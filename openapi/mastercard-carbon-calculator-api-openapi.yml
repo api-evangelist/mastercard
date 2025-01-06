@@ -1,0 +1,4047 @@
+openapi: 3.0.3
+info:
+  title: Carbon Calculator API
+  description: >-
+    OpenAPI Specification for Carbon Calculator. For additional documentation
+    and use cases, go to [Mastercard
+    Developers](https://developer.mastercard.com/product/carbon-calculator).
+  contact:
+    name: API Support
+    email: apisupport@mastercard.com
+    url: https://developer.mastercard.com/support
+  version: 1.2.0
+externalDocs:
+  description: ISO 4217 - Currency Code
+  url: https://en.wikipedia.org/wiki/ISO_4217
+servers:
+  - url: https://sandbox.api.mastercard.com/carbon
+    description: Sandbox
+  - url: https://api.mastercard.com/carbon
+    description: Production
+tags:
+  - name: Service Provider
+    description: APIs for getting and/or updating issuer onboarding details.
+  - name: Payment Card
+    description: >-
+      APIs for payment cards onboarding and retrieving the transaction
+      footprints of those cards.
+  - name: Environmental Impact
+    description: >-
+      APIs for calculating carbon emission based on provided payment
+      transactions.
+  - name: Supported Parameters
+    description: APIs for fetching the supported merchants and currencies by the system.
+  - name: Engagement Services
+    description: >-
+      The engagement services use a Climate Profile that enables the users to
+      get personalized content based on their lifestyle, knowledge and
+      motivation.
+paths:
+  /service-providers:
+    get:
+      tags:
+        - Service Provider
+      summary: Fetches an existing Service Provider
+      description: >-
+        Allows a registered Service Provider to fetch its information from the
+        server.
+      operationId: GetServiceProviderById
+      responses:
+        '200':
+          $ref: '#/components/responses/ServiceProvider'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+    put:
+      tags:
+        - Service Provider
+      summary: Updates an existing Service Provider details
+      description: >-
+        Allows a registered Service Provider to update its configuration on the
+        server. A Service Provider should call this API first after the
+        successful creation of the project on Mastercard Developers before they
+        call other APIs.
+      operationId: UpdateServiceProvider
+      requestBody:
+        $ref: '#/components/requestBodies/ServiceProviderConfig'
+      responses:
+        '200':
+          $ref: '#/components/responses/ServiceProvider'
+        '400':
+          $ref: '#/components/responses/ServiceProviderBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+        '415':
+          $ref: '#/components/responses/ServiceProviderUnsupportedMediaTypeError'
+  /service-providers/payment-cards:
+    post:
+      tags:
+        - Payment Card
+      summary: Bulk Registration of Payment Cards
+      description: >-
+        Allows a registered service provider to add a list of new payment cards
+        to its profile.This endpoint uses [Mastercard payload
+        encryption](https://mstr.cd/2UPfda0). Refer to the [Payload
+        Encryption](https://developer.mastercard.com/carbon-calculator/documentation/tutorials-and-guides/payload-encryption/)
+        page for implementation details.
+      operationId: BulkRegisterPaymentCards
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentCards'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentCardEnrolments'
+        '400':
+          $ref: '#/components/responses/PaymentCardEnrolmentsBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+  /service-providers/payment-cards/{payment_card_id}:
+    delete:
+      tags:
+        - Payment Card
+      summary: Delete a Payment Card
+      description: >-
+        Allows a registered Service Provider to delete single Payment Card at a
+        time from its profile. Any data associated with a requested
+        paymentCardId will also be deleted permanently.
+
+
+        On the successful response from the server, a Service Provider should
+        remove all the requested paymentCardIds from the system.
+
+
+        Once a request has been received from a Service Provider, data deletion
+        will happen immediately.
+      operationId: PaymentCardDeletion
+      parameters:
+        - $ref: '#/components/parameters/PaymentCardId'
+      responses:
+        '202':
+          $ref: '#/components/responses/Accepted'
+        '400':
+          $ref: '#/components/responses/PaymentCardDeletionsBadRequestError'
+        '404':
+          $ref: '#/components/responses/PaymentCardByIdNotFoundError'
+  /payment-cards/{payment_card_id}/transaction-footprints:
+    get:
+      tags:
+        - Payment Card
+      summary: Fetches Historical Transactions and its Transaction Footprints
+      description: >-
+        Allows a Service Provider to fetch historical transactions for a payment
+        card. Note that a maximum of one year of transactions can be retrieved
+        using this API. Also, the payment card has to be registered first using
+        /payment-cards service.
+      operationId: GetPaymentCardTransactionHistory
+      parameters:
+        - $ref: '#/components/parameters/PaymentCardId'
+        - $ref: '#/components/parameters/FromDate'
+        - $ref: '#/components/parameters/ToDate'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          $ref: '#/components/responses/HistoricalTransactionFootprints'
+        '400':
+          $ref: '#/components/responses/TransactionHistoryBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+  /payment-cards/transaction-footprints/aggregates:
+    post:
+      tags:
+        - Payment Card
+      summary: >-
+        Fetches carbon score for payment cards and aggregates the same on a
+        weekly and monthly basis. The result will be in descending order.
+      description: >
+        Allows a Service Provider to fetch aggregate carbon score for a single
+        or multiple payment cards. A payment card has to be registered first
+        using /service-providers/payment-cards endpoint before this endpoint can
+        be called. The aggregate can be requested weekly, or monthly. Note that
+        **ONLY** cleared transactions will be returned.
+
+
+        If any of the paymentCardIds is not valid or not registered, then the
+        entire request will be rejected, and no aggregate will be returned.
+
+
+        If no transaction is found for a particular paymentCardId then the
+        response will have an empty list against that paymentCardId.
+
+
+        The date range is valid for 26 weeks for weekly aggregate and 12 months
+        for monthly aggregate.
+      operationId: GetPaymentCardAggregateTransactions
+      requestBody:
+        $ref: '#/components/requestBodies/AggregateSearchCriteria'
+      responses:
+        '200':
+          $ref: '#/components/responses/AggregateTransactionFootprints'
+        '400':
+          $ref: '#/components/responses/AggregateTransactionBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+        '415':
+          $ref: '#/components/responses/ServiceProviderUnsupportedMediaTypeError'
+  /payment-cards:
+    post:
+      tags:
+        - Payment Card
+      summary: Register a Payment Card (to be deprecated)
+      description: >-
+        Allows a registered Service Provider to add a new Payment Card to its
+        profile. This endpoint uses [Mastercard payload
+        encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/#mastercard-encryption).
+        Refer to the [Payload
+        Encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/)
+        section for implementation details.
+      operationId: RegisterPaymentCard
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentCard'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentCardReference'
+        '400':
+          $ref: '#/components/responses/RegisterPaymentCardBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+        '415':
+          $ref: '#/components/responses/ServiceProviderUnsupportedMediaTypeError'
+  /payment-card-enrolments:
+    post:
+      tags:
+        - Payment Card
+      summary: Batch Registration of Payment Cards (to be deprecated)
+      description: >-
+        Allows a registered Service Provider to add a list of new Payment Cards
+        **(at most maximum of 100 payment cards)** to its profile. This endpoint
+        uses [Mastercard payload
+        encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/#mastercard-encryption).
+        Refer to the [Payload
+        Encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/)
+        section for implementation details.
+      operationId: BatchRegisterPaymentCards
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentCards'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentCardEnrolments'
+        '400':
+          $ref: '#/components/responses/PaymentCardEnrolmentsBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+        '415':
+          $ref: '#/components/responses/ServiceProviderUnsupportedMediaTypeError'
+  /payment-card-deletions:
+    post:
+      tags:
+        - Payment Card
+      summary: Delete one or more Payment Cards (to be deprecated)
+      description: >
+        Allows a registered Service Provider to delete one or more Payment Cards
+        from its profile. Any data associated with a requested paymentCardId
+        will also be deleted permanently.
+
+
+        On the successful response from the server, a Service Provider should
+        remove all the requested paymentCardIds from the system.
+
+
+        Once a request has been received from a Service Provider, data deletion
+        will happen immediately.
+      operationId: PaymentCardDeletions
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentCardIds'
+      responses:
+        '202':
+          $ref: '#/components/responses/Accepted'
+        '400':
+          $ref: '#/components/responses/PaymentCardDeletionsBadRequestError'
+        '404':
+          $ref: '#/components/responses/PaymentCardDeletionsNotFoundError'
+        '415':
+          $ref: '#/components/responses/ServiceProviderUnsupportedMediaTypeError'
+  /transaction-footprints:
+    post:
+      tags:
+        - Environmental Impact
+      summary: Calculate Transaction Footprints
+      description: >-
+        Calculates carbon emission based on the payment transaction amount, the
+        merchant category code and the AIIA code. You can send **one or more
+        transactions** together to get the transaction footprints. <br> Below is
+        the approach to deliver **MCC** or **AIIA** based scoring. <li><b>If
+        only `mcc` field provided in the request with required fields :</b> MCC
+        based scoring will be delivered.</li>
+         <li><b>If `type` and `additionalInformation` field provided in the request with required fields :</b> AIIA based scoring will be delivered.</li>
+      operationId: FootprintsByTransactionData
+      requestBody:
+        $ref: '#/components/requestBodies/Transactions'
+      responses:
+        '200':
+          $ref: '#/components/responses/TransactionFootprintsData'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeError'
+  /supported-currencies:
+    get:
+      tags:
+        - Supported Parameters
+      summary: Provide Supported Currencies
+      description: >-
+        Provides the list of currencies supported by the application. While
+        sending a transaction amount in the Amount object, 'currencyCode' should
+        be from one of the supported currencies. It is recommended to cache this
+        list and use it for checking before sending transactions for footprint
+        calculation. Generally this list doesn't change that often, but it is
+        recommended to refresh this data every 24-hours.
+      operationId: GetSupportedCurrencies
+      responses:
+        '200':
+          $ref: '#/components/responses/SupportedCurrencies'
+  /supported-merchant-categories:
+    get:
+      tags:
+        - Supported Parameters
+      summary: Provide Supported MCCs
+      description: >-
+        Provides a list of merchant category codes supported by the application.
+        While sending transaction data in the Transaction object, 'mcc' should
+        be from one of the supported merchant categories. It is recommended to
+        cache this list and use it for checking before sending transactions for
+        footprint calculation. Generally this list doesn't change that often,
+        but it is recommended to refresh this data every 24-hours.
+      operationId: GetSupportedMerchantCategories
+      responses:
+        '200':
+          $ref: '#/components/responses/SupportedMerchantCategories'
+  /surveys:
+    get:
+      tags:
+        - Engagement Services
+      summary: A survey that can be answered by the user.
+      description: >-
+        The Survey API offers essential features for seamless onboarding onto
+        the Engagement Services platform, enabling integration with diverse
+        surveys designed to fine-tune a climate profile. In response, the API
+        furnishes a comprehensive set of survey questions, inviting user input
+        to gather valuable insights and data.
+      operationId: getSurvey
+      responses:
+        '200':
+          $ref: '#/components/responses/Survey'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+  /profiles:
+    put:
+      operationId: updateUserProfile
+      description: >-
+        The Profile Service employs a sophisticated algorithm to compute a
+        detailed climate profile, drawing upon the responses gathered through a
+        survey obtained from the Surveys Service. This process involves a
+        meticulous analysis of user-provided answers to generate a comprehensive
+        and nuanced representation of their climate preferences and
+        perspectives. See (https://surveyjs.io/survey-creator)
+      summary: >-
+        Calculates a climate profile based on the answers from a survey obtained
+        from the Surveys Service.
+      tags:
+        - Engagement Services
+      requestBody:
+        $ref: '#/components/requestBodies/ProfileRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/Profile'
+        '400':
+          $ref: '#/components/responses/ProfilePayloadBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+  /insights:
+    put:
+      operationId: updateUserInsights
+      description: >-
+        The Insights service delivers insights and other suggestions that can
+        inform you about what you can do to reduce your footprint.
+      summary: Get insights based on the contents of your climate profile.
+      tags:
+        - Engagement Services
+      parameters:
+        - $ref: '#/components/parameters/Branding'
+        - $ref: '#/components/parameters/Heading'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Version'
+        - $ref: '#/components/parameters/Language'
+      requestBody:
+        $ref: '#/components/requestBodies/InsightsRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/Insights'
+        '400':
+          $ref: '#/components/responses/MissingInsightAttributesBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+  /insights/{id}:
+    put:
+      operationId: getInsightsById
+      description: >-
+        Fetches a given Insight and marks it as viewed in your profile. Issuer
+        has to save the profile locally and send it in future communication with
+        Engagement Services
+      summary: Fetches an Insight details based on provided Insight id
+      tags:
+        - Engagement Services
+      parameters:
+        - $ref: '#/components/parameters/Branding'
+        - $ref: '#/components/parameters/Language'
+        - $ref: '#/components/parameters/Version'
+        - $ref: '#/components/parameters/InsightsId'
+      requestBody:
+        $ref: '#/components/requestBodies/InsightsByIdRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/InsightsByIdResponse'
+        '400':
+          $ref: '#/components/responses/MissingInsightAttributesBadRequestError'
+        '404':
+          $ref: '#/components/responses/InsightNotFoundError'
+  /benchmarks:
+    get:
+      operationId: getBenchmarksForCountry
+      description: >-
+        Returns a benchmark for a specific country for the year 2020, monthly or
+        yearly
+      summary: Get benchmarks for a specific country, monthly or yearly
+      tags:
+        - Engagement Services
+      parameters:
+        - $ref: '#/components/parameters/Period'
+        - $ref: '#/components/parameters/CountryCode'
+      responses:
+        '200':
+          $ref: '#/components/responses/Benchmarks'
+        '400':
+          $ref: '#/components/responses/BenchmarkBadRequestError'
+        '404':
+          $ref: '#/components/responses/BenchmarkNotFoundError'
+components:
+  headers:
+    Location:
+      description: The URL to check on status of resource
+      schema:
+        type: string
+    X-MC-Correlation-ID:
+      description: >-
+        This id is unique per request and is used to co-relate a request to its
+        response. Customers must share this id while raising any incident for
+        this API.
+      schema:
+        $ref: '#/components/schemas/X-MC-Correlation-ID'
+  schemas:
+    Surveys:
+      type: object
+      properties:
+        surveysPayload:
+          $ref: '#/components/schemas/SurveyData'
+    Profile:
+      type: object
+      properties:
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
+      required:
+        - profileResponsePayload
+    X-MC-Correlation-ID:
+      type: string
+      example: X-MC-Correlation-ID:5e4b7f904d2820f688c67ef9fc0035
+    PaymentCardEnrolments:
+      title: PaymentCardEnrolments
+      type: array
+      minItems: 1
+      maxItems: 500
+      description: >-
+        List of payment card enrolments corresponding to each of the payment
+        cards. This information should be used to identify the success and
+        failure enrolments and take appropriate next steps.
+      items:
+        $ref: '#/components/schemas/PaymentCardEnrolment'
+    PaymentCardEnrolment:
+      title: PaymentCardEnrolment
+      type: object
+      description: The response object which contains Payment Card information.
+      properties:
+        paymentCardId:
+          $ref: '#/components/schemas/PaymentCardId'
+        bin:
+          type: string
+          minLength: 4
+          maxLength: 8
+          pattern: ^\d{4,8}
+          description: >-
+            First 4 to 8 digits of BIN will be present in response only in case
+            of success already exists card and if valid supported FPAN bin
+            range.
+          example: '545502'
+        last4fpan:
+          type: string
+          minLength: 4
+          maxLength: 4
+          pattern: ^\d{4}
+          description: >-
+            Last 4 digits of a payment card number will be present only if the
+            card number in the request is valid.
+          example: '8351'
+        status:
+          type: string
+          minLength: 6
+          maxLength: 7
+          description: >-
+            Status of a Payment Card on the server. Possible values are ACTIVE &
+            PENDING. The cards that are in PENDING state will move to ACTIVE
+            state in background as soon as their enrolment is complete. The
+            paymentCardId will remain same.
+          example: ACTIVE
+        errorCode:
+          title: errorCode
+          type: string
+          minLength: 10
+          maxLength: 30
+          example: INVALID_FPAN
+          description: >-
+            Error code in case of registration failed. Possible values are,
+
+            * INVALID_FPAN = The card number in the request is either invalid or
+            does not match with your currently supported account range. Try
+            again with a valid card number or update the supported account
+            range.
+
+            * INVALID_CARD_BASE_CURRENCY = The card base currency in the request
+            is either invalid or does not match with your currently supported
+            card base currency range. Try again with a valid card base currency.
+
+            * UNSUPPORTED_CURRENCY = The currency in the request is not
+            supported, try again with a different one.
+    CurrencyCode:
+      type: string
+      description: Currency code as per ISO 4217
+      minLength: 3
+      maxLength: 3
+      pattern: ^[A-Za-z]{3}$
+    TransactionId:
+      type: string
+      description: >-
+        A unique ID associated with a payment transaction, For example, original
+        payment transaction ID. The same ID will be returned in the response
+        corresponding to its payment transaction.
+      minLength: 1
+      maxLength: 100
+      pattern: ^[\w\-\_]{1,100}
+    Transactions:
+      title: Transactions
+      type: array
+      description: >-
+        List of payment transactions from API consumer for calculating
+        transaction footprint.
+      minItems: 1
+      maxItems: 5000
+      items:
+        $ref: '#/components/schemas/TransactionData'
+      example:
+        - transactionId: ee421c25-f928-4bf6-b884-3600b76b860d
+          mcc: 3997
+          cardBrand: OTH
+          amount:
+            currencyCode: USD
+            value: 123
+          profile:
+            traits:
+              knowledge: 0.65
+              lifestyle: 0.445
+              motivated: 0.683
+            userAttributes:
+              demo: 66
+              diet: 256
+              lifestyle: 4
+              energy: 12288
+              transport: 36933
+              country: AX
+            created: '2024-01-31T10:57:36.161Z'
+            surveys:
+              key1:
+                key2: 1
+                key3: 2
+            persona: '3'
+            benchmarks:
+              key1:
+                key2: 1
+                key3: 2
+            comparisons:
+              key1:
+                key2: 1
+                key3: 2
+            insights:
+              key1:
+                key2: 1
+                key3: 2
+            version: '1.0'
+        - transactionId: fdc4626c-f51e-4ba6-9728-c79ac1d9aec8
+          mcc: 3000
+          cardBrand: OTH
+          amount:
+            currencyCode: USD
+            value: 10.35
+        - transactionId: 0218BC0251FEB8F8E063C6979E0AE0DD
+          mcc: 1234
+          cardBrand: OTH
+          amount:
+            currencyCode: USD
+            value: 123
+        - transactionId: odc4626c-f51e-4ba6-9728-c79ac1d9aec9
+          mcc: 3997
+          type: AIIA
+          amount:
+            value: 100
+            currencyCode: USD
+          cardBrand: OTH
+          additionalInformation:
+            - key: aiiaCode
+              value: '101'
+    TransactionData:
+      title: TransactionData
+      type: object
+      description: >-
+        Object which holds information about payment transaction for carbon
+        scoring and other properties.
+      allOf:
+        - $ref: '#/components/schemas/Transaction'
+    Transaction:
+      title: Transaction
+      type: object
+      description: A single payment transaction for carbon scoring.
+      required:
+        - transactionId
+        - amount
+      properties:
+        transactionId:
+          $ref: '#/components/schemas/TransactionId'
+        type:
+          $ref: '#/components/schemas/Type'
+        mcc:
+          type: string
+          description: >-
+            Merchant category code of a payment transaction that uniquely
+            defines a merchant business.
+          minLength: 1
+          maxLength: 4
+          pattern: ^\d{1,4}
+          example: '3997'
+        amount:
+          $ref: '#/components/schemas/Amount'
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
+        additionalInformation:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdditionalInformation'
+    CardBrand:
+      title: CardBrand
+      type: string
+      minLength: 1
+      maxLength: 3
+      pattern: ^(MA|OTH|NC)$
+      example: MA
+      description: >-
+        Brand type of the payment card through which transaction done. Possible
+        values are,
+
+        * MA = Mastercard branded payment card.
+
+        * OTH = Payment card brand other than Mastercard.
+
+        * NC = Non card based transaction.
+    Amount:
+      title: Amount
+      type: object
+      description: The value and the currency of a payment transaction.
+      required:
+        - currencyCode
+        - value
+      properties:
+        value:
+          type: number
+          description: Actual amount of a payment transaction
+          maximum: 1000000000
+          exclusiveMaximum: false
+          minimum: -1000000000
+          exclusiveMinimum: false
+          example: 100
+        currencyCode:
+          $ref: '#/components/schemas/CurrencyCode'
+    TransactionFootprintsData:
+      title: TransactionFootprintsData
+      type: array
+      description: >-
+        List of transaction footprints corresponding to each transaction in
+        Transactions request.
+      minItems: 1
+      maxItems: 5000
+      items:
+        $ref: '#/components/schemas/TransactionFootprintData'
+    TransactionFootprintData:
+      title: TransactionFootprintData
+      type: object
+      description: >-
+        A single transaction footprint calculated for a corresponding
+        transaction.
+      allOf:
+        - $ref: '#/components/schemas/TransactionFootprint'
+      properties:
+        cardBrand:
+          $ref: '#/components/schemas/CardBrand'
+        scoreStatus:
+          type: string
+          example: SUCCESS
+          description: >-
+            scoreStatus defines the status of carbon scoring for a given
+            transaction. Possible values are,
+
+            * SUCCESS = Transaction is scored successfully.
+
+            * FAILURE = Transaction scoring is failed.
+          minLength: 5
+          maxLength: 7
+        errorCode:
+          type: string
+          example: INVALID_MCC
+          description: >-
+            A unique constant identifying the error case encountered during
+            carbon scoring for a given transaction.
+          minLength: 1
+          maxLength: 100
+        errorMessage:
+          type: string
+          example: >-
+            MCC Provided in the request is Invalid. Kindly Request again with
+            valid MCC.
+          description: Short description of the errorCode field.
+          minLength: 10
+          maxLength: 1000
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
+        classification:
+          title: Classification
+          type: object
+          description: Classification for this transaction.
+          properties:
+            type:
+              $ref: '#/components/schemas/ClassificationType'
+            id:
+              type: string
+              example: '5411'
+              description: specifies Id of Classification
+          required:
+            - id
+            - type
+        spendingAreaId:
+          type: number
+          description: Spending area id
+          example: 30
+    ClassificationType:
+      type: string
+      minLength: 3
+      maxLength: 5
+      pattern: ^(mcc|docc|MCC|plaid)$
+      example: MCC
+      description: |-
+        Classification for this transaction. Possible values are,
+        * mcc * docc * MCC * plaid
+    TransactionFootprint:
+      title: TransactionFootprint
+      type: object
+      description: >-
+        A single transaction footprint calculated for a corresponding payment
+        transaction.
+      required:
+        - transactionId
+        - mcc
+      allOf:
+        - $ref: '#/components/schemas/CarbonUsage'
+        - type: object
+          properties:
+            transactionId:
+              $ref: '#/components/schemas/TransactionId'
+            mcc:
+              type: string
+              description: >-
+                Merchant category code of a payment transaction that uniquely
+                defines a merchant business (same as in request).
+              minLength: 1
+              maxLength: 4
+              pattern: ^\d{1,4}
+            category:
+              $ref: '#/components/schemas/Category'
+            scoreReference:
+              type: string
+              description: >-
+                Score Reference defines transaction scoring type, based on which
+                score has been generated. Possible values are MCC or AIIA.
+              minLength: 3
+              maxLength: 4
+    AggregateSearchCriteria:
+      title: AggregateSearchCriteria
+      type: object
+      description: >-
+        Request object which holds the criteria (that is, list of payment card
+        IDs and aggregate type) for retrieving aggregate transactions.
+      required:
+        - paymentCardIds
+        - aggregateType
+      properties:
+        paymentCardIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentCardId'
+          minItems: 1
+          maxItems: 5
+          example: c5d88571-ac15-465a-a0d8-1ad1327b9a06
+          description: Unique ID provided in the response while registering a payment card.
+        aggregateType:
+          type: integer
+          minimum: 1
+          maximum: 3
+          example: 1
+          description: >
+            Aggregate type for which aggregate needs to be calculated. Supported
+            values are:
+
+            <li> 1 = Weekly Transactions aggregated for last 26 weeks <li> 2 =
+            Monthly transactions aggregated for last 12 months <li> 3 = Monthly
+            category-wise transactions aggregated for last 12 months
+        crossPANAggregate:
+          type: string
+          minLength: 1
+          maxLength: 1
+          pattern: ^(?:Y|N|y|n)$
+          example: 'Y'
+          description: >
+            Wheter to retrieve cross PAN aggregate carbon footprint or not.
+            Supported values are:
+
+            <li> Y = Retrieve cross PAN aggregate. <li> N = Do not retrieve
+            cross PAN aggregate. <br> If not provided then default will be
+            considered as 'N'.
+        fromDate:
+          $ref: '#/components/schemas/Day'
+        toDate:
+          $ref: '#/components/schemas/Day'
+      example:
+        aggregateType: 1
+        crossPANAggregate: 'Y'
+        paymentCardIds:
+          - 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+          - b86fd2ba-c095-4acb-b9df-f3805655ba24
+        fromDate: '2020-07-01'
+        toDate: '2020-08-30'
+    HistoricalTransactionFootprints:
+      title: HistoricalTransactionFootprints
+      description: >-
+        Response object which holds all the transaction footprints for
+        historical transactions.
+      properties:
+        count:
+          description: The number of items in this batch (the size of the item array).
+          type: integer
+          example: 2
+        offset:
+          description: >-
+            The number of items you asked the start of the list to be offset
+            from.
+          type: integer
+          minimum: 0
+          example: 1
+        limit:
+          description: The number of items you asked the list to be limited to.
+          type: integer
+          minimum: 5
+          maximum: 50
+          example: 5
+        total:
+          description: The total number of items in the collection.
+          type: integer
+          example: 5
+        items:
+          description: |
+            List of `HistoricalTransactionFootprint` objects.
+          type: array
+          minItems: 1
+          maxItems: 5000
+          items:
+            $ref: '#/components/schemas/HistoricalTransactionFootprint'
+    HistoricalTransactionFootprint:
+      title: HistoricalTransactionFootprint
+      type: object
+      description: >-
+        A single transaction footprint along with transaction info for a
+        corresponding payment transaction.
+      required:
+        - transactionMetadata
+        - transactionFootprint
+      properties:
+        transactionMetadata:
+          $ref: '#/components/schemas/TransactionMetadata'
+        transactionFootprint:
+          $ref: '#/components/schemas/TransactionFootprint'
+    TransactionMetadata:
+      title: TransactionMetadata
+      type: object
+      description: Metadata about a transaction.
+      required:
+        - id
+        - retrievalRefNumber
+        - processingCode
+        - dateAndTime
+        - merchantName
+        - acquiringInstitutionCountryCode
+        - acquiringInstitutionCode
+        - amount
+        - currencyCode
+        - indicator
+      properties:
+        id:
+          title: id
+          type: string
+          description: A unique ID associated with a transaction.
+          maxLength: 100
+          minLength: 1
+          pattern: ^[\w\-\_]{1,100}
+          example: ee421c25-f928-4bf6-b884-3600b76b860d
+        traceId:
+          title: traceId
+          type: string
+          description: A unique ID associated with a transaction.
+          maxLength: 100
+          minLength: 65
+          pattern: ([A-Za-z0-9]{10,100})
+          example: 9A52386ce297173Ecfeb9120aabb0805bbeeb1350ce1de640864852e800bd2067
+        banknetReferenceNumber:
+          title: banknetReferenceNumber
+          type: string
+          description: >-
+            DE 63, subfield 2 (Banknet Reference Number) is generated by the
+            Authorization Platform for each originating message it routes. The
+            reference number is guaranteed to be a unique value for any
+            transaction within the specified financial network on any processing
+            day.
+          maxLength: 13
+          minLength: 6
+          pattern: ([A-Za-z0-9]{6,13})
+          example: MPL0R6B2R
+        banknetDate:
+          title: banknetDate
+          type: string
+          description: >-
+            DE 7 subelement 1 (POS_BANKNET_DATE) is a date when transaction
+            message enters into Mastercard network.
+          maxLength: 4
+          minLength: 4
+          pattern: ([0-9]{4})
+          example: '0525'
+        retrievalRefNumber:
+          title: retrievalRefNumber
+          type: string
+          description: >-
+            DE 37 (Retrieval Reference Number) is a document reference number
+            supplied by the system retaining the original source document of the
+            transaction and assists in locating that source document or a copy
+            thereof. DE 37 is made available for use by automated merchant POS
+            systems that may be interconnected into the interchange system.
+            Merchant POS systems may assign a unique receipt or sales document
+            ID to be used to satisfy regulatory or legal requirements when the
+            merchant performs source document capture and truncation. DE 37 may
+            be used to relay source document reference numbers to the issuer at
+            the time each transaction is processed. Number assigned by the
+            acquirer. When present, DE 37 must contain a value other than all
+            zeros or all spaces. DE 37 can have trailing spaces if the
+            transaction is not a Visa or EMV chip transaction.
+          maxLength: 12
+          minLength: 12
+          example: MCC000100120
+        processingCode:
+          title: processingCode
+          type: string
+          description: >-
+            DE 3, subfield 1 (Cardholder Transaction Type Code) describes the
+            specific transaction type.
+          maxLength: 2
+          minLength: 2
+          example: '00'
+        authCode:
+          title: authCode
+          type: string
+          description: >-
+            DE 38 (Authorization ID Response) is a transaction response ID code
+            that the authorizing institution assigns. DE 38 is used to transmit
+            a card issuers authorization code for Authorization transactions.
+          maxLength: 6
+          minLength: 1
+          example: 01423Z
+        dateAndTime:
+          title: dateAndTime
+          type: string
+          description: >-
+            This is the date and time when transaction acquire at the Merchant.
+            (For example, YYYY-MM-DDThh:mmTZD).
+          maxLength: 25
+          minLength: 22
+          example: 2018-07-02T00:00+00:00
+        merchantName:
+          title: merchantName
+          type: string
+          description: >-
+            DE 43 (Card Acceptor Name/Location for All Transactions), subfield 1
+            (Card Acceptor Name) is the merchant doing business as name.
+          maxLength: 25
+          minLength: 1
+          example: ABC Store
+        acquiringInstitutionCountryCode:
+          title: acquiringInstitutionCountryCode
+          type: string
+          description: >-
+            DE 19 (Acquiring Institution Country Code) is the code of the
+            country where the acquiring institution is located. Refer to the ISO
+            3166 specification for more information.
+          maxLength: 3
+          minLength: 3
+          example: USA
+        acquiringInstitutionCode:
+          title: acquiringInstitutionCode
+          type: string
+          description: >-
+            DE 32 (Acquiring Institution ID Code) identifies the acquiring
+            institution (for example, merchant bank) or its agent.
+          maxLength: 11
+          minLength: 11
+          example: '12312312312'
+        amount:
+          title: amount
+          type: number
+          description: Transaction amount for the given transaction.
+          maxLength: 10
+          minLength: 1
+          example: 25.5
+        currencyCode:
+          $ref: '#/components/schemas/CurrencyCode'
+        indicator:
+          title: indicator
+          type: string
+          description: Transaction type (CLEAR = CL or REFUND = RFT).
+          maxLength: 8
+          minLength: 2
+          example: CL
+    Category:
+      title: Category
+      type: object
+      description: User understandable information about an MCC categorization.
+      properties:
+        mainCategory:
+          title: mainCategory
+          type: string
+          description: Main category to which an MCC belongs.
+          minLength: 5
+          maxLength: 100
+          pattern: ^[\w\-\_\&\,]+[\w\-\_\&\,\ ]{5,100}
+          example: Shopping
+        subCategory:
+          title: subCategory
+          type: string
+          description: Sub-category of a category to which an MCC belongs.
+          minLength: 5
+          maxLength: 100
+          pattern: ^[\w\-\_\&\,]+[\w\-\_\&\,\ ]{5,100}
+          example: Department Store
+        sector:
+          title: sector
+          type: string
+          description: Sector of a category to which an MCC belongs.
+          minLength: 5
+          maxLength: 100
+          pattern: ^[\w\-\_\&\,]+[\w\-\_\&\,\ ]{5,100}
+          example: Specialty Retail & Services
+        sectorCode:
+          title: sectorCode
+          type: string
+          description: Unique code assigned to each sector.
+          minLength: 3
+          maxLength: 3
+          pattern: ^\d{3}
+          example: '302'
+    SupportedCurrencies:
+      title: SupportedCurrencies
+      type: array
+      description: List of supported currencies.
+      minItems: 1
+      maxItems: 1000
+      items:
+        $ref: '#/components/schemas/Currency'
+    Currency:
+      title: Currency
+      type: object
+      description: Information for a supported currency.
+      required:
+        - currencyCode
+      properties:
+        currencyCode:
+          $ref: '#/components/schemas/CurrencyCode'
+    Type:
+      title: Type
+      type: string
+      minLength: 3
+      maxLength: 4
+      example: AIIA
+      description: >-
+        Type defines transaction scoring type, based on which score has been
+        generated.Allowed value is AIIA.
+    AdditionalInformation:
+      title: AdditionalInformation
+      description: Additional Information object with key value pair.
+      type: object
+      properties:
+        key:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: aiiaCode
+          description: >-
+            A unique key within `AdditionalInformation` which describes a
+            specific input. For example aiiaCode.
+        value:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: '101'
+          description: A value against particular key.
+    SupportedMerchantCategories:
+      title: SupportedMerchantCategories
+      type: array
+      description: List of supported merchant categories.
+      minItems: 1
+      maxItems: 5000
+      items:
+        $ref: '#/components/schemas/MerchantCategory'
+    MerchantCategory:
+      title: MerchantCategory
+      type: object
+      description: Information for a supported merchant category.
+      required:
+        - mcc
+        - category
+      properties:
+        mcc:
+          type: string
+          maxLength: 4
+          minLength: 1
+          pattern: ^\d{1,4}
+          description: >-
+            Merchant category code of a payment transaction that uniquely
+            defines a merchant business.
+          example: '3862'
+        category:
+          $ref: '#/components/schemas/Category'
+    AggregateTransactionFootprints:
+      title: AggregateTransactionFootprints
+      type: object
+      description: List of AggregateTransactionFootprint.
+      required:
+        - aggregateTransactionFootprints
+      properties:
+        aggregateTransactionFootprints:
+          description: Array of `crossPANAggregations` based on given aggregation level.
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/AggregateTransactionFootprint'
+        crossPANAggregations:
+          description: Array of `crossPANAggregations` based on given aggregation level.
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/CrossPANAggregation'
+    CrossPANAggregation:
+      title: CrossPANAggregation
+      description: Cross PAN aggregated carbon footprint for given aggregate type.
+      properties:
+        aggregateValue:
+          type: string
+          minLength: 10
+          maxLength: 25
+          description: |
+            Aggregate duration for which aggregate has been calculated.
+            * Weekly = Week-26|2019 (i.e.,Starting from week 1 to week 26).
+            * Monthly = July|2019
+          example: Week-26|2019
+      allOf:
+        - $ref: '#/components/schemas/CarbonUsage'
+    CarbonUsage:
+      title: CarbonUsage
+      type: object
+      description: Object to hold carbon usage data.
+      properties:
+        carbonEmissionInGrams:
+          title: carbonEmissionInGrams
+          type: number
+          description: The transaction's CO2 emission in grams.
+          example: 48.52
+        carbonEmissionInOunces:
+          title: carbonEmissionInOunces
+          type: number
+          description: The transaction's CO2 emission in ounces.
+          example: 1.71
+    AggregateTransactionFootprint:
+      title: AggregateTransactionFootprint
+      type: object
+      description: Aggregate transaction footprint for a single payment card ID.
+      required:
+        - paymentCardId
+        - footprintAggregations
+      properties:
+        paymentCardId:
+          $ref: '#/components/schemas/PaymentCardId'
+        footprintAggregations:
+          description: Array of FootprintAggregation based on given aggregation level.
+          type: array
+          minItems: 1
+          maxItems: 186
+          items:
+            $ref: '#/components/schemas/FootprintAggregation'
+    FootprintAggregation:
+      title: FootprintAggregation
+      type: object
+      description: >-
+        Aggregation of carbon score for a payment card ID and given aggregation
+        level.
+      allOf:
+        - $ref: '#/components/schemas/CarbonUsage'
+        - type: object
+          properties:
+            aggregateValue:
+              type: string
+              minLength: 10
+              maxLength: 25
+              description: |
+                Aggregate duration for which aggregate has been calculated.
+                * Weekly = Week-22|2019 (i.e., Week of the year).
+                * Monthly = July|2019
+    PaymentCard:
+      title: PaymentCard
+      type: object
+      description: >-
+        The request object for registering a new Payment Card. This object will
+        be encrypted before sending it to the server.
+      required:
+        - fpan
+        - cardBaseCurrency
+      properties:
+        fpan:
+          type: string
+          minLength: 16
+          maxLength: 16
+          pattern: ^\d{16}
+          description: Original payment card number in full.
+          example: '5344035171229750'
+        cardBaseCurrency:
+          $ref: '#/components/schemas/CurrencyCode'
+      example:
+        fpan: '5344035171229750'
+        cardBaseCurrency: EUR
+    PaymentCardReference:
+      title: PaymentCardReference
+      type: object
+      description: >-
+        Reference information for a Payment Card generated after a successful
+        registration. This information should be used to perform the further
+        operation for that card.
+      required:
+        - paymentCardId
+        - status
+        - bin
+        - last4fpan
+      properties:
+        paymentCardId:
+          $ref: '#/components/schemas/PaymentCardId'
+        bin:
+          type: string
+          minLength: 4
+          maxLength: 8
+          pattern: ^\d{4,8}
+          description: First 4 to 8 digits of a payment card number.
+          example: '534403'
+        last4fpan:
+          type: string
+          minLength: 4
+          maxLength: 4
+          pattern: ^\d{4}
+          description: Last 4 digits of a payment card number.
+          example: '9750'
+        status:
+          type: string
+          minLength: 6
+          maxLength: 7
+          description: >-
+            Status of a Payment Card on the server. Possible values are ACTIVE &
+            PENDING. The cards that are in PENDING state will move to ACTIVE
+            state in background as soon as their enrolment is complete. The
+            paymentCardId will remain same.
+          example: ACTIVE
+    PaymentCardId:
+      type: string
+      minLength: 36
+      maxLength: 36
+      pattern: ^[0-9A-Fa-f\-]{36}
+      description: Unique ID provided in the response while registering a payment card.
+      example: c5d88571-ac15-465a-a0d8-1ad1327b9a06
+    Day:
+      type: string
+      minLength: 10
+      maxLength: 10
+      pattern: ^((?:19|20)[0-9][0-9])-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$
+      example: '2020-09-19'
+    ServiceProvider:
+      title: ServiceProvider
+      type: object
+      description: Information about a Service Provider as available on the server.
+      required:
+        - clientId
+        - customerName
+        - supportedAccountRange
+        - status
+      properties:
+        clientId:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: ^[\w\d\-\_]{1,200}
+          description: >-
+            Unique Service Provider identifier from the Mastercard Developer
+            Portal.
+          example: fjl2fxzsYl1OpvxkBItC9nVw1PSQc_b-eQMcmQFg011ab4b5
+        customerId:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: ^[\w\d]{1,200}
+          description: >-
+            Unique Service Provider identifier assigned by Mastercard which
+            remains same across all Mastercard systems.
+          example: customerid1
+        customerName:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: ^[\w\s]{1,200}
+          description: >-
+            Name of a Service Provider as registered on the server. This doesn't
+            have to be a legal name.
+          example: ABC Bank
+        supportedAccountRange:
+          type: string
+          minLength: 4
+          maxLength: 1000
+          pattern: ^[\d\,]{4,1000}
+          description: >-
+            Comma separated account range supported by a Service Provider as
+            available on the server.
+          example: 534403,518145,518152,5403,5424
+        email:
+          type: string
+          description: Email address of a Service Provider as registered on the server.
+          minLength: 5
+          maxLength: 100
+          example: John.Doe@mail.com
+        status:
+          type: string
+          minLength: 6
+          maxLength: 9
+          description: >-
+            Status of a Service Provider on the server. Possible values are
+            ACTIVE, INACTIVE & TERMINATED.
+          example: ACTIVE
+        senderId:
+          type: string
+          description: >-
+            Logical address of the service provider which has been configured in
+            NGFT(Next Gen File Transfer).
+          example: cc-fp@anz
+        ica:
+          type: string
+          description: Activity ICA value of the customer.
+          example: '24528'
+        cardHolderBase:
+          type: string
+          description: Total cardholder base of the service provider.
+          example: '9900000'
+    ServiceProviderConfig:
+      title: ServiceProviderConfig
+      type: object
+      description: Configuration details for a Service Provider
+      properties:
+        customerName:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: ^[\w\s]{1,200}
+          description: >-
+            Name with which a Service Provider is registered and will be
+            identified on the server. This doesn't have to be a legal name.
+          example: ABC Bank
+        supportedAccountRange:
+          type: string
+          minLength: 1
+          pattern: ^[\d\,]{1,}
+          description: Comma separated account range supported by a Service Provider.
+          example: 534403,518145,518152,5403,5424
+        senderId:
+          type: string
+          description: >-
+            Logical address of the service provider which has been configured in
+            NGFT(Next Gen File Transfer).
+          example: cc-fp@anz
+        cardHolderBase:
+          type: string
+          pattern: ^\d+
+          minimum: 1
+          maximum: 999999999999999
+          exclusiveMinimum: false
+          description: Total card holder base details of service provider.
+          example: '9900000'
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of any error.
+      required:
+        - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns a list of Error objects.
+      required:
+        - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    Error:
+      title: Error
+      type: object
+      description: Error object which contains details about the error.
+      required:
+        - Source
+        - ReasonCode
+        - Description
+        - Recoverable
+      properties:
+        Source:
+          type: string
+          description: >-
+            The application name that generated this error. Every error message
+            that is generated and returned by the gateway will have this field
+            equal to Gateway. Other possible values are 'Carbon-Calculator' and
+            'Service-Provider'.
+          minLength: 1
+          maxLength: 100
+          example: Service-Provider-Mgmt
+        ReasonCode:
+          type: string
+          description: >-
+            A unique constant identifying the error case encountered during
+            request processing.
+          minLength: 1
+          maxLength: 100
+          example: INVALID_REQUEST_PARAMETER
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: >-
+            One of the request parameters is invalid, try again with correct
+            request.
+        Recoverable:
+          type: boolean
+          description: >-
+            Indicates whether this error will always be returned for this
+            request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: >-
+            (Optional) Where appropriate, indicates detailed information about
+            data received and calculated during the request processing, to help
+            the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+    InsightItem:
+      properties:
+        heading:
+          description: Heading of the item
+          type: string
+          example: insight
+        id:
+          description: Id of the item
+          type: string
+          example: T1
+        mainCategory:
+          description: Main Category of the item
+          type: string
+          example: Shopping
+        seen:
+          description: whether or not item has been seen
+          type: boolean
+          example: false
+        spendingAreaId:
+          description: Spending Area Id
+          type: string
+          example: '678'
+        subCategory:
+          description: Sub Category of the item
+          type: string
+          example: hardware
+        version:
+          description: Version of the item
+          type: string
+          example: '1.1'
+      required:
+        - id
+        - mainCategory
+        - seen
+        - spendingAreaId
+        - subCategory
+        - version
+      type: object
+    InsightsData:
+      properties:
+        insightPayload:
+          properties:
+            insights:
+              items:
+                $ref: '#/components/schemas/InsightItem'
+              type: array
+              description: details of items
+            language:
+              type: string
+              description: language of insights
+              example: en
+            nextPage:
+              type: string
+              description: next present or not
+              example: 'yes'
+            page:
+              type: number
+              description: number of page
+              example: 1
+            previousPage:
+              type: string
+              description: previous Page present or not
+              example: 'yes'
+            totalItemCount:
+              type: number
+              description: total item count number
+              example: 96
+            totalPageCount:
+              type: number
+              description: total page count
+              example: 20
+          required:
+            - insights
+            - page
+            - totalItemCount
+            - totalPageCount
+          type: object
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
+      required:
+        - insightPayload
+      type: object
+    Profiles:
+      title: profiles
+      type: object
+      description: Climate Profile of the user.
+      properties:
+        profilesPayload:
+          properties:
+            id:
+              type: string
+              description: id of survey
+              example: onboarding
+            surveyioResults:
+              type: object
+              properties:
+                sex:
+                  type: string
+                  description: >-
+                    'demo.m' stands for Male, 'demo.f' stands for Female,
+                    'demo.other' stands for other
+                  example: demo.m
+                age:
+                  type: string
+                  description: >-
+                    'demo.lt10' for age in range 0-9, 'demo.lt20' for age in the
+                    range 10-19, 'demo.lt30' for age in the range 20-29,
+                    'demo.lt40' for age in the range 30-39, 'demo.lt50' for age
+                    in the range 40-49, 'demo.lt60' for age in the range 50-59,
+                    'demo.lt70' for age in the range 60-69, 'demo.lt80' for age
+                    in the range 70-79, 'demo.lt90' for age in the range 80-89,
+                    'demo.gt90' for age greater than 90
+                  example: demo.lt30
+                country:
+                  type: string
+                  description: >-
+                    2 letter country code of country of residence. For example,
+                    'IN' stands for India, 'US' stands for United States of
+                    America, 'BH' stands for Bahrain
+                  example: IN
+                interest:
+                  type: string
+                  description: >-
+                    'stronglyAgree' stands for 'Strongly Agree', 'somewhatAgree'
+                    stands for 'Somewhat Agree', 'Neutral' stands for 'Neutral',
+                    'somewhatDisagree' stands for 'Somewhat Disagree' and
+                    'stronglyDisagree' stands for 'Strongly Disagree'
+                  example: Neutral
+                knowledge:
+                  type: string
+                  description: >-
+                    'stronglyAgree' stands for 'Strongly Agree', 'somewhatAgree'
+                    stands for 'Somewhat Agree', 'Neutral' stands for 'Neutral',
+                    'somewhatDisagree' stands for 'Somewhat Disagree' and
+                    'stronglyDisagree' stands for 'Strongly Disagree'
+                  example: Neutral
+                diet:
+                  type: string
+                  description: >-
+                    'diet.all' stands for "I eat everything", 'diet.meatlessDay'
+                    stands for "One meatless day a week", 'diet.avoidRed' stands
+                    for "I try to avoid eating red meat", 'diet.noRed' stands
+                    for "I don't eat red meat", 'diet.pescetarian' stands for
+                    "Pescetarian(I don't eat meat except fish)",
+                    'diet.vegetarian' stands for "Vegetarian", 'diet.vegan'
+                    stands for "Vegan"
+                  example: diet.noRed
+                renewableElectricity:
+                  type: string
+                  description: >-
+                    'energy.renewable' stands for "Yes, we use a supplier of
+                    renewable electricity", 'energy.selfProduced' stands for
+                    "Yes, we produce our own renewable electricity",
+                    'energy.not' stands for "No", 'energy.idk' stands for "I
+                    don't know"
+                  example: energy.renewable
+                haveCar:
+                  type: string
+                  description: >-
+                    'transport.hasCar' stands for "Yes" and 'transport.noCar'
+                    stands for "No"
+                  example: transport.hasCar
+                carFuel:
+                  type: string
+                  description: >-
+                    'transport.petrol' stands for "Petrol", 'transport.diesel'
+                    stands for "Diesel", 'transport.bio' stands for "Bio-fuel or
+                    bio-gas", 'transport.hybrid' stands for "Hybrid",
+                    'transport.phev' stands for "Plug-in hybrid",
+                    'transport.electric' stands for "Electric", 'transport.idk'
+                    stands for "I don't know"
+                  example: transport.petrol
+                flyFrequency:
+                  type: string
+                  description: >-
+                    'transport.everyMonth' stands for "Every month or more",
+                    'transport.secondMonth' stands for "Every second month",
+                    'transport.twice' stands for "A couple of times a year",
+                    'transport.once' stands for "Once a year or less",
+                    'transport.Never' stands for "Never"
+                  example: transport.twice
+                shopFrequency:
+                  type: string
+                  description: >-
+                    'lifestyle.shopVeryOften' stands for "Every week or more
+                    often", 'lifestyle.shopOften' stands for "2-3 times every
+                    month", 'lifestyle.shopSometimes' stands for "Once a month",
+                    'lifestyle.shopSeldom' stands for "1-2 times every 3
+                    months", 'lifestyle.shopRarely' stands for "Less often or
+                    not at all"
+                  example: once a month
+                difference:
+                  type: string
+                  description: >-
+                    'stronglyAgree' stands for 'Strongly Agree', 'somewhatAgree'
+                    stands for 'Somewhat Agree', 'Neutral' stands for 'Neutral',
+                    'somewhatDisagree' stands for 'Somewhat Disagree' and
+                    'stronglyDisagree' stands for 'Strongly Disagree'
+                  example: somewhatAgree
+                consciousPurchasingDecision:
+                  type: string
+                  description: >-
+                    'stronglyAgree' stands for 'Strongly Agree', 'somewhatAgree'
+                    stands for 'Somewhat Agree', 'Neutral' stands for 'Neutral',
+                    'somewhatDisagree' stands for 'Somewhat Disagree' and
+                    'stronglyDisagree' stands for 'Strongly Disagree'
+                  example: Neutral
+                explainCarbonFootprint:
+                  type: string
+                  description: >-
+                    'stronglyAgree' stands for 'Strongly Agree', 'somewhatAgree'
+                    stands for 'Somewhat Agree', 'Neutral' stands for 'Neutral',
+                    'somewhatDisagree' stands for 'Somewhat Disagree' and
+                    'stronglyDisagree' stands for 'Strongly Disagree'
+                  example: stronglyDisagree
+              required:
+                - sex
+                - age
+                - country
+                - interest
+                - knowledge
+                - diet
+                - renewableElectricity
+                - haveCar
+                - flyFrequency
+                - shopFrequency
+                - difference
+                - consciousPurchasingDecision
+                - explainCarbonFootprint
+              additionalProperties: false
+            version:
+              type: string
+              example: '1'
+              description: version of survey
+          required:
+            - id
+            - surveyioResults
+            - version
+          type: object
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
+      required:
+        - profilesPayload
+    SurveyData:
+      title: surveys
+      type: object
+      description: List of survey questions.
+      properties:
+        id:
+          description: Id of survey
+          type: string
+          example: onboarding
+          minLength: 10
+          maxLength: 15
+        language:
+          description: language of user
+          type: string
+          example: en
+          minLength: 2
+          maxLength: 10
+        type:
+          description: The type of survey
+          type: string
+          example: survey
+          minLength: 6
+          maxLength: 20
+        survey:
+          $ref: '#/components/schemas/SurveyJs'
+        version:
+          description: Survey version number
+          type: string
+          example: '1.0'
+          minLength: 2
+          maxLength: 10
+      required:
+        - id
+        - survey
+        - version
+    Page:
+      properties:
+        questions:
+          description: Array containing the questions for this page
+          items:
+            $ref: '#/components/schemas/Question'
+          type: array
+        name:
+          description: 'Name of this page default: `pageNN` ex `page3`'
+          type: string
+          example: page1
+          minLength: 5
+          maxLength: 20
+        visibleIf:
+          description: >-
+            to denote if the page will be visible or not. This will only be
+            displayed in the response if a particular page is to be displayed
+            based on a certain condition.
+          type: boolean
+          example: '{haveCar} = ''transport.hasCar'''
+      required:
+        - questions
+        - name
+      type: object
+    SurveyJs:
+      description: SurveyJS compatible survey. See https://surveyjs.io/
+      properties:
+        pages:
+          description: Pages containing questions
+          items:
+            $ref: '#/components/schemas/Page'
+          type: array
+        showQuestionNumbers:
+          description: string to denote whether or not question number is diplayed
+          type: string
+          example: 'off'
+          minLength: 3
+          maxLength: 10
+        showProgressBar:
+          description: denotes position of progress bar
+          type: string
+          example: top
+          minLength: 3
+          maxLength: 20
+      required:
+        - pages
+      type: object
+    Option:
+      properties:
+        text:
+          type: string
+          example: What kind of car is it?
+          description: The survey question
+        value:
+          type: string
+          example: Diesel
+          description: The survey answer
+      required:
+        - text
+        - value
+      type: object
+    Question:
+      properties:
+        choices:
+          description: dropdown or choice
+          items:
+            $ref: '#/components/schemas/Option'
+          type: array
+        description:
+          description: Question asked as a part of survey
+          type: string
+          example: >-
+            I am curious about my own carbon footprint and how I personally
+            contribute to climate change
+        name:
+          type: string
+          example: interest
+          description: name given to the question
+        title:
+          description: title for survey question
+          type: string
+          example: >-
+            I am curious about my own carbon footprint and how I personally
+            contribute to climate change
+        type:
+          description: denotes input type of the choices
+          type: string
+          example: radiogroup
+      required:
+        - description
+        - name
+        - title
+        - type
+      type: object
+    ClimateProfile:
+      description: >-
+        Represents a Climate Profile for a User. Always use updated profile
+        present in the response, which might include benchmarks, comparisons,
+        insights and surveys.
+      properties:
+        userAttributes:
+          description: Attributes defining this profile
+          properties:
+            country:
+              type: string
+              description: country of issuer
+              example: IN
+              minLength: 2
+              maxLength: 3
+            demo:
+              type: number
+              description: demo of user / score for user demo
+              example: 65
+            diet:
+              type: number
+              description: diet type of user
+              example: 512
+            energy:
+              type: number
+              description: energy consumption type of user
+              example: 12288
+            lifestyle:
+              type: number
+              description: lifestyle type of user
+              example: 1
+            transport:
+              type: number
+              description: transport type of user
+              example: 12357
+          required:
+            - country
+            - demo
+            - diet
+            - energy
+            - lifestyle
+            - transport
+          type: object
+        benchmarks:
+          description: Tracks benchmarks data. This value is sourced from benchmarks API.
+          type: object
+          additionalProperties: true
+          example:
+            key1:
+              key2: 1
+              key3: 2
+        comparisons:
+          description: >-
+            Tracks comparison data. This value is sourced from comparisons by id
+            API.
+          type: object
+          additionalProperties: true
+          example:
+            key1:
+              key2: 1
+              key3: 2
+        insights:
+          description: >-
+            Tracks which insights have been displayed. This value is sourced
+            from insights by id API.
+          type: object
+          additionalProperties: true
+          example:
+            key1:
+              key2: 1
+              key3: 2
+        created:
+          description: represents creation date of user profile
+          type: string
+          format: date-time
+          example: '2023-08-07T12:39:35.087Z'
+        persona:
+          description: Representation of user persona type
+          type: string
+          example: '5'
+          minLength: 1
+          maxLength: 1
+        surveys:
+          description: Tracks surveys data. This value is sourced from /surveys API.
+          type: object
+          additionalProperties: true
+          example:
+            key1:
+              key2: 1
+              key3: 2
+        traits:
+          description: Scores for knowledge, lifestyle, and motivation
+          properties:
+            knowledge:
+              type: number
+              example: 0.575
+              description: score for user knowledge
+              minLength: 1
+            lifestyle:
+              type: number
+              example: 0.324
+              description: score for user lifestyle
+              minLength: 1
+            motivated:
+              type: number
+              example: 0.617
+              description: score for user motivation
+              minLength: 1
+          required:
+            - knowledge
+            - lifestyle
+            - motivated
+          type: object
+        version:
+          description: Version for this profile
+          type: string
+          example: 1
+      required:
+        - userAttributes
+        - created
+        - persona
+        - traits
+        - version
+      type: object
+    InsightsRequestPayload:
+      title: InsightsRequestPayload
+      type: object
+      description: The request object which contains climate Profile and payload
+      properties:
+        insightsPayload:
+          properties:
+            docc:
+              type: string
+              description: document of insights
+              example: Eat more greens - for the planet
+            main:
+              type: string
+              description: description of main category
+              example: shopping
+            mainCategory:
+              type: string
+              description: details of main category
+              example: shopping
+            spendingAreaId:
+              type: string
+              description: area of category in which expenditure was made
+              example: '30'
+            subCategory:
+              type: string
+              description: details of sub category
+              example: clothes
+          type: object
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
+    InsightsByIdRequestPayload:
+      title: InsightsByIdRequestPayload
+      type: object
+      description: The request object which contains climate Profile
+      properties:
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
+    LanguageCode:
+      description: ISO 639-1 format language code
+      example: es
+      pattern: ^[a-z]{2}$
+      type: string
+    Benchmark:
+      type: object
+      properties:
+        benchmarksPayload:
+          $ref: '#/components/schemas/BenchmarksData'
+    BenchmarksData:
+      title: benchmarks
+      type: object
+      description: benchmark data.
+      properties:
+        id:
+          type: string
+          description: id of benchmark
+          example: US
+        emission:
+          type: object
+          description: >-
+            Emissions for this country yearly or monthly in metric tons, atleast
+            one property will appear among yearly, monthly or data.
+          properties:
+            yearly:
+              description: Yearly emissions for this country in metric tons
+              type: number
+              example: 1.425
+            monthly:
+              description: Monthly emissions for this country in metric tons
+              type: number
+              example: 0.678
+            data:
+              description: If no data exists for this country
+              type: string
+              example: No emissions records for this country
+          minProperties: 1
+        parisAgreement:
+          type: object
+          description: >-
+            Emissions meeting the 2030 goal stated in the Paris agreement in
+            metric tons, atleast one property will appear among yearly or
+            monthly.
+          properties:
+            yearly:
+              description: >-
+                Yearly emissions goal for reaching the Paris agreement in metric
+                tons
+              type: number
+              example: 1.66
+            monthly:
+              description: >-
+                Monthly emissions goal for reaching the Paris agreement in
+                metric tons
+              type: number
+              example: 0.425
+          minProperties: 1
+      required:
+        - emission
+        - id
+        - parisAgreement
+    Period:
+      enum:
+        - MONTH
+        - YEAR
+      type: string
+    CountryCode:
+      description: ISO 3166-1 alpha-2 format country code
+      pattern: ^[A-Z]{2}$
+      type: string
+    InsightsResponseById:
+      properties:
+        insightsByIdPayload:
+          properties:
+            content:
+              description: The details of the insight
+              type: string
+              example: >-
+                Voluptate eiusmod culpa incididunt excepteur anim ipsum et ex
+                elit laboris esse. Nostrud proident culpa exercitation eu dolore
+                consectetur sit amet cillum veniam enim duis ut. Qui mollit
+                fugiat tempor deserunt occaecat fugiat adipisicing ex cupidatat
+                duis commodo id ea. Dolor laboris eu commodo ea reprehenderit in
+                nisi proident. Fugiat cupidatat excepteur et ullamco anim.
+                Cillum fugiat commodo ipsum consequat irure proident tempor nisi
+                tempor ad.\nOccaecat est pariatur cillum commodo incididunt
+                exercitation laboris consectetur eu mollit incididunt.
+                Adipisicing quis incididunt mollit esse officia dolore fugiat
+                reprehenderit nisi do velit ea. Id cillum consectetur mollit eu
+                laborum nostrud nulla sint Lorem voluptate elit id.
+            heading:
+              description: Title of insight
+              type: string
+              example: Recycle your e-waste
+            id:
+              description: The Insight Id
+              type: string
+              example: T101
+            mainCategory:
+              description: Main category of this insight
+              type: string
+              example: home
+            notification:
+              description: Summary user for tool tips or similar
+              type: string
+              example: A balanced diet is good for your health and that of the planet.
+            source:
+              description: Entity used as source for this insight
+              type: string
+              example: The Global E-waste Monitor 2020
+            sourceDate:
+              description: Date of source
+              type: string
+              example: '2020-07-01T00:00:00.000Z'
+            sourceDescription:
+              description: The source description
+              type: string
+              example: The Global E-waste Monitor 2020
+            sourceLink:
+              description: Link to source (if available)
+              type: string
+              example: >-
+                https://ewastemonitor.info/wp-content/uploads/2020/11/GEM_2020_def_july1_low.pdf
+            spendingAreaId:
+              description: Spending Area Id
+              type: string
+              example: 10
+            subCategory:
+              description: The sub category
+              type: string
+              example: electronics
+            version:
+              description: Version for this profile
+              type: string
+              example: 1.1
+          required:
+            - content
+            - heading
+            - id
+            - mainCategory
+            - spendingAreaId
+            - subCategory
+            - version
+          type: object
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
+      required:
+        - insightPayload
+      type: object
+  parameters:
+    PaymentCardId:
+      name: payment_card_id
+      in: path
+      description: Unique ID provided in the response while registering a payment card.
+      required: true
+      example: 83c0711e-1851-4771-950a-055dded7f168
+      schema:
+        $ref: '#/components/schemas/PaymentCardId'
+    FromDate:
+      name: from_date
+      in: query
+      description: Start date for searching transaction (Format- YYYY-MM-DD).
+      required: true
+      example: '2018-05-07'
+      schema:
+        $ref: '#/components/schemas/Day'
+    ToDate:
+      name: to_date
+      in: query
+      description: End date for searching transaction (Format- YYYY-MM-DD).
+      required: true
+      example: '2021-05-07'
+      schema:
+        $ref: '#/components/schemas/Day'
+    Offset:
+      name: offset
+      in: query
+      description: The number of items you need the start of the list to be offset from.
+      required: false
+      example: 50
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+    Limit:
+      name: limit
+      in: query
+      description: The number of items you asked the list to be limited to.
+      required: false
+      example: 50
+      schema:
+        type: integer
+        default: 50
+        minimum: 5
+        maximum: 50
+    Branding:
+      name: branding
+      in: query
+      description: If you have a branded content version, please supply it here
+      required: false
+      example: branding
+      schema:
+        type: string
+    Heading:
+      name: heading
+      in: query
+      description: If you want to display heading of the insights content
+      required: false
+      example: false
+      schema:
+        type: boolean
+    PageSize:
+      name: page_size
+      in: query
+      description: size of page upto which data should be present
+      required: false
+      example: 20
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+    Page:
+      name: page
+      in: query
+      description: Page number of the page whose data should be present in response
+      required: false
+      example: 2
+      schema:
+        type: integer
+        minimum: 1
+    Version:
+      name: version
+      in: query
+      description: version of insights
+      required: false
+      example: 1.1
+      schema:
+        type: string
+        minimum: 1
+    Language:
+      name: language
+      in: query
+      description: language in which user wants to see insights to their climate profile
+      required: false
+      example: en
+      schema:
+        $ref: '#/components/schemas/LanguageCode'
+    Period:
+      name: period
+      in: query
+      description: period in which user wants to see benchmark for specific country
+      required: false
+      example: month / year
+      schema:
+        $ref: '#/components/schemas/Period'
+    CountryCode:
+      name: country
+      in: query
+      description: for specific country user wants to see benchmark
+      required: true
+      example: US
+      schema:
+        $ref: '#/components/schemas/CountryCode'
+    InsightsId:
+      name: id
+      in: path
+      description: >-
+        for specific insight Id user wants to see insight to their climate
+        profile
+      required: true
+      example: T101
+      schema:
+        type: string
+  requestBodies:
+    ServiceProviderConfig:
+      description: >-
+        Configuration details for service provider which needs to be update. It
+        should contain only those parameters which you want to update. If you
+        are calling this API for the first time then it is recommended to send
+        all the parameters.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServiceProviderConfig'
+    PaymentCard:
+      description: Payment card to be enroled.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentCard'
+    PaymentCards:
+      required: true
+      description: List of payment cards to be enroled.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PaymentCard'
+            minItems: 1
+            maxItems: 100
+            example:
+              - fpan: '5455029300268351'
+                cardBaseCurrency: EUR
+              - fpan: '5455023979760762'
+                cardBaseCurrency: USD
+              - fpan: '5455023979762834'
+                cardBaseCurrency: USD
+              - fpan: '5455023979762824'
+                cardBaseCurrency: USD
+    PaymentCardIds:
+      description: >-
+        List of paymentCardIds for which all associated data needs to be
+        deleted.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PaymentCardId'
+            minItems: 1
+            maxItems: 100
+          example:
+            - c5d88571-ac15-465a-a0d8-1ad1327b9a06
+            - 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+            - 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+            - b86fd2ba-c095-4acb-b9df-f3805655ba24
+    AggregateSearchCriteria:
+      description: >
+        The request should contain a list of *paymentCardIds* for which
+        aggregate carbon score needs to be retrieved and *aggregateType* as one
+        of the following:
+
+        <li> 1 = Weekly Transactions aggregated for last 26 weeks <li> 2 =
+        Monthly transactions aggregated for last 12 months <li> 3 = Monthly
+        category-wise transactions aggregated for last 12 months
+
+
+         In order to retrieve aggregate for custom duration, please provide `fromDate` and `toDate`. Note that the duration should not exceed 26 weeks (for weekly aggregate) and 12 months (for monthly aggregate).
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AggregateSearchCriteria'
+    Transactions:
+      description: List of payment transactions which needs to be scored.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Transactions'
+      required: true
+    ProfileRequest:
+      description: List of payment transactions which needs to be scored.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Profiles'
+          examples:
+            ProfileRequest:
+              $ref: '#/components/examples/ProfileRequest'
+      required: true
+    InsightsRequest:
+      description: Insights for climate profile.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InsightsRequestPayload'
+          examples:
+            InsightsRequest:
+              $ref: '#/components/examples/InsightsRequest'
+      required: true
+    InsightsByIdRequest:
+      description: Represents a Climate Profile for a User.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InsightsByIdRequestPayload'
+          examples:
+            InsightsByIdRequest:
+              $ref: '#/components/examples/InsightsByIdRequest'
+      required: true
+  responses:
+    PaymentCardEnrolments:
+      description: >-
+        The response object that contains the list of payment cards information
+        after batch registration.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentCardEnrolments'
+          examples:
+            PaymentCardEnrolments:
+              $ref: '#/components/examples/PaymentCardEnrolments'
+    PaymentCardEnrolmentsBadRequestError:
+      description: >-
+        This response code is returned when a request is invalid, or data in the
+        request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            PaymentCardEnrolmentsRequestValidationError:
+              $ref: '#/components/examples/RegisterPaymentCardRequestValidationError'
+            PaymentCardEnrolmentsRequestDecryptionError:
+              $ref: '#/components/examples/RegisterPaymentCardRequestDecryptionError'
+    TransactionFootprintsData:
+      description: >-
+        This response code is returned when a request is accepted and
+        successfully processed. A corresponding response will be returned for
+        the API caller.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TransactionFootprintsData'
+          examples:
+            TransactionFootprints:
+              $ref: '#/components/examples/TransactionFootprintsData'
+    PaymentCardDeletionsBadRequestError:
+      description: >-
+        This response code is returned when either a request is invalid or one
+        or more paymentCardIds are invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            PaymentCardDeletionsRequestValidationError:
+              $ref: '#/components/examples/PaymentCardDeletionsRequestValidationError'
+            PaymentCardDeletionsInvalidCardIdError:
+              $ref: '#/components/examples/PaymentCardDeletionsInvalidCardIdError'
+    HistoricalTransactionFootprints:
+      description: >-
+        This response code is returned when a request is accepted and
+        successfully processed. A corresponding response will be returned for
+        the API caller.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HistoricalTransactionFootprints'
+          examples:
+            HistoricalTransactionFootprints:
+              $ref: '#/components/examples/HistoricalTransactionFootprints'
+    AggregateTransactionFootprints:
+      description: >-
+        This response code is returned when a request is accepted and
+        successfully processed.  A corresponding response will be returned for
+        the API caller.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AggregateTransactionFootprints'
+          examples:
+            WeeklyAggregateTransactionFootprints:
+              $ref: '#/components/examples/WeeklyAggregateTransactionFootprints'
+            MonthlyAggregateTransactionFootprints:
+              $ref: '#/components/examples/MonthlyAggregateTransactionFootprints'
+            MonthlyCategoryAggregateTransactionFootprints:
+              $ref: >-
+                #/components/examples/MonthlyCategoryAggregateTransactionFootprints
+    SupportedCurrencies:
+      description: >-
+        This response code is returned when a request is accepted and
+        successfully processed. A corresponding response will be returned for
+        the API caller.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SupportedCurrencies'
+          examples:
+            SupportedCurrencies:
+              $ref: '#/components/examples/SupportedCurrencies'
+    SupportedMerchantCategories:
+      description: >-
+        This response code is returned when a request is accepted and
+        successfully processed. A corresponding response will be returned for
+        the API caller.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SupportedMerchantCategories'
+          examples:
+            SupportedMerchantCategories:
+              $ref: '#/components/examples/SupportedMerchantCategories'
+    PaymentCardReference:
+      description: >-
+        The response object that contains Payment Card information after a
+        successful registration.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentCardReference'
+          examples:
+            PaymentCardReference:
+              $ref: '#/components/examples/PaymentCardReference'
+    ServiceProvider:
+      description: >-
+        The response object that contains the latest information of a Service
+        Provider as available on the server.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServiceProvider'
+          examples:
+            ServiceProviderDetails:
+              $ref: '#/components/examples/ServiceProviderDetails'
+    UnsupportedMediaTypeError:
+      description: >-
+        This response code is returned when the MediaType in the request is
+        other than application/json.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            UnsupportedMediaTypeError:
+              $ref: '#/components/examples/UnsupportedMediaTypeError'
+    BadRequestError:
+      description: >-
+        This response code is returned when one or more request parameters is
+        either missing or is invalid. A caller should update his request as per
+        error details before trying again.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestError:
+              $ref: '#/components/examples/BadRequestError'
+    PaymentCardByIdNotFoundError:
+      description: >-
+        This response code is returned when the server cannot find the
+        paymentcard which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            PaymentCardByIdNotFoundError:
+              $ref: '#/components/examples/PaymentCardByIdNotFoundError'
+    TransactionHistoryBadRequestError:
+      description: >-
+        This response code is returned when a request is invalid or data in the
+        request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            TransactionHistoryPaymentCardNotFoundError:
+              $ref: '#/components/examples/TransactionHistoryPaymentCardNotFoundError'
+            TransactionHistoryInvalidDateRangeError:
+              $ref: '#/components/examples/TransactionHistoryInvalidDateRangeError'
+            TransactionHistoryInvalidDateFormatError:
+              $ref: '#/components/examples/TransactionHistoryInvalidDateFormatError'
+    AggregateTransactionBadRequestError:
+      description: >-
+        This response code is returned when a request is invalid or data in the
+        request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidPaymentCardError:
+              $ref: '#/components/examples/InvalidPaymentCardError'
+            AggregateTransactionInvalidDateFormatError:
+              $ref: '#/components/examples/AggregateTransactionInvalidDateFormatError'
+            AggregateTransactionInvalidDateRangeError:
+              $ref: '#/components/examples/AggregateTransactionInvalidDateRangeError'
+            AggregateTransactionInvalidAggregateTypeError:
+              $ref: >-
+                #/components/examples/AggregateTransactionInvalidAggregateTypeError
+    RegisterPaymentCardBadRequestError:
+      description: >-
+        This response code is returned when a request is invalid or data in the
+        request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            RegisterPaymentCardRequestValidationError:
+              $ref: '#/components/examples/RegisterPaymentCardRequestValidationError'
+            RegisterPaymentCardUnsupportedCardCurrencyError:
+              $ref: >-
+                #/components/examples/RegisterPaymentCardUnsupportedCardCurrencyError
+            RegisterPaymentCardInvalidFPANError:
+              $ref: '#/components/examples/RegisterPaymentCardInvalidFPANError'
+            RegisterPaymentCardRequestDecryptionError:
+              $ref: '#/components/examples/RegisterPaymentCardRequestDecryptionError'
+    ServiceProviderNotFoundError:
+      description: >-
+        This response code is returned when the server cannot find the account
+        which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+    ServiceProviderBadRequestError:
+      description: >-
+        This response code is returned when either a request is invalid or data
+        provided in the request is in invalid format.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderInvalidRequestParameterError:
+              $ref: >-
+                #/components/examples/ServiceProviderInvalidRequestParameterError
+            ServiceProviderDupicateSenderIdError:
+              $ref: '#/components/examples/DuplicateSenderIdError'
+    PaymentCardDeletionsNotFoundError:
+      description: >-
+        This response code is returned when the server cannot find the account
+        or one or more paymentcards which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+            PaymentCardNotFoundError:
+              $ref: '#/components/examples/PaymentCardNotFoundError'
+    ServiceProviderUnsupportedMediaTypeError:
+      description: >-
+        This response code is returned when the value of provided Content-Type
+        parameter is other than expected.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderUnsupportedMediaTypeError:
+              $ref: '#/components/examples/ServiceProviderUnsupportedMediaTypeError'
+    Accepted:
+      description: Accepted
+      headers:
+        Location:
+          $ref: '#/components/headers/Location'
+    Profile:
+      description: The resulting profile.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Profile'
+          examples:
+            ProfileResponse:
+              $ref: '#/components/examples/ProfileResponseData'
+    Survey:
+      description: Returns a survey compatible with the format supported by SurveyJS.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Surveys'
+          examples:
+            SurveyResponse:
+              $ref: '#/components/examples/SurveyResponseData'
+    ProfilePayloadBadRequestError:
+      description: >-
+        This response code is returned when one or more request parameters is
+        either missing or is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestError:
+              $ref: '#/components/examples/ProfilePayloadBadRequestError'
+    Insights:
+      description: ''
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InsightsData'
+          examples:
+            InsightsResponseData:
+              $ref: '#/components/examples/InsightsResponseData'
+    InsightsByIdResponse:
+      description: ''
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InsightsResponseById'
+          examples:
+            InsightsByIdResponse:
+              $ref: '#/components/examples/InsightsByIdResponse'
+    MissingInsightAttributesBadRequestError:
+      description: >-
+        This response code is returned when one or more request parameters is
+        either missing or is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestError:
+              $ref: '#/components/examples/MissingInsightAttributesBadRequestError'
+    Benchmarks:
+      description: ''
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Benchmark'
+          examples:
+            BenchmarksResponse:
+              $ref: '#/components/examples/BenchmarksResponseData'
+            NoDataEmissionResponseData:
+              $ref: '#/components/examples/NoDataEmissionResponseData'
+    BenchmarkBadRequestError:
+      description: >-
+        This response code is returned when one or more request parameters is
+        either missing or is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestError:
+              $ref: '#/components/examples/BenchmarkBadRequestError'
+            InvalidCountryCodeError:
+              $ref: '#/components/examples/InvalidCountryCodeError'
+            CountryCodeNotFoundError:
+              $ref: '#/components/examples/CountryCodeNotFoundError'
+            InvalidPeriodError:
+              $ref: '#/components/examples/InvalidPeriodError'
+    BenchmarkNotFoundError:
+      description: >-
+        This response code is returned when one or more request parameters is
+        either missing or is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+    InsightNotFoundError:
+      description: >-
+        This response code is returned when one or more request parameters is
+        either missing or is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+            InsightItemNotFoundError:
+              $ref: '#/components/examples/InsightItemNotFoundError'
+            InsightItemNotFoundInVersionError:
+              $ref: '#/components/examples/InsightItemNotFoundInVersionError'
+            UnsupportedLanguageError:
+              $ref: '#/components/examples/UnsupportedLanguageError'
+  examples:
+    PaymentCardEnrolments:
+      value:
+        - bin: '545502'
+          last4fpan: '8351'
+          status: ACTIVE
+          paymentCardId: 9f12f385-0b47-4cca-9e9d-baced21bca63
+        - bin: '545502'
+          last4fpan: '0762'
+          status: ACTIVE
+          paymentCardId: f506521c-38c6-4e87-bf1a-14023ce10d4e
+        - bin: '545502'
+          last4fpan: '2834'
+          status: PENDING
+          paymentCardId: 2da9571f-0cf2-458d-bc4b-9218578ce50d
+        - bin: '520402'
+          last4fpan: '2824'
+          errorCode: INVALID_FPAN
+    TransactionFootprintsData:
+      value:
+        - transactionId: ee421c25-f928-4bf6-b884-3600b76b860d
+          mcc: 3997
+          cardBrand: OTH
+          scoreReference: MCC
+          carbonEmissionInGrams: 48.52
+          carbonEmissionInOunces: 1.71
+          category:
+            mainCategory: Leisure & Entertainment
+            subCategory: Hotels & Vacation
+            sector: Hotels, Motels & Resorts
+            sectorCode: '604'
+          scoreStatus: SUCCESS
+          profile:
+            traits:
+              knowledge: 0.65
+              lifestyle: 0.445
+              motivated: 0.683
+            userAttributes:
+              demo: 66
+              diet: 256
+              lifestyle: 4
+              energy: 12288
+              transport: 36933
+              country: AX
+            created: '2024-01-31T10:57:36.161Z'
+            surveys:
+              key1:
+                key2: 1
+                key3: 2
+            persona: '3'
+            benchmarks:
+              key1:
+                key2: 1
+                key3: 2
+            comparisons:
+              key1:
+                key2: 1
+                key3: 2
+            insights:
+              key1:
+                key2: 1
+                key3: 2
+            version: '1.0'
+          classification:
+            type: mcc
+            id: '5411'
+          spendingAreaId: 20
+        - transactionId: fdc4626c-f51e-4ba6-9728-c79ac1d9aec8
+          mcc: 3000
+          scoreReference: MCC
+          carbonEmissionInGrams: 11941.95,
+          carbonEmissionInOunces: 421.24,
+          category:
+            mainCategory: Transport
+            subCategory: Flights
+            sector: Flights
+            sectorCode: '351'
+        - transactionId: 0218BC0251FEB8F8E063C6979E0AE0DD
+          mcc: 1234
+          scoreReference: null
+          scoreStatus: FAILURE
+          errorCode: INVALID_MCC
+          errorMessage: >-
+            MCC Provided in the request is Invalid. Kindly Request again with
+            valid MCC.
+        - transactionId: odc4626c-f51e-4ba6-9728-c79ac1d9aec9
+          mcc: 3997
+          scoreReference: AIIA
+          carbonEmissionInGrams: 27.98
+          carbonEmissionInOunces: 0.99
+          category:
+            mainCategory: Shopping
+            subCategory: Department Store
+            sector: Specialty Retail & Services
+            sectorCode: '302'
+          scoreStatus: SUCCESS
+    HistoricalTransactionFootprints:
+      value:
+        count: 2
+        offset: 1
+        limit: 5
+        total: 5
+        items:
+          - transactionMetadata:
+              id: ee421c25-f928-4bf6-b884-3600b76b860d
+              traceId: 9f52386ce297173ecfeb9120aabb0805bbeeb1350ce1de640864852e800bd206
+              banknetReferenceNumber: MPL0R6B2R
+              banknetDate: '0525'
+              retrievalRefNumber: MCC000100
+              processingCode: '00'
+              authCode: 52717Z
+              dateAndTime: 2018-07-02T00:00+00:00
+              merchantName: ABC Store
+              acquiringInstitutionCountryCode: USA
+              acquiringInstitutionCode: '12312312312'
+              amount: '25.50'
+              currencyCode: USD
+              indicator: CL
+            transactionFootPrint:
+              mcc: 3997
+              carbonEmissionInGrams: 48.52
+              carbonEmissionInOunces: 1.71
+              category:
+                mainCategory: Leisure & Entertainment
+                subCategory: Hotels & Vacation
+                sector: Hotels, Motels & Resorts
+                sectorCode: '604'
+              scoreReference: MCC
+          - transactionMetadata:
+              id: fdc4626c-f51e-4ba6-9728-c79ac1d9aec8
+              traceId: gf55386ce297173ecfeb9120aabb0805bbeeb1350ce1de640864852e8002343
+              banknetReferenceNumber: MPL0B6B23
+              banknetDate: '0725'
+              retrievalRefNumber: MCC000480
+              processingCode: '01'
+              authCode: K3C161
+              dateAndTime: 2019-12-25T00:00+00:00
+              merchantName: ABC Store
+              acquiringInstitutionCountryCode: USA
+              acquiringInstitutionCode: '23423423423'
+              amount: '30.00'
+              currencyCode: USD
+              indicator: CL
+            transactionFootPrint:
+              mcc: 5962
+              carbonEmissionInGrams: 27.98
+              carbonEmissionInOunces: 0.99
+              category:
+                mainCategory: Shopping
+                subCategory: Department Store
+                sector: Specialty Retail & Services
+                sectorCode: '302'
+              scoreReference: MCC
+          - transactionMetadata:
+              id: '9000010131662'
+              traceId: af55386ce297173ecfeb9120aabb0805bbeeb1350ce1de640864852e800bd854
+              banknetReferenceNumber: MPL0R8C2A
+              banknetDate: '0624'
+              retrievalRefNumber: '801220'
+              processingCode: '00'
+              authCode: '16'
+              dateAndTime: 2022-01-26T00:00+00:00
+              merchantName: Test Sandbox Merchant
+              acquiringInstitutionCountryCode: USA
+              acquiringInstitutionCode: '12311878333'
+              amount: 20
+              currencyCode: GBP
+              indicator: RFT
+            transactionFootprint:
+              carbonEmissionInGrams: -3398.54
+              carbonEmissionInOunces: -119.88
+              transactionId: '9000010131662'
+              mcc: '9311'
+              category:
+                mainCategory: Government Services
+                subCategory: Public Services
+                sector: Government Services
+                sectorCode: '801'
+              scoreReference: MCC
+    WeeklyAggregateTransactionFootprints:
+      value:
+        aggregateTransactionFootprint:
+          - paymentCardId: 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+            footprintAggregation:
+              - carbonEmissionInGrams: 140.52
+                carbonEmissionInOunces: 7.19
+                aggregateValue: Week-26|2019
+              - carbonEmissionInGrams: 142.67
+                carbonEmissionInOunces: 6.94
+                aggregateValue: Week-25|2019
+          - paymentCardId: 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+            footprintAggregation:
+              - carbonEmissionInGrams: 143.64
+                carbonEmissionInOunces: 6.97
+                aggregateValue: Week-26|2019
+              - carbonEmissionInGrams: 218.31
+                carbonEmissionInOunces: 7.19
+                aggregateValue: Week-25|2019
+        crossPANAggregation:
+          - carbonEmissionInGrams: 284.16
+            carbonEmissionInOunces: 14.16
+            aggregateValue: Week-26|2019
+          - carbonEmissionInGrams: 360.98
+            carbonEmissionInOunces: 14.13
+            aggregateValue: Week-25|2019
+    MonthlyAggregateTransactionFootprints:
+      value:
+        aggregateTransactionFootprint:
+          - paymentCardId: 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+            footprintAggregation:
+              - carbonEmissionInGrams: 616.35
+                carbonEmissionInOunces: 31.28
+                aggregateValue: October|2019
+              - carbonEmissionInGrams: 898.64
+                carbonEmissionInOunces: 32.54
+                aggregateValue: September|2019
+          - paymentCardId: 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+            footprintAggregation:
+              - carbonEmissionInGrams: 614.24
+                carbonEmissionInOunces: 32.21
+                aggregateValue: October|2019
+              - carbonEmissionInGrams: 612.24
+                carbonEmissionInOunces: 33.65
+                aggregateValue: September|2019
+        crossPANAggregation:
+          - carbonEmissionInGrams: 1230.59
+            carbonEmissionInOunces: 63.49
+            aggregateValue: October|2019
+          - carbonEmissionInGrams: 1510.88
+            carbonEmissionInOunces: 66.19
+            aggregateValue: September|2019
+    MonthlyCategoryAggregateTransactionFootprints:
+      value:
+        aggregateTransactionFootprint:
+          - paymentCardId: 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+            footprintAggregation:
+              - carbonEmissionInGrams: 345.35
+                carbonEmissionInOunces: 15.28
+                aggregateValue: October|2019|Shopping
+              - carbonEmissionInGrams: 261.64
+                carbonEmissionInOunces: 16.54
+                aggregateValue: October|2019|Hospital
+              - carbonEmissionInGrams: 898.64
+                carbonEmissionInOunces: 32.54
+                aggregateValue: September|2019|Shopping
+          - paymentCardId: 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+            footprintAggregation:
+              - carbonEmissionInGrams: 614.24
+                carbonEmissionInOunces: 32.21
+                aggregateValue: October|2019|Foods
+              - carbonEmissionInGrams: 612.24
+                carbonEmissionInOunces: 33.65
+                aggregateValue: September|2019|Hospital
+        crossPANAggregation:
+          - carbonEmissionInGrams: 345.35
+            carbonEmissionInOunces: 15.28
+            aggregateValue: October|2019|Shopping
+          - carbonEmissionInGrams: 898.64
+            carbonEmissionInOunces: 32.54
+            aggregateValue: October|2019|Hospital
+          - carbonEmissionInGrams: 614.24
+            carbonEmissionInOunces: 32.21
+            aggregateValue: October|2019|Foods
+          - carbonEmissionInGrams: 898.64
+            carbonEmissionInOunces: 32.54
+            aggregateValue: September|2019|Shopping
+          - carbonEmissionInGrams: 612.24
+            carbonEmissionInOunces: 33.65
+            aggregateValue: September|2019|Hospital
+    SupportedCurrencies:
+      value:
+        - currencyCode: SEK
+        - currencyCode: USD
+        - currencyCode: EUR
+        - currencyCode: GBP
+    SupportedMerchantCategories:
+      value:
+        - mcc: 10
+          category:
+            mainCategory: Shopping
+            subCategory: Department Store
+            sector: Department Stores
+            sectorCode: '201'
+        - mcc: 11
+          category:
+            mainCategory: Shopping
+            subCategory: Clothes & Fashion
+            sector: Variety Stores
+            sectorCode: '305'
+        - mcc: 12
+          category:
+            mainCategory: Food & Beverages
+            subCategory: Groceries
+            sector: Grocery Stores & Supermarkets
+            sectorCode: '101'
+        - mcc: 3860
+          category:
+            mainCategory: Leisure & Entertainment
+            subCategory: Hotels & Vacation
+            sector: Hotels, Motels & Resorts
+            sectorCode: '604'
+        - mcc: 3861
+          category:
+            mainCategory: Leisure & Entertainment
+            subCategory: Hotels & Vacation
+            sector: Hotels, Motels & Resorts
+            sectorCode: '604'
+        - mcc: 3620
+          category:
+            mainCategory: Leisure & Entertainment
+            subCategory: Hotels & Vacation
+            sector: Hotels, Motels & Resorts
+            sectorCode: '604'
+        - mcc: 3862
+          category:
+            mainCategory: Leisure & Entertainment
+            subCategory: Hotels & Vacation
+            sector: Hotels, Motels & Resorts
+            sectorCode: '604'
+        - mcc: 3621
+          category:
+            mainCategory: Leisure & Entertainment
+            subCategory: Hotels & Vacation
+            sector: Hotels, Motels & Resorts
+            sectorCode: '604'
+        - mcc: 3863
+          category:
+            mainCategory: Leisure & Entertainment
+            subCategory: Hotels & Vacation
+            sector: Hotels, Motels & Resorts
+            sectorCode: '604'
+        - mcc: 5800
+          category:
+            mainCategory: Shopping
+            subCategory: Department Store
+            sector: Specialty Retail & Services
+            sectorCode: '302'
+    PaymentCardReference:
+      value:
+        paymentCardId: c5d88571-ac15-465a-a0d8-1ad1327b9a06
+        bin: '534403'
+        last4fpan: '9750'
+        status: ACTIVE
+    ServiceProviderDetails:
+      value:
+        clientId: fjl2fxzsYl1OpvxkBItC9nVw1PSQc_b-eQMcmQFg011ab4b5
+        customerId: ''
+        customerName: ABC Bank
+        supportedAccountRange: 534403, 518145, 518152, 5403, 5424
+        email: John.Doe@mail.com
+        status: ACTIVE
+        senderId: cc-fp@anz
+        ica: '24528'
+        cardHolderBase: '9900000'
+    BadRequestError:
+      value:
+        Errors:
+          Error:
+            - Source: Carbon-Calculator
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                One of the request parameters is invalid, try again with the
+                correct request.
+              Recoverable: false
+              Details: >-
+                footprintsByTransactionData.transactionData[0].mcc: size must be
+                between 1 and 4
+            - Source: Carbon-Calculator
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                One of the request parameters is invalid, try again with the
+                correct request.
+              Recoverable: false
+              Details: >-
+                footprintsByTransactionData.transactionData[0].mcc: must match
+                "^\d{1,4}"
+    UnsupportedMediaTypeError:
+      value:
+        Errors:
+          Error:
+            - Source: Carbon-Calculator
+              ReasonCode: UNSUPPORTED_MEDIA_TYPE
+              Description: >-
+                Requested media type is not supported, try again with the
+                supported media type.
+              Recoverable: false
+              Details: ''
+    TransactionHistoryPaymentCardNotFoundError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider-Mgmt
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                Payment card id - c2c76ec0-4056-44ba-b14f-6654c9ba5722 is/are
+                invalid or not found. Please try again with valid payment card
+                id.
+              Recoverable: false
+              Details: ''
+    TransactionHistoryInvalidDateRangeError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider-Mgmt
+              ReasonCode: INVALID_DATE_RANGE
+              Description: >-
+                Requested date range is either invalid or exceeds one year
+                limits. Try again with a valid date range.
+              Recoverable: false
+              Details: ''
+    TransactionHistoryInvalidDateFormatError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider-Mgmt
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                One of the request parameters is invalid, try again with correct
+                request.
+              Recoverable: false
+              Details: >-
+                getPaymentCardTransactionHistory.fromDate: must match
+                "^((?:19|20)[0-9][0-9])-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$"
+            - Source: Service-Provider-Mgmt
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                One of the request parameters is invalid, try again with correct
+                request..
+              Recoverable: false
+              Details: >-
+                getPaymentCardTransactionHistory.fromDate: size must be between
+                10 and 10
+    AggregateTransactionInvalidDateRangeError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider-Mgmt
+              ReasonCode: INVALID_DATE_RANGE
+              Description: >-
+                Requested date range is either invalid or exceeds supported
+                limit (i.e. 26 weeks for weekly aggregate and 12 months for
+                monthly aggregate).
+              Recoverable: false
+              Details: ''
+    AggregateTransactionInvalidDateFormatError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider-Mgmt
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                One of the request parameters is invalid, try again with correct
+                request.
+              Recoverable: false
+              Details: >-
+                fromDate must match
+                "^((?:19|20)[0-9][0-9])-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$"
+            - Source: Service-Provider-Mgmt
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                One of the request parameters is invalid, try again with correct
+                request.
+              Recoverable: false
+              Details: fromDate size must be between 10 and 10
+    InvalidPaymentCardError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider-Mgmt
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                Payment card id -
+                [b86fd2ba-c095-4acb-b9df-f3805655ba24,d30f6223-b15d-4663-8e6a-247475c596dd
+                ] is/are invalid or not found. Please try again with a valid
+                payment card id.
+              Recoverable: false
+              Details: ''
+    AggregateTransactionInvalidAggregateTypeError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider-Mgmt
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                One of the request parameters is invalid, try again with correct
+                request.
+              Recoverable: false
+              Details: aggregateType must be less than or equal to 3
+    RegisterPaymentCardRequestValidationError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider-Mgmt
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                One of the request parameters is invalid, try again with the
+                correct request.
+              Recoverable: false
+              Details: ''
+    RegisterPaymentCardRequestDecryptionError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider-Mgmt
+              ReasonCode: CRYPTO_ERROR
+              Description: >-
+                We are unable to decipher your request, kindly verify your
+                request before trying again. If the problem persists then reach
+                out to your Mastercard associate.
+              Recoverable: false
+              Details: ''
+    RegisterPaymentCardUnsupportedCardCurrencyError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider-Mgmt
+              ReasonCode: UNSUPPORTED_CURRENCY
+              Description: >-
+                The currency in the request is not supported, try again with a
+                different one.
+              Recoverable: false
+              Details: ''
+    RegisterPaymentCardInvalidFPANError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider-Mgmt
+              ReasonCode: INVALID_FPAN
+              Description: >-
+                The card number in the request is either invalid or it does not
+                match with your currently supported account range. Try again
+                with a valid card number or update the supported account range.
+              Recoverable: false
+              Details: ''
+    PaymentCardDeletionsRequestValidationError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider-Mgmt
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                One of the request parameters is invalid, try again with the
+                correct request.
+              Recoverable: false
+              Details: ''
+    PaymentCardDeletionsInvalidCardIdError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider-Mgmt
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                One or more payment card IDs in the request are invalid, try
+                again by sending valid Ids.
+              Recoverable: false
+              Details: paymentCardId must match "^[0-9A-Fa-f\-]{36}"
+    ServiceProviderNotFoundError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider-Mgmt
+              ReasonCode: ACCOUNT_NOT_FOUND
+              Description: >-
+                We cannot find the account which you are using to access this
+                service. Kindly register your account or contact your Mastercard
+                associate if you have already registered with us earlier.
+              Recoverable: false
+              Details: ''
+    ServiceProviderInvalidRequestParameterError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider-Mgmt
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                One of the request parameters is either invalid or is missing,
+                try again with the correct request.
+              Recoverable: false
+              Details: supportedAccountRange must match "^[\d\,]{1,}"
+            - Source: Service-Provider-Mgmt
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                One of the request parameters is either invalid or is missing,
+                try again with the correct request.
+              Recoverable: false
+              Details: customerName must match "^[\w\s]{1,200}"
+    DuplicateSenderIdError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider-Mgmt
+              ReasonCode: SENDER_ID_ALREADY_EXISTS
+              Description: >-
+                The sender id in the request is already registered on the
+                server, try again with a different one.
+              Recoverable: false
+              Details: ''
+    PaymentCardNotFoundError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider-Mgmt
+              ReasonCode: PAYMENT_CARD_NOT_FOUND
+              Description: Paymentcards not found for the given payment card ids.
+              Recoverable: false
+              Details: ''
+    ServiceProviderUnsupportedMediaTypeError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider-Mgmt
+              ReasonCode: UNSUPPORTED_MEDIA_TYPE
+              Description: >-
+                Requested media type is not supported, try again with the
+                supported media type.
+              Recoverable: false
+              Details: ''
+    PaymentCardByIdNotFoundError:
+      value:
+        Errors:
+          Error:
+            - Source: Service-Provider
+              ReasonCode: PAYMENT_CARD_NOT_FOUND
+              Description: Paymentcard Not Found for the given payment card id in the path.
+              Recoverable: false
+              Details: ''
+    SurveyResponseData:
+      value:
+        - surveysPayload:
+            language: en
+            type: survey
+            id: onboarding
+            version: '1.1'
+            survey:
+              showQuestionNumber: 'off'
+              showProgressBar: top
+              pages:
+                - name: page1
+                  questions:
+                    - type: radiogroup
+                      name: sex
+                      title: What do you identify as?
+                      description: ''
+                      choices:
+                        - value: demo.m
+                          text: Male
+                        - value: demo.f
+                          text: Female
+                - name: page2
+                  questions:
+                    - type: dropdown
+                      name: age
+                      title: What age range are you in?
+                      description: ''
+                      choices:
+                        - value: demo.lt10
+                          text: 0-9
+                        - value: demo.lt20
+                          text: 10-19
+                        - value: demo.lt30
+                          text: 20-29
+                - name: page3
+                  questions:
+                    - type: dropdown
+                      name: country
+                      title: Which is your country of residence?
+                      description: ''
+                      choices:
+                        - value: AF
+                          text: Afghanistan
+                        - value: AX
+                          text: Åland Islands
+                        - value: AL
+                          text: Albania
+                - name: page4
+                  questions:
+                    - type: radiogroup
+                      name: interest
+                      title: >-
+                        I am curious about my own carbon footprint and how I
+                        personally contribute to climate change
+                      description: ''
+                      choices:
+                        - value: stronglyAgree
+                          text: Strongly agree
+                        - value: somewhatAgree
+                          text: Somewhat agree
+                        - value: neutral
+                          text: Neutral
+                - name: page5
+                  questions:
+                    - type: radiogroup
+                      name: knowledge
+                      title: >-
+                        I have good knowledge about climate change and its
+                        effects
+                      description: ''
+                      choices:
+                        - value: stronglyAgree
+                          text: Strongly agree
+                        - value: somewhatAgree
+                          text: Somewhat agree
+                        - value: neutral
+                          text: Neutral
+                - name: page6
+                  questions:
+                    - type: radiogroup
+                      name: diet
+                      title: What best describes your diet?
+                      description: ''
+                      choices:
+                        - value: diet.all
+                          text: I eat everything
+                        - value: diet.meatlessDay
+                          text: One meatless day a week
+                        - value: diet.avoidRed
+                          text: I try to avoid eating red meat
+                        - value: diet.noRed
+                          text: I don't eat red meat
+                - name: page7
+                  questions:
+                    - type: radiogroup
+                      name: renewableElectricity
+                      title: Does your household use renewable electricity?
+                      description: (e.g. solar, wind or hydro)
+                      choices:
+                        - value: energy.renewable
+                          text: Yes, we use a supplier of renewable electricity
+                        - value: energy.selfProduced
+                          text: Yes, we produce our own renewable electricity
+                - name: page8
+                  questions:
+                    - type: radiogroup
+                      name: haveCar
+                      title: Do you have a car?
+                      description: >-
+                        This only refers to cars you drive for personal or
+                        family needs, not a company car that is exclusively used
+                        professionally.
+                      choices:
+                        - value: transport.hasCar
+                          text: 'Yes'
+                        - value: transport.noCar
+                          text: 'No'
+                - name: page9
+                  visibleIf: '{haveCar} = ''transport.hasCar'''
+                  questions:
+                    - type: radiogroup
+                      name: carFuel
+                      title: What kind of car is it?
+                      description: ''
+                      choices:
+                        - value: transport.petrol
+                          text: Petrol
+                        - value: transport.diesel
+                          text: Diesel
+                        - value: transport.bio
+                          text: Bio-fuel or bio-gas
+                - name: page10
+                  questions:
+                    - type: radiogroup
+                      name: flyFrequency
+                      title: >-
+                        How often do you travel by plane for personal or leisure
+                        purposes?
+                      description: Do not include business travels.
+                      choices:
+                        - value: transport.twice
+                          text: A couple of times a year
+    ProfileResponseData:
+      value:
+        - profile:
+            traits:
+              knowledge: 0
+              lifestyle: 0.683
+              motivated: 0.3
+            userAttributes:
+              demo: 34
+              diet: 16399
+              lifestyle: 16
+              energy: 0
+              transport: 0
+              country: AF
+            created: '2024-01-19T09:31:08.065Z'
+            surveys:
+              key1:
+                key2: 1
+                key3: 2
+            persona: '5'
+            benchmarks:
+              key1:
+                key2: 1
+                key3: 2
+            comparisons:
+              key1:
+                key2: 1
+                key3: 2
+            insights:
+              key1:
+                key2: 1
+                key3: 2
+            version: '1.0'
+    InsightsResponseData:
+      value:
+        insightPayload:
+          language: en
+          insights:
+            - id: T13
+              version: '1.1'
+              mainCategory: shopping
+              subCategory: clothes
+              seen: false
+              spendingAreaId: '30'
+            - id: T14
+              version: '1.1'
+              mainCategory: shopping
+              subCategory: clothes
+              seen: false
+              spendingAreaId: '30'
+            - id: T2
+              version: '1.1'
+              mainCategory: shopping
+              subCategory: clothes
+              seen: false
+              spendingAreaId: '30'
+            - id: T23
+              version: '1.1'
+              mainCategory: shopping
+              subCategory: clothes
+              seen: false
+              spendingAreaId: '30'
+            - id: T24
+              version: '1.1'
+              mainCategory: shopping
+              subCategory: clothes
+              seen: false
+              spendingAreaId: '30'
+            - id: T6
+              version: '1.1'
+              mainCategory: shopping
+              subCategory: clothes
+              seen: false
+              spendingAreaId: '30'
+            - id: T78
+              version: '1.1'
+              mainCategory: shopping
+              subCategory: clothes
+              seen: false
+              spendingAreaId: '30'
+            - id: T79
+              version: '1.1'
+              mainCategory: shopping
+              subCategory: clothes
+              seen: false
+              spendingAreaId: '30'
+            - id: T92
+              version: '1.1'
+              mainCategory: shopping
+              subCategory: clothes
+              seen: false
+              spendingAreaId: '30'
+            - id: T20
+              version: '1.1'
+              mainCategory: shopping
+              subCategory: clothes
+              seen: false
+              spendingAreaId: '30'
+            - id: T21
+              version: '1.1'
+              mainCategory: shopping
+              subCategory: clothes
+              seen: false
+              spendingAreaId: '30'
+            - id: T75
+              version: '1.1'
+              mainCategory: shopping
+              subCategory: clothes
+              seen: false
+              spendingAreaId: '30'
+            - id: T76
+              version: '1.1'
+              mainCategory: shopping
+              subCategory: clothes
+              seen: false
+              spendingAreaId: '30'
+            - id: T77
+              version: '1.1'
+              mainCategory: shopping
+              subCategory: clothes
+              seen: false
+              spendingAreaId: '30'
+            - id: T9
+              version: '1.1'
+              mainCategory: shopping
+              subCategory: clothes
+              seen: false
+              spendingAreaId: '30'
+          page: 1
+          totalItemCount: 15
+          totalPageCount: 1
+        profile:
+          traits:
+            knowledge: 0.65
+            lifestyle: 0.445
+            motivated: 0.683
+          userAttributes:
+            demo: 66
+            diet: 256
+            lifestyle: 4
+            energy: 12288
+            transport: 36933
+            country: AX
+          created: '2024-01-31T10:57:36.161Z'
+          surveys:
+            key1:
+              key2: 1
+              key3: 2
+          persona: '3'
+          benchmarks:
+            key1:
+              key2: 1
+              key3: 2
+          comparisons:
+            key1:
+              key2: 1
+              key3: 2
+          insights:
+            key1:
+              key2: 1
+              key3: 2
+          version: '1.0'
+    InsightsRequest:
+      value:
+        insightsPayload:
+          mainCategory: shopping
+          main: shopping
+          docc: ''
+          spendingAreaId: '30'
+          subCategory: clothes
+        profile:
+          traits:
+            knowledge: 0.65
+            lifestyle: 0.445
+            motivated: 0.683
+          userAttributes:
+            demo: 66
+            diet: 256
+            lifestyle: 4
+            energy: 12288
+            transport: 36933
+            country: AX
+          created: '2024-01-31T10:57:36.161Z'
+          surveys:
+            key1:
+              key2: 1
+              key3: 2
+          persona: '3'
+          benchmarks:
+            key1:
+              key2: 1
+              key3: 2
+          comparisons:
+            key1:
+              key2: 1
+              key3: 2
+          insights:
+            key1:
+              key2: 1
+              key3: 2
+          version: '1.0'
+    InsightsByIdRequest:
+      value:
+        profile:
+          traits:
+            knowledge: 0.65
+            lifestyle: 0.445
+            motivated: 0.683
+          userAttributes:
+            demo: 66
+            diet: 256
+            lifestyle: 4
+            energy: 12288
+            transport: 36933
+            country: US
+          created: '2024-01-31T10:57:36.161Z'
+          surveys:
+            viewed:
+              onboardingVersion: 1
+          persona: '3'
+          benchmarks:
+            key1:
+              key2: 1
+              key3: 2
+          comparisons:
+            key1:
+              key2: 1
+              key3: 2
+          insights:
+            key1:
+              key2: 1
+              key3: 2
+          version: '1.0'
+    InsightsByIdResponse:
+      value:
+        insightsByIdPayload:
+          id: T101
+          version: 1.1
+          language: en
+          heading: Recycle your e-waste
+          content: >-
+            Voluptate eiusmod culpa incididunt excepteur anim ipsum et ex elit
+            laboris esse. Nostrud proident culpa exercitation eu dolore
+            consectetur sit amet cillum veniam enim duis ut. Qui mollit fugiat
+            tempor deserunt occaecat fugiat adipisicing ex cupidatat duis
+            commodo id ea. Dolor laboris eu commodo ea reprehenderit in nisi
+            proident. Fugiat cupidatat excepteur et ullamco anim. Cillum fugiat
+            commodo ipsum consequat irure proident tempor nisi tempor ad.
+
+            Occaecat est pariatur cillum commodo incididunt exercitation laboris
+            consectetur eu mollit incididunt. Adipisicing quis incididunt mollit
+            esse officia dolore fugiat reprehenderit nisi do velit ea. Id cillum
+            consectetur mollit eu laborum nostrud nulla sint Lorem voluptate
+            elit id.
+          notification: ''
+          mainCategory: home
+          subCategory: electronics
+          spendingAreaId: '10'
+          source: The Global E-waste Monitor 2020
+          sourceDescription: The Global E-waste Monitor 2020
+          sourceLink: >-
+            https://ewastemonitor.info/wp-content/uploads/2020/11/GEM_2020_def_july1_low.pdf
+          sourceDate: '2020-07-01'
+        profile:
+          traits:
+            knowledge: 0.65
+            lifestyle: 0.445
+            motivated: 0.683
+          userAttributes:
+            demo: 66
+            diet: 256
+            lifestyle: 4
+            energy: 12288
+            transport: 36933
+            country: AX
+          created: '2024-01-31T10:57:36.161Z'
+          surveys:
+            viewed:
+              onboardingVersion: 1
+          persona: '3'
+          benchmarks:
+            key1:
+              key2: 1
+              key3: 2
+          comparisons:
+            key1:
+              key2: 1
+              key3: 2
+          insights:
+            key1:
+              key2: 1
+              key3: 2
+          version: '1.0'
+    ProfileRequest:
+      value:
+        profilesPayload:
+          id: onboarding
+          version: '1.1'
+          surveyioResults:
+            sex: demo.f
+            age: demo.lt20
+            country: AX
+            interest: stronglyDisagree
+            knowledge: stronglyDisagree
+            diet: diet.vegan
+            renewableElectricity: energy.idk
+            haveCar: transport.noCar
+            flyFrequency: transport.never
+            shopFrequency: lifestyle.shopRarely
+            difference: stronglyDisagree
+            consciousPurchasingDecisions: stronglyDisagree
+            explainCarbonFootprint: stronglyDisagree
+        profile:
+          traits:
+            knowledge: 0.65
+            lifestyle: 0.445
+            motivated: 0.683
+          userAttributes:
+            demo: 66
+            diet: 256
+            lifestyle: 4
+            energy: 12288
+            transport: 36933
+            country: AX
+          created: '2024-01-31T10:57:36.161Z'
+          surveys:
+            key1:
+              key2: 1
+              key3: 2
+          persona: '3'
+          benchmarks:
+            key1:
+              key2: 1
+              key3: 2
+          comparisons:
+            key1:
+              key2: 1
+              key3: 2
+          insights:
+            key1:
+              key2: 1
+              key3: 2
+          version: '1.0'
+    ProfilePayloadBadRequestError:
+      value:
+        Errors:
+          Error:
+            - Source: Carbon-Calculator
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                One of the request parameters is invalid, try again with correct
+                request.
+              Recoverable: false
+              Details: payload.id must not be null
+            - Source: Carbon-Calculator
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                One of the request parameters is invalid, try again with correct
+                request.
+              Recoverable: false
+              Details: payload.version must not be null
+    MissingInsightAttributesBadRequestError:
+      value:
+        Errors:
+          Error:
+            - Source: Carbon-Calculator
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                One of the request parameters is invalid, try again with correct
+                request.
+              Recoverable: false
+              Details: profile.userAttributes must not be null
+            - Source: Carbon-Calculator
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                One of the request parameters is invalid, try again with correct
+                request
+              Recoverable: false
+              Details: profile.traits must not be null
+    BenchmarksResponseData:
+      value:
+        benchmarksPayload:
+          id: US
+          emission:
+            yearly: 1.425
+          parisAgreement:
+            yearly: 1.66
+    NoDataEmissionResponseData:
+      value:
+        benchmarksPayload:
+          id: VU
+          emission:
+            data: No emissions records for this country
+          parisAgreement:
+            yearly: 3.498
+    BenchmarkBadRequestError:
+      value:
+        Errors:
+          Error:
+            - Source: Carbon-Calculator
+              ReasonCode: BAD_REQUEST
+              Description: >-
+                One of the request parameters is invalid, try again with correct
+                request.
+              Recoverable: false
+              Details: country is a required field
+    CountryCodeNotFoundError:
+      value:
+        Errors:
+          Error:
+            - Source: Carbon-Calculator
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                One of the request parameters is invalid, try again with correct
+                request.
+              Recoverable: false
+              Details: country code not found
+    InvalidCountryCodeError:
+      value:
+        Errors:
+          Error:
+            - Source: Carbon-Calculator
+              ReasonCode: BAD_REQUEST
+              Description: >-
+                One of the request parameters is invalid, try again with correct
+                request.
+              Recoverable: false
+              Details: Country code is invalid
+    InvalidPeriodError:
+      value:
+        Errors:
+          Error:
+            - Source: Carbon-Calculator
+              ReasonCode: INVALID_REQUEST_PARAMETER
+              Description: >-
+                One of the request parameters is invalid, try again with correct
+                request.
+              Recoverable: false
+              Details: 'Period: Accepted values are ''month'' and ''year'''
+    InsightItemNotFoundError:
+      value:
+        Errors:
+          Error:
+            - Source: Carbon-Calculator
+              ReasonCode: ITEM_NOT_FOUND
+              Description: Insight Item not found for the provided id
+              Recoverable: false
+              Details: ''
+    InsightItemNotFoundInVersionError:
+      value:
+        Errors:
+          Error:
+            - Source: Carbon-Calculator
+              ReasonCode: VERSION_NOT_FOUND
+              Description: 'Insight T101 unavailable in 3.1 (use: 1.1)'
+              Recoverable: false
+              Details: ''
+    UnsupportedLanguageError:
+      value:
+        Errors:
+          Error:
+            - Source: Carbon-Calculator
+              ReasonCode: LANGUAGE_NOT_FOUND
+              Description: Unsupported language
+              Recoverable: false
+              Details: ''
