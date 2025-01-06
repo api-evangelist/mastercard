@@ -1,0 +1,491 @@
+openapi: 3.0.3
+info:
+  title: Automatic Billing Updater API
+  version: 1.0.0
+  description: Automatic billing updater
+  contact:
+    url: https://developer.mastercard.com/support
+    name: API Support
+    email: apisupport@mastercard.com
+servers:
+  - description: Production (open dropdown)
+    url: https://api.mastercard.com/abu/accounts/
+  - description: Sandbox (open dropdown)
+    url: https://sandbox.api.mastercard.com/abu/accounts/
+tags:
+  - description: >-
+      Inquiry on an account to receive the most up-to-date account information
+      available.
+    name: Account Inquiries
+  - description: >-
+      Account subscriptions include; subscribe requests, inquiries on
+      subscriptions and deletions to unsubscribe to an account.
+    name: Account Subscriptions
+paths:
+  /inquiries:
+    post:
+      summary: Inquiry request for an update on an account.
+      tags:
+        - Account Inquiries
+      description: >-
+        An inquiry request is used to receive the most up-to-date account
+        information available from issuers at any time. The parameters provided
+        in the request are used to identify the account inquired. Once a request
+        is received by ABU, a response will be provided back with the account
+        information.
+      operationId: accountInquiry
+      requestBody:
+        $ref: '#/components/requestBodies/InquiryRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/InquiryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedErrorResponse'
+  /subscriptions:
+    post:
+      summary: >-
+        Subscriptions to accounts to automatically receive notifications when an
+        update to an account occurs.
+      tags:
+        - Account Subscriptions
+      description: >-
+        A subscription request is used to watch an account. When an update is
+        made available from the issuing banks, ABU will send a notification to
+        the ABU Integrator's URI with the updated account information
+        automatically. ABU will respond with the latest account information as
+        well as subscribing the ABU Integrator to any future update
+        notifications.
+      operationId: accountSubscription
+      requestBody:
+        $ref: '#/components/requestBodies/SubscriptionRequest'
+      responses:
+        '202':
+          $ref: '#/components/responses/SubscriptionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedErrorResponse'
+  /subscription-inquiries:
+    post:
+      summary: >-
+        Inquire on a subscription to determine if an account is already being
+        watched or not.
+      tags:
+        - Account Subscriptions
+      description: >-
+        An inquiry request is used to check if an account is already being
+        watched or not. Based on the response back, the ABU Integrator can
+        choose to take action if necessary; to subscribe to watch an account or
+        unsubscribe, to stop watching an account.
+      operationId: subscriptionInquiry
+      requestBody:
+        $ref: '#/components/requestBodies/SubscriptionInquiryRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/SubscriptionInquiryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedErrorResponse'
+  /subscription-deletions:
+    post:
+      summary: >-
+        Unsubscribe from an account to stop receiving updates for account
+        information in the future.
+      tags:
+        - Account Subscriptions
+      description: >-
+        ABU Integrators can unsubscribe from an account to stop automatically
+        receiving notifications with account information when updates occur.
+      operationId: accountSubscriptionDeletion
+      requestBody:
+        $ref: '#/components/requestBodies/SubscriptionDeletionRequest'
+      responses:
+        '202':
+          $ref: '#/components/responses/SubscriptionDeletionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedErrorResponse'
+components:
+  examples:
+    AccountInquiryValid:
+      value:
+        responseIndicator: VALID
+    AccountInquiryUnknown:
+      value:
+        responseIndicator: UNKNOWN
+    AccountInquiryNonParticipating:
+      value:
+        responseIndicator: NON_PARTICIPATING
+    AccountInquiryContact:
+      value:
+        responseIndicator: CONTACT
+    AccountInquiryExpiry:
+      value:
+        responseIndicator: EXPIRY
+        account:
+          number: '5573491171027315'
+          expiry: '1221'
+    AccountInquiryAccountUpdate:
+      value:
+        responseIndicator: ACCOUNT_UPDATE
+        account:
+          number: '5573491171029999'
+          expiry: '1221'
+    SubscriptionAccountInquirySubscribed:
+      value:
+        subscribed: true
+    SubscriptionAccountInquiryNotSubscribed:
+      value:
+        subscribed: false
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+            - Source: Security.Credential
+              ReasonCode: AUTHENTICATION_FAILED
+              Description: Unauthorized Access to Web Service.
+              Recoverable: false
+              Details: No ICA configured for clientID
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+            - Source: Validation
+              ReasonCode: ICA_VALUE_REQUIRED
+              Description: ICA required for ABU client eligibility validation.
+              Recoverable: false
+              Details: ICA is mandatory.
+  requestBodies:
+    InquiryRequest:
+      description: >-
+        ABU Integrator sends request to inquire on the account for a specific
+        account.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Inquiry'
+    SubscriptionRequest:
+      description: ABU Integrator sends subscription request to subscribe to an account.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Subscription'
+    SubscriptionDeletionRequest:
+      description: >-
+        ABU Integrator sends subscriptionDeletion request to unsubscribe from an
+        account.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubscriptionDeletion'
+    SubscriptionInquiryRequest:
+      description: >-
+        ABU Integrator subscription request to inquire on a subscription for an
+        account number.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubscriptionInquiry'
+  schemas:
+    BaseAccount:
+      description: Properties common to all accounts
+      type: object
+      required:
+        - accountNumber
+        - expiryDate
+      properties:
+        accountNumber:
+          $ref: '#/components/schemas/AccountNumber'
+        expiryDate:
+          $ref: '#/components/schemas/Expiry'
+    BaseCustomer:
+      description: Properties common to all customer
+      type: object
+      required:
+        - ica
+        - merchantId
+      properties:
+        ica:
+          $ref: '#/components/schemas/Ica'
+        merchantId:
+          $ref: '#/components/schemas/MerchantId'
+    OutInquiry:
+      allOf:
+        - $ref: '#/components/schemas/AccountUpdate'
+        - type: object
+    OutSubscription:
+      allOf:
+        - $ref: '#/components/schemas/AccountUpdate'
+        - type: object
+    AccountUpdate:
+      type: object
+      properties:
+        account:
+          $ref: '#/components/schemas/Account'
+        responseIndicator:
+          $ref: '#/components/schemas/ResponseIndicator'
+    OutSubscriptionInquiry:
+      type: object
+      properties:
+        subscribed:
+          type: boolean
+          example: true
+          description: >-
+            Indicate to the ABU Integrator if they are subscribed to the
+            inquired account. account number for a given merchant. *`subscribed:
+            true`: Customer is subscribed. *`subscribed: false`: Customer is not
+            subscribed.
+    ErrorWrapper:
+      type: object
+      required:
+        - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Errors:
+      type: object
+      required:
+        - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    Error:
+      type: object
+      properties:
+        Source:
+          type: string
+          example: Validation
+          description: >-
+            The application name that generated this error. Every error message
+            that is generated and returned by the gateway will have this field
+            equal to Gateway.
+          maxLength: 100
+          minLength: 1
+        ReasonCode:
+          type: string
+          example: ICA_VALUE_REQUIRED
+          description: >-
+            A unique constant identifying the error case encountered during
+            request processing.
+          maxLength: 100
+          minLength: 1
+        Description:
+          type: string
+          example: ICA required for ABU client eligibility validation
+          description: Short description of the ReasonCode field.
+          maxLength: 1000
+          minLength: 10
+        Recoverable:
+          type: boolean
+          example: false
+          description: >-
+            Indicates whether this error will always be returned for this
+            request, or retrying could change the outcome.
+        Details:
+          type: string
+          description: >-
+            (Optional) Where appropriate, indicates detailed information about
+            data received and calculated during request processing, to help the
+            customer with diagnosing errors.
+          example: ICA is Mandatory
+          maxLength: 5000
+          minLength: 0
+    AccountNumber:
+      type: string
+      maxLength: 19
+      minLength: 13
+      example: '5573491171027315'
+      description: The account number being inquired upon.
+    Expiry:
+      type: string
+      maxLength: 4
+      minLength: 4
+      example: '1228'
+      description: >-
+        The expiration date associated to the account number being inquired
+        upon. Must be in MMYY format.
+    Ica:
+      type: string
+      minLength: 4
+      maxLength: 15
+      example: '1111'
+      description: >-
+        A number assigned by Mastercard to a licensed customer to identify the
+        member in transactions. This is used as an identifier for data submitted
+        to ABU.
+    MerchantId:
+      type: string
+      maxLength: 15
+      minLength: 15
+      example: '000000000002535'
+      description: >-
+        A merchant ID or payment facilitator ID, previously registered with
+        Mastercard.
+    SubMerchantId:
+      type: string
+      maxLength: 15
+      minLength: 15
+      example: '000000000000001'
+      description: >-
+        An optional identifier for a sub-merchant of a payment facilitators
+        under a registered merchant ID.
+    ResponseIndicator:
+      type: string
+      pattern: ^(VALID|UNKNOWN|NON_PARTICIPATING|CONTACT|EXPIRY|ACCOUNT_UPDATE)
+      example: VALID
+      description: >-
+        An indicator to help explain the status of the account being inquired
+        on. Possible values are:
+
+        * `VALID` = Matches the account as reported by the issuer.
+
+        * `UNKNOWN` = Account number is not known to ABU or part of a
+        participating BIN (Bank Identification Number) and/or issuer.
+
+        * `NON_PARTICIPATING` = Account number is not known to ABU or part of a
+        non-participating BIN (Bank Identification Number) and/or issuer.
+
+        * `CONTACT` (C) = Contact the issuer.
+
+        * `EXPIRY` (E) = The card inquired on is expired, updated expiry date
+        returned.
+
+        * `ACCOUNT_UPDATE` (A) = The card inquired on is updated, updated card
+        number and expiry date returned.
+    Account:
+      description: Representation of an account
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseAccount'
+        - type: object
+    Customer:
+      description: Representation of a customer
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseCustomer'
+        - type: object
+          properties:
+            subMerchantId:
+              $ref: '#/components/schemas/SubMerchantId'
+    SubscriptionInquiry:
+      allOf:
+        - $ref: '#/components/schemas/CustomerAccount'
+        - type: object
+    SubscriptionDeletion:
+      allOf:
+        - $ref: '#/components/schemas/CustomerAccount'
+        - type: object
+    Subscription:
+      allOf:
+        - $ref: '#/components/schemas/CustomerAccount'
+        - type: object
+    Inquiry:
+      allOf:
+        - $ref: '#/components/schemas/CustomerAccount'
+        - type: object
+    CustomerAccount:
+      type: object
+      required:
+        - requestId
+        - customer
+        - account
+      properties:
+        requestId:
+          type: string
+          maxLength: 64
+          minLength: 1
+          example: 323e304f-1cfc-4f0d-ac07-e6037ce09925
+          description: An identifier established by the customer.
+        customer:
+          $ref: '#/components/schemas/Customer'
+        account:
+          $ref: '#/components/schemas/Account'
+  responses:
+    InquiryResponse:
+      description: >-
+        Customer account inquiry response, account will only be populated if
+        response indicator is of type  `EXPIRY` or `ACCOUNT_UPDATE`.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OutInquiry'
+          examples:
+            Valid:
+              $ref: '#/components/examples/AccountInquiryValid'
+            Unknown:
+              $ref: '#/components/examples/AccountInquiryUnknown'
+            Non Participating:
+              $ref: '#/components/examples/AccountInquiryNonParticipating'
+            Contact:
+              $ref: '#/components/examples/AccountInquiryContact'
+            Expiry:
+              $ref: '#/components/examples/AccountInquiryExpiry'
+            Account Update:
+              $ref: '#/components/examples/AccountInquiryAccountUpdate'
+    SubscriptionResponse:
+      description: >-
+        Customer account inquiry response, account will only be populated if
+        response indicator is of type `EXPIRY` or `ACCOUNT_UPDATE`.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OutSubscription'
+          examples:
+            Valid:
+              $ref: '#/components/examples/AccountInquiryValid'
+            Unknown:
+              $ref: '#/components/examples/AccountInquiryUnknown'
+            Non Participating:
+              $ref: '#/components/examples/AccountInquiryNonParticipating'
+            Contact:
+              $ref: '#/components/examples/AccountInquiryContact'
+            Expiry:
+              $ref: '#/components/examples/AccountInquiryExpiry'
+            Account Update:
+              $ref: '#/components/examples/AccountInquiryAccountUpdate'
+    SubscriptionDeletionResponse:
+      description: >-
+        Successfully unsubscribed customer from account number for a given
+        merchant.
+    SubscriptionInquiryResponse:
+      description: The status of a subscription inquiry.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OutSubscriptionInquiry'
+          examples:
+            Subscribed:
+              $ref: '#/components/examples/SubscriptionAccountInquirySubscribed'
+            Not Subscribed:
+              $ref: '#/components/examples/SubscriptionAccountInquiryNotSubscribed'
+    BadRequestErrorResponse:
+      description: Something was wrong with the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    UnauthorizedErrorResponse:
+      description: Authentication information was missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
