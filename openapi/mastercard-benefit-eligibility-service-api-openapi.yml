@@ -1,0 +1,793 @@
+openapi: 3.0.3
+info:
+  title: Eligibility API
+  version: 1.0.1
+  description: >-
+    An API to check the benefits a cardholder may have. A vendor can check if
+    the cardholder is eligible for benefits.
+  contact:
+    name: API Support
+    email: apisupport@mastercard.com
+    url: https://developer.mastercard.com/support
+servers:
+  - url: https://api.mastercard.com/loyalty/eligibility
+    description: Production server
+  - url: https://sandbox.api.mastercard.com/loyalty/eligibility
+    description: Sandbox server
+tags:
+  - name: Benefits
+    description: Handles Benefits
+  - name: Products
+    description: Handles Products
+  - name: Widget Access Token
+    description: Generates tokens for vendor site.
+paths:
+  /benefits/searches:
+    post:
+      tags:
+        - Benefits
+      description: >-
+        Send cardholder information and a date, get the benefits that the
+        cardholder had for that date. If no date is provided the current one is
+        used.
+      summary: Search benefits
+      operationId: searchBenefits
+      requestBody:
+        $ref: '#/components/requestBodies/BenefitsSearch'
+      responses:
+        '200':
+          $ref: '#/components/responses/SearchBenefits'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /products/searches:
+    post:
+      tags:
+        - Products
+      description: >-
+        Returns the product information using the card number provided for the
+        requested date. If no date is provided, then current date will be used.
+      summary: Search products
+      operationId: searchProducts
+      requestBody:
+        $ref: '#/components/requestBodies/ProductSearch'
+      responses:
+        '200':
+          $ref: '#/components/responses/SearchProducts'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /widgets/access-tokens:
+    get:
+      tags:
+        - Widget Access Token
+      description: Generate a new access token for the vendor site.
+      summary: Generate Access Token
+      operationId: generateBenefitsAccessToken
+      responses:
+        '200':
+          $ref: '#/components/responses/AccessToken'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+components:
+  requestBodies:
+    BenefitsSearch:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Benefits'
+    ProductSearch:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Products'
+  responses:
+    SearchBenefits:
+      description: Returns Benefits that match the requested details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SearchBenefits'
+          examples:
+            listOfMultipleBenefitTypes:
+              $ref: '#/components/examples/MultipleBenefitTypes'
+    SearchProducts:
+      description: Returns Products that match the search criteria
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SearchProducts'
+    AccessToken:
+      description: Returns Token for cardholder
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BenefitsAccessToken'
+    BadRequestError:
+      description: Something was wrong with the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    UnauthorizedError:
+      description: Unauthorized - Access Not Granted
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+  schemas:
+    SearchBenefits:
+      type: object
+      properties:
+        data:
+          description: Array of Products
+          type: array
+          items:
+            $ref: '#/components/schemas/Benefit'
+    SearchProducts:
+      type: object
+      properties:
+        icaBusinessName:
+          description: Name of Issuer
+          type: string
+          example: Bank Group
+          minLength: 0
+          maxLength: 60
+        icaCode:
+          description: ICA code of the issuer
+          type: string
+          example: '7379'
+        icaRegion:
+          description: The geographical region of card issuer
+          type: string
+          example: US
+          minLength: 2
+          maxLength: 40
+          pattern: '[A-Z]+'
+        icaCountry:
+          description: The country of the card issuer
+          type: string
+          example: USA
+          maxLength: 3
+          minLength: 3
+          pattern: '[A-Z]+'
+        icaState:
+          description: The state of the card issuer
+          type: string
+          example: SOUTH DAKOTA
+          minLength: 0
+          maxLength: 300
+        icaLegalName:
+          description: This is the ICAs Legal name for MPI, MasterCard's Licensing database
+          type: string
+          example: Bank Group, N.A.
+          minLength: 0
+          maxLength: 300
+        parentICACode:
+          description: Code for Parent Issuer
+          type: string
+          example: '7379'
+          minLength: 4
+          maxLength: 9
+        data:
+          description: Array of Products
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+    BenefitsAccessToken:
+      type: object
+      properties:
+        accessToken:
+          description: The String (text) representation of Benefits Access Token
+          type: string
+          example: >-
+            hereeyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMDIzMTIxMjA5MjMzNC1zdGFnZS1iZW5lZml0cy1hY2Nlc3MtbWFzdGVyY2FyZC1jb20iLCJ0ZXN0IjoidGVzdCIsImV4cCI6MTcwNTkxNjUzNiwiaWF0IjoxNzA1OTEyOTM2fQ.6NGFRgiy_7TayB366Eupz-xmro6Sb9kpwLY35IHoQDs
+    Benefits:
+      type: object
+      properties:
+        cardNumber:
+          description: Full card number or BIN number
+          type: string
+          example: '5308780000000000'
+          minLength: 6
+          maxLength: 19
+        effectiveDate:
+          description: >-
+            Date for which products are to be determined. Defaults to the
+            current date if not provided. Date is in YYYY-MM-DD format.
+          type: string
+          example: '2022-12-15'
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        serviceProviderCode:
+          description: Number that represents the Service Provider of a Benefit
+          type: string
+          example: '01'
+          minLength: 1
+          maxLength: 6
+        productCode:
+          description: >-
+            The product identifier for a benefit, it is mandatory if a BIN is
+            used
+          type: string
+          example: MCC
+          minLength: 3
+          maxLength: 3
+        benefitCode:
+          type: string
+          maxLength: 3
+          minLength: 3
+          example: WTY
+          description: The unique alpha code assigned for the benefit
+      required:
+        - cardNumber
+    Products:
+      type: object
+      properties:
+        effectiveDate:
+          description: >-
+            Date for which benefits are to be determined. Defaults to the
+            current date if not provided. Date is in YYYY-MM-DD format
+          type: string
+          example: '2022-12-15'
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        cardNumber:
+          description: Full card number or BIN number
+          type: string
+          example: '5308780000000000'
+          minLength: 6
+          maxLength: 19
+      required:
+        - cardNumber
+    Product:
+      type: object
+      properties:
+        productCode:
+          description: >-
+            3 alpha character code of MasterCard Product. This is required if
+            the BIN or card number has multiple Products associated with it.
+          type: string
+          example: MCC
+          minLength: 3
+          maxLength: 3
+          pattern: ^[A-Z]{3}$
+        productName:
+          description: Name that corresponds to the Mastercard product
+          type: string
+          example: Mixed Product
+          minLength: 1
+          maxLength: 100
+    Benefit:
+      type: object
+      description: >
+        The representation of a benefit provided by Mastercard to the
+        cardholders.  
+
+        The details of the benefit are represented by means of various
+        properties defined by this object.  
+
+        Depending on the type of benefit, only a subset of these properties will
+        have the values.  
+
+        Please refer to the examples to know more about the details of the
+        attributes that are available for different benefit types.
+      properties:
+        benefitBundleId:
+          type: string
+          example: 2afd75df-a9f6-407f-bdfb-f24d2532a711
+          description: The unique identifier of the Bundle which the benefit is part of
+          minLength: 36
+          maxLength: 36
+        benefitBundleName:
+          type: string
+          example: US OPT Extended Warranty
+          description: Name of the benefit Bundle which the benefit is part of
+          minLength: 1
+          maxLength: 200
+        benefitServicingId:
+          type: string
+          example: 2afd75df-a9f6-407f-bdfb-f24d2532a711
+          description: Servicing identifier of the benefit
+          minLength: 0
+          maxLength: 36
+        benefitServicingOptions:
+          type: string
+          example: All Claims
+          description: Servicing option which benefit is associated to.
+          minLength: 0
+          maxLength: 100
+        benefitID:
+          type: string
+          example: '2495'
+          description: The unique numeric code of the Benefit
+          minLength: 1
+          maxLength: 6
+        benefitCode:
+          type: string
+          example: WTY
+          description: >-
+            The three character unique code assigned by Mastercard and used to
+            identify the benefit
+          minLength: 3
+          maxLength: 3
+        benefitName:
+          type: string
+          example: Extended Warranty
+          description: Name of the benefit
+          minLength: 1
+          maxLength: 50
+        macBenefitCategory:
+          type: string
+          example: Shopping
+          description: The category code defined by Mastercard to categorize the benefit
+          minLength: 1
+          maxLength: 100
+        serviceProviderCode:
+          type: string
+          example: 58
+          description: The code assigned for the Service Provider
+          minLength: 1
+          maxLength: 6
+        serviceProviderName:
+          type: string
+          example: US Extended Warranty - Information
+          description: The name of the Service Provider
+          minLength: 1
+          maxLength: 100
+        paymentType:
+          type: string
+          example: MasterCard Pays/ All Cards
+          description: MasterCard Pays vs Issuer Pays
+          minLength: 1
+          maxLength: 255
+        occurBeginTime:
+          type: string
+          example: 0
+          description: >
+            Numeric value of the Insurance policy occurrence begin time.  
+
+            This information along with the _occurTimeUnit_ identifies the time
+            duration for the policy occurrence to begin.
+        occurEndTime:
+          type: string
+          example: 1
+          description: >
+            Numeric value of the Insurance policy occurrence end time.  
+
+            This information along with the _occurTimeUnit_ identifies the time
+            duration for the policy occurrence to end.
+        occurTimeUnit:
+          type: string
+          example: Year
+          minLength: 0
+          maxLength: 5
+          description: Unit of measurement for the Occurrence begin time and end time
+        occurMinimumAmount:
+          type: string
+          example: 0
+          description: Minimum amount of claim before policy comes into effect.
+        occurMaximumAmount:
+          type: string
+          example: 19999.99
+          description: Maximum amount policy will pay per claim.
+        occurCurrency:
+          type: string
+          minLength: 0
+          maxLength: 3
+          example: USD
+          pattern: ^[A-Z]{3}$
+          description: >-
+            The ISO 4217 alpha code of the currency of the policy occurrence
+            minimum and maximum amount.
+        minimumClaimValue:
+          type: string
+          example: 1999.99
+          description: The minimum value for submitting the claim.
+        minimumClaimCurrencyType:
+          type: string
+          example: USD
+          description: The ISO 4217 alpha code of the currency of the minimum claim value.
+          minLength: 0
+          maxLength: 3
+          pattern: ^[A-Z]{3}$
+        occurMisc:
+          type: string
+          example: 0
+          description: >-
+            Covers miscellaneous coverage issues like return policy and
+            electronic & sport equipment coverage.
+        policyTimeLimit:
+          type: string
+          example: 12
+          description: >-
+            Length of entire policy. This information along with the
+            _policyTimeUnit_ identifies the duration of the policy.
+        policyTimeUnit:
+          type: string
+          example: Month
+          description: >-
+            The unit of measurement for the policy time limit.  For example,
+            Days, Months, Years.
+        policyMaximumOccurs:
+          type: string
+          example: 0
+          description: The maximum number of claims within policy time frame.
+        policyMaximumAmount:
+          type: string
+          example: 19999.99
+          description: >-
+            The maximum amount that the policy will pay when the claim is
+            settled.
+        policyCurrency:
+          type: string
+          example: USD
+          minLength: 0
+          maxLength: 3
+          pattern: ^[A-Z]{3}$
+          description: >-
+            The ISO 4217 alpha code for the currency of the maximum policy
+            amount.
+        policyRegionRestriction:
+          type: string
+          example: All
+          description: Geographical regions where the policy cover is allowed.
+        coverageType:
+          type: string
+          example: Excess
+          description: The type of coverage, for example,  Primary or Excess.
+        appliesTo:
+          type: string
+          example: Family
+          minLength: 1
+          maxLength: 255
+          description: >-
+            Identifies the members whom the policy is applicable to. For
+            example, Individual or Family.
+        qualifyingRequirement:
+          type: string
+          example: Recurrent bill payment with eligible MC $50 deductible.
+          description: >-
+            Identifies any additional requirements for qualifying for the policy
+            coverage.
+        additionalCoverage:
+          type: string
+          example: $300 Baggage Delay
+          description: >-
+            Any additional coverage, apart from the monetary benefit, that the
+            policy provides.
+        quantity:
+          type: string
+          example: 5
+          minLength: 0
+          description: The count for the number of items
+        quantityType:
+          type: string
+          description: >-
+            The information to supplement the 'quantity' by providing the
+            additional details like 'Bags' or 'Gigabytes' or 'Tickets' etc.
+          example: Tickets
+        duration:
+          type: string
+          description: Numeric value of the duration of the coverage.
+          example: 20
+        durationTimeIncrement:
+          type: string
+          description: >-
+            The unit of duration time increment. For example, Day, Hour, Minute,
+            Second etc.
+          example: Hour
+        deductibleValue:
+          type: string
+          description: Applicable deductible value
+          example: 100
+        deductibleCurrencyType:
+          type: string
+          pattern: ^[A-Z]{3}$
+          description: >-
+            The ISO 4217 alphabetic code for the currency of Applicable
+            deductible value.
+          example: USD
+        numberOfMemberEntitlements:
+          type: string
+          description: >-
+            Number of member Entitlements. Can be a numeric value or the text
+            'Unlimited'.
+          example: Unlimited
+        memberEntitlementsFundedBy:
+          type: string
+          description: >-
+            Information about who funds the member entitlements available as
+            part of the benefit.
+          example: Mastercard
+        numberOfGuestEntitlements:
+          type: string
+          description: >-
+            Number of guest entitlements.  Can be a numeric value or the text
+            'Unlimited'.
+          example: 2
+        typeOfGuestEntitlements:
+          type: string
+          description: Type of guest entitlements.
+          example: Each Time
+        guestEntitlementsFundedBy:
+          type: string
+          description: Information about who funds the Guest Entitlements.
+          example: Issuer
+        numberOfSharedMemberAndGuestEntitlements:
+          type: string
+          description: >-
+            Number of shared member and guest entitlements. Can be a numeric
+            value or the text 'Unlimited'.
+          example: 3
+        sharedMemberAndGuestEntitlementsFundedBy:
+          type: string
+          description: >-
+            Information about who funds the shared member and guest
+            entitlements.
+          example: Mastercard
+        discountValue:
+          type: string
+          description: Number representing the Applicable discount value.
+          example: 10
+        currency:
+          type: string
+          description: The ISO 4217 alpha code for the currency of Discount value.
+          example: USD
+          pattern: ^[A-Z]{3}$
+        discountType:
+          type: string
+          description: Type of discount.
+          example: basic-car-price
+        interchangeableEntitlement:
+          type: string
+          description: Interchangeable entitlement name.
+          example: FastTrack
+        serviceProviderDealId:
+          type: string
+          description: >-
+            The unique identifier of the agreement between Mastercard and the
+            Benefit Service Provider with regards to providing the required
+            services for the Benefit offered.
+          example: PPMCOWELBGHUAT
+        airportExperienceCoverage:
+          type: string
+          description: Identifies access limitations on where the benefit can be used.
+          example: Global, Domestic
+        airportExperienceExclusions:
+          type: string
+          description: Airport experience exclusions.
+          example: SAMPLEEXCEPTIONREGION
+        airportExperienceAccessMethod:
+          type: string
+          description: >-
+            The method or way using which the airport experience can be accessed
+            by the card holder.
+          example: Access with Digital Membership Card (DMC)
+        percentageOff:
+          type: string
+          description: The numeric value of Discount rate percentage.
+          example: 10
+        vendorReference:
+          type: string
+          description: >-
+            The textual value agreed to by Mastercard and the Service Provider
+            to exchange a needed identifier.
+          example: PPMCOWELBGUK23
+        bundleType:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: Region Specific Set
+          description: Category that benefit belong to
+        benefitEffectiveDate:
+          type: string
+          example: '2022-12-15'
+          pattern: ^\d{4}-\d{2}-\d{2}$
+          description: >-
+            Date from which the benefit becomes active to the associated
+            product. Date is in YYYY-MM-DD format
+        benefitExpirationDate:
+          type: string
+          example: '2022-12-15'
+          pattern: ^\d{4}-\d{2}-\d{2}$
+          description: >-
+            Date from which the benefit becomes in active to the associated
+            product. Date is in YYYY-MM-DD format
+        customAttributes:
+          description: Array of custom attributes
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomAttribute'
+    CustomAttribute:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the custom attribute.
+          example: Discount
+        value:
+          type: string
+          description: value of the custom attribute.
+          example: 10%
+    ErrorWrapper:
+      description: A top level object for errors
+      type: object
+      required:
+        - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    ErrorList:
+      description: The list of errors
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    Error:
+      description: A single error
+      type: object
+      properties:
+        Source:
+          type: string
+          minLength: 0
+          maxLength: 200
+          description: Information about where the error happened
+          example: ELIGIBILITY_BENEFITS_API
+        ReasonCode:
+          type: string
+          minLength: 0
+          maxLength: 200
+          description: An error code
+          example: BAD_REQUEST
+        Description:
+          type: string
+          minLength: 0
+          maxLength: 10000
+          description: A description of the error
+          example: We couldn't handle your request
+        Recoverable:
+          type: boolean
+          description: Indicates if the request can be presented again for processing
+          example: false
+        Details:
+          type: string
+          minLength: 0
+          maxLength: 10000
+          description: More details about the error
+          example: Invalid JSON payload
+    Errors:
+      description: Object that contains the list of errors
+      type: object
+      required:
+        - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+  examples:
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+            - Source: Benefits Eligibility Service
+              ReasonCode: BENEFITINFO_VAL_001
+              Description: Validation Error  BIN Number should be numeric.
+              Recoverable: false
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+            - Source: Gateway
+              ReasonCode: DECLINED
+              Description: Unauthorized - Access Not Granted
+              Recoverable: false
+              Details: null
+    MultipleBenefitTypes:
+      summary: Multiple types of Benefits
+      value:
+        data:
+          - benefitBundleId: 5bbf8967-Rce1-ACGC-56ty-18IYUT6ba572
+            benefitBundleName: OPT-PRO 121-IH
+            benefitServicingId: 5890b2e4-4cc7-490c-a85b-715f7e989dc1
+            benefitServicingOptions: Existing Claims
+            benefitID: '2495'
+            benefitCode: WTY
+            benefitName: Airport Lounge Access
+            macBenefitCategory: Travel
+            serviceProviderCode: '58'
+            serviceProviderName: US Extended Warranty - Information
+            paymentType: MasterCard Pays/ All Cards
+            bundleType: Region Specific Set
+            benefitEffectiveDate: '2022-12-15'
+            benefitExpirationDate: '2030-12-15'
+            appliesTo: Family
+            customAttributes:
+              - name: dealId
+                value: PPMCOWELBGHUAT
+            numberOfEntitlements: Unlimited
+            entitlementsFundedBy: Mastercard
+            numberOfGuestEntitlements: '2'
+            typeOfGuestEntitlements: Each Time
+            guestEntitlementsFundedBy: Issuer
+            numberOfSharedAndGuestEntitlements: '3'
+            sharedAndGuestEntitlementsFundedBy: Mastercard
+            discountValue: '10'
+            currency: USD
+            discountType: basic-car-price
+            interchangeableEntitlement: FastTrack
+            serviceProviderDealId: LOUNGEISSUERBANK
+            airportExperienceCoverage: Global, Domestic
+            airportExperienceExceptions: Lounge, Flight Delay Pass
+            airportExperienceAccessMethod: Access with Digital Membership Card (DMC)
+          - benefitBundleId: 2d01bd0d-84e6-46e7-89dc-7bba8797ed8c
+            benefitBundleName: OPT-TRC-211-IA
+            benefitServicingId: d2908f2b-8b41-4377-b5b6-025c223c0d33
+            benefitServicingOptions: New Claims
+            benefitID: '3395'
+            benefitCode: MCW
+            benefitName: Accidental Death and Dismemberment
+            macBenefitCategory: Travel
+            serviceProviderCode: '58'
+            serviceProviderName: US Extended Warranty - Information
+            paymentType: MasterCard Pays/ All Cards
+            bundleType: Region Specific Set
+            benefitEffectiveDate: '2022-12-15'
+            benefitExpirationDate: '2030-12-15'
+            appliesTo: Individual
+            customAttributes: []
+            occurBeginTime: '0'
+            occurEndTime: '1'
+            occurTimeUnit: Year
+            occurMinimumAmount: '0'
+            occurMaximumAmount: '10000'
+            occurCurrency: USD
+            minimumClaimValue: '10'
+            minimumClaimCurrencyType: USD
+            occurMisc: '0'
+            policyTimeLimit: '12'
+            policyTimeUnit: Month
+            policyMaximumOccurs: '0'
+            policyMaximumAmount: '10000'
+            policyCurrency: USD
+            policyRegionRestriction: All
+            coverageType: Excess
+            qualifyingRequirement: Recurrent bill payment with eligible MC $50 deductible.
+            additionalCoverage: >-
+              If death of the insured is abroad, and family decides not to
+              repatriate the body, then maximum limit for funeral expenses is
+              USD 5,000 / 70 or older max 30 days
+            quantity: '5'
+            duration: '20'
+            durationTimeIncrement: Hour
+            deductibleValue: '10'
+            deductibleCurrencyType: USD
+          - benefitBundleId: 10cc44cf-0151-4597-922b-c42a6cdfb408
+            benefitBundleName: OPT-WTY 66-IA
+            benefitServicingId: c8087ce6-32d6-435f-b700-7df231975800
+            benefitServicingOptions: All Claims
+            benefitID: '3149'
+            benefitCode: MEP
+            benefitName: Amazon Prime Membership
+            macBenefitCategory: Lifestyle
+            serviceProviderCode: '58'
+            serviceProviderName: US Extended Warranty - Information
+            paymentType: MasterCard Pays/ All Cards
+            bundleType: Region Specific Set
+            benefitEffectiveDate: '2022-12-15'
+            benefitExpirationDate: '2030-12-15'
+            appliesTo: Family
+            customAttributes: []
+            percentageOff: '10'
+            quantity: '5'
+            quantityType: ''
+            duration: '20'
+            durationTimeIncrement: Hour
+            vendorReference: DP
