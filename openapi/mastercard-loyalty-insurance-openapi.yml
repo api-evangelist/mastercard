@@ -1,0 +1,369 @@
+openapi: 3.0.3
+info:
+  title: Loyalty Insurance Claims API
+  description: >
+    The Loyalty Insurance API provides banks and customers with a digital
+    solution that makes it easier to manage claims globally within their web
+    apps rather than visiting multiple insurance sites. This facilitates claims
+    submissions by gathering all details via issuer app before redirecting
+    cardholder to claims processing website for pre-selecting benefit and
+    pre-filling forms. This also provides capability to search claim status
+    within banking app.
+
+    > This API does not require you to register the card holder and can be
+    leveraged without a user id.
+
+    The consumer will enter their claim information on the target web site
+    rendered in a web view and the site will display the Claim ID and postal 
+    code which the card holder can later use to input into a form within the 
+    issuer mobile app.
+
+    The Issuer will then call claim status API to retrieve status information
+    for this claim.
+
+    The retrieved status information will be displayed to the consumer within
+    the Issuer mobile app.
+  contact:
+    name: API Support
+    url: https://developer.mastercard.com/support
+    email: apisupport@mastercard.com
+  version: 1.0.0
+servers:
+  - url: https://api.mastercard.com/loyalty/insurance
+    description: Production server
+  - url: https://sandbox.api.mastercard.com/loyalty/insurance
+    description: Sandbox server
+tags:
+  - name: insurance claims
+    description: Insurance Claims API
+paths:
+  /user-data-tokens:
+    post:
+      tags:
+        - insurance claims
+      summary: >-
+        Create a user data token which is used in the redirection url that
+        redirects the cardholder to the website for submitting a new claim.
+      description: Create a user data token for submitting claim.
+      operationId: createUserToken
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/UserDataClaim'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserDataToken'
+        '400':
+          $ref: '#/components/responses/UserBadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /claim-searches:
+    post:
+      tags:
+        - insurance claims
+      summary: Retrieve the claim status.
+      description: >-
+        Retrieve the status of an insurance claim for the given claim ID and
+        postal code.
+      operationId: retrieveClaimStatus
+      requestBody:
+        $ref: '#/components/requestBodies/ClaimSearchRef'
+      responses:
+        '200':
+          $ref: '#/components/responses/ClaimStatusRef'
+        '400':
+          $ref: '#/components/responses/ClaimsBadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+components:
+  requestBodies:
+    UserDataClaim:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubmitClaimUserData'
+      description: User data for the submitted claim.
+      required: true
+    ClaimSearchRef:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClaimSearch'
+      description: Claim status payload.
+      required: true
+  schemas:
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          example: Error source
+          description: Source of the error.
+        Description:
+          type: string
+          example: Generic error description
+          description: Short description of the ReasonCode field.
+        ReasonCode:
+          type: string
+          example: REASON_CODE
+          description: >-
+            A unique constant identifying the error case encountered during API
+            request processing.
+        Recoverable:
+          type: boolean
+          description: >-
+            Indicates whether this error will always be returned for this
+            request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          example: Detailed error description
+          description: >-
+            Where appropriate, indicates detailed information about data
+            received.
+    ErrorItems:
+      required:
+        - Errors
+      type: object
+      properties:
+        Errors:
+          required:
+            - Error
+          type: object
+          properties:
+            Error:
+              type: array
+              description: Error Details
+              items:
+                $ref: '#/components/schemas/ErrorItem'
+    ClaimSearch:
+      type: object
+      required:
+        - claimId
+        - postalCode
+      properties:
+        claimId:
+          type: string
+          description: >-
+            Insurance claim identifier, cardholder should be able to retrieve
+            once the claim is submitted on the target website.
+          example: '512346231'
+        postalCode:
+          type: string
+          description: Postal code associated with insurance claim.
+          example: '71000'
+        preferredLanguage:
+          type: string
+          description: >-
+            User's preferred language in localized ISO 639-1 format such as
+            pt-BR
+          example: en-US
+    RequiredClaimDocuments:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the document required for an insurance claim.
+          example: Purchase Receipt
+        description:
+          type: string
+          description: Description of the document required for an insurance claim.
+          example: Receipt from the merchant on the date of purchase.
+        isReceived:
+          type: boolean
+          description: Received indicator of the insurance claim document.
+          example: false
+        category:
+          type: string
+          description: Category of the document required for an insurance claim.
+          example: Travel
+    ClaimFeature:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the insurance claim.
+          example: Comp/Collision
+        statusCode:
+          type: string
+          description: Status code of the insurance claim.
+          example: PAD
+        status:
+          type: string
+          description: Status of the insurance claim.
+          example: Paid
+        statusDescription:
+          type: string
+          description: Status description of the insurance claim.
+          example: Paid $100 to Cardholder on 02/02/2017 15:05:19
+    ClaimStatus:
+      type: object
+      properties:
+        features:
+          type: array
+          description: Array of insurance claim features associated with the claim.
+          items:
+            $ref: '#/components/schemas/ClaimFeature'
+        uploadDocumentsUrl:
+          type: string
+          description: URL to web page that facilitates uploading documents.
+          example: http://example.url.com/...
+        requiredDocuments:
+          type: array
+          description: Array of required documents for this claim.
+          items:
+            $ref: '#/components/schemas/RequiredClaimDocuments'
+    SubmitClaimUserData:
+      type: object
+      required:
+        - pan
+      properties:
+        firstName:
+          type: string
+          description: First name
+          example: John
+          maxLength: 20
+        lastName:
+          type: string
+          description: Last name
+          example: Smith
+          maxLength: 40
+        addressLine1:
+          type: string
+          description: Address line 1
+          example: Rua Francisco Pereira da Silva 1480
+          maxLength: 40
+        addressLine2:
+          type: string
+          description: Address line 2
+          example: Apt. 302
+          maxLength: 40
+        city:
+          type: string
+          description: City
+          example: Guarulhos
+          maxLength: 20
+        state:
+          type: string
+          description: State
+          example: SP
+        postalCode:
+          type: string
+          description: Postal code
+          example: 07272-060
+          maxLength: 12
+        country:
+          type: string
+          description: Alpha-3 ISO 3166-1 country code
+          example: BRA
+        email:
+          type: string
+          description: Email address
+          example: john.smith@mail.com
+          maxLength: 40
+        phone:
+          type: string
+          description: Phone number
+          example: (11) 1111-1111
+          maxLength: 20
+        pan:
+          type: string
+          description: Payment card number
+          example: '5534782345678238'
+    SubmitClaimUserToken:
+      type: object
+      properties:
+        token:
+          type: string
+          description: >-
+            Encrypted user data token to be used in the generated url that
+            redirects the cardholder to the target website to submit a new
+            claim.
+          example: EkRKarafAVJkljljfafkljeiwie
+  responses:
+    UserDataToken:
+      description: The user data token generated from the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubmitClaimUserToken'
+    ClaimStatusRef:
+      description: The status of the claim associated with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClaimStatus'
+    UserBadRequestError:
+      description: |
+        Bad Request
+        Reason Codes:
+        * MISSING_REQ_FIELD_GW - Missing required field(s)
+        * INVALID_FIELD - Invalid field(s)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorItems'
+          examples:
+            UserBadRequestExample:
+              $ref: '#/components/examples/UserBadRequestExample'
+    ClaimsBadRequestError:
+      description: |
+        Bad Request
+        Reason Codes:
+        * MISSING_REQ_FIELD_GW - Missing required field(s)
+        * INVALID_FIELD - Invalid field(s)
+        * CLAIM_NOT_FOUND - Claim not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorItems'
+          examples:
+            ClaimsBadRequestExample:
+              $ref: '#/components/examples/ClaimBadRequestExample'
+            ClaimNotFoundExample:
+              $ref: '#/components/examples/ClaimNotFoundExample'
+    UnauthorizedError:
+      description: Unauthorized - Access Not Granted
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorItems'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+  examples:
+    ClaimBadRequestExample:
+      value:
+        Errors:
+          Error:
+            - Source: Loyalty Service - Insurance
+              ReasonCode: MISSING_REQ_FIELD_GW
+              Description: Missing Required Field(s).
+              Recoverable: false
+              Details: Missing required field(s) - 'claimId'.
+    UserBadRequestExample:
+      value:
+        Errors:
+          Error:
+            - Source: Loyalty Service - Insurance
+              ReasonCode: INVALID_FIELD
+              Description: Invalid Field(s).
+              Recoverable: false
+              Details: Invalid field - 'pan' is not a string.
+    ClaimNotFoundExample:
+      value:
+        Errors:
+          Error:
+            - Source: Loyalty Service - Insurance
+              ReasonCode: CLAIM_NOT_FOUND
+              Description: Claim not found.
+              Recoverable: false
+              Details: Claim not found
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+            - Source: Gateway
+              ReasonCode: DECLINED
+              Description: Unauthorized - Access Not Granted.
+              Recoverable: false
+              Details: null
