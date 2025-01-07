@@ -1,0 +1,3788 @@
+openapi: 3.0.3
+info:
+  title: Merchant Self Services API
+  description: >-
+    These APIs are used by merchants to onboard their sub-merchants onto the
+    Mastercard Consumer Clarity and Alerts product suites. Merchants can also
+    use these APIs to manage logos for their Consumer Clarity sub-merchants.
+  contact:
+    name: API Support
+    email: apisupport@mastercard.com
+    url: https://developer.mastercard.com/support
+  version: 1.6.0
+servers:
+  - url: https://api.ethocaweb.com/ethoca/merchant-self-services
+    description: Production server (uses live data)
+  - url: https://sandbox.api.ethocaweb.com/ethoca/merchant-self-services
+    description: Sandbox server (testing environment)
+tags:
+  - name: Sub-Merchants
+    description: Self serve APIs for Consumer Clarity sub-merchants
+  - name: Locations
+    description: >-
+      Self serve APIs for Consumer Clarity sub-merchants to onboard their
+      locations
+  - name: Card Acceptor Names
+    description: >-
+      Self serve APIs for Consumer Clarity sub-merchants to onboard card
+      acceptor names
+  - name: Acquirer Merchant IDs
+    description: >-
+      Self serve APIs for Consumer Clarity sub-merchants to onboard Acquirer
+      Reference ID (ARID) & Card Acceptor ID (CAID) pairs
+  - name: Merchant Logos
+    description: >-
+      Self serve APIs for Consumer Clarity Direct, Gateway, and Sub-Merchants to
+      onboard their logo
+  - name: Alerts Merchants
+    description: Self serve APIs for Alerts merchants
+  - name: Alerts Sub-Merchants
+    description: Self serve APIs for Alerts sub-merchants
+paths:
+  /merchants/{guid}/logos:
+    parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MerchantGuidParam'
+    put:
+      tags:
+        - Merchant Logos
+      summary: Update a logo for an existing merchant.
+      description: >-
+        Returns status and messages (if any validation failures) related to the
+        logo of a sub-merchant.
+      operationId: updateMerchantLogoByGuid
+      requestBody:
+        $ref: '#/components/requestBodies/MerchantLogoBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/LogoSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+    post:
+      tags:
+        - Merchant Logos
+      summary: Create a logo for an existing merchant.
+      description: >-
+        Returns status and messages (if any validation failures) related to the
+        logo of a sub-merchant.
+      operationId: createMerchantLogo
+      requestBody:
+        $ref: '#/components/requestBodies/MerchantLogoBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/LogoSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+    delete:
+      tags:
+        - Merchant Logos
+      summary: Delete a logo for an existing merchant.
+      description: Returns 204 status code if logo deleted successfully.
+      operationId: deleteLogoByMerchantGuid
+      responses:
+        '204':
+          $ref: '#/components/responses/SuccessWithoutBody'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+    get:
+      tags:
+        - Merchant Logos
+      summary: Get the logo for an existing merchant.
+      description: >-
+        Returns base64 encoded image, status and messages (if any validation
+        failures) related to the logo of a sub-merchant.
+      operationId: getLogoByMerchantGuid
+      responses:
+        '200':
+          $ref: '#/components/responses/LogoSuccessWithImage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+  /sub-merchants:
+    parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+    post:
+      tags:
+        - Sub-Merchants
+      summary: Create a sub-merchant.
+      description: Returns sub-merchant object with status.
+      operationId: createSubMerchant
+      requestBody:
+        $ref: '#/components/requestBodies/SubMerchantBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/SubMerchantSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+  /sub-merchants/{guid}:
+    put:
+      tags:
+        - Sub-Merchants
+      summary: Update a sub-merchant.
+      description: Returns sub-merchant object with status.
+      operationId: updateSubMerchant
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/MerchantGuidParam'
+      requestBody:
+        $ref: '#/components/requestBodies/SubMerchantBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/SubMerchantSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        default:
+          $ref: '#/components/responses/Default'
+    get:
+      tags:
+        - Sub-Merchants
+      summary: Get sub-merchant by guid.
+      description: Returns sub-merchant object with status.
+      operationId: getSubMerchantByGuid
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MerchantGuidParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/SubMerchantSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+  /sub-merchants/{guid}/states:
+    parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MerchantGuidParam'
+    put:
+      tags:
+        - Sub-Merchants
+      summary: Activate/Deactivate a sub-merchant.
+      description: >-
+        Returns 204 if merchant is activated/deactivated successfully. It takes
+        a state attribute with two possible values:
+
+          - INACTIVE
+            - For LIVE and LOCKED_FOR_EDIT merchants, this endpoint changes the merchant to INACTIVE status.
+            - For CONFIGURATION merchants, it physically deletes the merchant, rather than deactivating it.
+
+          - ACTIVE
+            - Reactivates an INACTIVE merchant by placing it in CONFIGURATION status. From there, the flow follows the onboarding process where the merchant is in CONFIGURATION status and its attributes are available for editing.
+      operationId: changeSubMerchantState
+      requestBody:
+        $ref: '#/components/requestBodies/ChangeSubMerchantStateBody'
+      responses:
+        '204':
+          $ref: '#/components/responses/SuccessWithoutBody'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+  /sub-merchants/{guid}/locations:
+    parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MerchantGuidParam'
+    post:
+      tags:
+        - Locations
+      summary: Add a unique set of sub-merchant's locations
+      description: Creates locations under an existing sub-merchant
+      operationId: addLocations
+      requestBody:
+        $ref: '#/components/requestBodies/LocationsBulkRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/LocationsBulkSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        default:
+          $ref: '#/components/responses/Default'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/ClarityOffsetParam'
+        - $ref: '#/components/parameters/ClarityPageNumberParam'
+        - $ref: '#/components/parameters/ClaritySortDirectionParam'
+        - $ref: '#/components/parameters/ClaritySortFieldParam'
+        - $ref: '#/components/parameters/LocationSearchTextQueryParam'
+      summary: Get sub-merchant's locations
+      description: Returns sub-merchant's locations with pagination metadata
+      operationId: getAllLocations
+      tags:
+        - Locations
+      responses:
+        '200':
+          $ref: '#/components/responses/PageableLocationsSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+  /sub-merchants/{guid}/locations/{location_id}:
+    get:
+      summary: Get location by id
+      description: Returns location object
+      operationId: getLocationById
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MerchantGuidParam'
+        - $ref: '#/components/parameters/LocationIdParam'
+      tags:
+        - Locations
+      responses:
+        '200':
+          $ref: '#/components/responses/LocationSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+    put:
+      summary: Update an existing location
+      description: Updates a location object
+      operationId: updateLocation
+      tags:
+        - Locations
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MerchantGuidParam'
+        - $ref: '#/components/parameters/LocationIdParam'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        $ref: '#/components/requestBodies/LocationBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/LocationSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+    delete:
+      summary: Delete an existing location
+      description: Returns 204 status code if Location deleted successfully
+      operationId: deleteLocation
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MerchantGuidParam'
+        - $ref: '#/components/parameters/LocationIdParam'
+      tags:
+        - Locations
+      responses:
+        '204':
+          $ref: '#/components/responses/SuccessWithoutBody'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+  /alerts/merchants/org-profiles:
+    get:
+      tags:
+        - Alerts Merchants
+      summary: Get details of organization profiles.
+      description: >-
+        Returns organization profile details containing member name, id and
+        type.
+      operationId: getAlertsOrgProfiles
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsOrgProfilesSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+  /alerts/merchants/{member_id}/acquirer-reference-ids:
+    post:
+      tags:
+        - Alerts Merchants
+      summary: Create acquirer reference id config.
+      description: Create an acquirer reference id configuration.
+      operationId: createAlertsAcquirerReferenceIdConfig
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MemberIdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/AlertsAcquirerReferenceIdConfigRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsMerchantIdentifierSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        default:
+          $ref: '#/components/responses/Default'
+    put:
+      tags:
+        - Alerts Merchants
+      summary: Update acquirer reference id config.
+      description: Update an acquirer reference id configuration.
+      operationId: updateAlertsAcquirerReferenceIdConfig
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MemberIdParam'
+        - $ref: '#/components/parameters/MerchantIdentifierConfigIdParam'
+      requestBody:
+        $ref: >-
+          #/components/requestBodies/AlertsAcquirerReferenceIdConfigUpdateRequestBody
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsMerchantIdentifierSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        default:
+          $ref: '#/components/responses/Default'
+    get:
+      tags:
+        - Alerts Merchants
+      summary: Get acquirer reference id configs.
+      description: >-
+        Get the acquirer reference id configs filtered by acquirer reference id
+        and card scheme.
+      operationId: getAlertsAcquirerReferenceIdConfigs
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MemberIdParam'
+        - $ref: '#/components/parameters/AcquirerReferenceIdParam'
+        - $ref: '#/components/parameters/CardSchemeParam'
+        - $ref: '#/components/parameters/OffsetParam'
+        - $ref: '#/components/parameters/PageNumberParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsPageableAcquirerReferenceIdConfigs'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+    delete:
+      tags:
+        - Alerts Merchants
+      summary: Delete acquirer reference id config.
+      description: Delete an acquirer reference id configuration.
+      operationId: deleteAlertsAcquirerReferenceIdConfig
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MemberIdParam'
+        - $ref: '#/components/parameters/MerchantIdentifierConfigIdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessWithoutBody'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+  /alerts/merchants/{member_id}/sub-merchants:
+    parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MemberIdParam'
+    post:
+      tags:
+        - Alerts Sub-Merchants
+      summary: Create a sub-merchant.
+      description: Returns created sub-merchant details.
+      operationId: createAlertsSubMerchant
+      requestBody:
+        $ref: '#/components/requestBodies/AlertsSubMerchantCreateRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsSubMerchantSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        default:
+          $ref: '#/components/responses/Default'
+    get:
+      tags:
+        - Alerts Sub-Merchants
+      summary: Get a list of sub-merchants.
+      description: Returns sub-merchants matching multiple criteria.
+      operationId: getAlertsSubMerchants
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MemberIdParam'
+        - $ref: '#/components/parameters/MerchantNameParam'
+        - $ref: '#/components/parameters/MerchantStatusParam'
+        - $ref: '#/components/parameters/OffsetParam'
+        - $ref: '#/components/parameters/PageNumberParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsPageableSubMerchants'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+  /alerts/merchants/{member_id}/sub-merchants/{sub_merchant_id}:
+    put:
+      tags:
+        - Alerts Sub-Merchants
+      summary: Update a sub-merchant.
+      description: Returns updated sub-merchant details.
+      operationId: updateAlertsSubMerchantDetails
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MemberIdParam'
+        - $ref: '#/components/parameters/SubMerchantIdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/AlertsSubMerchantDetailsUpdateRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsSubMerchantSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        default:
+          $ref: '#/components/responses/Default'
+    get:
+      tags:
+        - Alerts Sub-Merchants
+      summary: Get a sub-merchant.
+      description: Returns sub-merchant details with matching ID.
+      operationId: getAlertsSubMerchantByGuid
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MemberIdParam'
+        - $ref: '#/components/parameters/SubMerchantIdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsSubMerchantSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+  /alerts/merchants/{member_id}/sub-merchants/{sub_merchant_id}/status-changes:
+    put:
+      tags:
+        - Alerts Sub-Merchants
+      summary: Change sub-merchant status.
+      description: Returns sub-merchant details with updated status.
+      operationId: updateAlertsSubMerchantStatus
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MemberIdParam'
+        - $ref: '#/components/parameters/SubMerchantIdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/AlertsSubMerchantStatusUpdateRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsSubMerchantSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        default:
+          $ref: '#/components/responses/Default'
+  /alerts/merchants/{member_id}/sub-merchants/{sub_merchant_id}/card-acceptor-ids:
+    post:
+      tags:
+        - Alerts Sub-Merchants
+      summary: Create sub-merchant card acceptor id config.
+      description: Returns created sub-merchant card acceptor id config details.
+      operationId: createAlertsCardAcceptorIdConfig
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MemberIdParam'
+        - $ref: '#/components/parameters/SubMerchantIdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/AlertsCardAcceptorIdConfigRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsMerchantIdentifierSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        default:
+          $ref: '#/components/responses/Default'
+    get:
+      tags:
+        - Alerts Sub-Merchants
+      summary: Get sub-merchant card acceptor id configs.
+      description: Returns sub-merchant card acceptor id config details.
+      operationId: getAlertsCardAcceptorIdConfigs
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MemberIdParam'
+        - $ref: '#/components/parameters/SubMerchantIdParam'
+        - $ref: '#/components/parameters/AcquirerReferenceIdParam'
+        - $ref: '#/components/parameters/CardAcceptorIdParam'
+        - $ref: '#/components/parameters/OffsetParam'
+        - $ref: '#/components/parameters/PageNumberParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsCardAcceptorIdConfigs'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+    delete:
+      tags:
+        - Alerts Sub-Merchants
+      summary: Delete sub-merchant card acceptor id config.
+      description: Returns 200 if sub-merchant card acceptor id configs gets deleted.
+      operationId: deleteAlertsCardAcceptorIdConfig
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MemberIdParam'
+        - $ref: '#/components/parameters/SubMerchantIdParam'
+        - $ref: '#/components/parameters/MerchantIdentifierConfigIdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessWithoutBody'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+  /alerts/merchants/{member_id}/sub-merchants/{sub_merchant_id}/card-acceptor-names:
+    post:
+      tags:
+        - Alerts Sub-Merchants
+      summary: Create sub-merchant card acceptor name config.
+      description: Returns created sub-merchant card acceptor name config details.
+      operationId: createAlertsCardAcceptorNameConfig
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MemberIdParam'
+        - $ref: '#/components/parameters/SubMerchantIdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/AlertsCardAcceptorNameConfigRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsMerchantIdentifierSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        default:
+          $ref: '#/components/responses/Default'
+    get:
+      tags:
+        - Alerts Sub-Merchants
+      summary: Get sub-merchant card acceptor name configs.
+      description: Returns sub-merchant card acceptor name config details.
+      operationId: getAlertsCardAcceptorNameConfigs
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MemberIdParam'
+        - $ref: '#/components/parameters/SubMerchantIdParam'
+        - $ref: '#/components/parameters/CardAcceptorNameParam'
+        - $ref: '#/components/parameters/OffsetParam'
+        - $ref: '#/components/parameters/PageNumberParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsCardAcceptorNameConfigs'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+    delete:
+      tags:
+        - Alerts Sub-Merchants
+      summary: Delete sub-merchant card acceptor name config.
+      description: Returns 200 if sub-merchant card acceptor name configs gets deleted.
+      operationId: deleteAlertsCardAcceptorNameConfig
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MemberIdParam'
+        - $ref: '#/components/parameters/SubMerchantIdParam'
+        - $ref: '#/components/parameters/MerchantIdentifierConfigIdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessWithoutBody'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+  /sub-merchants/{guid}/locations/{location_id}/card-acceptor-names:
+    parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MerchantGuidParam'
+      - $ref: '#/components/parameters/LocationIdParam'
+    post:
+      summary: Add Card Acceptor Names
+      description: Creates card acceptor names under a location of an existing sub-merchant
+      operationId: addCardAcceptorNames
+      tags:
+        - Card Acceptor Names
+      requestBody:
+        $ref: '#/components/requestBodies/CardAcceptorNamesBulkRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/CardAcceptorNamesBulkSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        default:
+          $ref: '#/components/responses/Default'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/ClarityOffsetParam'
+        - $ref: '#/components/parameters/ClarityPageNumberParam'
+        - $ref: '#/components/parameters/ClaritySortDirectionParam'
+        - $ref: '#/components/parameters/ClaritySortFieldParam'
+        - $ref: '#/components/parameters/CardAcceptorNameSearchTextParam'
+      summary: Get Card Acceptor Names
+      description: Returns Card Acceptor Names with pagination metadata
+      operationId: getCardAcceptorNames
+      tags:
+        - Card Acceptor Names
+      responses:
+        '200':
+          $ref: '#/components/responses/PageableCardAcceptorNamesSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+  /sub-merchants/{guid}/locations/{location_id}/card-acceptor-names/{id}:
+    get:
+      summary: Get card acceptor name by id
+      description: Returns card acceptor name object
+      operationId: getCardAcceptorNameById
+      tags:
+        - Card Acceptor Names
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MerchantGuidParam'
+        - $ref: '#/components/parameters/LocationIdParam'
+        - $ref: '#/components/parameters/CardAcceptorNameIdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/CardAcceptorSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+    put:
+      summary: Update card acceptor name by id
+      description: Updates card acceptor name object
+      operationId: updateCardAcceptorNameById
+      tags:
+        - Card Acceptor Names
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MerchantGuidParam'
+        - $ref: '#/components/parameters/LocationIdParam'
+        - $ref: '#/components/parameters/CardAcceptorNameIdParam'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        $ref: '#/components/requestBodies/CardAcceptorNamesBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/CardAcceptorSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+    delete:
+      summary: Delete existing Card Acceptor Name
+      description: Returns 204 status code if Card Acceptor Name deleted successfully
+      operationId: deleteCardAcceptorById
+      tags:
+        - Card Acceptor Names
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - $ref: '#/components/parameters/SubmitterFirstNameParam'
+        - $ref: '#/components/parameters/SubmitterLastNameParam'
+        - $ref: '#/components/parameters/MerchantGuidParam'
+        - $ref: '#/components/parameters/LocationIdParam'
+        - $ref: '#/components/parameters/CardAcceptorNameIdParam'
+      responses:
+        '204':
+          $ref: '#/components/responses/SuccessWithoutBody'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+  /sub-merchants/{guid}/locations/{location_id}/acquirer-merchant-ids:
+    parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MerchantGuidParam'
+      - $ref: '#/components/parameters/LocationIdParam'
+    post:
+      summary: Add Acquirer Reference ID and Card Acceptor ID pairs
+      description: >-
+        Returns added pairs of Acquirer Reference ID and Card Acceptor ID. Non
+        unique pairs are placed in the rejected list.
+      operationId: addAcquirerMerchantIds
+      tags:
+        - Acquirer Merchant IDs
+      requestBody:
+        $ref: '#/components/requestBodies/AcquirerMerchantIdsRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/AcquirerMerchantIdsSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        default:
+          $ref: '#/components/responses/Default'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/ClarityOffsetParam'
+        - $ref: '#/components/parameters/ClarityPageNumberParam'
+        - $ref: '#/components/parameters/ClaritySortDirectionParam'
+        - $ref: '#/components/parameters/AcquirerMerchantIdsSortFieldParam'
+        - $ref: '#/components/parameters/AcquirerMerchantIdsSearchTextParam'
+      summary: Get accepted Acquirer Reference ID and Card Acceptor ID pairs
+      description: >-
+        Returns accepted Acquirer Reference ID and CardAcceptor ID pairs with
+        pagination metadata
+      operationId: getAcceptedAcquirerMerchantIds
+      tags:
+        - Acquirer Merchant IDs
+      responses:
+        '200':
+          $ref: '#/components/responses/PageableAcceptedAcquirerMerchantIdsSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+  /sub-merchants/{guid}/locations/{location_id}/acquirer-merchant-ids/{acquirer_merchant_id}:
+    parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MerchantGuidParam'
+      - $ref: '#/components/parameters/LocationIdParam'
+      - $ref: '#/components/parameters/AcquirerMerchantIdParam'
+    delete:
+      summary: Delete existing Acquirer Reference ID and Card Acceptor ID pair
+      description: >-
+        Returns 204 status code if acquirer reference ID and card acceptor ID
+        pair deleted successfully
+      operationId: deleteAcceptedAcquirerMerchantId
+      tags:
+        - Acquirer Merchant IDs
+      responses:
+        '204':
+          $ref: '#/components/responses/SuccessWithoutBody'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+components:
+  parameters:
+    LocationIdParam:
+      name: location_id
+      in: path
+      required: true
+      example: Mxyz123
+      description: Unique identifier of location
+      schema:
+        $ref: '#/components/schemas/ResourceId'
+    AcquirerMerchantIdParam:
+      name: acquirer_merchant_id
+      in: path
+      required: true
+      example: Mxyz123
+      description: Unique identifier of Acquirer Reference Id and Card Acceptor Id Pair
+      schema:
+        $ref: '#/components/schemas/ResourceId'
+    SubmitterFirstNameParam:
+      name: Submitter-First-Name
+      in: header
+      required: true
+      example: Diana
+      description: The first name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/FirstName'
+    SubmitterLastNameParam:
+      name: Submitter-Last-Name
+      in: header
+      required: true
+      example: Princess
+      description: The last name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/LastName'
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      example: '"842DFBC17F921E7716642B9164F3B22B"'
+      description: >-
+        If-Match is a request header which makes the request conditional. Client
+        must send the corresponding value from the latest Etag response header
+        received for this merchant.
+      schema:
+        $ref: '#/components/schemas/Etag'
+    MerchantGuidParam:
+      name: guid
+      in: path
+      required: true
+      description: Consumer Clarity internal merchant's GUID
+      example: jK2dA5aybhQQBq6C
+      schema:
+        $ref: '#/components/schemas/MerchantGuid'
+    UserIdParam:
+      name: User-Id
+      in: header
+      required: true
+      example: princess.diana
+      description: The user id of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/UserId'
+    MemberIdParam:
+      name: member_id
+      in: path
+      required: true
+      description: Merchant member ID (parent of the sub-merchant)
+      example: 99ca4b15-72a6-41dd-8127-573d4b07669c
+      schema:
+        $ref: '#/components/schemas/AlertsMerchantMemberId'
+    SubMerchantIdParam:
+      name: sub_merchant_id
+      in: path
+      required: true
+      description: Sub-merchant member ID
+      example: cc2cac41-d127-4c06-9646-c0f2ad76c444
+      schema:
+        $ref: '#/components/schemas/AlertsMerchantMemberId'
+    MerchantNameParam:
+      name: name
+      in: query
+      required: true
+      description: The name of the merchant
+      example: Merchant 1
+      schema:
+        $ref: '#/components/schemas/MerchantName'
+    MerchantStatusParam:
+      name: status
+      in: query
+      required: false
+      description: The status of the merchant
+      example: ACTIVATED
+      schema:
+        $ref: '#/components/schemas/MerchantStatus'
+    OffsetParam:
+      name: offset
+      in: query
+      required: false
+      description: Number of items per page
+      schema:
+        type: integer
+        default: 25
+        maximum: 25
+      example: 25
+    PageNumberParam:
+      name: page_number
+      in: query
+      required: false
+      description: Current page number
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+      example: 1
+    ClarityOffsetParam:
+      name: offset
+      in: query
+      required: false
+      description: The number of items to skip before starting to collect the result set
+      schema:
+        type: integer
+        default: 50
+        minimum: 0
+        example: 0
+    ClarityPageNumberParam:
+      name: page_number
+      in: query
+      required: false
+      description: current page number
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+      example: 2
+    ClaritySortDirectionParam:
+      name: sort_direction
+      in: query
+      required: false
+      description: Direction to sort the data using sort_field in response
+      schema:
+        type: string
+        default: DESC
+        enum:
+          - ASC
+          - DESC
+        example: ASC
+    ClaritySortFieldParam:
+      name: sort_field
+      in: query
+      required: false
+      description: Field to Sort data in response
+      schema:
+        type: string
+        default: modifiedDateTime
+        maxLength: 100
+      example: modifiedDateTime
+    CardAcceptorNameSearchTextParam:
+      name: search_text
+      in: query
+      required: false
+      description: |
+        Input field used as wild search against Card Acceptor. 
+        The service searches for substring, following the %search_text% pattern.
+      schema:
+        type: string
+        maxLength: 100
+      example: Test
+    CardAcceptorNameIdParam:
+      name: id
+      in: path
+      required: true
+      example: Mxyz123
+      description: Unique identifier of the card acceptor name.
+      schema:
+        $ref: '#/components/schemas/ResourceId'
+    LocationSearchTextQueryParam:
+      name: search_text
+      in: query
+      required: false
+      description: >-
+        Input field used as wild search in region/city/country like regex
+        %search_text%
+      schema:
+        type: string
+        maxLength: 100
+      example: Toronto
+    AcquirerMerchantIdsSortFieldParam:
+      name: sort_field
+      in: query
+      required: false
+      description: Field to Sort data in response
+      schema:
+        type: string
+        default: acquirerReferenceId
+        maxLength: 30
+      example: acquirerReferenceId
+    AcquirerMerchantIdsSearchTextParam:
+      name: search_text
+      in: query
+      required: false
+      description: >
+        Input field used as wild search against Acquirer Reference ID and Card
+        Acceptor
+
+        ID. The service searches for substring, following the %search_text%
+        pattern.
+      schema:
+        type: string
+        maxLength: 30
+      example: Test
+    MerchantIdentifierConfigIdParam:
+      name: merchant_identifier_config_id
+      in: query
+      required: true
+      description: >-
+        The Configuration ID for acquirer reference ID or card acceptor ID or
+        card acceptor name configurations.
+      schema:
+        $ref: '#/components/schemas/AlertsMerchantConfigId'
+      example: 88ca4b15-72a6-41dd-8127-573d4b07875c
+    AcquirerReferenceIdParam:
+      name: acquirer_reference_id
+      in: query
+      required: false
+      description: BIN that a partner currently services under their portfolio.
+      schema:
+        $ref: '#/components/schemas/AcquirerReferenceId'
+      example: '123456'
+    CardSchemeParam:
+      name: card_scheme
+      description: >-
+        Name of card scheme may be one of - MASTERCARD, VISA or any other
+        supported schemes
+      in: query
+      schema:
+        $ref: '#/components/schemas/CardScheme'
+      example: MASTERCARD
+    CardAcceptorIdParam:
+      name: card_acceptor_id
+      in: query
+      required: false
+      description: >-
+        Identifies the card acceptor ID assigned by the acquirer. This ID must
+        represent a unique identifier for each merchant name/location within the
+        acquirer BIN.
+      schema:
+        $ref: '#/components/schemas/CardAcceptorId'
+      example: card_acceptor1
+    CardAcceptorNameParam:
+      name: card_acceptor_name
+      in: query
+      required: false
+      description: >-
+        A sub-element of the merchant descriptor that contains the merchant's
+        name or doing business as name as it appears on the cardholder's billing
+        statement.
+      schema:
+        $ref: '#/components/schemas/CardAcceptorName'
+      example: Acceptor 1
+  requestBodies:
+    MerchantLogoBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MerchantLogo'
+    SubMerchantBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubMerchant'
+    ChangeSubMerchantStateBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubMerchantState'
+          examples:
+            inactivation:
+              value:
+                state: INACTIVE
+                inactivationReason: My business is closing
+            activation:
+              value:
+                state: ACTIVE
+    AlertsAcquirerReferenceIdConfigRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsAcquirerReferenceIdConfig'
+          examples:
+            AlertsAcquirerReferenceIdConfig:
+              $ref: '#/components/examples/AlertsAcquirerReferenceIdConfig'
+    AlertsAcquirerReferenceIdConfigUpdateRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsAcquirerReferenceIdConfigUpdate'
+          examples:
+            AlertsAcquirerReferenceIdConfigUpdate:
+              $ref: '#/components/examples/AlertsAcquirerReferenceIdConfigUpdate'
+    AlertsSubMerchantCreateRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsSubMerchantCreate'
+    AlertsSubMerchantDetailsUpdateRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsSubMerchantDetailsUpdate'
+    AlertsSubMerchantStatusUpdateRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsSubMerchantStatusUpdate'
+          examples:
+            AlertsSubMerchantStatusUpdateRequestBody:
+              $ref: '#/components/examples/AlertsSubMerchantStatusUpdate'
+    AlertsCardAcceptorIdConfigRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsCardAcceptorIdConfig'
+          examples:
+            AlertsCardAcceptorIdConfig:
+              $ref: '#/components/examples/AlertsCardAcceptorIdConfig'
+    AlertsCardAcceptorNameConfigRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsCardAcceptorNameConfig'
+          examples:
+            AlertsCardAcceptorNameConfig:
+              $ref: '#/components/examples/AlertsCardAcceptorNameConfig'
+    AcquirerMerchantIdsRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AcquirerMerchant'
+    CardAcceptorNamesBulkRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CardAcceptorNamesBulk'
+    CardAcceptorNamesBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CardAcceptorData'
+    LocationsBulkRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LocationsBulk'
+    LocationBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LocationWithoutCardAcceptors'
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            InvalidData:
+              $ref: '#/components/examples/InvalidData'
+            AlertsInvalidData:
+              $ref: '#/components/examples/AlertsInvalidData'
+            InvalidParameterSet:
+              $ref: '#/components/examples/InvalidParameterSet'
+            FormatInvalid:
+              $ref: '#/components/examples/FormatInvalid'
+            AlertsFormatInvalid:
+              $ref: '#/components/examples/AlertsFormatInvalid'
+            MissingRequiredHeader:
+              $ref: '#/components/examples/MissingRequiredHeader'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ResourceNotFound:
+              $ref: '#/components/examples/ResourceNotFound'
+            EntityNotFound:
+              $ref: '#/components/examples/EntityNotFound'
+            AlertsEntityNotFound:
+              $ref: '#/components/examples/AlertsEntityNotFound'
+    PreconditionFailed:
+      description: Pre Condition Failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            PreConditionFailed:
+              $ref: '#/components/examples/PreconditionFailed'
+    PreconditionRequired:
+      description: Pre Condition Failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            PreConditionFailed:
+              $ref: '#/components/examples/PreconditionRequired'
+    PermissionDenied:
+      description: Permission Denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            PermissionDenied:
+              $ref: '#/components/examples/PermissionDenied'
+    ForbiddenOperation:
+      description: Forbidden Operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ForbiddenOperation:
+              $ref: '#/components/examples/ForbiddenOperation'
+    ValidationFailed:
+      description: Validation Failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ValidationFailed:
+              $ref: '#/components/examples/ValidationFailed'
+    Default:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ServerError:
+              $ref: '#/components/examples/ServerError'
+    SuccessWithoutBody:
+      description: Successful Operation
+    LogoSuccessWithImage:
+      description: Successful Operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LogoImageResource'
+    LogoSuccess:
+      description: Successful Operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LogoResource'
+    SubMerchantSuccess:
+      description: Successful Operation
+      headers:
+        Etag:
+          required: true
+          schema:
+            $ref: '#/components/schemas/Etag'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubMerchantResource'
+    AlertsOrgProfilesSuccess:
+      description: >-
+        Details of organization profiles for members such as Partners and
+        Acquirers
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsOrgProfile'
+          examples:
+            AlertsOrgProfilePartner:
+              $ref: '#/components/examples/AlertsOrgProfilePartner'
+            AlertsOrgProfileAcquirer:
+              $ref: '#/components/examples/AlertsOrgProfileAcquirer'
+    AlertsSubMerchantSuccess:
+      description: Sub-merchant with all details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsSubMerchantResource'
+          examples:
+            AlertsSubMerchantActivated:
+              $ref: '#/components/examples/AlertsSubMerchantActivated'
+            AlertsSubMerchantDeactivated:
+              $ref: '#/components/examples/AlertsSubMerchantDeactivated'
+    AlertsPageableSubMerchants:
+      description: Pageable list of sub-merchants with all details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsPageableSubMerchantResource'
+          examples:
+            AlertsPageableSubMerchants:
+              $ref: '#/components/examples/AlertsPageableSubMerchants'
+    AlertsMerchantIdentifierSuccess:
+      description: >-
+        Sub-merchant identifiers for either card acceptor id or card acceptor
+        name configuration
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsMerchantIdentifierConfigIdOnly'
+          examples:
+            AlertsMerchantIdentifierConfigIdOnly:
+              $ref: '#/components/examples/AlertsMerchantIdentifierConfigIdOnly'
+    AlertsCardAcceptorIdConfigs:
+      description: Sub-merchant card acceptor id configurations
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsCardAcceptorIdConfigs'
+          examples:
+            AlertsCardAcceptorIdConfigs:
+              $ref: '#/components/examples/AlertsCardAcceptorIdConfigs'
+    AlertsCardAcceptorNameConfigs:
+      description: Sub-merchant card acceptor name configurations
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsCardAcceptorNameConfigs'
+          examples:
+            AlertsCardAcceptorNameConfigs:
+              $ref: '#/components/examples/AlertsCardAcceptorNameConfigs'
+    AlertsPageableAcquirerReferenceIdConfigs:
+      description: Pageable list of acquirer reference id configurations
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsPageableAcquirerReferenceIdConfigs'
+    PageableAcceptedAcquirerMerchantIdsSuccess:
+      description: Pageable accepted acquirer reference ID and card acceptor ID response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PageableAcceptedAcquirerMerchantIdsResource'
+    AcquirerMerchantIdsSuccess:
+      description: Acquirer Reference ID and CardAcceptor ID response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AcquirerMerchantIdsResource'
+    LocationsBulkSuccess:
+      description: Locations response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LocationsBulkResource'
+    LocationSuccess:
+      description: Location response
+      headers:
+        Etag:
+          required: true
+          schema:
+            $ref: '#/components/schemas/Etag'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LocationWithoutCardAcceptorsResource'
+    PageableLocationsSuccess:
+      description: Pageable locations resource with pagination metadata
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PageableLocationsResource'
+    CardAcceptorSuccess:
+      description: Card Acceptor response
+      headers:
+        Etag:
+          required: true
+          schema:
+            $ref: '#/components/schemas/Etag'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CardAcceptorDataResource'
+    CardAcceptorNamesBulkSuccess:
+      description: Card Acceptor Names response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CardAcceptorNamesBulkResource'
+    PageableCardAcceptorNamesSuccess:
+      description: Pageable card acceptor names resource with pagination metadata
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PageableCardAcceptorNamesResource'
+  examples:
+    InvalidData:
+      summary: Invalid Data Error Response For Consumer Clarity
+      description: >-
+        If a field or set of fields fails a validation (eg. NotNull, Length,
+        Pattern etc.), then InvalidData response will be returned to the caller
+        for each invalid field with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+            - Source: service
+              ReasonCode: 'invalid data: merchantType'
+              Description: must not be blank
+              Recoverable: false
+              Details: ''
+    AlertsInvalidData:
+      summary: Invalid Data Field Error Response For Alerts
+      description: >-
+        If a field or set of fields fails a validation (eg. NotNull, Length,
+        Pattern etc.), then InvalidData response will be returned to the caller
+        for each invalid field with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+            - Source: service
+              ReasonCode: 'invalid data: name'
+              Description: size must be between 3 and 200
+              Recoverable: false
+              Details: ''
+    InvalidParameterSet:
+      summary: Invalid Parameter Set Error Response
+      description: >-
+        If request body is malformed or missing, then InvalidParameterSet error
+        response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+            - Source: service
+              ReasonCode: invalid.parameter.set
+              Description: request body is malformed
+              Recoverable: false
+              Details: ''
+    FormatInvalid:
+      summary: Format Invalid Error Response For Consumer Clarity
+      description: >-
+        If a field is not correctly formatted (e.g. a String value is sent in an
+        Integer type field), then FormatInvalid response is returned to the
+        caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+            - Source: service
+              ReasonCode: format.invalid
+              Description: orderHistoryMonths
+              Recoverable: false
+              Details: ''
+    AlertsFormatInvalid:
+      summary: Format Invalid Error Response For Alerts
+      description: >-
+        If a field is not correctly formatted (e.g. a String value is sent in an
+        Integer type field), then FormatInvalid response is returned to the
+        caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+            - Source: service
+              ReasonCode: 'invalid data: merchantCategoryCode'
+              Description: must match \"^[0-9]*$\"
+              Recoverable: false
+              Details: ''
+    MissingRequiredHeader:
+      summary: Missing Required Header Error Response
+      description: >-
+        If a required request header is missing or null, then
+        MissingRequiredHeader error response is returned to the caller with HTTP
+        Status code 400.
+      value:
+        Errors:
+          Error:
+            - Source: service
+              ReasonCode: missing required header
+              Description: Submitter-First-Name
+              Recoverable: false
+              Details: ''
+    EntityNotFound:
+      summary: Entity Not Found Error Response For Consumer Clarity
+      description: >-
+        If a requested entity(e.g. Merchant or Logo) doesn't exist in the
+        system, then EntityNotFound error response is returned to the caller
+        with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+            - Source: service
+              ReasonCode: 'invalid data: GUID'
+              Description: Merchant 1E37M8VSX1D28QYX not found
+              Recoverable: false
+              Details: ''
+    AlertsEntityNotFound:
+      summary: Entity Not Found Error Response For Alerts
+      description: >-
+        If a requested entity(e.g. Sub-Merchant or Card Acceptor ID or Card
+        Acceptor Name) doesn't exist in the system, then EntityNotFound error
+        response is returned to the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+            - Source: service
+              ReasonCode: 'invalid data: subMerchantId'
+              Description: Sub-Merchant 99ca4b15-72a6-41dd-8127-573d4b07669c not found
+              Recoverable: false
+              Details: ''
+    ResourceNotFound:
+      summary: Resource Not Found Error Response
+      description: >-
+        If request URI doesn't match with any available endpoints, then
+        ResourceNotFound error response is returned the caller with HTTP Status
+        code 404.
+      value:
+        Errors:
+          Error:
+            - Source: service
+              ReasonCode: resource.not.found
+              Description: Not Found
+              Recoverable: false
+              Details: /merchant-self-services/sub-merchantTs/
+    PreconditionFailed:
+      summary: Precondition Failed for the request
+      description: >-
+        If the Etag value sent in the If-Match header doesn't match with the
+        hash of the merchant saved in the system, a PreconditionFailed error
+        response is returned to the caller with HTTP Status code 412.
+      value:
+        Errors:
+          Error:
+            - Source: service
+              ReasonCode: 'invalid data: If-Match'
+              Description: >-
+                Merchant has been modified by another user. Please refresh the
+                merchant data and try again
+              Recoverable: false
+              Details: ''
+    PreconditionRequired:
+      summary: Precondition Required for the request
+      description: >-
+        If the request doesn't contain the If-Match header, a
+        PreconditionRequired error response is returned to the caller with HTTP
+        Status code 428.
+      value:
+        Errors:
+          Error:
+            - Source: service
+              ReasonCode: missing required header
+              Description: If-Match,
+              Recoverable: false
+              Details: ''
+    PermissionDenied:
+      summary: Permission Denied Error Response
+      description: >-
+        If the client id in the request doesn't correspond to any member in the
+        system, then PermissionDenied error response is returned to the caller
+        with HTTP Status code 401.
+      value:
+        Errors:
+          Error:
+            - Source: service
+              ReasonCode: permission.denied
+              Description: Member does not have permission to perform any operation
+              Recoverable: false
+              Details: ''
+    ForbiddenOperation:
+      summary: Member does not have permission to add/update/delete a resource
+      description: >-
+        If the merchant tries operate on a resource that is not related to them
+        or if they are not allowed perform a specific operation on their
+        resource, then ForbiddenOperation error response is returned to the
+        caller with HTTP Status code 403.
+      value:
+        Errors:
+          Error:
+            - Source: service
+              ReasonCode: operation.not.allowed
+              Description: >-
+                Member is not allowed to perform a specific operation on a
+                particular resource
+              Recoverable: false
+              Details: ''
+    ValidationFailed:
+      summary: Validation of the request failed
+      description: >-
+        If the fields in the request did not pass the validation, a
+        ValidationFailed error response is returned to the caller with HTTP
+        Status code 422.
+      value:
+        Errors:
+          Error:
+            - Source: service
+              ReasonCode: validation.failed
+              Description: Validation of the request fields failed
+              Recoverable: false
+              Details: ''
+    ServerError:
+      summary: Server Error Response
+      description: >-
+        If an unexpected internal server error occurs, then ServerError response
+        is returned to the caller with HTTP Status code 500.
+      value:
+        Errors:
+          Error:
+            - Source: service
+              ReasonCode: server.error
+              Description: Internal Server Error
+              Recoverable: false
+              Details: ''
+    AlertsOrgProfilePartner:
+      summary: Alerts Organization Profile for Partners
+      value:
+        memberId: 99ca4b15-72a6-41dd-8127-573d4b07669c
+        name: Partner Merchant 1
+        merchantType: PARTNER
+        status: ACTIVATED
+        subOrgProfiles:
+          - memberId: 11ab4b15-72a6-41dd-8127-573d4b07669c
+            name: Acquirer Merchant 1
+            merchantType: ACQUIRER
+            status: ACTIVATED
+          - memberId: 22de5c10-72a6-41dd-8127-573d4b07660c
+            name: Acquirer Merchant 2
+            merchantType: ACQUIRER
+            status: DEACTIVATED
+    AlertsOrgProfileAcquirer:
+      summary: Alerts Organization Profile for Acquirers
+      value:
+        memberId: 11ab4b15-72a6-41dd-8127-573d4b07669c
+        name: Acquirer Merchant 1
+        merchantType: ACQUIRER
+        status: ACTIVATED
+        subOrgProfiles: []
+    AlertsAcquirerReferenceIdConfig:
+      summary: Alerts Acquirer Reference Id Configuration
+      value:
+        cardScheme: MASTERCARD
+        acquirerReferenceId: '123456'
+        binOnlyMatch: true
+    AlertsAcquirerReferenceIdConfigUpdate:
+      summary: Alerts Acquirer Reference Id Configuration for Update
+      value:
+        binOnlyMatch: true
+    AlertsSubMerchantActivated:
+      summary: Alerts Merchant - Activated
+      value:
+        subMerchantId: 99ca4b15-72a6-41dd-8127-573d4b07669c
+        name: Merchant 1
+        merchantType: SUBMERCHANT
+        status: ACTIVATED
+        parentMemberId: 99ca4b15-72a6-41dd-8127-573d4b07669c
+        merchantCategoryCode: '3002'
+        createdBy:
+          timestamp: '2023-04-28T10:30:00.000Z'
+          user: princess.diana
+        modifiedBy:
+          timestamp: '2023-04-28T10:30:00.000Z'
+          user: princess.diana
+        statusUpdateTs: '2023-04-28T10:30:00.000Z'
+    AlertsSubMerchantDeactivated:
+      summary: Alerts Merchant - Deactivated
+      value:
+        subMerchantId: 99ca4b15-72a6-41dd-8127-573d4b07669c
+        name: Merchant 1
+        merchantType: SUBMERCHANT
+        status: DEACTIVATED
+        parentMemberId: 99ca4b15-72a6-41dd-8127-573d4b07669c
+        merchantCategoryCode: '3002'
+        createdBy:
+          timestamp: '2023-04-28T10:30:00.000Z'
+          user: princess.diana
+        modifiedBy:
+          timestamp: '2023-04-30T10:30:00.000Z'
+          user: princess.diana
+        statusUpdateTs: '2023-04-30T10:30:00.000Z'
+    AlertsPageableSubMerchants:
+      summary: Pageable list of Sub-Merchants
+      value:
+        responseHeader:
+          totalRecords: 500
+          totalPages: 10
+          currentPage: 2
+          responseTime: 300 ms
+        subMerchants:
+          - subMerchantId: 99ca4b15-72a6-41dd-8127-573d4b07669c
+            name: Merchant 1
+            merchantType: SUBMERCHANT
+            status: ACTIVATED
+            parentMemberId: 99ca4b15-72a6-41dd-8127-573d4b07669c
+            merchantCategoryCode: '3002'
+            createdBy:
+              timestamp: '2023-04-28T10:30:00.000Z'
+              user: John Doe
+            modifiedBy:
+              timestamp: '2023-04-28T10:30:00.000Z'
+              user: John Doe
+            statusUpdateTs: '2023-04-28T10:30:00.000Z'
+          - subMerchantId: 22ca4b15-72a6-41dd-8127-573d4b07662c
+            name: Merchant 2
+            merchantType: SUBMERCHANT
+            status: ACTIVATED
+            parentMemberId: 99ca4b15-72a6-41dd-8127-573d4b07669c
+            merchantCategoryCode: '3003'
+            createdBy:
+              timestamp: '2023-02-02T10:30:00.000Z'
+              user: John Doe
+            modifiedBy:
+              timestamp: '2023-02-02T10:30:00.000Z'
+              user: John Doe
+            statusUpdateTs: '2023-02-02T10:30:00.000Z'
+    AlertsMerchantIdentifierConfigIdOnly:
+      summary: Alerts Merchant Identifier Configuration ID
+      value:
+        merchantIdentifierConfigId: 88ca4b15-72a6-41dd-8127-573d4b07875c
+    AlertsSubMerchantStatusUpdate:
+      summary: Alert Merchant Status Update
+      value:
+        status: DEACTIVATED
+    AlertsCardAcceptorIdConfig:
+      summary: Alerts Card Acceptor ID Configuration
+      value:
+        acquirerReferenceId: '123456'
+        cardAcceptorId: card_acceptorA
+    AlertsCardAcceptorIdConfigs:
+      summary: Alerts Card Acceptor ID Configurations
+      value:
+        responseHeader:
+          totalRecords: 500
+          totalPages: 10
+          currentPage: 2
+          responseTime: 300 ms
+        configs:
+          - merchantIdentifierConfigId: 11ca4b15-72a6-41dd-8127-573d4b07511c
+            acquirerReferenceId: '123456'
+            cardAcceptorId: card_acceptorA
+          - merchantIdentifierConfigId: 22ca4b15-72a6-41dd-8127-573d4b07522c
+            acquirerReferenceId: '876543'
+            cardAcceptorId: card_acceptorB
+    AlertsCardAcceptorNameConfig:
+      summary: Alerts Card Acceptor Name Configuration
+      value:
+        cardAcceptorName: card_acceptor1
+        cardAcceptorCity: Toronto
+        cardAcceptorRegion: '019'
+        cardAcceptorCountry: CAN
+    AlertsCardAcceptorNameConfigs:
+      summary: Alerts Card Acceptor Name Configurations
+      value:
+        responseHeader:
+          totalRecords: 500
+          totalPages: 10
+          currentPage: 2
+          responseTime: 300 ms
+        configs:
+          - merchantIdentifierConfigId: 33ca4b15-72a6-41dd-8127-573d4b07533c
+            cardAcceptorName: card_acceptor1
+            cardAcceptorCity: Toronto
+            cardAcceptorRegion: '019'
+            cardAcceptorCountry: CAN
+          - merchantIdentifierConfigId: 44ca4b15-72a6-41dd-8127-573d4b07544c
+            cardAcceptorName: card_acceptor2
+            cardAcceptorCity: Ottawa
+            cardAcceptorRegion: '019'
+            cardAcceptorCountry: CAN
+  schemas:
+    Error:
+      type: object
+      properties:
+        Source:
+          maxLength: 100
+          minLength: 0
+          type: string
+          description: Source of the error
+          example: Service
+          nullable: true
+        ReasonCode:
+          maxLength: 100
+          minLength: 0
+          type: string
+          description: A unique constant identifying the error
+          example: format.invalid
+          nullable: true
+        Description:
+          maxLength: 1000
+          minLength: 0
+          type: string
+          description: Short description of the error
+          example: Short description of the error
+          nullable: true
+        Recoverable:
+          type: boolean
+          description: >-
+            Indicates whether this error will always be returned for this
+            request, or retrying could change the outcome
+          example: false
+          default: false
+          nullable: true
+        Details:
+          maxLength: 1000
+          minLength: 0
+          type: string
+          description: Optional detailed description of the issue
+          example: Detailed description of the error
+          nullable: true
+      description: Error object
+    ErrorResponse:
+      required:
+        - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+      description: Error Response object
+    Errors:
+      required:
+        - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: List of error objects
+          items:
+            $ref: '#/components/schemas/Error'
+      description: Errors object
+    MerchantLogo:
+      required:
+        - imageBase64Encoded
+      type: object
+      properties:
+        imageBase64Encoded:
+          $ref: '#/components/schemas/ImageBase64Encoded'
+      description: logo request schema for merchants
+    LogoResource:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          title: Status
+          maxLength: 100
+          minLength: 1
+          type: string
+          description: Status of the logo
+          example: ACTIVE
+        messages:
+          title: Messages
+          type: array
+          description: List of validation messages for a logo.
+          nullable: true
+          items:
+            maxLength: 200
+            minLength: 1
+            type: string
+            example: Logo under review
+      description: Schema for a sub-merchant logo status
+    LogoImageResource:
+      allOf:
+        - $ref: '#/components/schemas/LogoResource'
+        - type: object
+          properties:
+            imageBase64Encoded:
+              $ref: '#/components/schemas/ImageBase64Encoded'
+      description: Schema for a sub-merchant logo including image binary
+    SearchField:
+      type: object
+      required:
+        - searchFieldCards
+      properties:
+        searchParameter:
+          title: Merchant API Search parameter
+          type: string
+          description: Merchant api search parameter
+          example: ACQUIRER_REFERENCE_NUMBER
+          nullable: true
+          enum:
+            - PAYMENT_TYPE
+            - TRANSACTION_IDENTIFIER_VALUE
+            - ACQUIRER_REFERENCE_NUMBER
+            - TRANSACTION_DATE
+            - CARD_FIRST_SIX
+            - CARD_LAST_FOUR
+            - ISSUER_AUTHORIZATION_CODE
+            - TRANSACTION_AMOUNT
+            - TRANSACTION_CURRENCY_CODE
+        required:
+          title: Required
+          type: boolean
+          description: If the search field is required
+          example: true
+          nullable: true
+        searchFieldCards:
+          $ref: '#/components/schemas/CardTypes'
+      description: Schema for a Search Field
+    Locale:
+      required:
+        - merchantDescription
+        - code
+        - defaultLocale
+      type: object
+      properties:
+        code:
+          title: Code
+          type: string
+          description: >-
+            The locale where the merchant anticipates their business to be
+            located; often referred to as the Accept-Language in HTTP headers.
+          example: EN_CA
+          enum:
+            - EN_US
+            - EN_CA
+            - EN_GB
+            - ES_MX
+            - ES_ES
+            - ES_US
+            - FR_CA
+            - FR_FR
+            - PT_BR
+            - PT_PT
+            - HE_IL
+        merchantDescription:
+          title: Merchant Description
+          maxLength: 4000
+          minLength: 1
+          type: string
+          description: >-
+            Description of the primary merchant tied to the transaction and
+            responsible for providing the products or services (description of
+            the business, what they do, markets, etc.). Used to help cardholder
+            understand business responsible for the charge.
+          example: An airline that no longer exists.
+        defaultLocale:
+          title: Default Locale
+          type: boolean
+          description: >-
+            This indicates whether or not this locale will be used as the
+            default locale for displaying information to the customer.
+          example: true
+      description: Merchant Locale details
+    Location:
+      type: object
+      required:
+        - countryCode
+        - defaultLocation
+      allOf:
+        - $ref: '#/components/schemas/LocationWithoutCardAcceptors'
+        - properties:
+            cardAcceptorNames:
+              $ref: '#/components/schemas/CardAcceptors'
+    LocationWithoutCardAcceptors:
+      type: object
+      required:
+        - countryCode
+      allOf:
+        - $ref: '#/components/schemas/Address'
+        - properties:
+            website:
+              title: Website
+              maxLength: 100
+              minLength: 1
+              type: string
+              description: URL for merchant's customer service focused information.
+              example: https://merchantwebsite.example.com/customerservice.html
+              nullable: true
+            email:
+              $ref: '#/components/schemas/ShortEmail'
+            contactWebsite:
+              title: Contact Website
+              maxLength: 100
+              minLength: 1
+              type: string
+              description: Merchant's contact website.
+              example: https://merchantwebsite.example.com/contactus.html
+              nullable: true
+            displayAddressToCardHolder:
+              title: Display Address To Card Holder
+              type: boolean
+              description: Set true to display this location's address to card holder
+              example: true
+              nullable: true
+            displayPhoneToCardHolder:
+              title: Display Phone To Card Holder
+              type: boolean
+              description: Set true to display this location's phone number to card holder
+              example: true
+              nullable: true
+            refundPolicy:
+              title: Refund Policy
+              maxLength: 1500
+              minLength: 1
+              type: string
+              description: Entire merchant refund policy, formatted for text display
+              example: Complete merchant refund policy
+              nullable: true
+            terms:
+              title: Terms and Conditions
+              maxLength: 2000
+              minLength: 1
+              type: string
+              description: Entire merchant Terms & Conditions, formatted for text display
+              example: Entire merchant Terms & Conditions
+              nullable: true
+            customerServiceInstructions:
+              title: Customer Service Information
+              maxLength: 500
+              minLength: 1
+              type: string
+              description: >-
+                Free form text displayed to issuer that can be sent to the
+                cardholder. Can be specific to transaction.
+              example: Include Transaction ID in all communications.
+              nullable: true
+            additionalInfo:
+              title: Additional Info
+              maxLength: 1500
+              minLength: 1
+              type: string
+              description: >-
+                Additional information that a merchant would want a customer or
+                Issuer to know in regards to a transaction.
+              example: Customers can contact merchants for a refund 24 hours a day.
+              nullable: true
+            termsWebsite:
+              title: Merchant Terms Website
+              maxLength: 255
+              minLength: 1
+              type: string
+              description: Merchant terms website URL
+              example: https://merchantwebsite.example.com/terms.html
+              nullable: true
+            refundPolicyWebsite:
+              title: Merchant Refund Policy Website
+              maxLength: 255
+              minLength: 1
+              type: string
+              description: Merchant refund policy website URL
+              example: https://merchantwebsite.example.com/refunds.html
+              nullable: true
+            defaultLocation:
+              title: Default Location
+              type: boolean
+              description: true if this is a default location of a merchant
+              example: true
+            cardAcceptorLocation:
+              title: Card Acceptor Location
+              maxLength: 150
+              minLength: 1
+              type: string
+              description: Card Acceptor Location
+              example: Pan American Airlines Canada
+              nullable: true
+            cardAcceptorLocationType:
+              title: Card Acceptor Location Type
+              type: string
+              description: Types of card acceptor location - ONLINE, PHONE, CARD_PRESENT
+              example: CARD_PRESENT
+              nullable: true
+              enum:
+                - ONLINE
+                - PHONE
+                - CARD_PRESENT
+          description: Merchant location details
+    SubMerchant:
+      description: Schema for a sub-merchant
+      allOf:
+        - $ref: '#/components/schemas/Merchant'
+        - type: object
+          required:
+            - subMerchantIdentifier
+          properties:
+            subMerchantIdentifier:
+              $ref: '#/components/schemas/SubMerchantIdentifier'
+            searchFields:
+              $ref: '#/components/schemas/SearchFields'
+    SubMerchantResource:
+      description: Sub-Merchant Response
+      allOf:
+        - $ref: '#/components/schemas/MerchantResource'
+        - type: object
+          properties:
+            subMerchantIdentifier:
+              $ref: '#/components/schemas/SubMerchantIdentifier'
+            searchFields:
+              $ref: '#/components/schemas/SearchFieldsResource'
+            locationCount:
+              $ref: '#/components/schemas/LocationCount'
+    CardTypes:
+      title: Card Types
+      type: array
+      minItems: 1
+      maxItems: 4
+      uniqueItems: true
+      description: A list of all of the card types that are accepted as a form of payment.
+      items:
+        type: string
+        description: Type of card used for a transaction
+        example: AMEX
+        enum:
+          - AMEX
+          - DISCOVER
+          - MC
+          - VISA
+    SearchFieldResource:
+      type: object
+      properties:
+        searchParameter:
+          title: Search Parameter
+          type: string
+          maxLength: 28
+          minLength: 12
+          description: Merchant api search parameter
+          example: cardAcceptorName
+          nullable: true
+        required:
+          title: Required
+          type: boolean
+          description: Set true if this search parameter is mandatory
+          example: true
+          nullable: true
+        searchFieldCards:
+          $ref: '#/components/schemas/CardTypesResource'
+      description: Merchant Api Search Field
+    CardTypesResource:
+      title: Card Types Response
+      type: array
+      uniqueItems: true
+      description: A list of all of the card types that are accepted as a form of payment.
+      items:
+        type: string
+        description: Type of card used for a transaction
+        example: AMEX
+    LocationResource:
+      deprecated: true
+      allOf:
+        - $ref: '#/components/schemas/Location'
+        - type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/ResourceId'
+            rejectedCardAcceptorNames:
+              $ref: '#/components/schemas/CardAcceptors'
+            cardAcceptorLocationType:
+              title: Card Acceptor Location Type
+              type: string
+              description: Types of card acceptor location - ONLINE, PHONE, CARD_PRESENT
+              example: ONLINE
+              nullable: true
+    Merchant:
+      description: Base merchant request schema
+      required:
+        - merchantType
+        - locales
+        - businessType
+      allOf:
+        - $ref: '#/components/schemas/BaseMerchant'
+        - type: object
+          properties:
+            merchantType:
+              title: Merchant Type
+              type: string
+              description: |-
+                Type of a merchant. Allowed Values -
+                + SUB_MERCHANT -
+                + DIRECT -
+                + GATEWAY - 
+              example: SUB_MERCHANT
+              enum:
+                - SUB_MERCHANT
+                - DIRECT
+                - GATEWAY
+            locales:
+              title: Merchant Locales
+              minItems: 1
+              maxItems: 10
+              uniqueItems: true
+              type: array
+              description: Merchant Locales
+              items:
+                $ref: '#/components/schemas/Locale'
+            locations:
+              title: Merchant Locations
+              minItems: 0
+              maxItems: 50
+              uniqueItems: true
+              type: array
+              description: Merchant Locations
+              deprecated: true
+              nullable: true
+              items:
+                $ref: '#/components/schemas/Location'
+            contentTypes:
+              title: Content Types
+              uniqueItems: true
+              type: array
+              description: An indicator as to the type of products and services you offer.
+              nullable: true
+              example:
+                - ADULT_LANGUAGE
+              items:
+                type: string
+                enum:
+                  - ADULT_LANGUAGE
+                  - ADULT_PRODUCTS
+                  - ADULT_SERVICES
+                  - GAMBLING
+                  - ONLINE_DATING
+                  - OTHER
+            crm:
+              $ref: '#/components/schemas/Crm'
+            businessType:
+              title: Merchant Business Type
+              type: string
+              description: >-
+                Business type describes the legal structure under which the
+                business operates
+              example: BUSINESS_CORPORATION
+              enum:
+                - SOLE_PROPRIETORSHIP
+                - BUSINESS_CORPORATION
+                - OTHER
+            firstPartyTrustEnrollments:
+              title: First Party Trust Enrollments
+              description: A list of First Party Trust Enrollments
+              type: array
+              minLength: 0
+              maxLength: 2
+              uniqueItems: true
+              nullable: true
+              items:
+                $ref: '#/components/schemas/FirstPartyTrustEnrollment'
+    LocaleResource:
+      allOf:
+        - $ref: '#/components/schemas/Locale'
+        - type: object
+          properties:
+            code:
+              title: Code
+              type: string
+              description: >-
+                The locale where the merchant anticipates their business to be
+                located; often referred to as the Accept-Language in HTTP
+                headers.
+              example: EN_CA
+    BaseMerchant:
+      type: object
+      description: Base merchant model schema
+      required:
+        - name
+        - industryCode
+        - primaryContact
+        - legalAddress
+      properties:
+        name:
+          title: Name
+          maxLength: 60
+          minLength: 1
+          type: string
+          description: Name of the merchant that the item was purchased from.
+          example: Pan American Airlines
+        categoryCode:
+          title: Merchant Category Code
+          maxLength: 4
+          minLength: 4
+          pattern: ^[0-9]*$
+          type: string
+          description: >-
+            A four-digit number listed in ISO 18245 for retail financial
+            services. MCC is used to classify the business by the type of goods
+            or services it provides.
+          example: '3002'
+          nullable: true
+        orderAvailabilityDateTime:
+          title: Order Availability Date
+          type: string
+          description: >-
+            The earliest date an Issuer can search for orders (i.e. the date an
+            Issuer cannot search before). Date-Time must be in [ISO 8601
+            format](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6)
+          example: '2021-10-18T13:56:47.123+00:00'
+          format: date-time
+          nullable: true
+        orderHistoryMonths:
+          title: Order History in Months
+          maximum: 12
+          minimum: 1
+          type: integer
+          description: >-
+            The number of months worth of data you have made available to search
+            on.
+          format: int32
+          example: 5
+          nullable: true
+        orderLatencyDays:
+          title: Order Latency in Days
+          maximum: 365
+          minimum: 0
+          type: integer
+          description: >-
+            The numbers of days that need to elapse between an authorization for
+            a purchase and when the purchase can be searched on. 
+          format: int32
+          example: 5
+          nullable: true
+        industryCode:
+          title: Industry Code
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: >-
+            Industry Code is used to classify the business by the type of
+            industry.
+          example: ACC
+        primaryContact:
+          $ref: '#/components/schemas/PrimaryContact'
+        legalAddress:
+          $ref: '#/components/schemas/LegalAddress'
+    ValidationStatus:
+      type: object
+      description: Status of created Merchant
+      nullable: true
+      properties:
+        messages:
+          title: Messages
+          type: array
+          description: List of validation messages for a merchant.
+          nullable: true
+          items:
+            $ref: '#/components/schemas/Error'
+        contactUs:
+          title: Contact-us message
+          type: string
+          maxLength: 500
+          minLength: 1
+          description: Ethoca's CX team contact
+          example: >-
+            Please reach out to Mastercard/Ethoca customer success team for any
+            questions or concerns.
+          nullable: true
+    MerchantResource:
+      description: Base merchant response schema
+      required:
+        - merchantType
+        - locales
+        - businessType
+      allOf:
+        - $ref: '#/components/schemas/BaseMerchant'
+        - type: object
+          properties:
+            merchantType:
+              title: Merchant Type
+              type: string
+              description: |-
+                Type of a merchant. Allowed Values -
+                + SUB_MERCHANT -
+                + DIRECT -
+                + GATEWAY - 
+              example: SUB_MERCHANT
+              minLength: 1
+              maxLength: 50
+            guid:
+              $ref: '#/components/schemas/MerchantGuid'
+            status:
+              title: Status
+              maxLength: 20
+              minLength: 4
+              type: string
+              description: >-
+                * CONFIGURATION - This status indicates that this merchant
+                record is being modified. Any changes applied to a record with
+                this status are NOT visible in production. There is no guarantee
+                that the data is either valid or consistent.
+
+                * TESTING - This status indicates that the merchant is being
+                tested. The data for a record with this status is NOT visible in
+                production and data modifications are not permitted.
+
+                * LIVE - This status indicates that the merchant record is
+                visible in production. The data has been validated and is used
+                for transaction lookups. Data modifications are not permitted.
+
+                * INACTIVE - This status indicates that this merchant record is
+                NOT visible in production. Data modifications are not permitted.
+
+                * LOCKED_FOR_EDIT - This status indicates that this merchant
+                record is locked for modification by the customer success team.
+                Data modifications are not permitted.
+              example: LIVE
+            locales:
+              title: Merchant Locale Details
+              minItems: 1
+              maxItems: 10
+              uniqueItems: true
+              type: array
+              description: Merchant Locale Details
+              items:
+                $ref: '#/components/schemas/LocaleResource'
+            locations:
+              title: Merchant Location Details
+              minItems: 0
+              maxItems: 50
+              uniqueItems: true
+              type: array
+              description: Merchant Location details
+              deprecated: true
+              nullable: true
+              items:
+                $ref: '#/components/schemas/LocationResource'
+            contentTypes:
+              title: Content Types
+              uniqueItems: true
+              type: array
+              description: An indicator as to the type of products and services you offer.
+              example:
+                - ADULT_LANGUAGE
+              items:
+                type: string
+              nullable: true
+            validationStatus:
+              $ref: '#/components/schemas/ValidationStatus'
+            crm:
+              $ref: '#/components/schemas/CrmResource'
+            businessType:
+              title: Merchant Business Type
+              type: string
+              description: >-
+                Business type describes the legal structure under which the
+                business operates
+              minLength: 1
+              maxLength: 25
+              example: BUSINESS_CORPORATION
+            firstPartyTrustEnrollments:
+              title: First Party Trust Enrollments
+              description: A list of First Party Trust Enrollments
+              type: array
+              uniqueItems: true
+              minLength: 0
+              maxLength: 2
+              nullable: true
+              items:
+                $ref: '#/components/schemas/FirstPartyTrustEnrollmentResource'
+    SearchFields:
+      title: Search Fields
+      type: array
+      description: >-
+        SearchFields is an array of SearchField objects. The following
+        validations apply:
+
+        * If the searchFields array contains both TRANSACTION_AMOUNT and
+        TRANSACTION_CURRENCY_CODE searchParameters, then the value of the
+        "searchFieldCards" and "required" properties must be same for both items
+
+        * If the searchFields array contains the TRANSACTION_AMOUNT
+        searchParameter, then it must also contain the TRANSACTION_CURRENCY_CODE
+        searchParameter (and vice versa)
+      nullable: true
+      items:
+        $ref: '#/components/schemas/SearchField'
+    SearchFieldsResource:
+      title: Search Fields Response
+      type: array
+      description: Search Field
+      nullable: true
+      items:
+        $ref: '#/components/schemas/SearchFieldResource'
+    SubMerchantIdentifier:
+      title: Sub-Merchant Identifier
+      maxLength: 100
+      minLength: 1
+      type: string
+      description: >-
+        The alphanumeric ID of the sub-merchant associated with the purchase
+        details. Required for channel partner.
+      example: GHF5F67DFSD468GJJXH78
+    SalesforceAccountNumber:
+      title: Sales Force Account Number
+      maxLength: 100
+      minLength: 1
+      type: string
+      description: Unique identifier for a merchant in sales force system.
+      example: TY12SS33ERYUIOPDDSS34XX
+    CardAcceptors:
+      title: Merchant Card Acceptors
+      maxItems: 1500
+      type: array
+      uniqueItems: true
+      description: List of merchant card acceptors
+      nullable: true
+      items:
+        $ref: '#/components/schemas/CardAcceptor'
+    CardAcceptor:
+      title: Merchant Card Acceptor
+      maxLength: 50
+      minLength: 1
+      type: string
+      description: Merchant Card Acceptor
+      example: ETHOCA NINJA GAMES
+    TermsConditionsConsent:
+      title: Terms & conditions consent
+      type: object
+      required:
+        - date
+        - firstName
+        - lastName
+        - jobTitle
+        - email
+        - countryCode
+        - consentUuid
+        - consentVersion
+      properties:
+        date:
+          type: string
+          description: >-
+            Date stamp in which the sub-merchant provided his consent on the
+            terms and conditions. Date must be in [ISO 8601
+            format](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6)
+          format: date-time
+          example: '2021-10-18T13:56:47.123+00:00'
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: First name of person that gave consent
+          example: John
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Last name of person that gave consent
+          example: Doe
+        jobTitle:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Job title of person that gave consent
+          example: Manager
+        email:
+          $ref: '#/components/schemas/Email'
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        consentUuid:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: >-
+            Universally Unique Identifier (UUID) of the consent that the user
+            consented to
+          example: 3d94ab7b-fe1c-4f7d-ad4c-93c1eb6d29c3
+        consentVersion:
+          type: string
+          minLength: 1
+          maxLength: 8
+          description: Version of the consent that the user consented to
+          example: '1.0'
+    FirstName:
+      title: First Name
+      maxLength: 30
+      minLength: 1
+      type: string
+      description: The individual's first name
+      example: Michael
+      nullable: true
+    SecondName:
+      title: Second Name
+      maxLength: 30
+      minLength: 1
+      type: string
+      description: The individual's second name
+      example: Andrew
+      nullable: true
+    LastName:
+      title: Last Name
+      maxLength: 30
+      minLength: 1
+      type: string
+      description: The individual's last name
+      example: Fox
+      nullable: true
+    UserId:
+      title: User Id
+      maxLength: 300
+      minLength: 1
+      type: string
+      description: The user id of the submitter/technical contact.
+      example: princess.diana
+    ImageBase64Encoded:
+      title: Image Base 64 Encoded
+      type: string
+      description: Base 64 encoded image (JPG or PNG)
+      minLength: 0
+      maxLength: 999999999
+      example: >-
+        /9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAIBAQIBAQICAgICAgICAwUDAwMDAwYEBAMFBwYHBwcGBwcICQsJCAgKCAcHCg0KCgsMDAwMBwkODw0MDgsMDAz/2wBDAQICAgMDAwYDAwYMCAcIDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAz/wAARCAAQABADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD638d/8HA2uah8em0jwP4L0W+8JxXZt459QmlW6vo1PMoKnbGCASAVY4xn0r6L+F//AAUzn8XatY3Op6HZ22h37AFoXYzWoJxkk8NjvgCvmXx1/wAG/wD4s0X4+HU/A3izw7D4RkuzPEuoiUXVjExOYtqqVkwCQDuXPGcV9JfCz/gmbf8AhTVrGz1TWbCbQ7BgWMAbzroA5IwQAue/JxnvX4TxVPjz63R/slO3Nr8HL/29fXltb8etj+puKKfhUsBR/spxvya6z59vtX0579vP7Nj/2Q==
+    MerchantGuid:
+      title: Merchant GUID
+      maxLength: 16
+      minLength: 11
+      type: string
+      description: Consumer Clarity internal merchant's GUID
+      example: jK2dA5aybhQQBq6C
+    Crm:
+      title: Customer Relationship Management
+      type: object
+      description: Customer Relationship Management
+      nullable: true
+      properties:
+        termsConditionsConsent:
+          $ref: '#/components/schemas/TermsConditionsConsent'
+        sanctionScreening:
+          $ref: '#/components/schemas/SanctionScreening'
+        paymentConfirmation:
+          title: Payment Confirmation
+          type: boolean
+          description: Confirmation of payment account setup
+          example: true
+          default: false
+    CrmResource:
+      title: Customer Relationship Management Response
+      description: Customer Relationship Management Response
+      allOf:
+        - $ref: '#/components/schemas/Crm'
+        - type: object
+          properties:
+            sanctionScreeningStatus:
+              title: Sanction Screening Status
+              maxLength: 11
+              minLength: 6
+              type: string
+              description: Indicates merchant's sanction screening status
+              example: APPROVED
+              default: DENIED
+            billingAccountCreated:
+              type: boolean
+              description: >-
+                Indicates whether a sub-merchant billing account has been set up
+                in SalesForce
+              example: true
+              default: false
+            salesforceAccountNumber:
+              $ref: '#/components/schemas/SalesforceAccountNumber'
+    PrimaryContact:
+      title: Primary Contact
+      description: Primary contact details of the merchant
+      required:
+        - jobTitle
+        - firstName
+        - lastName
+        - email
+      properties:
+        jobTitle:
+          title: Job Title
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Job title of the primary contact
+          example: Manager
+        firstName:
+          title: First Name
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: First name of the primary contact
+          example: John
+        lastName:
+          title: Last Name
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Last name of the primary contact
+          example: Doe
+        email:
+          $ref: '#/components/schemas/ShortEmail'
+        phone:
+          title: Phone
+          maxLength: 30
+          minLength: 3
+          type: string
+          description: Phone number for primary contact
+          example: 1-234-567-8901
+          nullable: true
+    LegalAddress:
+      title: Legal Address
+      description: Legal address of the merchant.
+      required:
+        - addressLine1
+        - countryCode
+        - city
+        - regionCode
+        - postalCode
+        - phone
+      allOf:
+        - $ref: '#/components/schemas/Address'
+        - type: object
+          properties:
+            phone:
+              title: Phone
+              maxLength: 30
+              minLength: 3
+              type: string
+              description: Phone number of the merchant's office
+              example: 1-234-567-9991
+    SubMerchantState:
+      required:
+        - state
+      properties:
+        state:
+          type: string
+          description: State of the Sub-Merchant
+          example: ACTIVE
+          enum:
+            - ACTIVE
+            - INACTIVE
+        inactivationReason:
+          title: Reason for Inactivation
+          type: string
+          description: Reason for Inactivation. Required when state is INACTIVE.
+          example: My business is closing
+          minLength: 1
+          maxLength: 250
+    Email:
+      title: Email Address
+      maxLength: 254
+      minLength: 1
+      type: string
+      description: Email address
+      example: john.doe@example.com
+      format: email
+      nullable: true
+    CountryCode:
+      title: Country Code
+      maxLength: 3
+      minLength: 3
+      type: string
+      description: >-
+        The [ISO 3166-1](https://www.iso.org/obp/ui/#search) alpha-3 compliant
+        country code.
+      example: CAN
+      nullable: true
+    Etag:
+      title: Entity Tag
+      maxLength: 100
+      minLength: 1
+      type: string
+      description: >-
+        Etag is a response header which is an identifier for a specific version
+        of a resource.
+      example: '"842DFBC17F921E7716642B9164F3B22B"'
+    AlertsMerchantMemberId:
+      title: Unique identifier for merchants
+      description: >-
+        Internal Universally Unique Identifier (UUID) which uniquely identifies
+        the merchants
+      type: string
+      format: uuid
+      example: 99ca4b15-72a6-41dd-8127-573d4b07669c
+    AlertsMerchantConfigId:
+      title: >-
+        Unique identifier for merchants identifier (such as acquirer reference
+        id, card acceptor id or name) configuration
+      description: >-
+        Internal Universally Unique Identifier (UUID) which uniquely identifies
+        the merchants configuration
+      type: string
+      format: uuid
+      example: 88ca4b15-72a6-41dd-8127-573d4b07558c
+    MerchantName:
+      title: Merchant's Name
+      maxLength: 200
+      minLength: 3
+      type: string
+      description: Merchant's partial or full name.
+      example: Merchant 1
+    MerchantType:
+      title: Merchant's Type
+      description: Merchant Type must be one of - PARTNER, ACQUIRER, SUBMERCHANT
+      type: string
+      minLength: 1
+      maxLength: 50
+      example: SUBMERCHANT
+    MerchantStatus:
+      title: Merchant's Status
+      type: string
+      description: Merchant Status must be one of - ACTIVATED, DEACTIVATED
+      minLength: 1
+      maxLength: 50
+      example: ACTIVATED
+    MerchantCategoryCode:
+      title: Merchant Category Code
+      description: >-
+        A four-digit number listed in ISO 18245 for retail financial services.
+        MCC is used to classify the business by the type of goods or services it
+        provides.
+      type: string
+      maxLength: 4
+      minLength: 0
+      pattern: ^[0-9]*$
+      example: '3002'
+    AcquirerReferenceId:
+      title: Acquirer Reference ID (ARID)
+      description: >-
+        The acquirer BINs that a partner currently services under their
+        portfolio. This is represented by Mastercard DE 31 - Subfield 2
+        (Clearing), DE 32 (Authorization), or Visa Field 32.
+      type: string
+      minLength: 6
+      maxLength: 6
+      pattern: ^[\d]+$
+      example: '123456'
+    CardAcceptorId:
+      title: Card Acceptor's ID (CAID)
+      description: >-
+        Identifies the card acceptor ID assigned by the acquirer. This ID must
+        represent a unique identifier for each merchant name/location within the
+        acquirer BIN. This is represented by Mastercard DE 42 and Visa Field 42.
+      type: string
+      minLength: 1
+      maxLength: 15
+      example: card_acceptor1
+    CardAcceptorName:
+      title: Card Acceptor's Name
+      description: >-
+        A sub-element of the merchant descriptor that contains the merchant's
+        name or doing business as name as it appears on the cardholder's billing
+        statement.
+      type: string
+      minLength: 1
+      maxLength: 200
+      example: Acceptor 1
+    CardAcceptorCity:
+      title: Card Acceptor's City
+      description: >-
+        A sub-element of the merchant descriptor indicating the merchant
+        city/location as it appears on the cardholder's billing statement.
+      type: string
+      minLength: 1
+      maxLength: 80
+      example: Toronto
+    CardAcceptorRegion:
+      title: Card Acceptor's Region
+      description: >-
+        A sub-element of the merchant descriptor indicating either the state,
+        province, or region of the merchant as it appears on the cardholder's
+        statement. Value is not case-sensitive and can accept 2 or 3 character
+        ISO state and province code.
+      type: string
+      minLength: 1
+      maxLength: 3
+      example: '019'
+    CardAcceptorCountry:
+      title: Card Acceptor's Country
+      description: >-
+        A sub-element of the merchant descriptor indicating the country of the
+        merchant as it appears on the cardholder's statement. Value is not
+        case-sensitive and can accept 2 or 3 character ISO country code.
+      type: string
+      minLength: 1
+      maxLength: 3
+      example: CAN
+    CardScheme:
+      description: >-
+        Name of card scheme may be one of - MASTERCARD, VISA or any other
+        supported schemes
+      type: string
+      minLength: 1
+      maxLength: 20
+      example: MASTERCARD
+    BinOnlyMatch:
+      description: >-
+        Indicates whether to use only acquirer reference ID (Acquirer BIN) for
+        merchant matching
+      type: boolean
+      default: false
+      example: true
+    Timestamp:
+      description: Timestamp of the creation or modification of the resource
+      type: string
+      minLength: 0
+      maxLength: 50
+      format: date-time
+      example: '2023-04-28T10:30:00.000Z'
+    User:
+      description: Username for the user creating or modifying a resource
+      type: string
+      minLength: 0
+      maxLength: 200
+      example: John Doe
+    CreatedOrModifiedBy:
+      description: >-
+        Timestamp and user responsible for creation or modification of the
+        resource
+      type: object
+      properties:
+        timestamp:
+          $ref: '#/components/schemas/Timestamp'
+        user:
+          $ref: '#/components/schemas/User'
+    ResponseTime:
+      type: string
+      description: Total response time in ms
+      minLength: 0
+      maxLength: 10
+      example: 300 ms
+    ResponseHeader:
+      type: object
+      properties:
+        totalRecords:
+          type: integer
+          format: int64
+          description: Total number of records found
+          minimum: 0
+          maximum: 999999999
+          example: 500
+        totalPages:
+          type: integer
+          description: Total number of pages based on limit
+          minimum: 0
+          maximum: 999999999
+          example: 10
+        currentPage:
+          type: integer
+          description: The current page number
+          minimum: 1
+          maximum: 999999999
+          example: 2
+        responseTime:
+          $ref: '#/components/schemas/ResponseTime'
+    ClarityResponseHeader:
+      allOf:
+        - $ref: '#/components/schemas/ResponseHeader'
+        - type: object
+          properties:
+            currentPage:
+              type: integer
+              description: Current page
+              minimum: 0
+              maximum: 999999999
+              example: 2
+    AlertsSubMerchantCreate:
+      description: Request used to create sub-merchants
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/MerchantName'
+        merchantCategoryCode:
+          $ref: '#/components/schemas/MerchantCategoryCode'
+      required:
+        - name
+        - merchantCategoryCode
+    AlertsSubMerchantDetailsUpdate:
+      description: Request used to update sub-merchant details
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/MerchantName'
+        merchantCategoryCode:
+          $ref: '#/components/schemas/MerchantCategoryCode'
+      required:
+        - name
+        - merchantCategoryCode
+    AlertsSubMerchantStatusUpdate:
+      description: Request used to update sub-merchant status
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/MerchantStatus'
+      required:
+        - status
+    AlertsPageableSubMerchantResource:
+      description: Pageable response containing sub-merchants with their details
+      type: object
+      properties:
+        responseHeader:
+          $ref: '#/components/schemas/ResponseHeader'
+        subMerchants:
+          type: array
+          description: List of sub-merchants with all details
+          items:
+            $ref: '#/components/schemas/AlertsSubMerchantResource'
+    AlertsSubMerchantResource:
+      description: Response containing a specific sub-merchant with details
+      type: object
+      properties:
+        subMerchantId:
+          $ref: '#/components/schemas/AlertsMerchantMemberId'
+        name:
+          $ref: '#/components/schemas/MerchantName'
+        merchantType:
+          $ref: '#/components/schemas/MerchantType'
+        status:
+          $ref: '#/components/schemas/MerchantStatus'
+        parentMemberId:
+          $ref: '#/components/schemas/AlertsMerchantMemberId'
+        merchantCategoryCode:
+          $ref: '#/components/schemas/MerchantCategoryCode'
+        createdBy:
+          $ref: '#/components/schemas/CreatedOrModifiedBy'
+        modifiedBy:
+          $ref: '#/components/schemas/CreatedOrModifiedBy'
+        statusUpdateTs:
+          $ref: '#/components/schemas/Timestamp'
+    AlertsMerchantIdentifierConfigIdOnly:
+      description: >-
+        Merchant identifier configuration Id (referring to card acceptor id or
+        name configuration)
+      type: object
+      properties:
+        merchantIdentifierConfigId:
+          $ref: '#/components/schemas/AlertsMerchantConfigId'
+    AlertsCardAcceptorIdConfig:
+      description: Map of acquirer reference id and the corresponding card acceptor id
+      type: object
+      properties:
+        merchantIdentifierConfigId:
+          $ref: '#/components/schemas/AlertsMerchantConfigId'
+        acquirerReferenceId:
+          $ref: '#/components/schemas/AcquirerReferenceId'
+        cardAcceptorId:
+          $ref: '#/components/schemas/CardAcceptorId'
+      required:
+        - acquirerReferenceId
+        - cardAcceptorId
+    AlertsCardAcceptorIdConfigs:
+      description: Card acceptor id configurations for a merchant
+      type: object
+      properties:
+        responseHeader:
+          $ref: '#/components/schemas/ResponseHeader'
+        configs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertsCardAcceptorIdConfig'
+    AlertsCardAcceptorNameConfig:
+      description: Card acceptor name configuration
+      type: object
+      properties:
+        merchantIdentifierConfigId:
+          $ref: '#/components/schemas/AlertsMerchantConfigId'
+        cardAcceptorName:
+          $ref: '#/components/schemas/CardAcceptorName'
+        cardAcceptorCity:
+          $ref: '#/components/schemas/CardAcceptorCity'
+        cardAcceptorRegion:
+          $ref: '#/components/schemas/CardAcceptorRegion'
+        cardAcceptorCountry:
+          $ref: '#/components/schemas/CardAcceptorCountry'
+      required:
+        - cardAcceptorName
+    AlertsCardAcceptorNameConfigs:
+      description: Card acceptor name configurations for a merchant
+      type: object
+      properties:
+        responseHeader:
+          $ref: '#/components/schemas/ResponseHeader'
+        configs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertsCardAcceptorNameConfig'
+    AlertsSubOrgProfile:
+      description: Sub organization member details containing member name, id and type
+      type: object
+      properties:
+        memberId:
+          $ref: '#/components/schemas/AlertsMerchantMemberId'
+        name:
+          $ref: '#/components/schemas/MerchantName'
+        merchantType:
+          $ref: '#/components/schemas/MerchantType'
+        status:
+          $ref: '#/components/schemas/MerchantStatus'
+    AlertsOrgProfile:
+      description: Details of organization profiles containing member name, id and type
+      type: object
+      properties:
+        memberId:
+          $ref: '#/components/schemas/AlertsMerchantMemberId'
+        name:
+          $ref: '#/components/schemas/MerchantName'
+        merchantType:
+          $ref: '#/components/schemas/MerchantType'
+        status:
+          $ref: '#/components/schemas/MerchantStatus'
+        subOrgProfiles:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertsSubOrgProfile'
+    AlertsPageableAcquirerReferenceIdConfigs:
+      description: Pageable response containing acquirer reference id configurations
+      type: object
+      properties:
+        responseHeader:
+          $ref: '#/components/schemas/ResponseHeader'
+        configs:
+          $ref: '#/components/schemas/AlertsAcquirerReferenceIdConfigs'
+    AlertsAcquirerReferenceIdConfig:
+      description: Acquirer reference id configuration
+      type: object
+      properties:
+        merchantIdentifierConfigId:
+          $ref: '#/components/schemas/AlertsMerchantConfigId'
+        acquirerReferenceId:
+          $ref: '#/components/schemas/AcquirerReferenceId'
+        cardScheme:
+          $ref: '#/components/schemas/CardScheme'
+        binOnlyMatch:
+          $ref: '#/components/schemas/BinOnlyMatch'
+      required:
+        - acquirerReferenceId
+        - cardScheme
+    AlertsAcquirerReferenceIdConfigUpdate:
+      description: Acquirer reference id configuration for update
+      type: object
+      properties:
+        binOnlyMatch:
+          $ref: '#/components/schemas/BinOnlyMatch'
+      required:
+        - binOnlyMatch
+    AlertsAcquirerReferenceIdConfigs:
+      description: Acquirer reference id configurations
+      type: array
+      items:
+        $ref: '#/components/schemas/AlertsAcquirerReferenceIdConfig'
+    ShortEmail:
+      title: Email Address
+      maxLength: 100
+      minLength: 1
+      type: string
+      description: Email address
+      example: john.doe@example.com
+      format: email
+      nullable: true
+    SanctionScreening:
+      title: Sanction Screening
+      type: object
+      required:
+        - taxId
+        - publiclyTraded
+        - doBusinessWithSanctionedGeographies
+      properties:
+        taxId:
+          title: Tax Identification
+          description: Known as VAT Number in the US and GST in Canada.
+          example: 123456789AB1234
+          type: string
+          minLength: 1
+          maxLength: 30
+        formerLegalNames:
+          title: List of Former Legal Names
+          description: The merchant's former legal names
+          uniqueItems: true
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/MerchantName'
+        doBusinessWithSanctionedGeographies:
+          title: Business With Sanctioned Geographies Indicator
+          description: >
+            Indicates whether the merchant does business with sanctioned
+            geographies.
+
+            If it is true, then sanctionedGeographies property can't be empty.
+          type: boolean
+          example: false
+        sanctionedGeographies:
+          title: List of Sanctioned Geographies
+          description: >
+            List of sanctioned geographies that the merchant is doing business
+            with. It
+
+            can't be empty if the doBusinessWithSanctionedGeographies property
+            is true
+          uniqueItems: true
+          type: array
+          nullable: true
+          items:
+            title: Sanctioned Geography
+            type: string
+            minLength: 1
+            maxLength: 60
+            description: Sanctioned geography
+            example: Iran
+        publiclyTraded:
+          title: Merchant Publicly Traded Indicator
+          description: Indicates whether a merchant is publicly traded.
+          type: boolean
+          example: false
+        tickerSymbol:
+          title: Merchant's Stock Symbol
+          description: >-
+            Publicly traded merchant's stock symbol. It's mandatory if the
+            isPubliclyTraded attribute is true.
+          type: string
+          minLength: 1
+          maxLength: 10
+          example: NFLX
+          nullable: true
+        beneficialOwners:
+          type: array
+          title: List of Beneficial Owners
+          description: >-
+            Required only if publiclyTraded property is false and legalEntities
+            property is empty.
+          uniqueItems: true
+          nullable: true
+          items:
+            $ref: '#/components/schemas/BeneficialOwner'
+        legalEntities:
+          type: array
+          title: List of Legal Entities
+          description: >-
+            Required only if publiclyTraded property is false and
+            beneficialOwners property is empty.
+          uniqueItems: true
+          nullable: true
+          items:
+            $ref: '#/components/schemas/LegalEntity'
+    PercentOwnership:
+      title: Percent Ownership
+      minLength: 1
+      maxLength: 5
+      pattern: ^(100(\.00?)?|[1-9]\d?(\.\d{1,2})?|0\.\d{1,2})$
+      type: string
+      description: Percent Ownership.
+      example: '25.50'
+      nullable: true
+    BeneficialOwner:
+      title: Beneficial Owner
+      description: Individual owning the merchant.
+      type: object
+      properties:
+        firstName:
+          $ref: '#/components/schemas/FirstName'
+        secondName:
+          $ref: '#/components/schemas/SecondName'
+        lastName:
+          $ref: '#/components/schemas/LastName'
+        address:
+          $ref: '#/components/schemas/ShortAddress'
+        birthCountry:
+          $ref: '#/components/schemas/CountryCode'
+        birthDate:
+          title: Beneficial Owner Birth Date
+          description: >-
+            Beneficial owner birth date. Date must be in a [ISO 8601
+            format](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6)
+          type: string
+          format: date
+          example: '1977-05-23T00:00:00.000Z'
+          nullable: true
+        percentOwnership:
+          $ref: '#/components/schemas/PercentOwnership'
+    LegalEntity:
+      title: Legal Entity
+      description: Legal entity owning the merchant.
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/EntityName'
+        dba:
+          $ref: '#/components/schemas/EntityName'
+        address:
+          $ref: '#/components/schemas/ShortAddress'
+        percentOwnership:
+          $ref: '#/components/schemas/PercentOwnership'
+        governmentOwned:
+          title: Government Owned
+          description: Indicates whether the legal entity is owned by a Government
+          type: boolean
+          example: false
+          nullable: true
+    ShortAddress:
+      title: Address
+      description: Address.
+      properties:
+        addressLine1:
+          title: Address Line 1
+          maxLength: 250
+          minLength: 1
+          type: string
+          description: The street detail for the address.
+          example: 223 Blythwood Rd
+          nullable: true
+        addressLine2:
+          title: Address Line 2
+          maxLength: 250
+          minLength: 1
+          type: string
+          description: The secondary street detail for the address.
+          example: Suite 123
+          nullable: true
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        regionCode:
+          title: Region code
+          maxLength: 3
+          minLength: 1
+          type: string
+          description: Region where merchant's legal office is located
+          example: 'ON'
+          nullable: true
+        city:
+          title: City
+          maxLength: 100
+          minLength: 1
+          type: string
+          description: City where merchant's legal office is located
+          example: Toronto
+          nullable: true
+        postalCode:
+          title: Postal Code
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: The zip/postal detail for the merchant's legal address
+          example: M4N1A7
+          nullable: true
+    Address:
+      title: Address
+      description: Address entity associated to merchant's location and legal address.
+      required:
+        - countryCode
+      allOf:
+        - $ref: '#/components/schemas/ShortAddress'
+        - properties:
+            website:
+              title: Website
+              maxLength: 500
+              minLength: 1
+              type: string
+              description: URL for merchant's website
+              example: https://merchantwebsite.example.com
+              nullable: true
+            email:
+              $ref: '#/components/schemas/Email'
+            phone:
+              title: Phone
+              maxLength: 30
+              minLength: 3
+              type: string
+              description: Phone number of the merchant's office
+              example: 1-234-567-9999
+              nullable: true
+    EntityName:
+      title: Entity Legal/Business Name
+      maxLength: 100
+      minLength: 1
+      type: string
+      description: The entity's legal or business name.
+      example: Walmart
+      nullable: true
+    AcquirerMerchantId:
+      type: object
+      title: Acquirer reference ID & card acceptor ID pair
+      description: Acquirer reference ID & card acceptor ID pair
+      required:
+        - acquirerReferenceId
+        - cardAcceptorId
+      properties:
+        acquirerReferenceId:
+          $ref: '#/components/schemas/AcquirerReferenceId'
+        cardAcceptorId:
+          $ref: '#/components/schemas/CardAcceptorId'
+        firstPartyTrustEnabled:
+          type: boolean
+          description: >-
+            Marks the ARID/CAID pair as relevant for the FPT engine. When false,
+            the FPT engine won't use the ARID/CAID pair for identifying
+            transactions.
+          example: true
+          default: false
+    AcquirerMerchant:
+      description: Acquirer & Merchant IDs information
+      title: AcquirerMerchant
+      required:
+        - acquirerMerchantIds
+      properties:
+        acquirerMerchantIds:
+          $ref: '#/components/schemas/AcquirerMerchantIds'
+    AcquirerMerchantIds:
+      title: Acquirer reference ID & card acceptor ID pairs
+      maxItems: 100
+      minItems: 1
+      type: array
+      uniqueItems: true
+      description: Set of acquirer reference ID & card acceptor ID pairs
+      items:
+        $ref: '#/components/schemas/AcquirerMerchantId'
+    AcquirerMerchantIdResource:
+      type: object
+      title: Acquirer reference ID & card acceptor ID resource
+      description: Acquirer reference ID & card acceptor ID resource
+      required:
+        - id
+      allOf:
+        - $ref: '#/components/schemas/AcquirerMerchantId'
+        - type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/ResourceId'
+    AcceptedAcquirerMerchantIdsResource:
+      description: Accepted acquirer reference ID & card acceptor ID pairs
+      type: array
+      items:
+        $ref: '#/components/schemas/AcquirerMerchantIdResource'
+    AcquirerMerchantIdsResource:
+      title: Acquirer reference ID & card acceptor ID pairs resource
+      description: Set of acquirer reference ID & card acceptor ID pairs resource
+      properties:
+        acceptedIds:
+          $ref: '#/components/schemas/AcceptedAcquirerMerchantIdsResource'
+        rejectedIds:
+          description: Rejected acquirer reference ID & card acceptor ID pairs
+          type: array
+          items:
+            $ref: '#/components/schemas/AcquirerMerchantId'
+    PageableAcceptedAcquirerMerchantIdsResource:
+      title: >-
+        Pageable accepted acquirer reference ID & card acceptor ID pairs
+        resource
+      description: >-
+        Pageable accepted acquirer reference ID & card acceptor ID pairs
+        resource with pagination metadata
+      properties:
+        data:
+          $ref: '#/components/schemas/AcceptedAcquirerMerchantIdsResource'
+        metadata:
+          $ref: '#/components/schemas/ClarityResponseHeader'
+    ResourceId:
+      type: string
+      minLength: 1
+      maxLength: 40
+      description: Unique identifier of resource
+      nullable: true
+      example: Mxyz123
+    LocationCount:
+      title: Merchant Location count
+      type: integer
+      default: 0
+      example: 15
+      minimum: 0
+      maximum: 9999999
+    FirstPartyTrustEnrollment:
+      title: First Party Trust Enrollment
+      type: object
+      required:
+        - enrollmentType
+      properties:
+        enrollmentType:
+          $ref: '#/components/schemas/FirstPartyTrustEnrollmentType'
+    FirstPartyTrustEnrollmentResource:
+      title: First Party Trust Enrollment Resource
+      type: object
+      required:
+        - enrollmentType
+      properties:
+        enrollmentType:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: Type of First Party Trust Enrollment
+          example: CLARITY
+    FirstPartyTrustEnrollmentType:
+      title: First Party Trust Enrollment Types
+      type: string
+      description: Type of First Party Trust Enrollment
+      example: CLARITY
+      enum:
+        - CLARITY
+        - ISSM
+    LocationsBulk:
+      type: object
+      required:
+        - locations
+      properties:
+        locations:
+          minItems: 1
+          maxItems: 25
+          type: array
+          uniqueItems: true
+          description: Set of Merchant Locations
+          items:
+            $ref: '#/components/schemas/LocationWithoutCardAcceptors'
+    BulkOperationResource:
+      title: Bulk post resource
+      description: Resource with responseCode and details
+      type: object
+      required:
+        - status
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        errors:
+          type: array
+          description: List of error objects
+          nullable: true
+          items:
+            $ref: '#/components/schemas/Error'
+        status:
+          title: Response Status
+          type: string
+          description: The status of resource - PENDING, PASS, FAILED
+          example: PENDING
+    LocationsBulkResource:
+      title: Locations resource
+      description: List of locations resource
+      type: object
+      properties:
+        locations:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkOperationResource'
+    LocationWithoutCardAcceptorsResource:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/LocationWithoutCardAcceptors'
+        - properties:
+            id:
+              $ref: '#/components/schemas/ResourceId'
+            cardAcceptorLocationType:
+              title: Card Acceptor Location Type
+              type: string
+              description: Types of card acceptor location - ONLINE, PHONE, CARD_PRESENT
+              example: ONLINE
+              nullable: true
+    PageableLocationsResource:
+      title: Pageable locations resource
+      description: Pageable locations resource with pagination metadata
+      properties:
+        data:
+          type: array
+          description: List of Location resources
+          items:
+            $ref: '#/components/schemas/LocationWithoutCardAcceptorsResource'
+        metadata:
+          $ref: '#/components/schemas/ClarityResponseHeader'
+    CardAcceptorData:
+      title: Merchant Card Acceptor Names
+      type: object
+      required:
+        - matchType
+        - cardAcceptorName
+      properties:
+        matchType:
+          title: Card Acceptor Match Type
+          type: string
+          description: Types of card acceptor match type
+          example: EXACT
+          enum:
+            - EXACT
+            - STARTS_WITH
+            - STRICT_CONTAINS
+            - CONTAINS
+        cardAcceptorName:
+          $ref: '#/components/schemas/CardAcceptor'
+    CardAcceptorDataResource:
+      title: Merchant Card Acceptor Names
+      type: object
+      required:
+        - matchType
+        - cardAcceptorName
+        - id
+        - status
+      properties:
+        matchType:
+          title: Card Acceptor Match Type
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: The card acceptor match type
+          example: EXACT
+        cardAcceptorName:
+          $ref: '#/components/schemas/CardAcceptor'
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        status:
+          title: Response Status
+          type: string
+          description: The status of Card Acceptor Name - PENDING, PASS, FAILED
+          example: PENDING
+    CardAcceptorNamesBulk:
+      title: Merchant Card Acceptor Names
+      type: object
+      required:
+        - cardAcceptorNames
+      properties:
+        cardAcceptorNames:
+          minItems: 1
+          maxItems: 250
+          type: array
+          description: List of merchant card acceptors
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/CardAcceptorData'
+    CardAcceptorNamesBulkResource:
+      title: Card Acceptor Names resource
+      description: Set of Card Acceptor Names resource
+      type: object
+      properties:
+        cardAcceptorNames:
+          type: array
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/BulkOperationResource'
+    PageableCardAcceptorNamesResource:
+      title: Pageable card acceptor names resource
+      description: Pageable card acceptor names resource with pagination metadata
+      properties:
+        data:
+          type: array
+          description: List of card acceptor resources
+          items:
+            $ref: '#/components/schemas/CardAcceptorDataResource'
+        metadata:
+          $ref: '#/components/schemas/ClarityResponseHeader'
