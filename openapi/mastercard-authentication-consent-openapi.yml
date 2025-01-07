@@ -1,0 +1,403 @@
+openapi: 3.0.3
+info:
+  title: Authentication Consent Service API
+  description: >-
+    The service is providing APIs for Authentication Consent Management. These
+    APIs can be used to store, retrieve, revoke or search user consents for a
+    specific combination of card, device and merchant
+  contact:
+    name: API Support
+    email: apisupport@mastercard.com
+  version: 1.0.0
+servers:
+  - url: https://mtf.api.identity.mastercard.co.in/aes
+    description: India MTF server
+  - url: https://mtf.api.identity.mastercard.com/aes
+    description: Global MTF server
+  - url: https://api.identity.mastercard.co.in/aes
+    description: India Production server
+  - url: https://api.identity.mastercard.com/aes
+    description: Global Production server
+tags:
+  - name: consent-languages
+    description: Access to different consent languages text.
+  - name: user-consent
+    description: Operations for user consents.
+paths:
+  /consent-languages:
+    get:
+      operationId: getConsentLanguages
+      summary: Get consent languages
+      tags:
+        - consent-languages
+      responses:
+        '200':
+          $ref: '#/components/responses/GetConsentLanguagesSuccess'
+        '400':
+          $ref: '#/components/responses/GetConsentLanguagesBadRequestError'
+      parameters:
+        - $ref: '#/components/parameters/locale'
+        - $ref: '#/components/parameters/consent_types'
+      description: >-
+        Get the consent language text for enrolled service(s). A merchant/psp
+        can use this API to get the text for their enrollment and cache it for
+        later use.
+  /user-consents/{user_consent_id}:
+    delete:
+      operationId: revokeUserConsentById
+      summary: Revoke user consent using an identifier
+      description: >-
+        A merchant/PSP can use this API to revoke the user consent for a user
+        consent identifier (user_consent_id). Once the user consent is revoked
+        (deleted), it will not be available via Retrieve User-Consent request.
+      tags:
+        - user-consent
+      responses:
+        '204':
+          $ref: '#/components/responses/DeleteConsentsSuccess'
+        '400':
+          $ref: '#/components/responses/DeleteConsentsBadRequestError'
+        '401':
+          $ref: '#/components/responses/UnAuthorizedMerchantError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+      parameters:
+        - $ref: '#/components/parameters/user_consent_id'
+    get:
+      operationId: getUserConsentById
+      summary: Retrieve user consent by an identifier
+      description: >-
+        Retrieve the user consent by an identifier. A Merchants/PSP can use this
+        API to check whether the user consent for the user_consent_id exist or
+        not.
+      tags:
+        - user-consent
+      parameters:
+        - $ref: '#/components/parameters/user_consent_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/GetConsentsSuccess'
+        '400':
+          $ref: '#/components/responses/GetConsentsBadRequestError'
+        '401':
+          $ref: '#/components/responses/UnAuthorizedMerchantError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+components:
+  schemas:
+    ConsentLanguages:
+      description: Collection of Consent Language details
+      type: object
+      required:
+        - consentLanguages
+      properties:
+        consentLanguages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsentLanguage'
+    ConsentLanguage:
+      description: Consent language details
+      type: object
+      required:
+        - consentLanguageId
+        - longText
+        - defaultText
+        - privacyNoticeURL
+        - consentType
+        - version
+        - locale
+      properties:
+        consentLanguageId:
+          type: string
+          description: A unique identifier of a consent language text.
+          example: ca91870b-02e5-40e1-9ad6-88aded6a72ab
+          minLength: 36
+          maxLength: 36
+        longText:
+          type: string
+          description: Actual consent language text.
+          example: >-
+            By clicking below, you consent to bypass entry of One Time Password
+            (OTP) for most transactions below ¹2000 initiated from this merchant
+            app on this device. You may continue to receive an OTP for
+            transactions at or above ¹2000. You can revoke your consent any time
+            within the merchant app.
+          minLength: 50
+          maxLength: 5000
+        defaultText:
+          type: string
+          description: A short description of the consent language text.
+          example: By consenting, you agree to the Mastercard Global Privacy Notice
+          minLength: 50
+          maxLength: 500
+        privacyNoticeURL:
+          type: string
+          description: A global Mastercard privacy policy URL.
+          example: https://www.mastercard.co.in/en-in/privacy.html
+          minLength: 10
+          maxLength: 150
+        consentType:
+          type: string
+          description: >-
+            Type of the consent. Possible valid values are india_frictionless,
+            device_auth and frictionless_device_auth.
+          example: india_frictionless
+          minLength: 2
+          maxLength: 50
+        version:
+          type: string
+          description: Current version of the consent language.
+          example: '1.0'
+          minLength: 3
+          maxLength: 10
+        locale:
+          type: string
+          description: Locale of the consent language text.
+          example: en-US
+          minLength: 5
+          maxLength: 50
+    UserConsent:
+      type: object
+      description: The user consent resource
+      required:
+        - userConsentId
+        - consentLanguageId
+        - consentedDate
+      properties:
+        userConsentId:
+          type: string
+          description: >-
+            User consent Identifier, generated at the time of store consent API
+            to track the user consents.
+          example: 2c0743c0-fe6a-41a6-88c4-2c94786fb9c2
+          minLength: 36
+          maxLength: 36
+        consentLanguageId:
+          type: string
+          description: >-
+            Unique Id for a specific consent language text. This Id will be
+            available through GET consent-languages API.
+          example: 75c4f996-1910-420f-b82b-fcc3e5196b99
+          minLength: 36
+          maxLength: 36
+        consentedDate:
+          type: string
+          format: YYYYMMDDHHMMSS
+          description: Consented date (in UTC) at which the user is consented.
+          example: '20200223000001'
+          minLength: 14
+          maxLength: 14
+    ErrorResponse:
+      type: object
+      required:
+        - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+            - Error
+          properties:
+            Error:
+              $ref: '#/components/schemas/Errors'
+    Errors:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    Error:
+      type: object
+      required:
+        - Source
+        - ReasonCode
+        - Recoverable
+      properties:
+        Source:
+          type: string
+          description: >-
+            The application that generated this error. <br>Possible values =
+            GATEWAY/AUTHENTICATION_CONSENT_SERVICE
+          example: AUTHENTICATION_CONSENT_SERVICE
+          minLength: 1
+          maxLength: 50
+        ReasonCode:
+          type: string
+          description: >-
+            A unique constant identifying the error case encountered during
+            transaction processing
+          example: resource.not.found
+          minLength: 1
+          maxLength: 100
+        Description:
+          type: string
+          description: Description of the 'ReasonCode' field with additional details
+          example: The requested resource does not exist
+          minLength: 0
+          maxLength: 500
+        Recoverable:
+          type: boolean
+          description: >-
+            Indicates whether this error will always be returned for this
+            request, or retrying with same value could change the outcome. For
+            example, if the request contains an invalid signature, retrying will
+            never result in a success. However, if the error is related to some
+            unexpected timeout with the service, retrying the call could result
+            in a successful response.
+          example: false
+        Details:
+          type: string
+          description: >-
+            Could be null, present for backwards compatibility or extra
+            information
+          example: The provided acctNumber did not pass the Mod10 validation
+          minLength: 0
+          maxLength: 500
+  responses:
+    GetConsentLanguagesSuccess:
+      description: >-
+        Consent languages for given filters, if filters not provided then return
+        all consent languages.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConsentLanguages'
+    GetConsentsSuccess:
+      description: The success response for retrieving user consent
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserConsent'
+    DeleteConsentsSuccess:
+      description: The server successfully processed the request
+    ResourceNotFoundError:
+      description: The requested resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ResourceNotFoundExample:
+              $ref: '#/components/examples/ResourceNotFoundExample'
+    UnAuthorizedMerchantError:
+      description: Requestor is not authorised to perform requested operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UnAuthorizedMerchantRequest:
+              $ref: '#/components/examples/UnAuthorizedMerchantRequest'
+    GetConsentLanguagesBadRequestError:
+      description: Server is unable to process the request due to invalid query parameter.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            InvalidLocalParameterLengthExample:
+              $ref: '#/components/examples/InvalidLocalParameterLengthExample'
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    DeleteConsentsBadRequestError:
+      description: Server is unable to parse the request data due to malformed json.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            InvalidMerchantRequest:
+              $ref: '#/components/examples/InvalidMerchantRequest'
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    GetConsentsBadRequestError:
+      description: Server is unable to parse the request data due to malformed json.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            InvalidMerchantRequest:
+              $ref: '#/components/examples/InvalidMerchantRequest'
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+  examples:
+    ResourceNotFoundExample:
+      summary: When resource not found
+      value:
+        Errors:
+          Error:
+            - Source: AUTHENTICATION_CONSENT_SERVICE
+              ReasonCode: resource.not.found
+              Description: The requested resource was not found
+              Recoverable: false
+    InvalidLocalParameterLengthExample:
+      summary: When locale query parameter length is invalid
+      value:
+        Errors:
+          Error:
+            - Source: AUTHENTICATION_CONSENT_SERVICE
+              ReasonCode: 'invalid data: locale'
+              Description: size must be between 5 and 50
+              Recoverable: false
+    InvalidMerchantRequest:
+      summary: When registration for the requestor does not exist
+      value:
+        Errors:
+          Error:
+            - Source: AUTHENTICATION_CONSENT_SERVICE
+              ReasonCode: invalid.requestor
+              Description: The registration for the requestor does not exist
+              Recoverable: false
+    UnAuthorizedMerchantRequest:
+      summary: When requestor is not authorized to perform requested operation
+      value:
+        Errors:
+          Error:
+            - Source: AUTHENTICATION_CONSENT_SERVICE
+              ReasonCode: unauthorized
+              Description: >-
+                Unable to perform this operation as the requestor is
+                unauthorized
+              Recoverable: false
+    BadRequestExample:
+      summary: When something went wrong with the request
+      value:
+        Errors:
+          Error:
+            - Source: AUTHENTICATION_CONSENT_SERVICE
+              ReasonCode: system.error
+              Description: Something went wrong with your request. Please try again later
+              Recoverable: false
+  parameters:
+    user_consent_id:
+      in: path
+      name: user_consent_id
+      required: true
+      schema:
+        type: string
+        minLength: 36
+        maxLength: 36
+      description: User Consent Identifier
+      example: 2c0743c0-fe6a-41a6-88c4-2c94786fb9c2
+    locale:
+      in: query
+      name: locale
+      schema:
+        type: string
+        minLength: 5
+        maxLength: 50
+      description: >-
+        Locale of the requested consent language. An optional field, if not
+        passed then en-US will be used.
+      example: en-US
+    consent_types:
+      in: query
+      name: consent_types
+      schema:
+        type: string
+      description: >-
+        List of Consent Type for different services. An optional query
+        parameter, if not provided then all type of consent languages will be
+        returned in the response <br/>Possible values are INDIA_FRICTIONLESS,
+        DEVICE_AUTH and FRICTIONLESS_DEVICE_AUTH <br/>Multiple values can be
+        sent in the request in order to receive multiple consents in response.
+      example: INDIA_FRICTIONLESS
