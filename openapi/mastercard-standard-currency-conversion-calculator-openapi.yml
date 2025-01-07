@@ -1,0 +1,269 @@
+openapi: 3.0.1
+info:
+  description: >-
+    This API provides a range of functions to get back currency conversion rates
+    and amounts based on current Mastercard currency conversion values.
+  version: 1.0.0
+  title: Standard Currency Conversion Calculator API
+  contact:
+    name: API Support
+    url: https://developer.mastercard.com/support
+    email: apisupport@mastercard.com
+tags:
+  - name: Conversion Rate
+    description: Conversion Rate
+  - name: Rate Issued
+    description: Rate Issued
+  - name: Currencies
+    description: Currencies
+paths:
+  /conversion-rate:
+    get:
+      tags:
+        - Conversion Rate
+      summary: Get the currency conversion rate details.
+      description: >-
+        Provides transaction details including date, transaction currency and
+        amount, cardholder billing currency and issuer specific mark up to
+        determine the applicable currency conversion rate and cardholder billing
+        amount.
+      operationId: getConversionDetailUsingGET
+      parameters:
+        - name: fxDate
+          in: query
+          description: Date of the requested FX rates.
+          required: true
+          schema:
+            type: string
+          example: '2023-02-27'
+        - name: transCurr
+          in: query
+          description: Currency of the transaction.
+          required: true
+          schema:
+            type: string
+          example: ALL
+        - name: crdhldBillCurr
+          in: query
+          description: Cardholder billing currency.
+          required: true
+          schema:
+            type: string
+          example: DZD
+        - name: bankFee
+          in: query
+          description: Additional fees imposed by the bank.
+          required: false
+          schema:
+            type: number
+            format: number
+          example: 5
+        - name: transAmt
+          in: query
+          description: Amount in the transaction currency.
+          required: true
+          schema:
+            type: number
+            format: number
+          example: 23
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversionRateWrapper'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+  /conversion-rate-issued:
+    get:
+      tags:
+        - Rate Issued
+      summary: Determine if the settlement rate has been issued.
+      description: >-
+        Provides status update if the present day Mastercard currency conversion
+        rates are issued. Mastercard rates are published daily and effective for
+        24 hours.
+      operationId: isRateIssuedUsingGET
+      parameters:
+        - name: date
+          in: query
+          description: The date by which the rate would have been issued.
+          required: false
+          schema:
+            type: string
+          example: '2023-02-27'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettlementRateIssuedWrapper'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+  /settlement-currencies:
+    get:
+      tags:
+        - Currencies
+      summary: getCurrencyRateData
+      description: >-
+        Provides a list of currencies for which Mastercard publishes currency
+        conversion rates.
+      operationId: getCurrencyRateDataUsingGET
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettlementCurrencyWrapper'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+servers:
+  - url: https://sandbox.api.mastercard.com/settlement/currencyrate
+    description: Sandbox server
+  - url: https://api.mastercard.com/settlement/currencyrate
+    description: Production server
+components:
+  schemas:
+    ConversionRateWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          example: settlement-conversion-rate
+          description: The name of the service being requested.
+        description:
+          type: string
+          example: Settlement conversion rate and billing amount
+          description: The description of the API being called.
+        date:
+          type: string
+          example: '2019-08-08 16:43:27'
+          description: The date and time the API is being called in GMT.
+        type:
+          type: string
+          example: error
+          description: The type of response being returned by the API.
+        data:
+          $ref: '#/components/schemas/Conversion'
+    Conversion:
+      type: object
+      properties:
+        conversionRate:
+          type: number
+          format: number
+          example: 0.943078
+          description: >-
+            Rate applied to the transaction to convert from Transaction Currency
+            to Cardholder Billing Currency.
+        crdhldBillAmt:
+          type: number
+          format: number
+          example: 21.690798
+          description: Amount in the cardholder billing currency.
+        fxDate:
+          type: string
+          example: '2016-09-30'
+          description: Date of the requested FX rates.
+        transCurr:
+          type: string
+          example: ALL
+          description: Currency of the transaction.
+        crdhldBillCurr:
+          type: string
+          example: DZD
+          description: Cardholder billing currency.
+        transAmt:
+          type: number
+          format: number
+          example: 23
+          description: Amount in the transaction currency.
+        bankFee:
+          type: number
+          format: number
+          example: 5
+          description: Additional fees imposed by the bank.
+        errorCode:
+          type: string
+          example: 104
+          description: The error code associated with the error being returned.
+        errorMessage:
+          type: string
+          example: >-
+            Not Found , The calculated cross rates for the selected date is not
+            available.
+          description: The reason for the error.
+    SettlementRateIssuedWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          example: settlement-conversion-rate-issued
+          description: The name of the service being requested.
+        description:
+          type: string
+          example: Is settlement conversion rate issued
+          description: The description of the API being called.
+        date:
+          type: string
+          example: '2019-08-08 16:22:31'
+          description: The date and time the API is being called in GMT.
+        data:
+          $ref: '#/components/schemas/SettlementRateIssued'
+    SettlementRateIssued:
+      type: object
+      properties:
+        rateIssued:
+          type: string
+          example: 'NO'
+          description: The requested foreign exchange rate.
+    SettlementCurrencyWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          example: settlement-currency
+          description: The name of the service being requested.
+        description:
+          type: string
+          example: A list of settlement active currencies
+          description: The description of the API being called.
+        date:
+          type: string
+          example: '2019-08-08 16:22:31'
+          description: The date and time the API is being called in GMT.
+        data:
+          $ref: '#/components/schemas/SettlementCurrency'
+    SettlementCurrency:
+      type: object
+      properties:
+        currencies:
+          type: array
+          description: A list of settlement currencies
+          items:
+            $ref: '#/components/schemas/Currency'
+    Currency:
+      type: object
+      properties:
+        alphaCd:
+          type: string
+          example: AOA
+          description: The Alpha code for the currency.
+        currNam:
+          type: string
+          example: ANGOLAN KWANZA
+          description: The full name of the currency.
