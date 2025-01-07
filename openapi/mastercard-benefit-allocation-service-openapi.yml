@@ -1,0 +1,512 @@
+openapi: 3.0.3
+info:
+  title: Benefit Allocation Service API
+  description: >-
+    Benefits Allocation Service API facilitates the management of benefit
+    segments to cards by enabling the assignment, replacement, or cancellation
+    of benefits. It also provides the ability to freeze or unfreeze benefits
+    associated with a card number and can replace a card  for a cardholder.
+  contact:
+    name: API Support
+    url: https://developer.mastercard.com/support
+    email: apisupport@mastercard.com
+  version: 1.0.0
+servers:
+  - url: https://sandbox.api.mastercard.com/loyalty/benefits
+    description: Sandbox server
+  - url: https://api.mastercard.com/loyalty/benefits
+    description: Production server
+tags:
+  - name: benefit-allocations-segment-management
+    description: Endpoints to assign, cancel or replace a segment to a card.
+  - name: benefit-allocations-card-management
+    description: Endpoints to freeze/unfreeze a card and replace a card for a cardholder.
+paths:
+  /card-segments:
+    post:
+      tags:
+        - benefit-allocations-segment-management
+      summary: Assign segment to a card
+      description: >-
+        Assigns segment to a card by sending a card number, segment code and
+        effective date in the input. The response is an array of bundles that
+        are assigned to the card. At this time this endpoint supports exactly
+        one segment code in the input. It is defined as an array for future
+        support.
+      operationId: assignSegment
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/AssignBenefitAllocationsRequest'
+      responses:
+        '200':
+          description: Contains bundles associated details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bundles'
+              examples:
+                AllocateBundlesExample:
+                  $ref: '#/components/examples/AllocateBundlesExample'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenErrorResponse'
+  /card-segments-replacements:
+    put:
+      tags:
+        - benefit-allocations-segment-management
+      summary: Replaces segment on a card
+      description: >-
+        Replaces the segment and the existing benefits with the new set of
+        benefits that are on the new Segment Code. The existing benefits are
+        expired, and new benefits are assigned. The response is an array of
+        bundles that are newly assigned to the card.
+      operationId: replaceSegment
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/ReplaceBenefitAllocationsRequest'
+      responses:
+        '200':
+          description: Contains bundles associated details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bundles'
+              examples:
+                AllocateBundlesExample:
+                  $ref: '#/components/examples/AllocateBundlesExample'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenErrorResponse'
+  /card-segments-cancellations:
+    put:
+      tags:
+        - benefit-allocations-segment-management
+      summary: Cancels segment from a card
+      description: >-
+        Cancels a segment and the benefits associated to the card for the input
+        segment. The response is an array of bundles that are cancelled on the
+        card. Exactly one input segment is supported at this time. It is defined
+        as an array for future support.
+      operationId: cancelSegment
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/CancelBenefitAllocationsRequest'
+      responses:
+        '200':
+          description: Contains bundles associated details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bundles'
+              examples:
+                CancelBundlesExample:
+                  $ref: '#/components/examples/CancelBundlesExample'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenErrorResponse'
+  /cards:
+    post:
+      tags:
+        - benefit-allocations-card-management
+      summary: Replace card number for a cardholder
+      description: >-
+        Replaces the card number associated with the user. The benefits on the
+        old card number are expired, and the same set of benefits are applied to
+        new card number.
+      operationId: cardReplacement
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/CardReplacementRequest'
+      responses:
+        '200':
+          description: Contains bundles associated details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bundles'
+              examples:
+                ReplaceCardExample:
+                  $ref: '#/components/examples/ReplaceCardExample'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenErrorResponse'
+    put:
+      tags:
+        - benefit-allocations-card-management
+      summary: Freeze/Unfreeze a card for benefits
+      description: >-
+        Freezes a card for benefits, or unfreezes the card for benefits.
+        isFrozen set to true freezes the card, and isFrozen set to false
+        unfreezes the card.
+      operationId: freezeUnfreeze
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/FrozenCardRequest'
+      responses:
+        '204':
+          $ref: '#/components/responses/BenefitAllocationEmptyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenErrorResponse'
+components:
+  requestBodies:
+    AssignBenefitAllocationsRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AssignBenefitAllocation'
+    ReplaceBenefitAllocationsRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ReplaceBenefitAllocation'
+    CancelBenefitAllocationsRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CancelBenefitAllocation'
+    CardReplacementRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CardReplacement'
+    FrozenCardRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FrozenCard'
+  responses:
+    BenefitAllocationEmptyResponse:
+      description: No content.
+    BadRequestErrorResponse:
+      description: Something was wrong with the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    ForbiddenErrorResponse:
+      description: Insufficient permissions for interacting with the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+  schemas:
+    ErrorWrapper:
+      description: A top level object for errors
+      type: object
+      required:
+        - errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/errors'
+    Error:
+      type: object
+      properties:
+        Source:
+          type: string
+          minLength: 0
+          maxLength: 200
+          description: Information about where the error happened
+          example: benefits allocation api
+        ReasonCode:
+          type: string
+          minLength: 0
+          maxLength: 200
+          description: An error code
+          example: Bad request
+        Description:
+          type: string
+          minLength: 0
+          maxLength: 10000
+          description: A description of the error
+          example: string
+        Recoverable:
+          type: boolean
+          description: Indicates if the request can be presented again for processing
+          example: string
+        Details:
+          type: string
+          minLength: 0
+          maxLength: 100000
+          description: More details about the error
+          example: Invalid JSON payload
+    errors:
+      required:
+        - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Object that contains the list of errors
+          items:
+            $ref: '#/components/schemas/Error'
+    AssignBenefitAllocation:
+      required:
+        - cardNumber
+        - segments
+      type: object
+      properties:
+        cardNumber:
+          type: integer
+          format: int64
+          description: 16 or 19 digit PAN number that will have a segment assigned to it.
+          example: 5291070000000000
+          pattern: ^(\d{16}|\d{19})$
+        segments:
+          type: array
+          description: >-
+            List of segments that will be assigned to the pan number. Only
+            accepts arrays containing one segment.
+          items:
+            $ref: '#/components/schemas/Segment'
+    Segment:
+      required:
+        - code
+        - effectiveDate
+      type: object
+      properties:
+        code:
+          maxLength: 250
+          minLength: 0
+          type: string
+          description: >-
+            Unique identifier representing a group of benefit bundles to be
+            assigned.
+          example: DART
+        effectiveDate:
+          type: string
+          description: >-
+            Date at which the benefit bundles associated to the segment code
+            will be active and available for use. Date should be in YYYY-MM-DD
+            format.
+          format: date
+          example: '2023-08-08'
+    ReplaceBenefitAllocation:
+      required:
+        - cardNumber
+        - oldSegmentCode
+        - newSegmentCode
+        - effectiveDate
+      type: object
+      properties:
+        cardNumber:
+          type: integer
+          format: int64
+          description: 16 or 19 digit PAN number that will have its segment replaced.
+          example: 5291070000000000
+          pattern: ^(\d{16}|\d{19})$
+        oldSegmentCode:
+          maxLength: 250
+          minLength: 0
+          type: string
+          description: >-
+            Unique identifier representing a group of benefit bundles that will
+            be expired and replaced.
+          example: DART
+        newSegmentCode:
+          maxLength: 250
+          minLength: 0
+          type: string
+          description: >-
+            Unique identifier representing the new group of benefit bundles that
+            will be assigned.
+          example: PRT
+        effectiveDate:
+          type: string
+          description: >-
+            Date at which the new segment will go in effect. Date should be in
+            YYYY-MM-DD format.
+          format: date
+          example: '2023-08-08'
+    CancelBenefitAllocation:
+      required:
+        - cardNumber
+        - segments
+      type: object
+      properties:
+        cardNumber:
+          type: integer
+          format: int64
+          description: >-
+            16 or 19 digit PAN number that will have it's segment
+            expired/cancelled.
+          example: 5291070000000000
+          pattern: ^(\d{16}|\d{19})$
+        segments:
+          type: array
+          description: >-
+            List of segments assigned to the card number that will be cancelled.
+            Only accepts arrays containing one segment.
+          items:
+            $ref: '#/components/schemas/SegmentToCancel'
+    SegmentToCancel:
+      required:
+        - code
+        - expiryDate
+      type: object
+      properties:
+        code:
+          maxLength: 250
+          minLength: 0
+          type: string
+          description: >-
+            Identifier that represents a group of benefit bundles to be
+            cancelled.
+          example: DART
+        expiryDate:
+          type: string
+          description: >-
+            Date at which the benefit bundles associated to the segment code
+            will be cancelled. Date should be in YYYY-MM-DD format.
+          format: date
+          example: '2024-07-24'
+    CardReplacement:
+      required:
+        - oldCardNumber
+        - newCardNumber
+        - effectiveDate
+      type: object
+      properties:
+        oldCardNumber:
+          type: integer
+          format: int64
+          description: >-
+            16 or 19 digit PAN number that will be expired and replaced along
+            with its benefit bundles.
+          example: 5291070000000000
+        newCardNumber:
+          type: integer
+          format: int64
+          description: >-
+            New 16 or 19 digit PAN number that will have the same unexpired set
+            of benefits as the old card number.
+          example: 5291070000000898
+        effectiveDate:
+          type: string
+          description: >-
+            Date at which the replace will be effective. Date should be in
+            YYYY-MM-DD format.
+          format: date
+          example: '2023-08-08'
+    FrozenCard:
+      required:
+        - cardNumber
+        - date
+        - isFrozen
+      type: object
+      properties:
+        cardNumber:
+          type: integer
+          format: int64
+          description: 16 or 19 digit PAN number that will be frozen/unfrozen.
+          example: 5291070000000000
+        date:
+          type: string
+          description: >-
+            Date at which the freeze will be effective. Date should be in
+            YYYY-MM-DD format.
+          format: date
+          example: '2023-08-08'
+        isFrozen:
+          type: boolean
+          description: >-
+            Variable to change whether or not the card number is frozen. True
+            for freeze and false for unfreeze.
+          example: true
+    Bundles:
+      type: object
+      properties:
+        bundles:
+          type: array
+          description: >-
+            List of eligible benefit bundles after a segment has been assigned
+            to a card number.
+          items:
+            $ref: '#/components/schemas/BundleDetails'
+    BundleDetails:
+      type: object
+      properties:
+        code:
+          maxLength: 6
+          minLength: 0
+          type: string
+          description: >-
+            Unique identifier of a benefit bundle that represents a group of
+            benefit instances available.
+          example: PC4657
+        effectiveDate:
+          type: string
+          description: >-
+            Effective date associated to the benefits in the benefit bundle.
+            Date will be in YYYY-MM-DD format.
+          format: date
+          example: '2023-08-08'
+        expiryDate:
+          type: string
+          description: >-
+            Expiry date associated to the benefits in the benefit bundle. Date
+            will be in YYYY-MM-DD format.
+          format: date
+          example: '2024-07-18'
+  examples:
+    AllocateBundlesExample:
+      value:
+        bundles:
+          - code: PC4657
+            effectiveDate: '2023-08-08'
+            expiryDate: null
+          - code: PC6323
+            effectiveDate: '2023-08-08'
+            expiryDate: null
+    CancelBundlesExample:
+      value:
+        bundles:
+          - code: PC4657
+            effectiveDate: '2023-08-08'
+            expiryDate: '2024-07-18'
+          - code: PC6323
+            effectiveDate: '2023-08-08'
+            expiryDate: '2024-07-18'
+    ReplaceCardExample:
+      value:
+        bundles:
+          - code: PC4657
+            effectiveDate: '2022-01-18'
+            expiryDate: '2024-07-18'
+          - code: PC6323
+            effectiveDate: '2022-01-18'
+            expiryDate: '2024-07-18'
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+            - Source: Benefit Allocation Service
+              ReasonCode: 50
+              Description: invalid card number, segment code, date
+              Recoverable: false
+              Details: invalid card number format
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+            - Source: Benefit Allocation Service
+              ReasonCode: PERMISSION_DENIED
+              Description: You don't seem authorized to do that
+              Recoverable: false
+              Details: cardNumber not mapped to requester
