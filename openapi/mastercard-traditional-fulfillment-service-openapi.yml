@@ -1,0 +1,587 @@
+openapi: 3.0.3
+info:
+  title: Loyalty Catalog API
+  description: >-
+    The Loyalty Catalog API supports item retrieval and program-specific
+    information, streamlining front-end redemption interfaces, and incorporates
+    Loyalty Rewards Order Management for updating order statuses.
+  contact:
+    name: API Support
+    url: https://developer.mastercard.com/support
+    email: apisupport@mastercard.com
+  version: 1.0.4
+servers:
+  - url: https://sandbox.api.mastercard.com/loyalty/rewards
+    description: Sandbox server
+  - url: https://api.mastercard.com/loyalty/rewards
+    description: Production server
+tags:
+  - name: catalogs
+    description: Operations specific to Rewards Catalog
+  - name: orders
+    description: Mastercard API for external vendor to provide orders status
+paths:
+  /catalogs:
+    get:
+      tags:
+        - catalogs
+      summary: Returns a list of all rewards catalogs for a given program.
+      description: >-
+        Allows the retrieval of the rewards catalog for a given program. This
+        method will provide all levels of the programs catalog hierarchy.
+      operationId: getCatalogs
+      parameters:
+        - $ref: '#/components/parameters/ProgramId'
+        - $ref: '#/components/parameters/Language'
+        - $ref: '#/components/parameters/ProductCode'
+      responses:
+        '200':
+          $ref: '#/components/responses/Catalog'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedErrorResponse'
+  /catalogs/{catalog_id}/items:
+    get:
+      tags:
+        - catalogs
+      summary: Returns a list of all reward items for a given catalog.
+      description: >-
+        Returns a list of all reward items for a given catalog and search
+        criteria.
+      operationId: getItems
+      parameters:
+        - $ref: '#/components/parameters/ProgramId'
+        - $ref: '#/components/parameters/CatalogId'
+        - $ref: '#/components/parameters/Language'
+        - $ref: '#/components/parameters/MinPoints'
+        - $ref: '#/components/parameters/MaxPoints'
+        - $ref: '#/components/parameters/Keyword'
+        - $ref: '#/components/parameters/ProductCode'
+      responses:
+        '200':
+          $ref: '#/components/responses/RewardItems'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedErrorResponse'
+  /vendors/{vendor_id}/orders/status:
+    post:
+      tags:
+        - orders
+      summary: API used by external Vendors to provide the orders status
+      description: >-
+        The Loyalty Rewards Order Management Mastercard API is used by external
+        vendor to provide orders status
+      operationId: updateOrderStatus
+      parameters:
+        - $ref: '#/components/parameters/VendorId'
+      requestBody:
+        $ref: '#/components/requestBodies/OrderStatusRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestOrderErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedOrderErrorResponse'
+components:
+  parameters:
+    CatalogId:
+      name: catalog_id
+      in: path
+      description: The internal Mastercard Catalog Hierarchy ID for the rewards program.
+      required: true
+      schema:
+        type: integer
+        format: int64
+      example: 1234
+    ProgramId:
+      name: program_id
+      in: query
+      description: Unique identifier of a rewards program.
+      required: true
+      schema:
+        type: integer
+        format: int64
+      example: 49631
+    ProductCode:
+      name: product_code
+      in: query
+      schema:
+        type: string
+      description: >-
+        The reward product identifier for the associated account, as defined by
+        the client and configured during the implementation of the program.
+      example: FIDOCASHBACK
+      required: false
+    Language:
+      name: language
+      in: query
+      description: >-
+        Language for the requested information. Customer preferred language
+        code. This must be a valid language code that is configured for
+        Mastercard program. This field is optional and will return English
+        (en_US), if not specified.
+      schema:
+        type: string
+      example: en_US
+    MinPoints:
+      name: min_points
+      in: query
+      description: Minimum point value for a reward item.
+      schema:
+        type: integer
+      example: 0
+    MaxPoints:
+      name: max_points
+      in: query
+      description: Maximum point value for a reward item.
+      schema:
+        type: integer
+      example: 9999
+    Keyword:
+      name: keyword
+      in: query
+      description: Filters reward items based on the keywords provided.
+      schema:
+        type: string
+      example: catalog
+    VendorId:
+      name: vendor_id
+      in: path
+      description: The internal Mastercard vendor Id for order fulfilment.
+      required: true
+      schema:
+        type: string
+      example: carltonone
+  examples:
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+            - Source: mrs-catalog-api
+              ReasonCode: INVALID_CLIENT_ID
+              Description: ClientId doesn't have access to the requested service.
+              Recoverable: false
+    UnauthorizedOrderExample:
+      value:
+        Errors:
+          Error:
+            - Source: rewards-order-management
+              ReasonCode: INVALID_CLIENT_ID
+              Description: ClientId doesn't have access to the requested service.
+              Recoverable: false
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+            - Source: mrs-catalog-api
+              ReasonCode: MISSING_REQUIRED_FIELD
+              Description: program_id parameter cannot be null.
+              Recoverable: false
+    BadOrderRequestExample:
+      value:
+        Errors:
+          Error:
+            - Source: rewards-order-management
+              ReasonCode: >-
+                MISSING_REQUIRED_FIELD_VENDORS_UPDATE_ORDER_REQUEST_LIST[0].MC_ORDER_ID
+              Description: McOrderId is blank or null.
+              Recoverable: false
+    OrderStatusExample:
+      value:
+        - orderId: 656afd7-2396-54345-34545
+          mcOrderId: afd72396-b9c0-11ed-afa1-0242ac120002
+          status: FAILED
+          errorCode: 1001
+          description: >-
+            [Combination of ExternalOrderId: (656afd7-2396-54345-34545) and
+            OrderId: (afd72396-b9c0-11ed-afa1-0242ac120002) invalid.]
+  schemas:
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of the error
+          example: mrs-catalog-api
+        ReasonCode:
+          type: string
+          description: >-
+            A unique constant identifying the error case encountered during API
+            request processing.
+          example: INVALID_INPUT
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Invalid Reward Catalog HierarchyId.
+        Recoverable:
+          type: boolean
+          description: >-
+            Indicates whether this error will always be returned for this
+            request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: >-
+            Where appropriate, indicates detailed information about the data
+            received.
+          example: Invalid Details
+      description: Error Details
+    Errors:
+      required:
+        - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    ErrorsWrapper:
+      required:
+        - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    CatalogDetails:
+      type: object
+      properties:
+        catalogs:
+          type: array
+          description: catalogs
+          items:
+            $ref: '#/components/schemas/Catalog'
+    RewardItems:
+      type: object
+      properties:
+        rewardItems:
+          type: array
+          description: rewardItems
+          items:
+            $ref: '#/components/schemas/RewardItem'
+    RewardItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: >-
+            The internal Mastercard ID assigned to the program matrix (Reward)
+            item.
+          example: 74568
+        shortDescription:
+          type: string
+          description: The short description of the reward item.
+          example: $25 Olive Garden
+          maxLength: 150
+        longDescription:
+          type: string
+          description: The long description of the reward item.
+          example: $25 Olive Garden Gift Card
+          maxLength: 150
+        imageURL:
+          type: string
+          description: The URL that links to the image used by the reward item.
+          example: >-
+            https://www.loyaltygateway.com/rewards/ImageDisplayServlet?
+            file=/apps_01/mcrewards_content/Catalog/en_US/items/OliveGC25.jpg
+          maxLength: 150
+        pointValue:
+          type: number
+          description: The point value of the reward item.
+          example: 25.23
+        shippingAddressRequired:
+          type: boolean
+          description: >-
+            Indicates whether a Shipping Address (Physical or PO Box Address) is
+            required.
+          example: true
+        isRecurringType:
+          type: boolean
+          description: >-
+            Reward Matrix Item is allowed for recurring redemptions only if the
+            program is configured for recurring redemptions.
+          example: true
+        isRedeemable:
+          type: boolean
+          description: Indicates if the reward item can be redeemed.
+          example: true
+        physicalAddressRequired:
+          type: boolean
+          description: >-
+            Indicates whether the reward item will be shipped to a physical
+            address (not a PO Box address).
+          example: true
+        isSingleQuantityType:
+          type: boolean
+          description: >-
+            Indicates whether the reward item can only be redeemed with a
+            quantity of one. This is configured at the reward category level, in
+            MRS.
+          example: false
+        emailAddressRequired:
+          type: boolean
+          description: >-
+            Indicates if an email address is required for the reward Item when
+            redeemed. This is typical for eCerts that must be delivered via
+            email.
+          example: false
+        orderInformation:
+          type: string
+          description: >-
+            The shipping message associated with the reward matrix items reward
+            category in the requested language.
+          example: Please allow 7-10 days for gift cards to arrive
+          maxLength: 150
+        personalizationInformation:
+          type: object
+          required:
+            - personalizationInformation
+          properties:
+            isRequired:
+              type: boolean
+              description: >-
+                Indicates if it is required to enter personalized information
+                for the reward item.
+              example: false
+            length:
+              type: integer
+              format: int64
+              description: >-
+                The number of allowable characters in the personalization
+                message.
+              example: 2000
+            label:
+              type: string
+              description: >-
+                The label displayed on the personalization information field in
+                the requested language.
+              example: No Translation Available
+              maxLength: 4000
+        redemptionFees:
+          type: array
+          description: redemptionFees
+          items:
+            $ref: '#/components/schemas/RedemptionFees'
+    RedemptionFees:
+      type: object
+      properties:
+        description:
+          type: string
+          description: Description of the fee associated with this reward item.
+          example: Point purchase
+          maxLength: 50
+        amount:
+          type: number
+          description: The fee associated with this reward item.
+          example: 50
+        quantityLevel:
+          type: boolean
+          description: >-
+            Indicates if the redemption fee amount will be multiplied by the
+            quantity on the redemption.
+          example: true
+    Catalog:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: >-
+            The internal Mastercard catalog hierarchy ID for the rewards
+            program.
+          example: 8032
+        name:
+          type: string
+          description: >-
+            The description for the reward catalog hierarchy level in the
+            requested language.
+          example: Gift Cards
+          maxLength: 40
+        imageURL:
+          type: string
+          description: >-
+            The URL where the reward catalog hierarchy image can be referenced
+            from.
+          example: >-
+            https://www.loyaltygateway.com/rewards/ImageDisplayServlet?
+            file=/apps_01/mcrewards_content/Catalog/en_US/categories/noimage.jpg
+          maxLength: 150
+        parentCatalogId:
+          type: integer
+          format: int64
+          description: >-
+            The parent reward catalog hierarchy to which the reward catalog
+            hierarchy is directly under. A null value indicates that the reward
+            catalog hierarchy is a top-level hierarchy.
+          example: 7991
+        hasRewardItems:
+          type: boolean
+          description: >-
+            Indicates that the reward catalog hierarchy is the lowest level and
+            therefore has the reward items associated to it.
+          example: true
+    OrderStatusArray:
+      type: array
+      description: order status array list
+      items:
+        $ref: '#/components/schemas/OrderStatus'
+    OrderStatus:
+      type: object
+      properties:
+        orderId:
+          type: string
+          description: Order Id of Vendor
+          example: 656afd7-2396-54345-34545
+        mcOrderId:
+          type: string
+          description: Order Id of Mastercard
+          example: afd72396-b9c0-11ed-afa1-0242ac120002
+        orderItems:
+          type: array
+          description: order items list
+          items:
+            $ref: '#/components/schemas/OrderItemStatus'
+        status:
+          type: string
+          description: Order Status
+          example: Pending
+    OrderItemStatus:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Order Item Id of Vendor
+          example: order-item-1
+        mcId:
+          type: string
+          description: Order Item Id of Mastercard
+          example: efa03f08-b9c0-11ed-afa1-0242ac120002
+        status:
+          type: string
+          description: Item status
+          example: Pending
+        trackingNumber:
+          type: string
+          description: Order tracking number
+          example: Track123
+        trackingUrl:
+          type: string
+          description: Order tracking url
+          example: https://tracking-url.com/order/123
+        errors:
+          type: array
+          description: order items error list
+          items:
+            $ref: '#/components/schemas/OrderItemError'
+        histories:
+          type: array
+          description: history detail of order item
+          items:
+            $ref: '#/components/schemas/History'
+    OrderItemError:
+      type: object
+      properties:
+        fieldName:
+          type: string
+          description: field name
+          example: address1
+        code:
+          type: string
+          description: errorcode
+          example: GRS_1001
+        message:
+          type: string
+          description: error message
+          example: address1 is required
+    History:
+      type: object
+      properties:
+        orderItemNumber:
+          type: string
+          description: order_item_number
+          example: order-item-1
+        eventType:
+          type: string
+          description: event_type
+          example: note
+        eventDate:
+          type: string
+          description: event_date
+          example: '2023-10-03T21:05:10Z'
+        note:
+          type: string
+          description: note
+          example: >-
+            GRS order item created for partner system order number:
+            SL_OCT-03-2023-16-431 Status is pending.
+  requestBodies:
+    OrderStatusRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrderStatusArray'
+  responses:
+    Catalog:
+      description: Rewards catalog response for a given program.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CatalogDetails'
+    RewardItems:
+      description: >-
+        Reward Matrix Item details result for a given set of items that are
+        associated with a catalog hierarchy.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RewardItems'
+    BadRequestErrorResponse:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    UnauthorizedErrorResponse:
+      description: User is not found in the reward programs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    SuccessResponse:
+      description: Status updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrderStatusArray'
+          examples:
+            SuccessRequestExample:
+              $ref: '#/components/examples/OrderStatusExample'
+    UnauthorizedOrderErrorResponse:
+      description: User does not have access to the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedOrderExample'
+    BadRequestOrderErrorResponse:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadOrderRequestExample'
