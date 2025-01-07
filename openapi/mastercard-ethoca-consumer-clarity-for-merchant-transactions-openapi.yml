@@ -1,0 +1,3292 @@
+openapi: 3.0.3
+info:
+  title: Consumer Clarity Merchant API
+  description: >-
+    The Consumer Clarity Merchant API provides endpoints for merchants and
+    issuers with Order details and helps merchants and issuers reduce disputes
+    and friendly fraud.
+  termsOfService: https://www.ethocaweb.com/consumerclarity/assets/static/termsOfUse.html
+  contact:
+    name: Consumer Clarity Support
+    email: productintegration@ethoca.com
+  license:
+    name: Copyright (c) 2023 Ethoca Limited. All Rights Reserved.
+    url: https://www.ethoca.com/terms-of-use
+  version: 4.2.0
+externalDocs:
+  description: Learn more about the Consumer Clarity Merchant API
+  url: >-
+    https://developer.mastercard.com/ethoca-consumer-clarity-for-merchants/documentation/
+servers:
+  - url: https://sandbox.api.ethocaweb.com/
+    description: Ethoca Sandbox Test url.
+  - url: https://mtf.api.ethocaweb.com/
+    description: Ethoca Mtf url.
+  - url: https://api.ethocaweb.com/
+    description: Ethoca prod url.
+tags:
+  - name: Transactions
+    description: transactions controller post end point
+  - name: HealthChecks
+    description: Health Check controller get end point
+paths:
+  /api/orders:
+    post:
+      tags:
+        - Transactions
+      summary: Searches order details based on the search criteria
+      description: Search for orders based on transaction fields that you currently support
+      operationId: getTransactionDetails
+      parameters:
+        - $ref: '#/components/parameters/eth_date'
+        - $ref: '#/components/parameters/authorization'
+      requestBody:
+        $ref: '#/components/requestBodies/OrderApi'
+      responses:
+        '200':
+          $ref: '#/components/responses/OrderApiAcknowledgement'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+  /api/orders/healthchecks:
+    get:
+      tags:
+        - HealthChecks
+      operationId: getHealthDetails
+      description: Health or Echo or Heartbeat endpoint ensuring that the API is running
+      summary: Health endpoint to ensure confirm connectivity to transaction API
+      responses:
+        '200':
+          $ref: '#/components/responses/HealthCheckResponse'
+components:
+  parameters:
+    eth_date:
+      name: X-Eth-Date
+      in: header
+      description: Date time in UTC format when request was sent to the Merchant API
+      required: false
+      example: '2017-06-19T13:18:16Z'
+      schema:
+        type: string
+        minLength: 10
+        maxLength: 25
+    authorization:
+      name: Authorization
+      in: header
+      description: >-
+        Every request sent to the Merchant API must be authorized. To facilitate
+        authorization, every request must contain a time stamped, symmetric-key
+        based HMAC signature header. The HMAC signature ensures that the API
+        secret key and key ID are exchanged securely between Ethoca and the
+        merchant out-of-band. The entropy of the issued API key must be no less
+        than 128 bits. ETHOCA-SHA1 KeyRef=<API
+        Key_ID>,Signature=<base64UrlSafe_hmac_signature>
+      required: true
+      example: 1c723b9ddda75f6348cd939c5a3140f58e58c70d
+      schema:
+        type: string
+  requestBodies:
+    OrderApi:
+      description: The request object Merchant API expects
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrderApi'
+  responses:
+    HealthCheckResponse:
+      description: |-
+        The code indicates the response.
+          - OK = The API is up and running
+          - failure = The API is not running
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HealthCheckResponse'
+    OrderApiAcknowledgement:
+      description: The response object Merchant API returns
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrderApiAcknowledgement'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+    MethodNotAllowed:
+      description: Method Not Allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            MethodNotAllowedExample:
+              $ref: '#/components/examples/MethodNotAllowedExample'
+  examples:
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+            - Source: Service
+              ReasonCode: Missing attributes
+              Description: request is missing mandatory attributes
+              Recoverable: false
+              Details: request is missing mandatory attributes
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+            - Source: Service
+              ReasonCode: Forbidden
+              Description: request is not authorized
+              Recoverable: false
+              Details: request is not authorized
+    MethodNotAllowedExample:
+      value:
+        Errors:
+          Error:
+            - Source: Service
+              ReasonCode: Method not allowed
+              Description: Method is not allowed
+              Recoverable: false
+              Details: Method is not allowed
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+            - Source: Service
+              ReasonCode: Unauthorized
+              Description: request is not authenticated
+              Recoverable: false
+              Details: request is not authenticated
+  schemas:
+    PaymentType:
+      title: Transaction Card Type
+      type: string
+      minLength: 2
+      maxLength: 8
+      pattern: ^[A-Za-z0-9]{2,8}$
+      description: |
+        The card brand or network as provided by the issuer
+
+        Allowed values:
+          - AMEX
+          - DISCOVER
+          - MC
+          - VISA
+
+        Definition of allowed values:
+          - AMEX: American Express
+          - DISCOVER: Discover
+          - MC: Mastercard
+          - VISA: Visa
+      example: MC
+    CardLastFour:
+      title: Card Last Four
+      minLength: 4
+      maxLength: 4
+      type: string
+      pattern: ^\d{4}$
+      description: Last four characters of the card used in the transaction
+      example: '1234'
+    CurrencyCode:
+      minLength: 3
+      maxLength: 3
+      type: string
+      description: >-
+        Currency code applied to order. This currency will apply to all
+        amount/price fields throughout entire payload. Must be three character
+        ISO currency code (https://en.wikipedia.org/wiki/ISO_4217#Active_codes)
+      example: USD
+    HealthCheckResponse:
+      type: string
+      maxLength: 7
+      minLength: 2
+      description: |-
+        The code indicates if the API is up or not
+          - OK = The API is up and running
+          - failure = The API is down
+      example: OK
+    OrderApi:
+      type: object
+      required:
+        - requestReference
+        - searchCriteria
+      properties:
+        requestReference:
+          $ref: '#/components/schemas/RequestReference'
+        searchCriteria:
+          $ref: '#/components/schemas/SearchCriteria'
+    RequestReference:
+      title: Request References
+      description: Request Information details, such as tracking details
+      type: object
+      properties:
+        originatorChannel:
+          title: Original Requester Channel
+          type: string
+          minLength: 1
+          maxLength: 20
+          description: |
+            Example value :
+              - DIGITAL
+              - CALL_CENTRE
+              - FIRST_PARTY_TRUST
+          example: DIGITAL
+        originatorId:
+          title: Requester ID
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Hashed Requesters/Aggregator Issuer ID
+          example: 420f0845bd9b808abd7acc053b0b372ceb461edd584e9b9db02b35304255715f
+        sourceId:
+          title: Source ID
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Aggregator's Actual Issuer ID Hashed
+          example: 66666688ggg0845bd9b808abd7acc053b0b372ceb461edd584e9b9db02b324gf
+        originatorDescription:
+          title: Requester Description
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Description about the issuer
+          example: Test Issuer
+        correlationId:
+          title: Correlation Id
+          description: Correlation ID between Ethoca and merchant tracking
+          type: string
+          minLength: 1
+          maxLength: 201
+          example: zebj8evpeo
+        locale:
+          type: string
+          minLength: 5
+          maxLength: 5
+          description: >
+            The locale, or language-country combination, associated with the
+            caller of the service in ISO 639-1 and ISO-3166-1 format
+
+            - 'en-US'
+
+            - 'en-CA'
+
+            - 'en-GB'
+
+            - 'es-ES'
+
+            - 'es-MX'
+
+            - 'es-US'
+
+            - 'fr-CA'
+
+            - 'fr-FR'
+
+            - 'pt-BR'
+
+            - 'pt-PT'
+
+            - 'he-IL'
+          example: en-US
+    SearchCriteria:
+      title: Search Criteria for order lookup
+      description: Parameters used to look up order
+      type: object
+      properties:
+        paymentType:
+          title: Transaction Card Type
+          type: string
+          minLength: 2
+          maxLength: 8
+          description: |
+            The card brand or network as provided by the issuer
+
+            Allowed values:
+              - AMEX
+              - DISCOVER
+              - MC
+              - VISA
+
+            Definition of allowed values:
+              - AMEX: American Express
+              - DISCOVER: Discover
+              - MC: Mastercard
+              - VISA: Visa
+          example: MC
+        transactionIdentifierType:
+          type: string
+          minLength: 1
+          maxLength: 20
+          description: >
+            Payment type-specific transaction identifier type associated with
+            the value specified in transactionIdentifierValue.
+
+
+            Current values:
+              - BANKNET_REF_NUM
+              - INVOICE_REF_NUM
+
+            Definition of current values:
+
+            - Mastercard: DE 63, Subfield 2: Banknet Reference Number
+
+            - American Express: TAB Field 26: Invoice/Reference Number
+          example: BANKNET_REF_NUM
+        transactionIdentifierValue:
+          title: Transaction Identifier Value
+          type: string
+          minLength: 1
+          maxLength: 30
+          description: >-
+            Transaction identifier value associated with the type specified in
+            transactionIdentifierType
+          example: T123456
+        acquirerReferenceNumber:
+          title: Acquirer Reference Number (ARN)
+          minLength: 23
+          maxLength: 23
+          type: string
+          description: Acquirer Reference Number of the transaction
+          example: '12345678901234567890123'
+        transactionDateTime:
+          title: Transaction Date and/or Time
+          minLength: 10
+          maxLength: 25
+          type: string
+          description: >
+            Date, time, and time zone of the authorization of the transaction 
+
+            (for example, "2020-06-18T17:11:05-05:00"), OR Date and time of the 
+
+            transaction in Coordinated Universal Time (UTC) (for example, 
+
+            "2020-06-18T17:11:05+00:00"), OR If time or time zone is unknown, 
+
+            then date of the transaction (for example, "2020-06-18"). ISO 8601 
+
+            format. This is the date and time of the authorization of the 
+
+            transaction, not the date and time of the settlement of the
+            transaction.
+          example: '2020-06-18T17:11:05-05:00'
+        cardFirstSix:
+          title: Card First Six
+          minLength: 6
+          maxLength: 6
+          type: string
+          pattern: ^\d{6}$
+          description: First six characters of the card used in the transaction
+          example: '123456'
+        cardLastFour:
+          title: Card Last Four
+          minLength: 4
+          maxLength: 4
+          type: string
+          pattern: ^\d{4}$
+          description: Last four characters of the card used in the transaction
+          example: '1234'
+        issuerAuthorizationCode:
+          title: Issuer Authorization Code
+          maxLength: 6
+          minLength: 6
+          type: string
+          description: Issuer authorization code for the transaction
+          example: '123456'
+        transactionAmount:
+          title: Transaction Value
+          minLength: 1
+          maxLength: 12
+          type: string
+          description: >
+            Total amount value associated with the transaction.
+
+            <br/><br/>Decimal point period is expected to denote separation of
+            the fractional suffix
+
+            from the rest of the amount, if applicable for the currency. Decimal
+
+            point period must not be the first character. Examples:<br>- USD
+            exponent
+
+            is 2, so $250 USD value should be represented as 250.00, 34&cent;
+            USD
+
+            value should be represented as 0.34<br>- JPY exponent is 0, so
+            &yen;250
+
+            JPY value should be represented as 250
+          example: '250.35'
+        transactionCurrencyCode:
+          title: Transaction Currency Code
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: >-
+            Alphabetic currency code associated with the value in ISO 4217
+            format
+          example: USD
+        merchantId:
+          title: Merchant Identifier
+          description: >-
+            The alphanumeric ID of the sub-merchant associated with the purchase
+            details. Required for channel partner
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: GHF5F67DFSD468GJJXH78
+        cardAcceptorId:
+          title: Card Acceptor Id
+          description: >-
+            An identifier for the store location or transaction point. Also
+            known as  Card Acceptor ID and it is assigned by the merchant
+            acquirer.
+          type: string
+          minLength: 1
+          maxLength: 15
+          example: 12345671234567
+        cardAcceptorName:
+          title: Card Acceptor Name
+          description: >-
+            Merchant 'doing business as' name, or website name<br>- Mastercard:
+            DE 43, Subfield 1; Card Acceptor Name<br>- Visa: TC 05, positions
+            92-116; Merchant Name
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: MicrosoftXBox
+        cardAcceptorLocation:
+          title: Card Acceptor Location
+          description: >-
+            Merchant city, telephone number, email address, or URL<br>-
+            Mastercard: DE 43, Subfield 3: Card Acceptor City<br>- Visa: TC 05,
+            positions 117-129: Merchant City
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: Austin
+        cardAcceptorRegionCode:
+          title: CardAcceptor Region Code
+          description: >-
+            The abbreviation for a subdivision (State, Province, Parish,
+            Territory, etc.) provided in the ISO 639-1 and ISO-3166-2 format
+          type: string
+          minLength: 1
+          maxLength: 3
+          pattern: ^[A-Za-z0-9]*$
+          example: TX
+        cardAcceptorCountryCode:
+          title: CardAcceptor Country Code
+          description: >-
+            The Country Code associated with the cardAcceptorNames location
+            data.
+          type: string
+          minLength: 2
+          maxLength: 3
+          example: US
+    AccountProfile:
+      type: object
+      properties:
+        email:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: ^[A-Za-z0-9]{1,200}$
+          description: Customer's email address for communication
+          example: first.user@gmail.com
+        phone:
+          minLength: 3
+          maxLength: 30
+          type: string
+          description: >-
+            Primary phone number on the account; include the country code and
+            any applicable separators
+          example: +1-234-567-8901
+        userIdName:
+          minLength: 1
+          maxLength: 65
+          type: string
+          description: >-
+            Merchant unique identifier for customer (if email address is used as
+            the User ID, this field should still be populated)
+          example: testuser123
+        customerNameDuration:
+          type: integer
+          minimum: 0
+          maximum: 99999
+          description: >-
+            Duration from customer registration to purchase date (in full
+            months). If less than 1 full month or 30 days, then use zero.
+          format: int32
+          example: 1
+        accountCreationDateTime:
+          minLength: 20
+          maxLength: 20
+          type: string
+          format: date-time
+          description: >-
+            Date & Time the account was created or opened. (String based date
+            time representation in International Date Time Format (ISO 8601) in
+            UTC - yyyy-mm-ddThh:mm:ssZ)
+          example: '2017-06-19T13:18:18Z'
+        accountLastUsageDateTime:
+          type: string
+          description: >-
+            Date of the last access or usage or transaction for this account
+            (note that this may be different from lastLoginDate if customer uses
+            guest checkout, etc.)(String based date time representation in
+            International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          minLength: 20
+          maxLength: 20
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        totalSpendAmount:
+          type: string
+          minLength: 1
+          maxLength: 12
+          description: >-
+            Total amount spent on this account since it was created. Maximum
+            number of fractional digits supported is 2.
+          example: '250.35'
+        cardholderVisitCountPrior:
+          type: integer
+          minimum: 0
+          maximum: 99999
+          description: Number of visits from cardholder prior to purchase transaction date
+          format: int32
+          example: 7
+        cardholderVisitCountSince:
+          type: integer
+          minimum: 0
+          maximum: 99999
+          description: >-
+            Number of visits from cardholder since purchase date to Purchase
+            Inquiry transaction date
+          format: int32
+          example: 9
+        monthsSinceFirstPurchase:
+          type: integer
+          minimum: 0
+          maximum: 99999
+          description: Months since the first purchase made by account holder and device
+          format: int32
+          example: 2
+        countOfPurchasesSinceRegistration:
+          type: integer
+          minimum: 0
+          maximum: 99999
+          description: Number of purchases since account and device were registered
+          format: int32
+          example: 90
+        countOfDisputedPurchasesSinceRegistration:
+          type: integer
+          minimum: 0
+          maximum: 99999
+          description: >-
+            Number of disputed purchases since account and device were
+            registered
+          format: int32
+          example: 9
+        additionalRelatedDisputes:
+          type: integer
+          minimum: 0
+          maximum: 99999
+          description: Number of additional related disputes
+          format: int32
+          example: 3
+        disputeHistoryMatch:
+          type: boolean
+          description: >-
+            Indicates whether this cardholder has disputed orders with this
+            merchant in the past 6 months
+          example: true
+        lastLoginDateTime:
+          minLength: 20
+          maxLength: 20
+          type: string
+          description: >-
+            Date of last login to customer account (string based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        membershipSubscriptionType:
+          minLength: 1
+          maxLength: 75
+          type: string
+          description: >-
+            Additional information about type of membership or subscription.
+            Example: level in membership, annual subscription, etc.
+          example: Gold Membership
+        goodOrders90DaysOld:
+          type: boolean
+          description: >-
+            Indicates whether the Device ID and bank card match what was used
+            with the current disputed transaction and if there are previous
+            orders that are at least 90 days old
+          example: true
+        accountPrimaryDeviceId:
+          minLength: 1
+          maxLength: 40
+          type: string
+          description: Primary Device ID
+          example: JCKJ78UY666L90
+        accountPrimaryDeviceName:
+          minLength: 1
+          maxLength: 20
+          type: string
+          description: Primary Device Name
+          example: Mark's iPad
+        accountAuthenticationConducted:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: >-
+            Type of authentication conducted (2.F1) (Password provided and
+            authenticated, any levels in between?, guest checkout)
+          example: Password Authentication
+        passwordLastUpdatedDateTime:
+          description: >-
+            Password last updated date and time. (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          type: string
+          minLength: 20
+          maxLength: 20
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        passwordAuthenticationDateTime:
+          type: string
+          description: >-
+            Password Authentication date and time (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          minLength: 20
+          maxLength: 20
+          example: '2017-06-19T13:18:18Z'
+        emailAccountHistory:
+          type: integer
+          minimum: 0
+          maximum: 99999
+          description: >-
+            Duration of email account since first registered (by initial
+            purchase - in full months). If less than 1 full month or 30 days,
+            then use zero
+          format: int32
+          example: 9
+        accountCreationIpAddress:
+          minLength: 1
+          maxLength: 45
+          type: string
+          description: IP Address for device used when creating the account
+          example: 127.0.0.1
+        name:
+          $ref: '#/components/schemas/NameType'
+        accountShippingAddress:
+          $ref: '#/components/schemas/AddressType'
+        accountBillingAddress:
+          $ref: '#/components/schemas/AddressType'
+        consequence:
+          $ref: '#/components/schemas/Consequence'
+        historicOrders:
+          type: array
+          description: List of the historic orders for this account
+          items:
+            $ref: '#/components/schemas/HistoricOrder'
+    AddressType:
+      type: object
+      properties:
+        line1:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: The street detail for the address
+          example: 223 Blythwood Rd
+        line2:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: The secondary street detail for the address
+          example: Main floor
+        line3:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: The tertiary street detail for the address
+          example: Main floor
+        city:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: The city detail for the address
+          example: Toronto
+        countrySubdivision:
+          minLength: 1
+          maxLength: 80
+          type: string
+          description: The state/province detail for the address
+          example: Ontario
+        postalCode:
+          minLength: 1
+          maxLength: 10
+          type: string
+          description: The zip/postal detail for the address
+          example: M4N1A7
+        country:
+          minLength: 1
+          maxLength: 80
+          type: string
+          description: The country detail for the address
+          example: Canada
+        latitude:
+          minLength: 1
+          maxLength: 11
+          type: string
+          description: The latitude coordinate of the address
+          example: '30.286254'
+        longitude:
+          minLength: 1
+          maxLength: 11
+          type: string
+          description: The longitude coordinate of the address
+          example: '-97.739378'
+    AirTravel:
+      type: object
+      description: List of air travel reservations
+      required:
+        - id
+        - passengerNameRecord
+        - designatorCode
+        - flightNumber
+        - originAirportCode
+        - destinationAirportCode
+      properties:
+        id:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: >-
+            AirTravel unique identifier (merchant generated sequence-based ID
+            for each reservation, for example 1, 2, 3, 4...)
+          example: 1
+        passengerNameRecord:
+          minLength: 1
+          maxLength: 6
+          type: string
+          description: The Passenger Name Record or Record Locator for the reservation
+          example: XY8UI9
+        designatorCode:
+          minLength: 2
+          maxLength: 2
+          type: string
+          description: The two digit IATA airline code
+          example: AI
+        airlineName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: The full name of the airline
+          example: Paradise Island Airlines
+        flightNumber:
+          minLength: 1
+          maxLength: 10
+          type: string
+          description: >-
+            The flight number assigned to that travel leg, not the full flight
+            designator
+          example: '8788'
+        flightPrice:
+          minLength: 1
+          maxLength: 12
+          type: string
+          description: The cost of a single flight on the itinerary
+          example: '245.99'
+        originAirportCode:
+          minLength: 3
+          maxLength: 3
+          type: string
+          description: The 3 digit IATA code for the originating airport
+          example: LAX
+        originAirportName:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: The full name of the originating airport
+          example: Metropolis International Airport
+        destinationAirportCode:
+          minLength: 3
+          maxLength: 3
+          type: string
+          description: The 3 digit IATA code for the destination airport
+          example: ISL
+        destinationAirportName:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: The full name of the destination airport
+          example: Smallville Regional Airport
+        scheduledDepartureDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            The scheduled time of departure (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        departureTimezone:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: The timezone of the departure as it appears in the TZ database
+          example: Europe/Paris
+        actualDepartureDateTime:
+          minLength: 20
+          maxLength: 20
+          type: string
+          description: >-
+            The actual time of departure (String based date/time representation
+            in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        scheduledArrivalDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            The scheduled time of arrival (String based date/time representation
+            in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        arrivalTimezone:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: The timezone of the arrival as it appears in the TZ database
+          example: Europe/Istanbul
+        actualArrivalDateTime:
+          minLength: 20
+          maxLength: 20
+          type: string
+          description: >-
+            The actual time of arrival (String based date/time representation in
+            International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        fareClass:
+          minLength: 1
+          maxLength: 25
+          type: string
+          description: The type of fare the passenger paid (such as First Class or Economy)
+          example: Economy
+        flightStatus:
+          type: string
+          minLength: 7
+          maxLength: 11
+          description: |
+            The status of the flight
+
+            Allowed values:
+              - Arrived
+              - Cancelled
+              - Delayed
+              - Departed
+              - Diverted
+              - En_Route
+              - Past_Flight
+              - Scheduled
+          example: Arrived
+        mealInfo:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: The information about the meal that was requested/available
+          example: Available
+        specialRequest:
+          minLength: 1
+          maxLength: 500
+          type: string
+          description: >-
+            Any special requests or instructions for the flight (such as lap
+            child, wheelchair, or unaccompanied minor)
+          example: Wheelchair Requested.
+        passengers:
+          type: array
+          description: The list of passengers flying on this particular flight
+          items:
+            $ref: '#/components/schemas/Passenger'
+    Consequence:
+      type: object
+      properties:
+        consequenceStatus:
+          type: boolean
+          description: >-
+            Indicates whether there is a consequence/merchant action for this
+            account/transaction if it is disputed
+          example: true
+        consequence:
+          minLength: 1
+          maxLength: 500
+          type: string
+          description: >-
+            Free form text displayed to issuer that can be shared verbatim with
+            the cardholder. Can be specific to customer or generated in real
+            time based on other aspects of order
+          example: No Change/Cancellation is Allowed.
+    CreditReimbursement:
+      type: object
+      description: List of credits for the order
+      required:
+        - id
+        - creditReimbursementDateTime
+      properties:
+        id:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: >-
+            Credit Reimbursement Object ID (merchant generated sequence based ID
+            for each credit, for example 1, 2, 3, 4...)
+          example: '90'
+        creditReimbursementDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Credit Reimbursement Date (String based date/time representation in
+            International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        creditReimbursementMethod:
+          minLength: 1
+          maxLength: 20
+          type: string
+          description: Method of credit
+          example: Cheque
+        voucherDetails:
+          minLength: 1
+          maxLength: 1000
+          type: string
+          description: Description of the voucher
+          example: Voucher
+        voucherExpirationDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Date voucher expires, if applicable (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        voucherAmount:
+          type: string
+          minLength: 1
+          maxLength: 12
+          description: >-
+            Amount of voucher (maximum number of fractional digits supported is
+            2)
+          example: '250.35'
+        voucherDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Date voucher was issued (String based date/time representation in
+            International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        voucherReference:
+          minLength: 1
+          maxLength: 255
+          type: string
+          description: Voucher reference identifier
+          example: 5435KJH45Y123
+        creditAmount:
+          type: string
+          minLength: 1
+          maxLength: 12
+          description: >-
+            Amount of credit applied (maximum number of fractional digits
+            supported is 2)
+          example: '250.35'
+        creditReference:
+          minLength: 1
+          maxLength: 255
+          type: string
+          description: Credit reference information
+          example: Credit report
+    Delivery:
+      type: object
+      description: List of deliveries created for the order
+      properties:
+        id:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: >-
+            Unique identifier for delivery item (merchant generated
+            sequence-based ID for each delivery, for example 1, 2, 3, 4...)
+          example: '32'
+        digitalDelivery:
+          $ref: '#/components/schemas/DigitalDelivery'
+        physicalDelivery:
+          $ref: '#/components/schemas/PhysicalDelivery'
+    DigitalDelivery:
+      type: object
+      properties:
+        digitalDeliveryDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Date and Time the product was downloaded/delivered to the user
+            (String based date/time representation in International Date Time
+            Format (ISO 8601) in UTC - yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        digitalDeliveryNotificationMessageSent:
+          type: boolean
+          description: Was a delivery notification message sent to user account?
+          example: true
+        digitalDeliveryNotificationMethod:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: >-
+            Indicates how the delivery notification message was provided (email,
+            SMS, etc.)
+          example: Email
+        digitalDeliveryNotificationMessageDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Date the delivery notification was sent to the user. (String based
+            date/time representation in International Date Time Format (ISO
+            8601) in UTC - yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        downloadStartDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Download start date and time (String based date/time representation
+            in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        downloadCompletionDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Download completion date and time (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        digitalDeliveryIpAddress:
+          minLength: 1
+          maxLength: 45
+          type: string
+          description: Device IP address that was used at the time of the  digital download
+          example: 129.0.0.1
+    Discount:
+      type: object
+      description: List of discounts applied to the order
+      required:
+        - id
+        - description
+        - amount
+      properties:
+        id:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: >-
+            Unique identifier for each discount record (merchant generated
+            sequence-based ID for each discount, for example 1, 2, 3, 4...)
+          example: '54'
+        description:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: Description/Name of the discount
+          example: summer sale- code 1234
+        amount:
+          type: string
+          minLength: 1
+          maxLength: 12
+          description: >-
+            Amount of this specific discount given (maximum number of fractional
+            digits supported is 2)
+          example: '250.35'
+    HistoricOrder:
+      type: object
+      description: List of historic orders for this account.
+      properties:
+        orderId:
+          minLength: 1
+          maxLength: 65
+          type: string
+          description: Merchant internal Order ID
+          example: '7768576'
+        orderDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Date of historical order (String based date/time representation in
+            International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        orderTotal:
+          description: Total amount of order
+          type: string
+          minLength: 1
+          maxLength: 12
+          example: '878.96'
+        primaryDeviceId:
+          minLength: 1
+          maxLength: 40
+          type: string
+          description: Primary device ID
+          example: 98JYI77
+        primaryDeviceName:
+          minLength: 1
+          maxLength: 20
+          type: string
+          description: Primary device name
+          example: Mark's iPad
+        deviceIpAddress:
+          minLength: 1
+          maxLength: 45
+          type: string
+          description: >-
+            Device IP address that was used at the time of the
+            historical/previous transaction
+          example: 127.0.0.1
+        paymentType:
+          $ref: '#/components/schemas/PaymentType'
+        userIdName:
+          minLength: 1
+          maxLength: 65
+          type: string
+          description: Merchant unique identifier for cardholder
+          example: testuser1234
+        matchCreditCard:
+          type: boolean
+          description: >-
+            Indicates whether this card matches orders that have been previously
+            placed with this merchant
+          example: true
+        matchDeviceId:
+          type: boolean
+          description: >-
+            Indicates whether this device ID matches orders that have been
+            previously placed with this merchant
+          example: true
+        matchDeviceName:
+          type: boolean
+          description: >-
+            Indicates whether this device name matches orders that have been
+            previously placed with this merchant
+          example: true
+        matchIpAddress:
+          type: boolean
+          description: >-
+            Indicates whether this IP Address matches orders that have been
+            previously placed with this merchant
+          example: true
+        matchGeoLocation:
+          type: boolean
+          description: >-
+            Indicates whether this Geo Location matches orders that have been
+            previously placed with this merchant
+          example: true
+        currencyCode:
+          $ref: '#/components/schemas/CurrencyCode'
+    Lodging:
+      type: object
+      required:
+        - lodgingCompanyName
+        - confirmationNumber
+        - stayDuration
+        - roomsBooked
+        - checkInDateTime
+        - checkoutDateTime
+      properties:
+        lodgingCompanyName:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: The name of the property
+          example: Mantle Lodging and Hotels
+        confirmationNumber:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: The confirmation number at the property
+          example: CT67Y01
+        roomType:
+          minLength: 1
+          maxLength: 20
+          type: string
+          description: The type of room booked
+          example: Suite
+        stayDuration:
+          type: integer
+          minimum: 0
+          maximum: 99999
+          description: The room stay duration (in days)
+          format: int32
+          example: 15
+        roomsBooked:
+          type: integer
+          minimum: 0
+          maximum: 99999
+          description: The number of rooms that were booked
+          format: int32
+          example: 1
+        lodgingPrice:
+          type: string
+          minLength: 1
+          maxLength: 12
+          example: '199.99'
+          description: >-
+            The cost of a nightly rate for a lodging rental. If there are
+            multiple prices over different nights, you may use an average.
+        checkInDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            The date and time the guest will check in to the property (String
+            based date/time representation in International Date Time Format
+            (ISO 8601) in UTC - yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        lodgingTimezone:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: >-
+            The timezone of the lodging's location. This is not the timezone of
+            the property's corporate office, but rather the specific location of
+            the property that is being booked as it appears in the TZ database.
+          example: America/New_York
+        actualCheckInDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            The actual date and time the guest checked in to the property
+            (String based date time representation in International Date Time
+            Format (ISO 8601) in UTC - yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        checkoutDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            The date and time the guest will check out of the property (String
+            based date/time representation in International Date Time Format
+            (ISO 8601) in UTC - yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        actualCheckOutDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            The actual date and time the guest checked out of the property
+            (String based date/time representation in International Date Time
+            Format (ISO 8601) in UTC - yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        roomPreferences:
+          minLength: 1
+          maxLength: 200
+          type: string
+          description: Request preferences for the room
+          example: High speed WiFi required
+        loyaltyReferenceId:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: 'Reference to loyalty object (in: /loyalty.id)'
+          example: RT6545E01
+        relatedPurchases:
+          type: array
+          description: >-
+            Additional charges related to the property stay (such as restaurant
+            charges, mini-bar, etc.)
+          items:
+            $ref: '#/components/schemas/RelatedPurchase'
+        lodgingAddress:
+          $ref: '#/components/schemas/AddressType'
+      description: List of accommodation rentals
+    Loyalty:
+      type: object
+      properties:
+        id:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: >-
+            Loyalty unique identifier  (merchant generated sequence-based ID for
+            each loyalty account, for example 1, 2, 3, 4...)
+          example: '123'
+        programName:
+          minLength: 1
+          maxLength: 200
+          type: string
+          description: Name of the loyalty program
+          example: GoldClub
+        numberRegistered:
+          minLength: 1
+          maxLength: 20
+          type: string
+          description: Loyalty program number assigned to registered account
+          example: '7678767'
+        nameRegistered:
+          $ref: '#/components/schemas/NameType'
+        addressRegistered:
+          $ref: '#/components/schemas/AddressType'
+      description: List of loyalty membership accounts that relate to the order
+    MerchantCustomerServiceContact:
+      type: object
+      properties:
+        phoneNumber:
+          minLength: 3
+          maxLength: 30
+          type: string
+          description: >-
+            Merchant's customer service phone number including the country code
+            and any applicable separators
+          example: +1-234-567-8901
+        email:
+          minLength: 1
+          maxLength: 200
+          type: string
+          description: Merchant's customer service email address
+          example: customerservice.merchant@example.com
+        website:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: URL for merchant's customer service focused information
+          example: http://merchantwebsite.example.com/customerservice.html
+        customerServiceInstructions:
+          minLength: 1
+          maxLength: 250
+          type: string
+          description: >-
+            Free form text displayed to issuer that can be sent to the
+            cardholder. Can be specific to transaction.
+          example: Include Transaction ID in all communications.
+        address:
+          $ref: '#/components/schemas/AddressType'
+    FacilitatorProfile:
+      type: object
+      properties:
+        profileType:
+          type: string
+          minLength: 2
+          maxLength: 3
+          description: |
+            Type of facilitator
+
+            Allowed values:
+              - OTA
+          example: OTA
+        profile:
+          $ref: '#/components/schemas/MerchantProfile'
+    MerchantProfile:
+      type: object
+      properties:
+        name:
+          minLength: 1
+          maxLength: 200
+          type: string
+          description: Name of the merchant that the item was purchased from
+          example: Amazon
+        description:
+          minLength: 1
+          maxLength: 250
+          type: string
+          description: >-
+            Description of the primary merchant tied to the transaction and
+            responsible for providing the products or services (description of
+            the business, what they do, markets, etc.). Used to help cardholder
+            understand business responsible for the charge.
+          example: Online Sales Platform
+        merchantCategoryCode:
+          minLength: 4
+          maxLength: 4
+          type: string
+          description: >-
+            A four-digit number listed in ISO 18245 for retail financial
+            services. MCC is used to classify the business by the type of goods
+            or services it provides.
+          example: AC98
+        refundPolicyRecap:
+          minLength: 1
+          maxLength: 250
+          type: string
+          description: Short version of the merchant policy, specific to this order
+          example: Short version of the policy
+        refundPolicy:
+          minLength: 1
+          maxLength: 200000
+          type: string
+          description: Entire merchant refund policy, formatted for text display
+          example: Complete merchant refund policy
+        refundPolicyLink:
+          minLength: 1
+          maxLength: 500
+          type: string
+          description: >-
+            Link to the refund policy document online that is specific to this
+            individual receipt
+          example: http://somesite.com/refundpolicy.html
+        termsAndConditionsRecap:
+          minLength: 1
+          maxLength: 250
+          type: string
+          description: Short version of the merchant policy, specific to this order
+          example: Damaged products are seller's responsibility
+        termsAndConditions:
+          minLength: 1
+          maxLength: 200000
+          type: string
+          description: Entire merchant Terms & Conditions, formatted for text display
+          example: Entire merchant Terms & Conditions
+        termsAndConditionsLink:
+          minLength: 1
+          maxLength: 500
+          type: string
+          description: >-
+            Link to the Terms & Conditions document online that is specific to
+            this individual receipt
+          example: http://somesite.com/termsandconditions.html
+        cancellationPolicyRecap:
+          minLength: 1
+          maxLength: 250
+          type: string
+          description: Short version of the cancellation policy
+          example: Short version of the cancellation policy
+        cancellationPolicy:
+          minLength: 1
+          maxLength: 200000
+          type: string
+          description: Entire cancellation policy, formatted for text display
+          example: Entire cancellation policy
+        cancellationPolicyLink:
+          minLength: 1
+          maxLength: 500
+          type: string
+          description: Link to the full version of the cancellation policy
+          example: http://somesite.com/cancellationPolicy.html
+        logoUrl:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Link to the merchant logo
+          example: http://somesite.com/logoUrl.html
+        merchantReceiptContact:
+          $ref: '#/components/schemas/MerchantReceiptContact'
+        merchantCustomerServiceContact:
+          $ref: '#/components/schemas/MerchantCustomerServiceContact'
+    MerchantReceiptContact:
+      type: object
+      properties:
+        phoneForReceipt:
+          minLength: 3
+          maxLength: 30
+          type: string
+          description: >-
+            Merchant's primary phone (such as the sales number shown on receipt)
+            include the country code and any applicable separators
+          example: +1-234-567-8901
+        emailForReceipt:
+          minLength: 1
+          maxLength: 200
+          type: string
+          description: Merchant's sales email (such as the sales email shown on receipt)
+          example: sales.merchant@example.com
+        websiteForReceipt:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: >-
+            URL for merchant's orders (such as the website address shown on
+            receipt)
+          example: http://merchantwebsite.example.com
+        receiptAddress:
+          $ref: '#/components/schemas/AddressType'
+    NameType:
+      type: object
+      properties:
+        prefix:
+          minLength: 1
+          maxLength: 10
+          type: string
+          description: Prefix of the person
+          example: Mr.
+        givenName:
+          minLength: 1
+          maxLength: 40
+          type: string
+          description: Given name of the person
+          example: Raymond
+        additionalName:
+          minLength: 1
+          maxLength: 40
+          type: string
+          description: Middle name or initial of the person
+          example: Jacob
+        familyName:
+          minLength: 1
+          maxLength: 80
+          type: string
+          description: Family name of the person
+          example: Holt
+        suffix:
+          minLength: 1
+          maxLength: 10
+          type: string
+          description: Suffix of the person
+          example: Sr.
+    Order:
+      type: object
+      description: >-
+        Contains items, payments, transaction details, shipping, and other
+        information related to the order (purchase)
+      required:
+        - merchantOrderId
+        - orderDateTime
+        - subtotal
+        - total
+        - currencyCode
+        - orderItems
+      properties:
+        merchantOrderId:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: Merchant's internal order tracking number
+          example: 765656JCHJDJ898HYJY90
+        orderDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            The date and time the order was made (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        orderStatus:
+          type: string
+          minLength: 5
+          maxLength: 18
+          description: |
+            Status of the order
+
+            Allowed values:
+              - Open_Pending
+              - Open_PendingReturn
+              - Closed_Complete
+              - Closed_Canceled
+              - Other
+          example: Closed_Canceled
+        orderStatusOther:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: Order status description if -Other- is provided
+          example: Unidentified
+        orderEmail:
+          minLength: 1
+          maxLength: 200
+          type: string
+          description: >-
+            Customer email address for the order/transaction. This is not the
+            account email.
+          example: onetwothree@example.com
+        orderPhone:
+          minLength: 3
+          maxLength: 30
+          type: string
+          description: >-
+            Customer phone number for the order, if different from the billing
+            phone number. Include the country code and any applicable separators
+          example: +91 99898989800
+        relationshipToAccountHolder:
+          minLength: 1
+          maxLength: 45
+          type: string
+          description: Customer relationship to account holder (if different)
+          example: Spouse
+        subtotal:
+          type: string
+          minLength: 1
+          maxLength: 12
+          description: >-
+            Order subtotal. Total amount of all products purchased in this
+            order, not including tax and shipping. The maximum number of
+            fractional digits supported is 2.
+          example: '7878.98'
+        shippingHandling:
+          type: string
+          minLength: 1
+          maxLength: 12
+          description: >-
+            Total cost of shipping and handling for the order. If several
+            different shipping and handling fees, summarize into one field.
+          example: '898.9'
+        tax:
+          type: string
+          minLength: 1
+          maxLength: 12
+          description: >-
+            Total amount of tax. Maximum number of fractional digits supported
+            is 2.
+          example: '13.78'
+        total:
+          type: string
+          minLength: 1
+          maxLength: 12
+          description: >-
+            Total amount of the order, including tax and shipping. Maximum
+            number of fractional digits supported is 2.
+          example: '8898.9'
+        refundTotal:
+          type: string
+          minLength: 1
+          maxLength: 12
+          description: Total amount of all refunds that have been issued for this purchase.
+          example: '20.21'
+        currencyCode:
+          $ref: '#/components/schemas/CurrencyCode'
+        specialInstructions:
+          minLength: 1
+          maxLength: 2000
+          type: string
+          description: Any special instructions requested at time of order
+          example: Handle with care.
+        communications:
+          minLength: 1
+          maxLength: 1000
+          type: string
+          description: Provide additional communications between consumer and merchant
+          example: Any further info needed.
+        proofOfConsent:
+          minLength: 1
+          maxLength: 500
+          type: string
+          description: >-
+            Allows merchant to describe when and how the customer agreed to the
+            terms and conditions at checkout
+          example: Signed the Terms & Conditions document at office.
+        refundEligible:
+          type: boolean
+          description: Indicates whether the transaction is eligible for a refund
+          example: true
+        orderRecipientName:
+          $ref: '#/components/schemas/NameType'
+        storeAddress:
+          $ref: '#/components/schemas/AddressType'
+        orderItems:
+          type: array
+          description: >-
+            List of items (products) included in the order (requires at least
+            one, may repeat)
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        transactionDetails:
+          $ref: '#/components/schemas/TransactionDetails'
+        payments:
+          type: array
+          description: List of payments for the order (requires at least one, may repeat)
+          items:
+            $ref: '#/components/schemas/Payment'
+        creditReimbursements:
+          type: array
+          description: List of credits for the order
+          items:
+            $ref: '#/components/schemas/CreditReimbursement'
+        refunds:
+          type: array
+          description: List of refunds made for the order
+          items:
+            $ref: '#/components/schemas/Refund'
+        taxItems:
+          type: array
+          description: >-
+            List of taxes applied to the order (requires at least one, may
+            repeat)
+          items:
+            $ref: '#/components/schemas/Tax'
+        discounts:
+          type: array
+          description: List of discounts applied to the order
+          items:
+            $ref: '#/components/schemas/Discount'
+        deliveries:
+          type: array
+          description: List of deliveries created for the order
+          items:
+            $ref: '#/components/schemas/Delivery'
+        reservations:
+          type: array
+          description: List of reservations created for the order
+          items:
+            $ref: '#/components/schemas/Reservation'
+        loyalties:
+          type: array
+          description: List of loyalty membership accounts that relate to the order
+          items:
+            $ref: '#/components/schemas/Loyalty'
+        customData:
+          type: array
+          description: custom data that can be part of Order
+          items:
+            $ref: '#/components/schemas/CustomData'
+        callToActionLinks:
+          type: array
+          description: Call to Action Links for merchants
+          items:
+            $ref: '#/components/schemas/CallToActionLink'
+    CallToActionLink:
+      type: object
+      required:
+        - linkUrl
+        - linkType
+      properties:
+        linkUrl:
+          type: string
+          description: CTA URL
+          minLength: 9
+          maxLength: 500
+          example: https://support.testmerchant.com/cta
+        linkType:
+          title: CTA type
+          description: |
+            The CTA types
+
+            Allowed values:
+              - VIEW_ORDER
+              - REQUEST_REFUND
+              - BUY_AGAIN
+              - WRITE_REVIEW
+          type: string
+          minLength: 1
+          maxLength: 20
+          example: VIEW_ORDER
+    OrderItem:
+      description: >-
+        List of items (products) included in the order (requires at least one,
+        may repeat). This item identified one product of the list.
+      type: object
+      required:
+        - id
+        - productName
+        - unitOfMeasurement
+      properties:
+        id:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: >-
+            Order item unique identifier (merchant generated sequence-based ID
+            for each order item, for example 1, 2, 3, 4...)
+          example: '898989'
+        productId:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: >-
+            Item ID/Product ID. Internal ID created to track an individual
+            product in the system.
+          example: 7676776R78
+        productSku:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: Product SKU
+          example: R76776R78
+        productName:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: Name of the product
+          example: Monitor
+        productDescription:
+          minLength: 1
+          maxLength: 1000
+          type: string
+          description: >-
+            Description of item, which can contain extended details of the
+            product, for example size: 6, color: blue
+          example: 32 Inches Wide Screen
+        artistSeller:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: Name of the artist or seller
+          example: Amazon
+        conditionOfGoods:
+          minLength: 1
+          maxLength: 20
+          type: string
+          description: Item condition (such as new, used, etc.)
+          example: Used
+        linkToItemPurchased:
+          minLength: 1
+          maxLength: 500
+          type: string
+          description: Hyperlink to web page for item purchased
+          example: http://amazon.ca/items/Samsung32Monitor
+        quantity:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Quantity of items purchased (1, 3, 30 etc.)
+          example: 2 lbs
+        unitOfMeasurement:
+          description: >-
+            The unit of measurement for the product purchased (i.e. weight of a
+            product)
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: kg
+        productPrice:
+          type: string
+          minLength: 1
+          maxLength: 12
+          description: Price per unit. Maximum number of fractional digits supported is 2.
+          example: '890.79'
+        productType:
+          minLength: 1
+          maxLength: 30
+          type: string
+          description: >-
+            Physical good, membership/subscription, digital good (such as game,
+            ad, video, music, book/text, other)
+          example: Screen
+        itemDeliveryFormat:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: Indicates how the customer gets the product or service
+          example: Overnight, 2nd Day
+        deliveryReferenceId:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: 'Reference to delivery object (in: /order.deliveries)'
+          example: R76776R78
+        refundReferenceId:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: 'Reference to refund object (in: /order.refunds)'
+          example: R76776R78
+        creditReimbursementReferenceId:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: >-
+            Reference to creditReimbursement object (in:
+            /order.creditReimbursements)
+          example: R76776R78
+        reservationReferenceId:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: Reference to reservation object
+          example: R76776R78
+        adultContent:
+          description: Indicates whether this order item contains adult content
+          type: boolean
+          example: false
+        itemDiscount:
+          $ref: '#/components/schemas/Discount'
+        usage:
+          $ref: '#/components/schemas/Usage'
+        recurring:
+          $ref: '#/components/schemas/Recurring'
+    Passenger:
+      description: The list of passengers flying on this particular flight
+      type: object
+      properties:
+        id:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: >-
+            Passenger unique identifier (merchant generated sequence-based ID
+            for each reservation, for example 1, 2..)
+          example: '89'
+        ticketNumber:
+          minLength: 1
+          maxLength: 25
+          type: string
+          description: The ticket number of the passenger
+          example: 89YU87U
+        seatNumber:
+          description: The seat number assigned to the passenger
+          type: string
+          minLength: 1
+          maxLength: 5
+          example: 45E
+        loyaltyReferenceId:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: 'Reference to loyalty object (in: /loyalty.id)'
+          example: '98987'
+        knownTravelerNumber:
+          type: boolean
+          description: Known traveler or redress number
+          example: true
+        checkInDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            The date and time the passenger checked in (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        travelUtilizationIndicator:
+          type: boolean
+          description: Indicates whether the flight was taken
+          example: true
+        name:
+          $ref: '#/components/schemas/NameType'
+        relatedPurchases:
+          type: array
+          description: Additional charges related to the passenger on the flight
+          items:
+            $ref: '#/components/schemas/RelatedPurchase'
+    OrderApiAcknowledgement:
+      type: object
+      required:
+        - responseStatus
+      properties:
+        responseStatus:
+          $ref: '#/components/schemas/ResponseStatus'
+        order:
+          $ref: '#/components/schemas/Order'
+        merchantProfile:
+          $ref: '#/components/schemas/MerchantProfile'
+        paymentFacilitatorProfile:
+          $ref: '#/components/schemas/MerchantProfile'
+        facilitatorProfile:
+          $ref: '#/components/schemas/FacilitatorProfile'
+        accountProfile:
+          $ref: '#/components/schemas/AccountProfile'
+    ResponseStatus:
+      title: Response Status
+      required:
+        - code
+      type: object
+      properties:
+        code:
+          title: Code
+          type: string
+          minLength: 17
+          maxLength: 27
+          description: |
+            API status code, not an HTTP status code
+
+            Allowed values:
+              - TRANSACTION_FOUND
+              - TRANSACTION_NOT_FOUND
+              - MULTIPLE_TRANSACTIONS_FOUND
+          example: TRANSACTION_FOUND
+        message:
+          title: Message
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: API status message, not an HTTP status message
+          example: Transaction details provided
+        trackingId:
+          title: Tracking Id
+          description: Any internal merchant reference ID linked to this search
+          type: string
+          minLength: 1
+          maxLength: 201
+          example: zebj8evpeo
+      description: Result status of the request
+    Payment:
+      type: object
+      properties:
+        id:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: >-
+            Payment object unique identifier (merchant generated sequence-based
+            ID for each payment, for example 1, 2, 3, 4...)
+          example: '3'
+        matchedPayment:
+          type: boolean
+          description: >-
+            Indicates whether a payment record matches the transaction search
+            attributes
+          example: true
+        paymentType:
+          $ref: '#/components/schemas/PaymentType'
+        cardFirstSix:
+          minLength: 6
+          maxLength: 6
+          type: string
+          description: >-
+            The first six digits of the card number associated with the
+            transaction. Format - exactly six numeric characters.
+          example: '524167'
+        cardLastFour:
+          $ref: '#/components/schemas/CardLastFour'
+        cardCvv2ValidationOutcomeAtPurchase:
+          type: string
+          minLength: 1
+          maxLength: 1
+          pattern: ^[A-Za-z0-9]{1,1}$
+          description: |
+            Card CVV2 verification code received at the purchase
+
+            Allowed values:
+              - X
+              - U
+              - P
+              - Y
+              - D
+              - N
+
+            Definition of allowed values:
+              - X: No information available
+              - U: The issuer has not certified or has not provided the encryption keys
+              - P: Card verification not performed
+              - Y: Valid
+              - D: Invalid
+              - N: Not attempted
+          example: X
+        addressValidationServiceMatch:
+          type: string
+          minLength: 1
+          maxLength: 1
+          description: >
+            Indicates whether the billing address was validated with an AVS
+            service
+
+
+            Allowed values:
+              - Y
+              - N
+              - U
+
+            Definition of allowed values:
+              - Y: Yes
+              - N: No
+              - U: Unavailable
+          example: 'Y'
+        totalBeforeTax:
+          description: >-
+            Subtotal (before tax). Maximum number of fractional digits supported
+            is 2.
+          type: string
+          minLength: 1
+          maxLength: 12
+          example: '898.96'
+        paymentAmount:
+          type: string
+          minLength: 1
+          maxLength: 12
+          description: >-
+            Total amount of this payment. Maximum number of fractional digits
+            supported is 2.
+          example: '250.35'
+        transactionIdentifierValue:
+          minLength: 1
+          maxLength: 30
+          type: string
+          description: >-
+            The TransactionId for this order; for Mastercard purchases, this is
+            field DE63, and for Visa this is Tran ID or Tran ID1.
+          example: 90989JJJNM7767
+        acquirerReferenceNumber:
+          minLength: 23
+          maxLength: 23
+          type: string
+          description: Display of the Acquirer Reference Number for this order
+          example: '12345678901234567890123'
+        issuerAuthorizationCode:
+          minLength: 6
+          maxLength: 6
+          type: string
+          description: Pre-authorization code returned by the processor
+          example: 89ii88
+        authorizationDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Display of the Authorization date (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        transactionType:
+          type: string
+          minLength: 4
+          maxLength: 10
+          description: |
+            Type of payment transaction
+
+            Allowed values:
+              - Adjustment
+              - Credit
+              - Reversal
+              - Sale
+          example: Credit
+        merchantIdentificationNumber:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: Merchant Identification Number (MID). Assigned by acquirer.
+          example: GOOG9898K87
+        paymentGatewayId:
+          minLength: 1
+          maxLength: 10
+          type: string
+          description: >-
+            This is passed as part of the transaction. Key for merchants with
+            more than one gateway.
+          example: CH8989V01
+        paymentGatewayDescriptor:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: The descriptor for the payment gateway
+          example: Channel 89 version 1 gateway.
+        merchantBillingDescriptor:
+          minLength: 1
+          maxLength: 24
+          type: string
+          description: >-
+            The settled descriptor that shows on the credit card holder's
+            statement at settlement
+          example: Google Storage.
+        authorizedMerchantBillingDescriptor:
+          minLength: 1
+          maxLength: 24
+          type: string
+          description: >-
+            The pre-settlement authorized descriptor that shows on the website
+            or app being used by the credit card holder
+          example: Subscription renewal
+        billingName:
+          $ref: '#/components/schemas/NameType'
+        billingAddress:
+          $ref: '#/components/schemas/AddressType'
+      description: List of payments for the order (requires at least one, may repeat)
+    PhysicalDelivery:
+      type: object
+      properties:
+        trackingNumber:
+          minLength: 1
+          maxLength: 255
+          type: string
+          description: >-
+            Tracking number for delivery - provide 'Not Yet Available' if number
+            has not been issued yet
+          example: 6765TYE45F43
+        deliveryProvider:
+          minLength: 1
+          maxLength: 45
+          type: string
+          description: Name of shipping provider, such as UPS, FedEx, USPS, etc.
+          example: UPS
+        deliveryService:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: >-
+            Name of the delivery service (for example, Next Day, Overnight, 3
+            Day, etc.)
+          example: 2 Day Delivery
+        deliveryStatus:
+          type: string
+          minLength: 5
+          maxLength: 18
+          description: >
+            Status of the delivery. Must provide one of the available,
+            enumerated values.
+
+
+            Allowed values:
+              - Backordered
+              - Cancelled
+              - In_Transit
+              - Not_Shipped
+              - Other
+              - Partial_Shipped
+              - Pickup
+              - Shipped
+              - Shipping_Exception
+          example: Backordered
+        descriptionOfOtherStatus:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: Delivery status description if 'other' is provided in deliveryStatus
+          example: Shipment status is not available from sender.
+        dateShipped:
+          type: string
+          description: >-
+            Date shipped from warehouse/merchant (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          minLength: 20
+          maxLength: 20
+          example: '2017-06-19T13:18:18Z'
+        dateDelivered:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Date delivered (String based date/time representation in
+            International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        signatureRequiredForDelivery:
+          type: boolean
+          description: Indicates whether delivery requires a signature
+          example: true
+        proofOfDeliverySigned:
+          type: boolean
+          description: Indicates whether proof of delivery signature was captured
+          example: true
+        proofOfDeliverySignedBy:
+          minLength: 1
+          maxLength: 75
+          type: string
+          description: >-
+            Indicates the proof of the delivery signature (this is an open text
+            field)
+          example: Digital signature captured and send to merchant.
+        numberOfItemsDelivered:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: Number or quantity of items delivered
+          example: 2 lbs
+        specialShippingInstructions:
+          minLength: 1
+          maxLength: 75
+          type: string
+          description: >-
+            Special instructions provided by the customer for shipping (for
+            example, leave on front porch, gate code, etc.)
+          example: Buzz Code 999
+        packingSlipContents:
+          minLength: 1
+          maxLength: 2000
+          type: string
+          description: Packing slip contents
+          example: 6 Items and a Manual.
+        addressVerificationForShipping:
+          type: boolean
+          description: Indicates whether the shipping address was verified with a vendor
+          example: true
+        billingAddressMatchesShippingAddress:
+          type: boolean
+          description: >-
+            Indicates whether the shipping address matched the billing address
+            for a payment
+          example: true
+        customerPickup:
+          type: boolean
+          description: >-
+            Indicates whether the customer did/will pick up from the store or
+            shipping center
+          example: true
+        reasonForPickup:
+          minLength: 1
+          maxLength: 30
+          type: string
+          description: >-
+            The reason for the customer pick up, such as Customer Requested
+            (online option for some merchants) or Delivery Missed (customer was
+            not present to sih for delivery)
+          example: Delivery missed.
+        pickupDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            The date on which the item or the ordered good was picked up (String
+            based date/time representation in International Date Time Format
+            (ISO 8601) in UTC - yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        idVerifiedAtPickupLocation:
+          type: boolean
+          description: Indicates whether an ID was verified at the pickup location
+          example: true
+        idVerificationAtPickupLocation:
+          minLength: 1
+          maxLength: 25
+          type: string
+          description: >-
+            Identification used for verification (Driver's license, credit card,
+            etc.)
+          example: GREEN CARD
+        shippingName:
+          $ref: '#/components/schemas/NameType'
+        shippingAddress:
+          $ref: '#/components/schemas/AddressType'
+        pickupAddressLocation:
+          $ref: '#/components/schemas/AddressType'
+        nameOfSigner:
+          $ref: '#/components/schemas/NameType'
+    Recurring:
+      type: object
+      description: Recurring product details
+      properties:
+        trialPeriod:
+          type: boolean
+          description: Indicates whether there is a trial period associated with this item
+          example: true
+        trialStatus:
+          type: string
+          minLength: 6
+          maxLength: 11
+          description: |
+            Current status of the trial (if applicable)
+
+            Allowed values:
+              - Active
+              - Cancelled
+              - Expired
+              - Not_Started
+          example: Active
+        trialInterval:
+          type: integer
+          minimum: 0
+          maximum: 99999
+          format: int32
+          description: >-
+            The multiplier for the trial period, combines with trialIntervalUnit
+            (for example, a 1 in this field + Month in trialIntervalUnit = once
+            per month
+          example: 2
+        trialIntervalUnit:
+          type: string
+          minLength: 3
+          maxLength: 5
+          description: |
+            The trial renewal interval
+
+            Allowed values:
+              - Day
+              - Week
+              - Month
+              - Year
+          example: Month
+        trialActivationDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Date the trial was activated for the customer (String based
+            date/time representation in International Date Time Format (ISO
+            8601) in UTC - yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        trialStartDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Date the trial began with the customer (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        trialEndDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Date the trial expires (String based date/time representation in
+            International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        trialPrice:
+          type: string
+          minLength: 1
+          maxLength: 12
+          description: >-
+            Cost of the trial, pre-tax (maximum number of fractional digits
+            supported is 2)
+          example: '12'
+        subscriptionActivationDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Date the subscription was activated for the customer  (String based
+            date/time representation in International Date Time Format (ISO
+            8601) in UTC - yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        subscriptionStartDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Date the subscription/contract began with the customer (String based
+            date/time representation in International Date Time Format (ISO
+            8601) in UTC - yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        subscriptionExpirationDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Date the subscription expires (String based date/time representation
+            in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        subscriptionCancellationDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Date the subscription was cancelled (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        subscriptionPrice:
+          type: string
+          minLength: 1
+          maxLength: 12
+          description: >-
+            Cost of the subscription, pre-tax (maximum number of fractional
+            digits supported is 2)
+          example: '16'
+        subscriptionInterval:
+          type: integer
+          minimum: 0
+          maximum: 99999
+          format: int32
+          description: >-
+            The multiplier for the subscription renewal period, combines with
+            subscriptionIntervalUnit (for example, a 1 in this field + Month in
+            subscriptionIntervalUnit means subscription renews once per month
+          example: 1
+        subscriptionIntervalUnit:
+          type: string
+          minLength: 3
+          maxLength: 5
+          description: |
+            The subscription renewal interval
+
+            Allowed values:
+              - Day
+              - Week
+              - Month
+              - Year
+          example: Year
+        subscriptionStatus:
+          type: string
+          minLength: 6
+          maxLength: 11
+          description: |
+            Current status of the subscription
+
+            Allowed values:
+              - Active
+              - Cancelled
+              - Expired
+              - Not_Started
+          example: Active
+        subscriptionCurrentPeriodStarted:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Date the subscription period/billing cycle started. (String based
+            date/time representation in International Date Time Format (ISO
+            8601) in UTC - yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        subscriptionCurrentPeriodEnds:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Date the subscription period/billing cycle ends (String based
+            date/time representation in International Date Time Format (ISO
+            8601) in UTC - yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        subscriptionFirstPaymentDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Date of the first subscription payment, not the trial payment
+            (String based date/time representation in International Date Time
+            Format (ISO 8601) in UTC - yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        subscriptionFirstPayment:
+          description: >-
+            Amount of the first subscription payment, not the trial payment
+            (maximum number of fractional digits supported is 2)
+          type: string
+          minLength: 1
+          maxLength: 12
+          example: '909.96'
+        subscriptionNextBillingDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Next subscription billing date in the cycle (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        subscriptionDuration:
+          type: integer
+          minimum: 0
+          maximum: 99999
+          format: int32
+          description: Number of remaining billing cycles
+          example: 3
+        numberOfHistoricSuccessfulPayments:
+          type: integer
+          minimum: 0
+          maximum: 99999
+          format: int32
+          description: Number of historical successful payments
+          example: 6
+        balanceOnSubscription:
+          description: >-
+            Balance on the subscription contract (maximum number of fractional
+            digits supported is 2)
+          type: string
+          minLength: 1
+          maxLength: 12
+          example: '120'
+        cancellationPenalty:
+          type: boolean
+          description: Indicates whether there is a cancellation penalty
+          example: true
+        cancellationPenaltyDescription:
+          minLength: 1
+          maxLength: 500
+          type: string
+          description: A short written description of the penalty/policy
+          example: Users have to pay penalty fee for cancellation
+        subscriptionCancellationPolicy:
+          minLength: 1
+          maxLength: 200000
+          type: string
+          description: The full subscription cancellation policy
+          example: >-
+            Some description explaining all cancellation policies and
+            conditions.
+        subscriptionCancellationPolicyLink:
+          minLength: 1
+          maxLength: 500
+          type: string
+          description: The link to the full subscription cancellation policy
+          example: http://somesite.com/cancellationpolicy.html
+        subscriptionContract:
+          minLength: 1
+          maxLength: 200000
+          type: string
+          description: The full subscription contract
+          example: Contract description for the subscription with all details.
+        subscriptionContractLink:
+          minLength: 1
+          maxLength: 500
+          type: string
+          description: Link to the full subscription contract
+          example: http://somelink.com/contract.html
+        subscriptionDisputed:
+          type: boolean
+          description: Indicates whether this recurring item was disputed previously
+          example: true
+        subscriptionFirstPaymentDisputed:
+          type: boolean
+          description: >-
+            Indicates whether the dispute was for the first subscription payment
+            or trial payment
+          example: true
+        subscriptionDisputeDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Date the Subscription was disputed (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+    Refund:
+      type: object
+      description: List of refunds made for the order
+      required:
+        - id
+        - refundDateTime
+        - total
+      properties:
+        id:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: >-
+            Refund object unique identifier (merchant generated sequence-based
+            ID for each refund, for example 1, 2, 3, 4..)
+          example: '23'
+        referenceNumber:
+          minLength: 1
+          maxLength: 65
+          type: string
+          description: >-
+            Refund reference number, sequence, or reference number provided by
+            acquirer. This will be hidden from the cardholder.
+          example: 89U897Y09K5
+        refundDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Date and time when the refund is requested. (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        cardLastFour:
+          $ref: '#/components/schemas/CardLastFour'
+        paymentType:
+          $ref: '#/components/schemas/PaymentType'
+        total:
+          description: Total amount that was refunded on the transaction
+          type: string
+          minLength: 1
+          maxLength: 12
+          example: '787.96'
+        orderBalance:
+          description: >-
+            Amount remaining after the refund on the order (maximum number of
+            fractional digits supported is 2)
+          type: string
+          minLength: 1
+          maxLength: 12
+          example: '898.96'
+        issuerAuthorizationCode:
+          type: string
+          minLength: 6
+          maxLength: 6
+          description: Authorization code for the refund
+          pattern: ^[a-zA-Z0-9]*$
+          example: 89iui8
+    RelatedPurchase:
+      type: object
+      description: >-
+        Additional charges related to the property stay (such as restaurant
+        charges, mini-bar, etc.)
+      properties:
+        id:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: >-
+            Related purchases unique identifier (merchant generated
+            sequence-based ID for each reservation, for example 1, 2, 3, 4...)
+          example: '8987'
+        productName:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: Description of what was purchased
+          example: flower bouquet
+        quantity:
+          description: Quantity of items purchased (1, 3, 30 etc.)
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: '2'
+        unitOfMeasurement:
+          description: >-
+            The unit of measurement for the product purchased (i.e. weight of a
+            product)
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: kg
+        productPrice:
+          type: string
+          minLength: 1
+          maxLength: 12
+          description: Price per unit (maximum number of fractional digits supported is 2)
+          example: '29'
+        purchaseDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            The date and time that the purchase was made (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        purchaseLocation:
+          minLength: 1
+          maxLength: 25
+          type: string
+          description: >-
+            Source of the related purchase, and not the initial purchase (such
+            as website, mobile, ticket counter, etc.)
+          example: In-Store
+    Reservation:
+      type: object
+      description: List of reservations created for the order
+      required:
+        - id
+        - reservationStartDateTime
+        - reservationEndDateTime
+        - reservationNumber
+      properties:
+        id:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: >-
+            Reservation unique identifier (merchant generated sequence-based ID
+            for each reservation, for example 1, 2, 3, 4...)
+          example: '34'
+        reservationStartDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Start date of reservation (String based date/time representation in
+            International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        reservationEndDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            End date of reservation (String based date/time representation in
+            International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        reservationNumber:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: >-
+            Confirmation number of the reservation; note that this is not the
+            PNR (Passenger Name Record) number or the ticket number of a flight;
+            used primarily for OTAs (Online Travel Agencies), hotel rentals, and
+            car rentals
+          example: SAT76576UYT342
+        reservationStatus:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: Current status of the reservation
+          example: Accepted
+        reservationStatusOther:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: Reservation status description if 'Other' is provided
+          example: Onhold
+        travelInsurancePolicyRecap:
+          minLength: 1
+          maxLength: 250
+          type: string
+          description: >-
+            Short version of the Travel Insurance Policy - specific to this
+            order
+          example: Short version of the policy
+        travelInsurancePolicy:
+          minLength: 1
+          maxLength: 200000
+          type: string
+          description: Entire Travel Insurance Policy, formatted for text display
+          example: Travel Insurance Policy details
+        travelInsurancePolicyLink:
+          minLength: 1
+          maxLength: 500
+          type: string
+          description: Link to travel policy purchased
+          example: http://somehost.com/policydocument.html
+        itineraries:
+          type: array
+          description: List of air travel reservations
+          items:
+            $ref: '#/components/schemas/AirTravel'
+        vehicleRentals:
+          type: array
+          description: List of rental vehicle reservations
+          items:
+            $ref: '#/components/schemas/VehicleRental'
+        lodgings:
+          type: array
+          description: List of accommodation rentals
+          items:
+            $ref: '#/components/schemas/Lodging'
+    Tax:
+      type: object
+      required:
+        - id
+        - description
+        - amount
+      properties:
+        id:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: >-
+            Unique identifier for each tax record (merchant generated
+            sequence-based ID for each tax record, for example 1, 2, 3, 4...)
+          example: '32'
+        description:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: >-
+            Description of tax paid, for example 9.25% CA Sales Tax, VAT, etc.
+            Can repeat if multiple taxes were processed.
+          example: 9.25% CA Sales Tax
+        amount:
+          type: string
+          minLength: 1
+          maxLength: 12
+          description: >-
+            Sum of the taxes for this order for this tax type (maximum number of
+            fractional digits supported is 2)
+          example: '250.35'
+    TransactionDetails:
+      description: Details about the order transaction aspects
+      type: object
+      properties:
+        deviceIpAddress:
+          minLength: 1
+          maxLength: 45
+          type: string
+          description: >-
+            Device IP address that was used at the time of the original 
+            transaction
+          example: 120.0.0.1
+        geolocation:
+          minLength: 1
+          maxLength: 30
+          type: string
+          description: >-
+            Geographical location of customer at the date/time of the
+            transaction
+          example: Toronto/CA
+        geoLocationLongitude:
+          minLength: 1
+          maxLength: 30
+          type: string
+          description: >-
+            The longitude of the users device at the time of the  initial
+            transaction being created.
+          example: -81.0005857
+        geoLocationLatitude:
+          minLength: 1
+          maxLength: 30
+          type: string
+          description: >-
+            The latitude of the users device at the time of the  initial
+            transaction being created.
+          example: 46.4992699
+        orderDeviceId:
+          minLength: 1
+          maxLength: 40
+          type: string
+          description: ID of the device used to place order
+          example: DAX9090989
+        orderDeviceName:
+          minLength: 1
+          maxLength: 20
+          type: string
+          description: Name of the device used to place order
+          example: ETHOCAMAC909
+        orderDeviceFingerprint:
+          minLength: 20
+          maxLength: 200
+          type: string
+          description: The fingerprint of the device used for the transaction.
+          example: a48d8a6de1453c98eefdb906f08e8f1314cc2ec41a20291ab70ff75d47c66a3d
+        deviceType:
+          minLength: 1
+          maxLength: 20
+          type: string
+          description: Type of device used to make the purchase
+          example: COMPUTER
+        appSourceBrowserType:
+          minLength: 1
+          maxLength: 45
+          type: string
+          description: The application or browser used to make the purchase
+          example: Firefox v10.3.2
+        simDetails:
+          minLength: 1
+          maxLength: 21
+          type: string
+          description: SIM card reference number
+          example: 898898988CD98980
+        mobileNetworkProvider:
+          minLength: 1
+          maxLength: 45
+          type: string
+          description: >-
+            Mobile network the phone was connected to during the purchase (if
+            any)
+          example: Rogers
+        imeiId:
+          minLength: 1
+          maxLength: 32
+          type: string
+          description: Device IMEI ID
+          example: 987979KHH78798JHJHJ
+        iccId:
+          minLength: 1
+          maxLength: 22
+          type: string
+          description: >-
+            SIM card identifier (integrated circuit card identifier). Stored in
+            the SIM card and engraved on the outside.
+          example: '56897687870898'
+        salesChannel:
+          minLength: 1
+          maxLength: 25
+          type: string
+          description: >-
+            Source of the purchase (such as website, mobile, ticket counter,
+            etc.)
+          example: Mobile
+    Usage:
+      type: object
+      description: Item (product) usage details
+      properties:
+        productInUse:
+          type: boolean
+          description: Indicates whether product has been delivered, used, or accessed?
+          example: true
+        lastUtilizationDateTime:
+          description: >-
+            Date of last login to the application/utilization of subscription by
+            consumer (String based date/time representation in International
+            Date Time Format (ISO 8601) in UTC - yyyy-mm-ddThh:mm:ssZ)
+          type: string
+          minLength: 20
+          maxLength: 20
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        totalUsage:
+          type: integer
+          minimum: 0
+          maximum: 99999
+          description: Total number of times the product was delivered, used or accessed
+          format: int32
+          example: 78
+        consumptionDescription:
+          minLength: 1
+          maxLength: 500
+          type: string
+          description: >-
+            Details about the usage of the product, for example how many minutes
+            of game play, number of times video was viewed, number of pages read
+            in a digital book, etc.
+          example: Movie has been viewed 52 times.
+        consumptionMethod:
+          minLength: 1
+          maxLength: 500
+          type: string
+          description: >-
+            How the product was used/accessed (further proof the consumer used
+            the product), for example how they used it, device details and/or IP
+            address, etc.
+          example: User accessed the movie from iPad Application.
+    VehicleRental:
+      type: object
+      description: List of rental vehicle reservations
+      required:
+        - rentalCompanyName
+        - confirmationNumber
+        - vehicleType
+        - pickupDateTime
+        - pickupLocation
+      properties:
+        rentalCompanyName:
+          minLength: 1
+          maxLength: 100
+          type: string
+          description: Vehicle rental company name
+          example: Enterprise Rentals
+        confirmationNumber:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: The confirmation number at the  rental agency
+          example: XT5654T
+        loyaltyReferenceId:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: 'Reference to loyalty object (in: /loyalty.id)'
+          example: YU7676K
+        vehicleRentalPrice:
+          type: string
+          minLength: 1
+          maxLength: 12
+          example: '45.99'
+          description: The cost of the daily rate for a vehicle rental
+        vehicleType:
+          minLength: 1
+          maxLength: 20
+          type: string
+          description: Rental vehicle type
+          example: Full size
+        pickupDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Rental vehicle pick up date and time (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        pickupTimezone:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: >-
+            The timezone for the pickup location of the vehicle as it appears in
+            the TZ database
+          example: Europe/Istanbul
+        actualPickupDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            The actual pick up date and time (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        pickupLocation:
+          minLength: 1
+          maxLength: 200
+          type: string
+          description: Rental vehicle pick up location
+          example: Toronto West
+        dropoffDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            Rental vehicle drop-off date and time (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        dropoffTimezone:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: >-
+            The timezone for the drop off location of the vehicle as it appears
+            in the TZ database
+          example: Asia/Muscat
+        actualDropoffDateTime:
+          type: string
+          minLength: 20
+          maxLength: 20
+          description: >-
+            The actual drop-off date and time (String based date/time
+            representation in International Date Time Format (ISO 8601) in UTC -
+            yyyy-mm-ddThh:mm:ssZ)
+          format: date-time
+          example: '2017-06-19T13:18:18Z'
+        dropoffLocation:
+          minLength: 1
+          maxLength: 200
+          type: string
+          description: Rental vehicle drop off location
+          example: Toronto West
+        driverLicenseNumberLast3:
+          minLength: 3
+          maxLength: 3
+          type: string
+          description: The last 3 digits of the Driver's license number
+          example: '963'
+        driverLicenseIssuer:
+          minLength: 1
+          maxLength: 25
+          type: string
+          description: The state or country that the Driver's license was issued in
+          example: Ontario
+        driverLicenseExpiryDate:
+          description: >-
+            Driver's license expiry data (String based date/time representation
+            in International Date Format (ISO 8601) YYYY-MM-DD)
+          type: string
+          format: date
+          minLength: 10
+          maxLength: 10
+          example: '2017-06-19'
+        operatorName:
+          $ref: '#/components/schemas/NameType'
+        relatedPurchases:
+          type: array
+          items:
+            $ref: '#/components/schemas/RelatedPurchase'
+        vehiclePickupAddress:
+          $ref: '#/components/schemas/AddressType'
+        vehicleDropoffAddress:
+          $ref: '#/components/schemas/AddressType'
+    CustomData:
+      type: object
+      properties:
+        customFieldName:
+          type: string
+          description: The name of the custom field that is being sent
+          minLength: 1
+          maxLength: 500
+          example: Driver Rating
+        customFieldValue:
+          type: string
+          description: The custom data value that is associated with the custom field
+          minLength: 1
+          maxLength: 500
+          example: 5 Stars
+    Error:
+      type: object
+      required:
+        - ReasonCode
+      properties:
+        Source:
+          maxLength: 100
+          minLength: 0
+          type: string
+          description: Source of the error
+          example: Service
+        ReasonCode:
+          maxLength: 100
+          minLength: 0
+          type: string
+          description: Unique code identifying the error case
+          example: REQUEST_BODY_MALFORMED
+        Description:
+          maxLength: 1000
+          minLength: 0
+          type: string
+          description: Short description of the error
+          example: MerchantCriteria must not be null.
+        Recoverable:
+          type: boolean
+          description: >-
+            Indicates whether this error will always be returned for this
+            request, or if retrying could change the outcome
+          example: false
+          default: false
+        Details:
+          maxLength: 1000
+          minLength: 0
+          type: string
+          description: Optional detailed description of the issue
+          example: MerchantCriteria object is a mandatory field and must not be null.
+      description: Error object
+    ErrorResponse:
+      required:
+        - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+      description: Error response object
+    Errors:
+      required:
+        - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: List of error objects
+          items:
+            $ref: '#/components/schemas/Error'
+      description: Errors object
