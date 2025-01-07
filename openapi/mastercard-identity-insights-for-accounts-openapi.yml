@@ -1,0 +1,1010 @@
+openapi: 3.0.3
+info:
+  title: Mastercard Identity Insights for Accounts API
+  description: >-
+    Identity Insights for Accounts (IIA) synergy is suite of products targeted
+    toward businesses who want to prevent fraud, reduce financial losses, and
+    enhance the customer experience by building trust across critical account
+    touchpoints such as account acquisition, account login* and account
+    modification*.
+
+    * Will be made available in the future versions
+  contact:
+    name: API Support
+    email: apisupport@mastercard.com
+    url: https://developer.mastercard.com/support
+  version: 0.2.2
+servers:
+  - url: https://idv.mastercard.com/identity/accounts
+    description: Production server (US)
+  - url: https://sandbox.idv.mastercard.com/identity/accounts
+    description: Sandbox server (US testing environment)
+  - url: https://idv.mastercard.eu/identity/accounts
+    description: Production server (EU)
+  - url: https://sandbox.idv.mastercard.eu/identity/accounts
+    description: Sandbox server (EU testing environment)
+  - url: https://idv.mastercard.asia/identity/accounts
+    description: Production server (ASIA)
+  - url: https://sandbox.idv.mastercard.asia/identity/accounts
+    description: Sandbox server (ASIA testing environment)
+tags:
+  - name: Account Opening
+    description: Account Opening API
+paths:
+  /openings:
+    post:
+      tags:
+        - Account Opening
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountOpening'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+      description: >-
+        Provides customers user identity, IP, and device scores to help with
+        account creation decisioning. Using this API enables customers to be
+        able to catch fraud early on and enhance customer experience while
+        improving their risk models.
+      summary: Response will provide device, IP and user insights.
+      operationId: retrieveAccountOpeningInsights
+      requestBody:
+        $ref: '#/components/requestBodies/AccountOpeningRequest'
+components:
+  schemas:
+    AccountOpeningData:
+      type: object
+      description: >-
+        All input related to the opening of the account. User input is required
+        for all requests. Device input is only required if IP and/or device
+        insights are needed.
+      properties:
+        device:
+          $ref: '#/components/schemas/DeviceInput'
+        user:
+          $ref: '#/components/schemas/UserInput'
+        endCustomerRefId:
+          type: string
+          description: Optional end customer ID for reseller customers
+          example: '12345'
+          minLength: 1
+          maxLength: 40
+        placement:
+          description: >-
+            This optional field contains the placement identifier within the
+            application.
+          type: string
+          example: Registration
+    DeviceInput:
+      type: object
+      description: |-
+        Input related to the device.
+
+        The fields required in this section vary depending on the output needed:
+          * IP
+            * Optional to generate user insights
+            * Required to generate IP and device insights
+          * User Agent
+            * Optional to generate user and IP insights
+            * Required to generate device insights
+          * Other fields
+            * Optional fields that can enhance device insights
+            * If any of these fields are provided then IP and User Agent are
+            also required
+      properties:
+        ip:
+          type: string
+          description: >-
+            The IPv4 or IPv6 address associated with the account sign-up
+            attempt.
+          example: 2001:0db8:5b96:0000:0000:426f:8e17:642a
+        userAgent:
+          $ref: '#/components/schemas/BrowserUserAgent'
+        plugins:
+          $ref: '#/components/schemas/BrowserPlugins'
+        canvas:
+          description: >-
+            The canvas signature of the browser installed on the consumer
+            device.
+          type: string
+          example: e1af96a2e8af1115
+          minLength: 0
+          maxLength: 999
+        webGl:
+          description: The webGL signature of the browser installed on the consumer device.
+          type: string
+          example: wg1-ce04533340ea94cf
+          minLength: 0
+          maxLength: 999
+        timeZone:
+          pattern: ^-?\d+$
+          description: >-
+            Time-zone of the consumer device attempting to create an account.
+            The timezone must be a number of the time-zone offset, in minutes,
+            from the date based on current host system settings to UTC.
+          type: string
+          example: '600'
+        screenResolution:
+          pattern: ^\s*\d+\s*x\s*\d+\s*\d*\s*$
+          description: >-
+            The screen resolution of the consumer device being used to create
+            the account.
+          type: string
+          example: 1024x820
+        localStorage:
+          description: Flag to local storage is enabled on the consumer device.
+          type: boolean
+          example: true
+        buildManufacturer:
+          description: Manufacturer of the product/hardware.
+          type: string
+          example: Apple
+        androidBuildVersion:
+          description: >-
+            Build is used to determine information about the current build,
+            extracted from system properties.
+          type: string
+          example: '12'
+        androidSdkInt:
+          description: >-
+            The user-visible SDK version of the framework; its possible values
+            are defined in Build.VERSION_CODES.
+          type: string
+          example: '31'
+        buildFingerprint:
+          description: String that uniquely identifies this build.
+          type: string
+          example: >-
+            samsung/a32xsq/a32x:12/SP1A.210812.016/A326USQS7BVF2:user/release-keys
+        buildBrand:
+          description: >-
+            Consumer-visible brand with which the product/hardware will be
+            associated, if any.
+          type: string
+          example: Apple
+        supportedFeatures:
+          description: List of the supported features on the consumer device.
+          type: array
+          items:
+            type: string
+          example:
+            - mhac
+            - mhtse
+            - mhcdma
+            - mhgy
+        model:
+          description: >-
+            Mobile device manufacturer and modelAndroid: Build.MANUFACTURER + "
+            " + Build.MODEL returns the mobile device manufacturer and model,
+            For example,"samsung SM-G960U1",
+
+
+            iOS: utsname.machine returns the device model, For example,
+            "iPhone10.4". Note: Apple as a manufacturer is not included because
+            it is the same for all iOS devices.
+          type: string
+          example: iPhone
+        sdkUserAgent:
+          description: >-
+            The unique package name/bundle identifier of the client's
+            application.
+
+
+            Android: obtained from the applicationContext.getPackageName()
+            method.
+
+
+            iOS: obtained from the [NSBundle mainBundle] bundleIdentifier
+            property.
+          type: string
+          example: 14.3.1.7
+        majorOsVersion:
+          description: Major operating system version.
+          type: integer
+          example: 12
+        minorOsVersion:
+          description: Minor operating system version.
+          type: integer
+          example: 0
+        simCountryIso:
+          description: ISO country code equivalent for the SIM provider's country code.
+          type: string
+          example: us
+        simOperator:
+          description: >-
+            MCC+MNC (mobile country code + mobile network code) of the SIM
+            provider.
+          type: string
+          example: T-Mobile
+        primaryStorage:
+          format: int64
+          description: Device primary storage size.
+          type: integer
+          example: 117027876864
+        systemMemory:
+          format: int64
+          description: Device System memory size.
+          type: integer
+          example: 5847543808
+        buildProduct:
+          description: Name of the overall product.
+          type: string
+          example: beyond0qltesq
+        vendorAppId:
+          description: >-
+            Alphanumeric string that uniquely identifies a device to the appâ¬"s
+            vendor.
+          type: string
+          example: 64BAA4F0-9EBC-713E-5B5B-2AF40AB4123A
+        storedDeviceId:
+          description: >-
+            Optional unique device identifier that merchant can store on
+            consumer device. E.g with cookie in web flow.
+          type: string
+          example: wyett276tuygey6r
+        androidId:
+          description: >-
+            Google's unique device identifier. A 64-bit number (as a hex string)
+            that is randomly generated when the end user first sets up the
+            device.
+          type: string
+          example: 38400000-8cf0-11bd-b23e-10b96e40000d
+        language:
+          pattern: ^[a-zA-Z]{1,3}(-{1}[a-zA-Z0-9]{1,10})*?$
+          description: >-
+            The language of the consumer device. The language must be a string
+            representing the language version as defined in BCP-47.
+          type: string
+          example: zh-TW
+        colorDepth:
+          description: The device screen color depth value.
+          type: integer
+          example: 24
+          minimum: 0
+          maximum: 999
+        cookiesEnabled:
+          description: Flag to indicate cookies are enabled on the consumer device.
+          type: boolean
+          example: true
+    UserInput:
+      type: object
+      description: >-
+        Input related to the user (account and either email or phone are
+        required).
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountInfo'
+        name:
+          type: string
+          description: The full name of the person.
+          example: John Smith
+        email:
+          type: string
+          description: |-
+            The email address of the person.
+            Note: This field is required only if phone is not provided.
+          example: john.smith@mastercard.com
+          minLength: 3
+          maxLength: 254
+        phone:
+          $ref: '#/components/schemas/PhoneNumber'
+        address:
+          $ref: '#/components/schemas/Address'
+    AccountOpeningInsights:
+      type: object
+      required:
+        - requestRefId
+        - insights
+      description: All insights generated by analyzing the provided data.
+      properties:
+        requestRefId:
+          type: string
+          description: >-
+            The generated unique web transaction identifier. Same value as
+            X-MC-Correlation-ID in header response.
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+        insights:
+          $ref: '#/components/schemas/InsightsList'
+        warnings:
+          type: array
+          description: |-
+            An array containing warning messages.
+            Warnings can be one of:
+
+              * Address: Input postal code was corrected
+              * Address: Input state corrected
+              * Email: Address is too long
+              * Email: General syntax error
+              * Email: Invalid domain syntax
+              * Email: Invalid top-level-domain (TLD) in address
+              * Email: Invalid username syntax
+              * Ip: IP address is in private range
+              * Phone: Invalid country_hint value. Only Alpha-2 supported
+          items:
+            type: string
+          example:
+            - 'Email: Address is too long'
+        alerts:
+          type: array
+          description: An alert generated when processing the request.
+          items:
+            type: string
+          example:
+            - Unable to generate IP and user insights
+            - Unable to generate device insights
+    InsightsList:
+      type: object
+      required:
+        - user
+        - ip
+      description: List of the types of insights returned.
+      properties:
+        user:
+          $ref: '#/components/schemas/UserInsights'
+        ip:
+          $ref: '#/components/schemas/IPInsights'
+        device:
+          $ref: '#/components/schemas/DeviceInsights'
+    DeviceInsights:
+      type: object
+      required:
+        - scores
+        - details
+      description: Insights generated by analyzing the provided device data.
+      properties:
+        scores:
+          $ref: '#/components/schemas/DeviceScores'
+        details:
+          $ref: '#/components/schemas/DeviceDetails'
+    DeviceScores:
+      type: object
+      required:
+        - deviceRiskFactor
+        - deviceInsightFactor
+        - deviceTrustFactor
+      description: Scores that were calculated by analyzing the provided device data.
+      properties:
+        deviceRiskFactor:
+          $ref: '#/components/schemas/DeviceRiskFactor'
+        deviceInsightFactor:
+          $ref: '#/components/schemas/DeviceInsightFactor'
+        deviceTrustFactor:
+          $ref: '#/components/schemas/DeviceTrustFactor'
+    DeviceInsightFactor:
+      type: integer
+      description: >-
+        The calculated device risk is represented numerically using a range from
+        1 (no/low risk) to 5 (high risk). Each numerical value and its
+        associated risk representation is shown below.
+          * `1` - Represents a no or low risk request.
+          * `2` - Represents a low risk request.
+          * `3` - Represents a medium risk request.
+          * `4` - Represents a high risk request.
+          * `5` - Represents a very high risk request.
+
+        The calculated risk score is typically used to identify scenarios where
+        a service provider may want to introduce consumer friction on the
+        authorization process to validate the identity of the consumer. Example
+        usage by a service provider may be to implement controls such as
+        multifactor authentication for calculated risk factors of `3` or `4` and
+        request blocking for risk factors of `5`.
+      minimum: 0
+      maximum: 5
+      example: 2
+    DeviceDetails:
+      type: object
+      description: More granular details of the device insights.
+      required:
+        - id
+        - deviceInfo
+      properties:
+        id:
+          $ref: '#/components/schemas/DeviceID'
+        deviceInfo:
+          $ref: '#/components/schemas/DeviceInfo'
+    DeviceID:
+      type: object
+      description: This field contains device identification information.
+      required:
+        - uDeviceId
+        - lastSeen
+        - firstSeen
+        - lastSeenDays
+        - firstSeenDays
+      properties:
+        uDeviceId:
+          $ref: '#/components/schemas/UDID'
+        lastSeen:
+          description: The ISO UTC timestamp when the device was last seen.
+          type: string
+          example: '2022-06-03T18:00:50Z'
+        firstSeen:
+          description: The ISO UTC timestamp when the device was first seen.
+          type: string
+          example: '2022-03-01T13:00:50Z'
+        lastSeenDays:
+          description: >-
+            Number of of days since the device was last seen. If the device has
+            not been observed before, lastSeenDays will be 0.
+          type: integer
+          format: int64
+          example: 10
+          minimum: 0
+          maximum: 999999999
+        firstSeenDays:
+          description: >-
+            Number of days since the device was first seen. If the device has
+            not been observed before, firstSeenDays will be 0.
+          type: integer
+          format: int64
+          example: 10
+          minimum: 0
+          maximum: 999999999
+    DeviceInfo:
+      type: object
+      description: >-
+        This field contains information related to the consumer device used to
+        authorize with your product or service.
+      required:
+        - browser
+        - platform
+        - deviceType
+      properties:
+        browser:
+          type: string
+          description: The name of the browser used to authorize your product or service.
+          example: Safari
+        platform:
+          type: string
+          description: The device platform used to authorize your product or service.
+          example: iOS
+        deviceType:
+          type: string
+          description: The device type used to authorize your product or service.
+          example: iPhone
+    IPInsights:
+      type: object
+      required:
+        - scores
+        - details
+      description: Insights generated by analyzing the provided IP address.
+      properties:
+        scores:
+          $ref: '#/components/schemas/IPScores'
+        details:
+          $ref: '#/components/schemas/IPDetails'
+    IPScores:
+      type: object
+      required:
+        - ipRisk
+      description: Scores calculated by analyzing the provided IP address.
+      properties:
+        ipRisk:
+          $ref: '#/components/schemas/IPRiskScore'
+    IPRiskScore:
+      type: number
+      format: double
+      example: 0.125
+      minimum: 0
+      maximum: 1
+      description: >-
+        Comprehensive risk score associated with an IP address, with a higher
+        score indicating a riskier individual. A number between 0 and 1 rounded
+        to three decimal places.
+    IPDetails:
+      type: object
+      required:
+        - risk
+        - lastSeenDays
+        - geolocationCountryCode
+        - geolocationSubdivision
+        - phoneDistance
+        - addressDistance
+      description: Results from analyzing the provided IP address.
+      properties:
+        risk:
+          type: boolean
+          description: >-
+            True if the IP address is considered risky, based on multiple IP
+            data points and velocity calculations.
+          example: false
+        lastSeenDays:
+          type: integer
+          format: int64
+          description: >-
+            Count of days since the IP was last observed in the Identity
+            Network. If the IP has not been observed before, last_seen_days will
+            be 0.
+          example: 35
+          minimum: 0
+          maximum: 999999999
+        geolocationCountryCode:
+          type: string
+          format: ISO-3166-2
+          description: The ISO-3166 alpha-2 country code of the location of the IP address.
+          example: US
+        geolocationSubdivision:
+          type: string
+          description: More granular detail about the IP address location.
+          example: Oregon
+        phoneDistance:
+          type: integer
+          format: int64
+          description: The distance (in miles) between the IP address and the phone number.
+          example: 200
+        addressDistance:
+          type: integer
+          format: int64
+          description: >-
+            The distance (in miles) between the IP address and the physical
+            address.
+          example: 210
+    UserInsights:
+      type: object
+      required:
+        - scores
+        - details
+      description: Insights generated by analyzing the provided user data.
+      properties:
+        scores:
+          $ref: '#/components/schemas/UserScores'
+        details:
+          $ref: '#/components/schemas/UserDetails'
+    UserScores:
+      type: object
+      required:
+        - identityRisk
+      description: Scores that were calculated by analyzing the provided user data.
+      properties:
+        identityRisk:
+          $ref: '#/components/schemas/IdentityRiskScore'
+    IdentityRiskScore:
+      type: integer
+      format: int64
+      minimum: 0
+      maximum: 500
+      description: >-
+        Comprehensive identity risk score with a higher score indicating a
+        riskier account sign-up.
+      example: 42
+    UserDetails:
+      type: object
+      required:
+        - email
+        - phone
+        - address
+      description: More granular details of the user insights.
+      properties:
+        email:
+          $ref: '#/components/schemas/EmailAnalysis'
+        phone:
+          $ref: '#/components/schemas/PhoneAnalysis'
+        address:
+          $ref: '#/components/schemas/AddressAnalysis'
+    EmailAnalysis:
+      type: object
+      required:
+        - valid
+        - firstSeenDays
+        - matchToName
+        - domainCreationDate
+      description: Results from analyzing a particular email address.
+      properties:
+        valid:
+          type: boolean
+          description: True if the email address is valid.
+          example: true
+        domainCreationDate:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}
+          description: The date when the email domain was created. Format is YYYY-MM-DD.
+          example: '2000-11-29T00:00:00.000Z'
+        firstSeenDays:
+          type: integer
+          format: int64
+          description: >-
+            Count of days since the email was first observed in the Identity
+            Network. If the element has not been observed before,
+            first_seen_days will be 0.
+          example: 453
+        mailboxVelocity:
+          description: Number of times email has been seen in last 180 days.
+          example: 3
+          minimum: 0
+          maximum: 1000
+          type: integer
+          format: int64
+        isDisposable:
+          description: >-
+            True if the email domain is disposable. Disposable emails are
+            generally associated with fraudulent activities. If true, this is
+            one of the strongest risk indicators and the transaction should be
+            flagged for further review.
+          example: false
+          type: boolean
+        emailRiskScore:
+          description: >-
+            Comprehensive risk score associated with email address with higher
+            score indicating risker individual. A number between 0 and 1 rounded
+            to 3 decimal places.
+          minimum: 0
+          maximum: 1
+          example: 0.066
+          type: number
+          format: double
+        matchToName:
+          $ref: '#/components/schemas/MatchToName'
+    PhoneAnalysis:
+      type: object
+      required:
+        - valid
+        - lineType
+        - carrier
+        - countryCode
+        - lastSeenDays
+        - emailFirstSeenDays
+        - matchToName
+        - matchToAddress
+      description: Results from analyzing a particular phone number.
+      properties:
+        valid:
+          type: boolean
+          description: True if the phone number is valid.
+          example: true
+        lineType:
+          type: string
+          description: |-
+            The line type of the phone number.
+              * landline - Traditional wired phone line.
+              * fixed-voip - VOIP-based fixed line phones.
+              * mobile - Wireless phone line.
+              * voicemail - Voicemail-only service.
+              * toll-free - Callee pays for call.
+              * premium - Caller pays a premium for the call-e.g. 976 area code.
+              * non-fixed-voip - Skype, for example.
+              * other - Anything that does not match the previous categories.
+          example: landline
+        carrier:
+          type: string
+          description: >-
+            The company that provides voice and/or data services for the phone
+            number. Carriers are returned at the MVNO level.
+          example: Telco
+        countryCode:
+          type: string
+          format: ISO-3166-2
+          description: >-
+            The ISO-3166 alpha-2 country code of the address. See:
+            [ISO-3166](https://www.nationsonline.org/oneworld/country_code_list.htm)
+          example: US
+        lastSeenDays:
+          type: integer
+          format: int64
+          description: >-
+            Count of days since the phone was last observed in the Identity
+            Network. If the element has not been observed before, last_seen_days
+            will be 0.
+          example: 12
+          minimum: 0
+          maximum: 999999999
+        emailFirstSeenDays:
+          type: integer
+          format: int64
+          description: >-
+            Count of days since the combination of phone and email was first
+            observed in the Identity Network. If that combination has not been
+            observed before, first_seen_days will be 0.
+          example: 234
+        matchToName:
+          $ref: '#/components/schemas/MatchToName'
+        matchToAddress:
+          type: string
+          description: |-
+            The match status between the input phone and the input address.
+              * match - Phone location matches input address line 1, address line 2, city, state, and postal code.
+              * postal-match - Phone location postal code matches input address postal code.
+              * zip4-match: - Phone location postal code zip+4 matches input address postal code zip+4.
+              * city-state-match: - Phone location city and state matches input address city and state.
+              * metro-match: - Phone location is in the same metro area as input address.
+              * country-match - Phone location country matches input address country.
+              * no-match: - Phone location does not match input address.
+          example: no-match
+    AddressAnalysis:
+      type: object
+      required:
+        - validityLevel
+        - matchToName
+      description: Results from analyzing a particular address.
+      properties:
+        validityLevel:
+          type: string
+          description: >-
+            The most granular level to which the address could be validated. Ex.
+            If the address was only valid to the city level (but not to the
+            house level), it would return "valid_to_city".
+              * missing_address - An input address was not provided.
+              * invalid - The input address is not valid.
+              * valid - The input address is valid.
+              * valid_to_country - The input address could only be validated to the country level. This means the country
+                of the input address is valid, but the other elements of the input address were unable to be confirmed as
+                valid or invalid.
+              * valid_to_city - The input address was validated to the city level. This means the country, state, city, and
+                postal code of the input address are valid, but the street, house number, and subpremise of the input
+                address were unable to be confirmed as valid or invalid.
+              * valid_to_street - The input address was validated to the street level. This means the country, state, city,
+                postal code, and street of the input address are valid, but the house number and subpremise of the input
+                address were unable to be confirmed as valid or invalid.
+              * valid_to_house_number - The input address was validated to the street and house number level. This means
+                the country, state, city, postal code, street, and house number of the input address are valid, but the
+                subpremise of the input address was unable to be confirmed as valid or invalid.
+              * valid_to_house_number_missing_apt - The input address was validated to the street and house number level.
+                This means the country, state, city, postal code, street, and house number of the input address are valid,
+                but the subpremise of the input address was missing and thus unable to be confirmed as valid or invalid.
+          example: valid_to_street
+        matchToName:
+          $ref: '#/components/schemas/MatchToName'
+    DeviceTrustFactor:
+      type: integer
+      description: >-
+        An integer between 1-5 (1 being no trust and 5 being high trust). The
+        trust factor value reflects the trustworthiness of the attributes
+        associated with this device.
+      minimum: 1
+      maximum: 5
+      example: 4
+    UDID:
+      type: string
+      description: The generated unique device identifier.
+      example: UDID-9284e12b85b0d2763c13d734c70b1d62
+    BrowserUserAgent:
+      pattern: ^(?!\s*$).+
+      description: >-
+        The user-agent string of the consumer device. The user-agent must
+        represent the HTTP client of the service consumer with details on the
+        software originating the request.
+      type: string
+      example: >-
+        Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 7.0; InfoPath.3; .NET CLR
+        3.1.40767; Trident/6.0; en-IN)
+    BrowserPlugins:
+      description: A list of browser plugins installed on the consumer device.
+      type: array
+      items:
+        type: string
+      example:
+        - Adobe Acrobat
+        - QuickTime
+    DeviceRiskFactor:
+      type: integer
+      minimum: 1
+      maximum: 5
+      description: >-
+        The calculated risk factor is represented numerically using a range from
+        1 (no/low risk) to 5 (high risk). Each numerical value and its
+        associated risk representation is shown below.
+          * `1` - Represents a no or low risk request.
+          * `2` - Represents a low risk request.
+          * `3` - Represents a medium risk request.
+          * `4` - Represents a high risk request.
+          * `5` - Represents a very high risk request.
+
+        The calculated risk factor is typically used to identify scenarios where
+        a service provider may want to introduce consumer friction on the
+        authorization process to validate the identity of the consumer. Example
+        usage by a service provider may be to implement controls such as
+        multifactor authentication for calculated risk factors of `3` or `4` and
+        request blocking for risk factors of `5`.
+      example: 5
+    MatchToName:
+      type: string
+      description: >-
+        The match status between the input name and the queried entity. Possible
+        values are:
+          * no-match
+          * not-found
+          * match
+      example: no-match
+    AccountInfo:
+      type: object
+      description: Data points related to the account
+      properties:
+        hashedAccountId:
+          type: string
+          description: >-
+            The hashed identifier associated with the account sign-up. Please
+            use the same identifier when submitting another query for the same
+            account sign-up.
+          example: 3b5ed8ad6a408f42015254dd4b116080289038d41c311332e3c00be60f884370
+        signupTime:
+          type: string
+          description: >-
+            The timestamp associated with the account sign-up. Timestamp must be
+            in UTC timezone and data format YYYY-MM-DD HH:MM.
+          example: 2020-12-31 13:45
+    Address:
+      type: object
+      description: Full address including country, state, and postal code.
+      properties:
+        streetLine1:
+          type: string
+          description: >-
+            The first line of the _street_ part in the structured address.
+            _(Cannot be longer than 1000 characters.)_
+          example: 912 Uclan Dr
+        streetLine2:
+          type: string
+          description: >-
+            The second line of the _street_ part in the structured address.
+            _(Cannot be longer than 1000 characters.)_
+          example: Apt 32
+        city:
+          description: >-
+            The name of the city in the structured address. _(Cannot be longer
+            than 500 characters.)_
+          example: Houston
+          type: string
+        state:
+          description: >-
+            The state/province/parent subdivision code of the structured
+            address.
+          example: TX
+          type: string
+          minLength: 1
+          maxLength: 3
+        postalCode:
+          description: >-
+            The postal code of the structured address. _(Cannot be longer than
+            100 characters.)_
+          example: '63124'
+          type: string
+        country:
+          description: >-
+            The ISO-3166 alpha-2 country code of the address. See:
+            [ISO-3166](https://www.nationsonline.org/oneworld/country_code_list.htm)
+          example: US
+          type: string
+          pattern: ^[A-Za-z]+$
+          format: ISO-3166-2
+          minLength: 2
+          maxLength: 2
+    PhoneNumber:
+      type: object
+      description: Phone number including country hint (only the number is required).
+      properties:
+        countryHint:
+          description: >-
+            The ISO-3166 alpha-2 country code of the phone number. See:
+            [ISO-3166](https://www.nationsonline.org/oneworld/country_code_list.htm)
+          type: string
+          format: ISO-3166-2
+          example: US
+        number:
+          type: string
+          pattern: ^\+?[\d-]*(x\d*)?
+          description: >-
+            The phone number in E.164 or local format. The default country
+            calling code is +1 (USA).
+
+            Note: This field is required only if email is not provided.
+          example: '7785732875'
+    ErrorMessage:
+      required:
+        - Errors
+      type: object
+      description: The error response model used by all of our API endpoints.
+      properties:
+        Errors:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorList:
+      required:
+        - Error
+      type: object
+      description: The error response model used by all of our API endpoints
+      properties:
+        Error:
+          description: List of Error objects
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+    Error:
+      type: object
+      description: The error response model used by all of our API endpoints
+      properties:
+        Source:
+          type: string
+          description: The source of the problem, i.e where the error occurred.
+          example: IIA
+          minLength: 1
+          maxLength: 15
+        ReasonCode:
+          type: string
+          description: A code defining the error, as defined in documentation.
+          example: VALIDATION_ERROR
+          minLength: 1
+        Description:
+          type: string
+          description: A description for this specific occurrence of the above ReasonCode
+          example: Invalid Format
+          minLength: 1
+        Recoverable:
+          type: boolean
+          description: >-
+            Whether or not retrying this request could result in a successful
+            response.
+          example: false
+        Details:
+          type: string
+          description: >-
+            More details of this specific error. This is an optional field and
+            is sometimes used to give a more comprehensive description of the
+            error that has occurred, when required.
+          example: purchaseDate, billingAddress.city
+          minLength: 1
+  requestBodies:
+    AccountOpeningRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountOpeningData'
+  responses:
+    AccountOpening:
+      description: Success
+      headers:
+        X-MC-Correlation-ID:
+          schema:
+            type: string
+          description: A random string ID representing the account opening
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountOpeningInsights'
+    BadRequestError:
+      description: The data provided in the request was invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          examples:
+            InvalidFormatBadRequestErrorExample:
+              $ref: '#/components/examples/InvalidFormatBadRequestErrorExample'
+            MissingRequiredDataBadRequestErrorExample:
+              $ref: '#/components/examples/MissingRequiredDataBadRequestErrorExample'
+    UnauthorizedError:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+  examples:
+    MissingRequiredDataBadRequestErrorExample:
+      value:
+        Errors:
+          Error:
+            - Source: IIA
+              ReasonCode: VALIDATION_ERROR
+              Description: Required Data Element Missing
+              Recoverable: false
+              Details: device, user.full.name
+    InvalidFormatBadRequestErrorExample:
+      value:
+        Errors:
+          Error:
+            - Source: IIA
+              ReasonCode: VALIDATION_ERROR
+              Description: Invalid Format
+              Recoverable: false
+              Details: user.account.signupDate, device.ip
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+            - Source: IIA
+              ReasonCode: UNAUTHORIZED_REQUEST
+              Description: Unauthorized request
+              Recoverable: false
