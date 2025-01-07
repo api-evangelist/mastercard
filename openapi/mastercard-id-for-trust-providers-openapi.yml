@@ -1,0 +1,4878 @@
+openapi: 3.0.3
+info:
+  title: ID For Trust Providers API
+  description: >-
+    ID For Trust Providers offer the technology platform and operational service
+    to allow the secure storage and transmission of Digital Identity data from
+    the user to the Relying Party after having been verified to a required level
+    of assurance by an Identity Verification Provider.
+  contact:
+    name: API Support
+    email: apisupport@mastercard.com
+    url: https://developer.mastercard.com/support
+  version: 1.1.0
+servers:
+  - url: https://api.mastercard.com/idservice
+    description: Production server (uses USA live data).
+  - url: https://sandbox.api.mastercard.com/idservice
+    description: Sandbox server (testing USA environment).
+  - url: https://api.mastercard.com.au/idservice
+    description: Production server  (uses AUS live data).
+  - url: https://sandbox.api.mastercard.com.au/idservice
+    description: Sandbox server (testing AUS environment).
+tags:
+  - name: Create a User Identity
+    description: Create a user identity.
+  - name: Access a User Identity
+    description: Access a user identity.
+  - name: Manage a User Identity
+    description: Manage a user identity.
+  - name: Share a User Identity
+    description: Share a user's identity attributes with an RP.
+  - name: Identity History
+    description: Record and provide access to identity activities conducted by the user.
+paths:
+  /user-profiles/identity-searches:
+    post:
+      tags:
+        - Manage a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/IdentitySearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: >
+        Retrieve decrypted identities along with rotated PDS to present the user
+
+        with the registered identity in the TP app. Does not require a minimum
+        authentication standard.   
+
+        **This API is mandatory.**
+      summary: View an Identity
+      operationId: retrieveIdentities
+      parameters:
+        - $ref: '#/components/parameters/XUserIdentityParameter'
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/IdentitySearchRequest'
+  /user-profiles:
+    post:
+      tags:
+        - Create a User Identity
+      responses:
+        '201':
+          $ref: '#/components/responses/UserProfilesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+      description: |
+        - This endpoint registers a user profile using the given
+        `user profile ID`.
+
+        - An error will be returned if the user profile already exists.   
+        **This API is mandatory.**
+      summary: Create a new user.
+      operationId: createUserProfile
+      requestBody:
+        $ref: '#/components/requestBodies/UserProfilesRequest'
+    delete:
+      tags:
+        - Manage a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/UserProfilesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: >
+        Enable TP app to mark user account as deleted on Mastercard ID Network.
+        Requires GPA authentication.   
+
+        **This API is mandatory.**
+      summary: Delete an Identity.
+      operationId: deleteUserProfile
+      parameters:
+        - $ref: '#/components/parameters/UserProfileIdParameter'
+        - $ref: '#/components/parameters/UserConsentParameter'
+  /user-profiles/identity-attribute-deletions:
+    post:
+      tags:
+        - Manage a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/IdentityAttributeDeletionsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: >
+        Delete an identity attribute from a PDS and update the affected
+        assurance levels. Requires GPA authentication.   
+
+        **This API is mandatory.**
+      summary: Delete Document.
+      operationId: deleteIdentityAttribute
+      parameters:
+        - $ref: '#/components/parameters/XUserIdentityParameter'
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/IdentityAttributeDeletionsRequest'
+  /email-otps:
+    post:
+      tags:
+        - Manage a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/EmailOtpsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+      description: |
+        Take in and code in the request body. It checks if the provided
+        code matches the one-time password generated for the OTP request and
+        returns the result. Does not require a minimum authentication standard.
+        **This API is mandatory.**
+      summary: Add & Validate an Email Address   Request an OTP Code.
+      operationId: createEmailOTP
+      parameters:
+        - $ref: '#/components/parameters/XUserIdentityParameter'
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/EmailOtpsRequest'
+  /email-otp-verifications:
+    post:
+      tags:
+        - Manage a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/OtpVerificationsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+      description: |
+        Take in `otpId` and code in the request body. It checks if the provided
+        code matches the one-time password generated for the OTP request and
+        returns the result. Does not require a minimum authentication standard.
+        **This API is mandatory.**
+      summary: Add & Validate an Email Address  Verify an OTP Code.
+      operationId: verifyEmailOTP
+      parameters:
+        - $ref: '#/components/parameters/XUserIdentityParameter'
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/EmailOtpVerificationsRequest'
+  /sms-otps:
+    post:
+      tags:
+        - Manage a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/SmsOtpsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+      description: >
+        Generate and send via SMS an OTP along with a message body to the
+
+        provided phone number. Does not require a minimum authentication
+        standard.
+
+        **This API is mandatory.**
+      summary: "Add & Validate a Phone Number \tRequest an OTP Code."
+      operationId: createSMSOTP
+      parameters:
+        - $ref: '#/components/parameters/XUserIdentityParameter'
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/SmsOtpsRequest'
+  /sms-otp-verifications:
+    post:
+      tags:
+        - Manage a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/OtpVerificationsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+      description: |
+        Add the `otpId` and code in the request body. It checks if the provided
+        code matches the one-time password generated for the OTP request and
+        returns the result. Does not require a minimum authentication standard.
+        **This API is mandatory.**
+      summary: Add & Validate a Phone Number  Verify an OTP Code.
+      operationId: verifySMSOTP
+      parameters:
+        - $ref: '#/components/parameters/XUserIdentityParameter'
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/SmsOtpVerificationsRequest'
+  /tp-data-shares:
+    post:
+      summary: Add an Independently Validated Phone Number.
+      tags:
+        - Manage a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/TPDataShareSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: >
+        Used for a TP to share a User's Identity Attributes. Does not require a
+        minimum authentication standard.   
+
+        **This API is optional.**
+      operationId: updatePdsData
+      parameters:
+        - $ref: '#/components/parameters/XUserIdentityParameter'
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/TpDataShareRequest'
+  /multi-access-tokens:
+    post:
+      tags:
+        - Manage a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/AccessTokensResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+      description: |
+        Returns a `SDK Token` used for multiple document enrollment to be passed
+        to the `MIDS verification SDK` module.   
+        **This API is mandatory.**
+      summary: >-
+        Add and Validate a Document - Request a token to enroll an additional
+        document.
+      operationId: getMultiAccessToken
+      parameters:
+        - $ref: '#/components/parameters/XUserIdentityParameter'
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/MultiAccessTokensRequest'
+  /access-tokens:
+    post:
+      tags:
+        - Create a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/AccessTokensResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+      description: |
+        Returns a `SDK Token` token to be passed to the MIDS verification SDK
+        module.   
+        **This API is mandatory.**
+      summary: Request a token to enroll an identity.
+      operationId: getAccessToken
+      parameters:
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/AccessTokensRequest'
+  /document-verifications/document-data-retrievals:
+    post:
+      tags:
+        - Create a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/DocumentDataRetrievalsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: |
+        Informs if the document verification is still being processed or is
+        processed already. If `SUCCESS`, the document data is returned.   
+        **This API is mandatory.**
+      summary: Retrieve the details of a document.
+      operationId: retrieveDocumentData
+      parameters:
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/DocumentDataRetrievalsRequest'
+    put:
+      tags:
+        - Manage a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/DocumentDataRetrievalsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: >
+        Informs if the document verification for the additional document is
+        still being processed (PENDING)
+
+        or is processed already (SUCCESS). If SUCCESS, the document data is
+
+        returned.   
+
+        **This API is mandatory.**
+      summary: >-
+        Add and Validate a Document - Retrieve the details of an additional
+        document.
+      operationId: retrieveMultiDocumentData
+      parameters:
+        - $ref: '#/components/parameters/XUserIdentityParameter'
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/MultiDocumentDataRetrievalsRequest'
+  /document-verifications/document-data-confirmations:
+    post:
+      tags:
+        - Create a User Identity
+        - Manage a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/DocumentDataConfirmationsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: |
+        - After the user verifies and checks if the data extracted from the
+        documents match the current status (for example, Address).
+
+        - The user sends data back to MIDS to confirm the details.
+
+        - Perform verifications with IVPs and store the data into the PDS.   
+        **This API is mandatory.**
+      summary: Add and Validate a Document - Confirm the details of a document.
+      operationId: confirmDocumentData
+      parameters:
+        - $ref: '#/components/parameters/XUserIdentityParameter'
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/DocumentDataConfirmationsRequest'
+  /document-verifications/identity-attributes:
+    put:
+      tags:
+        - Manage a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/DocumentDataConfirmationsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: |
+        After the user verifies and confirms the conflict attribute, the user
+        sends data back to MIDS to confirm the details. This API will
+        perform verifications with IVPs and store the data into the PDS.   
+        **This API is mandatory.**
+      summary: >-
+        Add and Validate a Document - Resolve a conflict between identity
+        attributes.
+      operationId: updateIdentityAttribute
+      parameters:
+        - $ref: '#/components/parameters/XUserIdentityParameter'
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateIdentityAttributesRequest'
+  /document-verifications/update-id-confirmations:
+    put:
+      tags:
+        - Create a User Identity
+        - Manage a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/UpdateIdConfirmationsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: >
+        Delete the document verification data on the Identity verification
+        vendor
+
+        once the user confirms the PDS update.   
+
+        **This API is mandatory.**
+      summary: >-
+        Add and Validate a Document - Confirm the identity was stored to the
+        PDS.
+      operationId: updateIdConfirmation
+      parameters:
+        - $ref: '#/components/parameters/XUserIdentityParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateIdConfirmationsRequest'
+  /initiate-authentications:
+    post:
+      tags:
+        - Access a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/InitiateAuthenticationsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+      description: |
+        Initialize authentication based on the information provided in PDS.   
+        **This API is mandatory.**
+      summary: >
+        Authenticate a user using Liveness Assurance, this is a more performant,
+        but less stringent form of authentication, which will enable the user to
+        access, but not change certain details of their identity.
+      operationId: initializeAuthentication
+      parameters:
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/InitializeAuthenticationsRequest'
+  /initiate-premium-authentications:
+    post:
+      tags:
+        - Access a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/InitiateAuthenticationsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+      description: >
+        This API returns a token for initiating the premium authentication
+        process
+
+        using SDK.   
+
+        **This API is mandatory.**
+      summary: >-
+        Authenticate a user using Genuine Presence Assurance, this is a less
+        performant, but more stringent form of authentication, which will enable
+        the user to manage all aspects of their identity.
+      operationId: initiateStrongerAuthentication
+      parameters:
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/InitializePremiumAuthenticationsRequest'
+  /authentication-decisions/scans/{scan_id}:
+    put:
+      tags:
+        - Access a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/AuthenticationDecisionsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: >
+        Authenticate user identity and retrieve identity attributes without
+        updating selfie.   
+
+        **This API is mandatory.**
+      summary: Retrieve an outcome for an authentication.
+      operationId: authenticationdecisions
+      parameters:
+        - $ref: '#/components/parameters/ScanIdPathParameter'
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/AuthenticationDecisionRequest'
+  /audit-events:
+    put:
+      tags:
+        - Identity History
+      responses:
+        '201':
+          $ref: '#/components/responses/AuditEventsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+      description: >
+        Create the audit events with the user profile ID provided by the TP.
+        Does not require a minimum authentication standard.
+
+        **This API is mandatory.**
+      summary: Provide auditable events for recording against the identity.
+      operationId: createAuditEvents
+      requestBody:
+        $ref: '#/components/requestBodies/AuditEventsRequest'
+  /user-account-activity-searches:
+    post:
+      tags:
+        - Identity History
+      responses:
+        '200':
+          $ref: '#/components/responses/UserAccountActivitySearchesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: |
+        Retrieve decrypted user activities and present them to the user in the
+        TP app. Does not require a minimum authentication standard.
+        **This API is mandatory.**
+      summary: View identity lifecycle activities which have occurred in a time period.
+      operationId: retrieveUserActivities
+      parameters:
+        - $ref: '#/components/parameters/XUserIdentityParameter'
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/UserAccountActivitySearchRequest'
+  /rp-activity-searches:
+    post:
+      tags:
+        - Identity History
+      responses:
+        '200':
+          $ref: '#/components/responses/RPActivitySearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: |
+        Retrieve decrypted RP activities and present them to the user in the TP
+        app. Does not require a minimum authentication standard.
+        **This API is mandatory.**
+      summary: >-
+        View identity claim sharing activities which have occurred in a time
+        period.
+      operationId: searchRpActivity
+      parameters:
+        - $ref: '#/components/parameters/XUserIdentityParameter'
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/RPActivitySearchRequest'
+  /tprp-claims:
+    post:
+      tags:
+        - Share a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/TPRPClaimsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+      description: >
+        Returns the claims which satisfy the scopes in the request, based on
+
+        information provided in the PDS. Does not require a minimum
+        authentication standard.
+
+        **This API is optional.**
+      summary: Share an Identity when the TP is also an RP.
+      operationId: getClaimsIdentities
+      parameters:
+        - $ref: '#/components/parameters/XUserIdentityParameter'
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/TPRPClaimsRequest'
+  /claims/scopes/{arid}:
+    get:
+      summary: >-
+        Share an Identity with an External RP - Retrieve details of the scope
+        request being made by an RP.
+      tags:
+        - Share a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/RPScopesSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: >
+        Used to retrieve the scopes and RP details associated with the ARID.
+        Does not require a minimum authentication standard.   
+
+        **This API is mandatory.**
+      operationId: retrieveCSScopes
+      parameters:
+        - $ref: '#/components/parameters/AridParameter'
+  /claims/user-data-extractions:
+    post:
+      tags:
+        - Share a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/RPClaimsDataResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorClaimSharing'
+        '404':
+          $ref: '#/components/responses/NotFoundErrorClaimSharing'
+      description: >
+        Returns the user information from the PDS that is requested by the
+
+        Relying Party based on the ARID. Does not require a minimum
+        authentication standard.
+
+        **This API is mandatory.**
+      summary: >-
+        Share an Identity with an External RP - Provide the PDS to enable ID for
+        TP to determine if these satisfy an RPs scope request.
+      operationId: extractClaimsUserData
+      parameters:
+        - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/RPClaimsDataRequestData'
+  /claims/user-consents:
+    post:
+      tags:
+        - Share a User Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/UserConsentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorClaimSharing'
+        '404':
+          $ref: '#/components/responses/NotFoundErrorClaimSharing'
+      description: >
+        Inform the Trust Party about the user consent. If the consent is given,
+
+        the identity attributes will be shared with Relying Party. Does not
+        require a minimum authentication standard. 
+
+        **This API is mandatory.**
+      summary: >-
+        Share an Identity with an External RP - Provide consent to share the
+        identity attributes which satisfy an RPs scope request.
+      operationId: getUserConsentStatus
+      requestBody:
+        $ref: '#/components/requestBodies/UserConsentRequest'
+components:
+  schemas:
+    Configuration:
+      required:
+        - messageLevelEncryption
+        - baseUrl
+        - apiKey
+        - otpHost
+        - certificatePins
+      properties:
+        messageLevelEncryption:
+          type: boolean
+          description: >-
+            Indicates whether message level encryption is enabled or not for
+            Mobile ID.
+          example: false
+        baseUrl:
+          type: string
+          description: The Idemia Base URL for the Mobile ID.
+          minLength: 1
+          maxLength: 500
+          example: https://api.app.dev.0.stc.us.idemia.io
+        apiKey:
+          type: string
+          description: The Idemia Api Key for the Mobile ID.
+          minLength: 1
+          maxLength: 500
+          example: 2b6e3ff2-ecd0-4c66-8a5e-716dae42a5d9
+        otpHost:
+          type: string
+          description: The Idemia OTP URL for the Mobile ID.
+          minLength: 1
+          maxLength: 500
+          example: mid-dev.idemia.com
+        certificatePins:
+          type: array
+          description: Certificate Pinnings for IDEMIA domains
+          items:
+            $ref: '#/components/schemas/CertificatePin'
+    CertificatePin:
+      type: object
+      description: Identity attributes array item.
+      properties:
+        domain:
+          type: string
+          description: The Idemia domian for certificate pinning.
+          minLength: 1
+          maxLength: 500
+          example: api.app.dev.0.stc.us.idemia.io
+        publicKeyHash:
+          type: string
+          description: The Idemia certificate hash.
+          minLength: 1
+          maxLength: 500
+          example: sha256/K6ejhsw
+    ActivationCode:
+      required:
+        - transactionId
+        - activationCode
+        - status
+      properties:
+        activationCode:
+          type: string
+          description: >-
+            IDEMIA generated QR code, This will be used in MIDS Mobile SDK to
+            get user identity attributes from IDEMIA
+          minLength: 1
+          maxLength: 500
+          example: >-
+            OGI3MDdmOWMtODhkMC00NmY0LWI2ZmUtNWE5NmI1NTY4NjgyLGV5SmhiR2NpT2lKSVV6STFOaUo5LmV5SmhkV1FpT2lJNFlqY3dOMlk1WXkwNE9HUXdMVFEyWmpRdFlqWm1aUzAxWVRrMllqVTFOamcyT0RJaUxDSmxlSEFpT2pFMk5qUXlPVGM1TWpCOS5hN1BEbE5SYzBVUjh1ZjBkT0NVX29scjNwSW9xS2RwVTBQQlR5TlVyVnRzLGh0dHBzOi8vYXBpLmFwcC5kZXYuMC5zdGMudXMuaWRlbWlhLmlvL2dpcHMvcmVzdC92MS90cmFuc2FjdGlvbnMvLDU0MjE0Ng==
+        transactionId:
+          type: string
+          description: A random 128-bit. UUID represents the MIDS transaction.
+          minLength: 36
+          maxLength: 36
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+        status:
+          type: string
+          description: >-
+            The status of the Get Activation Code API, possible value is
+            PENDING.
+          minLength: 1
+          maxLength: 50
+          example: PENDING
+    MobileIdRegistration:
+      required:
+        - transactionId
+        - registrationId
+        - status
+      properties:
+        status:
+          type: string
+          description: The status of the registration API, possible value is PENDING.
+          minLength: 7
+          maxLength: 7
+          example: PENDING
+        transactionId:
+          type: string
+          description: A random 128-bit. UUID represents the MIDS transaction.
+          minLength: 36
+          maxLength: 36
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+        registrationId:
+          type: string
+          description: A random 128-bit. UUID represents the registration.
+          minLength: 36
+          maxLength: 36
+          example: 1ec14310-e85c-11ea-adc1-0242ac120003
+    MobileIdUserEligibilityInfo:
+      required:
+        - countryCode
+        - userConsent
+        - pds
+        - deviceType
+        - deviceOS
+      properties:
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        deviceOS:
+          type: string
+          description: >-
+            The OS version of the mobile device that user is using to register
+            with.
+          maxLength: 20
+          minLength: 1
+          example: iOS16
+        deviceType:
+          type: string
+          description: >-
+            The type of device operating system that user is using to register
+            with.
+          enum:
+            - ANDROID
+            - IOS
+          example: ANDROID
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    IdentityAttributeDeletions:
+      required:
+        - pds
+        - attributeName
+        - userConsent
+        - attributeId
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        attributeName:
+          type: string
+          description: The name of the attribute to be deleted.
+          enum:
+            - PASSPORT
+            - DRIVER_LICENSE
+          example: PASSPORT
+        attributeId:
+          type: string
+          description: >-
+            The identifier of the attribute being queried. This can be retrieved
+            from a call to either the authentication-decisions API, or the
+            user-profiles/identity-searches API.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 1
+          example: cf11bb8d-b1b1-49c7-90ed-c63134cd1008
+        sdkAuditEvents:
+          type: array
+          description: >-
+            Array of objects containing a record of any auditable steps
+            occurring between the App and the SDK. A call must be made by the TP
+            App from the MIDS Audit SDK prior to all API calls, with any audit
+            events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    IdentityAttributeDeleted:
+      required:
+        - pds
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+    TpDataShare:
+      required:
+        - pds
+        - userConsent
+        - userProfileId
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        userProfileId:
+          type: string
+          description: >-
+            UUID identifying the user, which the TP App generates using the MIDS
+            Core SDK.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: df52649e-4096-456a-bca0-751ee470009f
+        address:
+          $ref: '#/components/schemas/Address'
+        email:
+          $ref: '#/components/schemas/Email'
+        phone:
+          $ref: '#/components/schemas/Phone'
+    TPDataShareSuccessData:
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+    RPScopes:
+      required:
+        - scopes
+        - rpName
+        - rpLogoUrl
+      type: object
+      properties:
+        scopes:
+          type: array
+          items:
+            type: string
+            description: The list of scopes that have been requested.
+            example: name:0:365
+        rpName:
+          type: string
+          description: RP Name.
+          minLength: 1
+          maxLength: 255
+          example: THISRP
+        rpLogoUrl:
+          type: string
+          description: The URL of the logo of the RP.
+          minLength: 1
+          example: https://www.rpsite.com/logo.jpg
+    MultiDocumentDataRetrieval:
+      required:
+        - countryCode
+        - workflowId
+        - userConsent
+        - userProfileId
+        - locale
+        - pds
+      allOf:
+        - type: object
+          properties:
+            pds:
+              $ref: '#/components/schemas/PDS'
+        - $ref: '#/components/schemas/DocumentDataRetrieval'
+    VerifyAuthenticationDecisions:
+      required:
+        - countryCode
+        - sdkVersion
+        - pds
+        - userProfileId
+        - userConsent
+        - privacyPolicyVersion
+      type: object
+      properties:
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userProfileId:
+          type: string
+          description: >-
+            UUID identifying the user, which the TP App generates using the MIDS
+            Core SDK.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        sdkAuthenticationDecision:
+          type: boolean
+          description: >-
+            Flag indicating the result of Liveness detection conducted by the
+            SDK. This can be retrieved from the MIDS Verification SDK.
+          example: false
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        scopedFields:
+          type: array
+          description: >
+            Array of enums representing the identity attributes which the TP is
+            requesting access to.
+
+            The acceptable values are any/all of: 'all', 'legalName', 'email',
+            'phone', 'dateOfBirth', 'driverLicense', 'passport', 'address'
+          minItems: 1
+          items:
+            enum:
+              - >-
+                all - legalName - email - phone - dateOfBirth - selfie - address
+                - ageOver - ageUnder - city - postalCode - subDivision - govtId
+                - govtIdDetails - govtIdImage - passportIdentity -
+                passportDetails - passportImage - driverLicenseIdentity -
+                driverLicenseCardNumber - driverLicenseDetails -
+                driverLicenseImage - driverLicenseIssuingState - visaMatched -
+                cpf - rgNumber - cnh - mothersName - fathersName
+            type: string
+            example: all
+        privacyPolicyVersion:
+          type: string
+          description: >-
+            The version of the privacy policy which the API call is being
+            conducted under, this can be retrieved from the MIDS Core SDK.
+          minLength: 1
+          maxLength: 20
+          example: 1.0.0
+        deviceInfo:
+          $ref: '#/components/schemas/DeviceInfo'
+        fraudDetection:
+          $ref: '#/components/schemas/FraudDetection'
+        arid:
+          $ref: '#/components/schemas/ARID'
+    DocumentDataRetrieval:
+      required:
+        - countryCode
+        - workflowId
+        - userConsent
+        - userProfileId
+        - locale
+        - userSelectedCountry
+        - documentType
+      type: object
+      properties:
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        userSelectedCountry:
+          type: string
+          description: >-
+            An ISO 3166-1 alpha-3 code corresponding to the issuing country of
+            the document as specified by the user.
+          pattern: ^[a-zA-Z]{3}$
+          maxLength: 3
+          example: USA
+        documentType:
+          type: string
+          description: The type of the document as specified by the user.
+          enum:
+            - PASSPORT
+            - DRIVING_LICENSE
+          minLength: 8
+          maxLength: 15
+          example: PASSPORT
+        locale:
+          $ref: '#/components/schemas/Locale'
+        userProfileId:
+          type: string
+          description: >-
+            UUID identifying the user, which the TP App generates using the MIDS
+            Core SDK.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          maxLength: 36
+          example: df52649e-4096-456a-bca0-751ee470009f
+        workflowId:
+          type: string
+          description: >-
+            UUID returned to the TP after the initial enrollment /
+            re-authentication is completed, which is used to return the outcome
+            of the associated verification process.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: df52649e-4096-456a-bca0-751ee470009f
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        privacyPolicyVersion:
+          type: string
+          description: >-
+            The version of the privacy policy which the API call is being
+            conducted under, this can be retrieved from the MIDS Core SDK.
+          minLength: 1
+          maxLength: 20
+          example: 1.0.0
+        sdkAuditEvents:
+          type: array
+          description: >-
+            Array of objects containing a record of any auditable steps
+            occurring between the App and the SDK. A call must be made by the TP
+            App from the MIDS Audit SDK prior to all API calls, with any audit
+            events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    DocumentVerificationExtractedData:
+      required:
+        - status
+        - transactionId
+      type: object
+      properties:
+        documentData:
+          $ref: '#/components/schemas/DocumentDataStatus'
+        status:
+          description: >-
+            The status of the Status API, possible values are SUCCESS and
+            PENDING.
+          type: string
+          minLength: 1
+          maxLength: 10
+          example: SUCCESS
+        transactionId:
+          type: string
+          description: A random 128-bit. UUID represents the MIDS transaction.
+          minLength: 36
+          maxLength: 36
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+    DocumentData:
+      description: >-
+        Object containing the details of the document whose accuracy has been
+        confirmed by the user.
+      required:
+        - dateOfBirth
+        - documentNumber
+        - documentStatus
+        - documentType
+        - expiryDate
+        - firstName
+        - gender
+        - issuingCountry
+        - issuingDate
+        - lastName
+      allOf:
+        - $ref: '#/components/schemas/AddressData'
+        - $ref: '#/components/schemas/BaseEvidenceData'
+        - type: object
+          properties:
+            documentNumber:
+              type: string
+              description: Document number.
+              minLength: 1
+              maxLength: 255
+              example: 1LViI488YkFZh8YjNlLf61BMn29cmQn
+            documentType:
+              type: string
+              description: The type of the document as specified by the user.
+              minLength: 1
+              maxLength: 50
+              example: passport
+            issuingPlace:
+              type: string
+              description: Issuing place.
+              minLength: 1
+              maxLength: 50
+              example: New York
+            issuingAuthority:
+              type: string
+              description: Issuing authority.
+              minLength: 1
+              maxLength: 50
+              example: United States
+            placeOfBirth:
+              type: string
+              description: Place of birth.
+              minLength: 1
+              maxLength: 255
+              example: Boston
+            issuingState:
+              type: string
+              description: State.
+              minLength: 2
+              maxLength: 100
+              example: MO
+            formattedAddress:
+              type: string
+              description: Formatted address.
+              minLength: 1
+              maxLength: 200
+              example: 220 BLVD O FALLON MO
+            rgNumber:
+              type: string
+              description: >-
+                RG Number. This will only be available when the Brazilian DL is
+                scanned.
+              minLength: 1
+              maxLength: 255
+              example: 12345
+            cpf:
+              type: string
+              description: >-
+                CPF Number. This will only be available when the Brazilian DL is
+                scanned.
+              minLength: 1
+              maxLength: 255
+              example: 12345
+            cardNumber:
+              type: string
+              description: >-
+                The Driver's License card number was introduced to the
+                Australian Driver's License as a verifiable field. It is
+                currently only available for six Australian jurisdictions. This
+                field is optional.
+              minLength: 1
+              maxLength: 255
+              example: C876687JK
+    DocumentDataStatus:
+      description: >-
+        Object containing the details of the document whose accuracy has been
+        confirmed by the user.
+      required:
+        - dateOfBirth
+        - documentNumber
+        - documentStatus
+        - documentType
+        - expiryDate
+        - firstName
+        - gender
+        - issuingCountry
+        - issuingDate
+        - lastName
+      allOf:
+        - $ref: '#/components/schemas/DocumentData'
+        - type: object
+          properties:
+            documentStatus:
+              type: string
+              description: Document status.
+              minLength: 1
+              maxLength: 7
+              example: SUCCESS
+    ConfirmDocumentData:
+      required:
+        - dateOfBirth
+        - documentNumber
+        - documentType
+        - workflowId
+        - expiryDate
+        - firstName
+        - issuingCountry
+        - lastName
+      description: Document data to be verified.
+      allOf:
+        - $ref: '#/components/schemas/DocumentData'
+        - type: object
+          properties:
+            workflowId:
+              type: string
+              description: >-
+                UUID returned to the TP after the initial enrollment /
+                re-authentication is completed, which is used to return the
+                outcome of the associated verification process.
+              pattern: >-
+                ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+              example: be3ad617-04ad-43e1-a438-79425b6511b6
+    DocumentIdConfirmation:
+      required:
+        - countryCode
+        - workflowId
+        - userProfileId
+        - eventType
+      type: object
+      properties:
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        workflowId:
+          type: string
+          description: >-
+            UUID returned to the TP after the initial enrollment /
+            re-authentication is completed, which is used to return the outcome
+            of the associated verification process.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          maxLength: 36
+          minLength: 36
+          example: df52649e-4096-456a-bca0-751ee470009f
+        userProfileId:
+          type: string
+          description: >-
+            UUID identifying the user, which the TP App generates using the MIDS
+            Core SDK.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          maxLength: 36
+          minLength: 36
+          example: df52649e-4096-456a-bca0-751ee470009f
+        eventType:
+          type: string
+          description: ENROLLMENT or AUTHENTICATION.
+          enum:
+            - ENROLLMENT
+            - AUTHENTICATION
+          minLength: 10
+          maxLength: 14
+          example: ENROLLMENT
+        sdkAuditEvents:
+          type: array
+          description: >-
+            Array of objects containing a record of any auditable steps
+            occurring between the App and the SDK. A call must be made by the TP
+            App from the MIDS Audit SDK prior to all API calls, with any audit
+            events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    AccessToken:
+      required:
+        - apiDataCenter
+        - sdkToken
+        - transactionId
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: A random 128-bit UUID represents the transaction.
+          minLength: 36
+          maxLength: 36
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+        sdkToken:
+          type: string
+          description: Passed into the MIDS verification SDK for authentication.
+          minLength: 1
+          maxLength: 400
+          example: >-
+            eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAB3NQQpCMQwE0Lt0baBJ0yZ159KtN0jTBgTBjYgg3t3__3KGN8w3rc_llc4JG6KUhrmoYjolc7_OvWfPKJ2hUzNgagE2hcC5hsYIUeOdH7gStVr6AtElwNUcrBNDFppYMjqxb9hvKzb9fNzfa4_HVkORomdoggsYp8HgPqAWF43VtsOcfn_stx4UsAAAAA.tDRVowYYcpQ03Vlt7D3MiovleiyRFQMv4qzXb7Lf_6CarphRrlWXan8-jE-YesNiAiT8tk0b-i8TKHGrcgT1VQ
+        apiDataCenter:
+          type: string
+          description: API Data Centre specifying the region.
+          minLength: 1
+          maxLength: 2
+          example: SG
+    IdentityAttribute:
+      allOf:
+        - {}
+        - oneOf:
+            - $ref: '#/components/schemas/Address'
+            - $ref: '#/components/schemas/DateOfBirth'
+            - $ref: '#/components/schemas/Email'
+            - $ref: '#/components/schemas/FathersName'
+            - $ref: '#/components/schemas/MothersName'
+            - $ref: '#/components/schemas/LegalName'
+            - $ref: '#/components/schemas/Phone'
+            - $ref: '#/components/schemas/Selfie'
+            - $ref: '#/components/schemas/MobileIdEligibility'
+            - $ref: '#/components/schemas/GovtId'
+            - $ref: '#/components/schemas/GovtIdDetails'
+            - $ref: '#/components/schemas/GovtIdImage'
+            - $ref: '#/components/schemas/PassportIdentity'
+            - $ref: '#/components/schemas/PassportDetails'
+            - $ref: '#/components/schemas/PassportImage'
+            - $ref: '#/components/schemas/DriverLicenseIdentity'
+            - $ref: '#/components/schemas/DriverLicenseCardNumber'
+            - $ref: '#/components/schemas/DriverLicenseDetails'
+            - $ref: '#/components/schemas/DriverLicenseImage'
+            - $ref: '#/components/schemas/VisaMatched'
+            - $ref: '#/components/schemas/Cnh'
+            - $ref: '#/components/schemas/Cpf'
+            - $ref: '#/components/schemas/Rg'
+    IdentityAttributesById:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/IdentityAttribute'
+      description: Identity attributes are keyed by attribute IDs.
+      minLength: 1
+    IdentityAttributesByName:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/IdentityAttributesById'
+      description: Identity attributes keyed by IdentitySearch.scopedFields enum.
+      minLength: 1
+      example:
+        dateOfBirth:
+          e95b7c68-ebcb-4a88-9978-c33d78cde128:
+            value: '1980-01-01'
+            lastVerifiedDate: '2022-04-04T02:49:27.915Z'
+    ClientIdentities:
+      required:
+        - attributes
+      type: object
+      properties:
+        rotatedPds:
+          type: string
+          description: >-
+            A rotated PDS is created and returned when the encryption key
+            expires and a new key is generated.
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          minLength: 1
+          example: >-
+            ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        attributes:
+          $ref: '#/components/schemas/IdentityAttributesByName'
+    UserAccountActivities:
+      required:
+        - userAccountActivities
+      properties:
+        userAccountActivities:
+          type: array
+          description: User account activity items.
+          items:
+            $ref: '#/components/schemas/UserAccountActivityItems'
+        rotatedPds:
+          type: string
+          description: >-
+            A rotated PDS is created and returned when the encryption key
+            expires and a new one is generated.
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          minLength: 1
+          example: >-
+            ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    UserAccountActivityItems:
+      required:
+        - action
+        - createdDate
+      properties:
+        action:
+          type: string
+          description: >-
+            Type of the activity, possible values - ["ID Created", "Details
+            Updated", "Add Drivers License", "Add Passport", "Add Health Card",
+            "ID Backup", "ID Restore", "Attribute Deleted"].
+          minLength: 1
+          maxLength: 24
+          example: ID Created
+        createdDate:
+          type: string
+          description: Date of the event.
+          minLength: 1
+          maxLength: 29
+          example: '2020-01-28T13:16:01.714-05:00'
+        values:
+          type: array
+          description: Details of the activity.
+          items:
+            $ref: '#/components/schemas/UserAccountActivityItemContents'
+    UserAccountActivityItemContents:
+      required:
+        - value
+      properties:
+        attributeName:
+          type: string
+          description: Name of the updated attribute.
+          minLength: 1
+          maxLength: 255
+          example: legalName
+        previousValue:
+          type: string
+          description: Value before the update.
+          minLength: 1
+          maxLength: 255
+          example: John Doe
+        value:
+          type: string
+          description: Value after the update.
+          minLength: 1
+          maxLength: 255
+          example: John Dow
+        source:
+          type: string
+          description: The source document for the update.
+          minLength: 1
+          maxLength: 29
+          example: passport
+    AccessTokenCommonFields:
+      required:
+        - countryCode
+        - sdkVersion
+        - channelType
+        - userProfileId
+      type: object
+      properties:
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+        channelType:
+          type: string
+          description: The platform from where the request is originating Web/SDK.
+          enum:
+            - WEB
+            - SDK
+          minLength: 3
+          maxLength: 3
+          example: WEB
+        userProfileId:
+          type: string
+          description: >-
+            UUID identifying the user, which the TP App generates using the MIDS
+            Core SDK.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        sdkAuditEvents:
+          type: array
+          description: >-
+            Array of objects containing a record of any auditable steps
+            occurring between the App and the SDK. A call must be made by the TP
+            App from the MIDS Audit SDK prior to all API calls, with any audit
+            events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+    RetrieveAccessToken:
+      required:
+        - countryCode
+        - sdkVersion
+        - channelType
+        - userProfileId
+      allOf:
+        - type: object
+          properties:
+            enrollmentOrigin:
+              type: string
+              description: >-
+                A free text field which the TP can use to differentiate between
+                different scenarios which may influence the outcome of the
+                enrollment, e.g. In store, Online, etc.
+              minLength: 1
+              maxLength: 20
+              example: RETAIL
+        - $ref: '#/components/schemas/AccessTokenCommonFields'
+    MultiRetrieveAccessToken:
+      required:
+        - countryCode
+        - sdkVersion
+        - channelType
+        - userProfileId
+        - pds
+      allOf:
+        - type: object
+          properties:
+            pds:
+              $ref: '#/components/schemas/PDS'
+        - $ref: '#/components/schemas/AccessTokenCommonFields'
+    UserAccountActivitySearch:
+      required:
+        - pds
+        - startIndex
+        - endIndex
+        - userConsent
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        startIndex:
+          type: integer
+          description: Start index of the user account activity.
+          format: int32
+          minimum: 1
+          maximum: 999
+          example: 3
+        endIndex:
+          type: integer
+          description: End index of the user account activity.
+          format: int32
+          minimum: 1
+          maximum: 999
+          example: 10
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    IdentitySearch:
+      required:
+        - pds
+        - scopedFields
+        - userConsent
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        scopedFields:
+          type: array
+          description: >
+            Array of enums representing the identity attributes which the TP is
+            requesting access to.
+
+            The acceptable values are any/all of: 'all', 'legalName', 'email',
+            'phone', 'dateOfBirth', 'driverLicense', 'passport', 'address'
+          minItems: 1
+          items:
+            enum:
+              - >-
+                all - legalName - email - phone - dateOfBirth - selfie - address
+                - ageOver - ageUnder - city - postalCode - subDivision - govtId
+                - govtIdDetails - govtIdImage - passportIdentity -
+                passportDetails - passportImage - driverLicenseIdentity -
+                driverLicenseCardNumber - driverLicenseDetails -
+                driverLicenseImage - driverLicenseIssuingState - visaMatched -
+                cpf - rgNumber - cnh - mothersName - fathersName
+            type: string
+            example: all
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    RPActivitySearch:
+      required:
+        - pds
+        - startIndex
+        - endIndex
+        - userConsent
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        startIndex:
+          type: integer
+          description: Start index of the RP activity.
+          format: int32
+          minimum: 1
+          maximum: 999
+          example: 3
+        endIndex:
+          type: integer
+          description: End index of the RP activity.
+          format: int32
+          minimum: 1
+          maximum: 999
+          example: 10
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    RPActivities:
+      required:
+        - rpActivities
+      properties:
+        rpActivities:
+          type: array
+          description: Relying Party activity items.
+          items:
+            $ref: '#/components/schemas/RPActivityItems'
+        rotatedPds:
+          type: string
+          description: >-
+            A rotated PDS is created and returned when the encryption key
+            expires and a new key is generated.
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          minLength: 1
+          example: >-
+            ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    RPActivityItems:
+      required:
+        - rpName
+        - consentType
+        - createdDate
+        - attributesConsented
+      type: object
+      properties:
+        rpName:
+          type: string
+          description: Relying Party name.
+          minLength: 1
+          maxLength: 255
+          example: Toys inc
+        consentType:
+          type: string
+          description: User consent type.
+          minLength: 1
+          maxLength: 10
+          example: OneTime
+        createdDate:
+          type: string
+          description: Date of the event.
+          minLength: 1
+          maxLength: 29
+          example: '2020-01-28T13:16:01.714-05:00'
+        attributesConsented:
+          type: object
+          description: This is the same data structure that is returned to Relying Party.
+          additionalProperties: {}
+          example:
+            passport.firstName: John
+            passport.lastName: Doe
+    AuditEvents:
+      required:
+        - countryCode
+        - userProfileId
+        - sdkAuditEvents
+      properties:
+        sdkAuditEvents:
+          type: array
+          description: >-
+            Array of objects containing a record of any auditable steps
+            occurring between the App and the SDK. A call must be made by the TP
+            App from the MIDS Audit SDK prior to all API calls, with any audit
+            events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        userProfileId:
+          type: string
+          description: >-
+            UUID identifying the user, which the TP App generates using the MIDS
+            Core SDK.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    AuditEventsItem:
+      type: object
+      properties:
+        dateTime:
+          type: string
+          description: Date and time at which the event is created.
+          minLength: 1
+          maxLength: 29
+          example: '2020-01-28T13:16:01.714-05:00'
+        softwareVersion:
+          type: string
+          description: Software version.
+          minLength: 1
+          maxLength: 30
+          example: 1.0.0
+        userProfileId:
+          type: string
+          description: >-
+            UUID identifying the user, which the TP App generates using the MIDS
+            Core SDK.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        sessionId:
+          type: string
+          description: >-
+            UUID which uniquely identifies a set of transactions being executed
+            within the same authentication session.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 123ae1aa-6744-433e-879d-7da48d631234
+        transactionGroupId:
+          type: string
+          description: >-
+            UUID which uniquely identifies a set of transactions being executed
+            within a single use-case.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 28eae1aa-6744-433e-879d-7da48d63e89a
+        logRequestFlow:
+          type: string
+          description: Log Request Flow.
+          minLength: 1
+          maxLength: 255
+          example: CoreSDK-TP
+        logEvent:
+          type: string
+          description: Log Event.
+          minLength: 0
+          maxLength: 255
+          example: ID Enrollment
+        logEventType:
+          type: string
+          description: Log Event Type.
+          minLength: 1
+          maxLength: 255
+          example: User Profile Creation
+        osVersion:
+          type: string
+          description: OS version.
+          minLength: 1
+          maxLength: 255
+          example: Android 5.0
+        deviceMake:
+          type: string
+          description: Device make.
+          minLength: 1
+          maxLength: 255
+          example: Samsung S10
+        type:
+          type: string
+          description: Type of the event.
+          minLength: 1
+          maxLength: 255
+          example: audit
+        audit:
+          type: object
+          description: Represents the audit event.
+          properties:
+            privacyPolicy:
+              type: string
+              description: Version user confirmed.
+              minLength: 1
+              maxLength: 20
+              example: 1.0.0
+            userBiometricConsent:
+              type: string
+              description: User consent to capture details.
+              enum:
+                - 'TRUE'
+                - 'FALSE'
+                - NA
+              minLength: 4
+              maxLength: 5
+              example: 'TRUE'
+            event:
+              type: string
+              description: Event.
+              minLength: 1
+              maxLength: 255
+              example: Document Scan
+            eventType:
+              type: string
+              description: EventType.
+              minLength: 1
+              maxLength: 255
+              example: Enrollment
+            result:
+              type: string
+              description: API Call result.
+              enum:
+                - 'TRUE'
+                - 'FALSE'
+                - FAIL
+              minLength: 4
+              maxLength: 5
+              example: 'TRUE'
+            eventGeneratedSource:
+              type: string
+              description: Event generated source.
+              minLength: 1
+              maxLength: 50
+              example: CoreSDK
+            owner:
+              type: string
+              description: Owner.
+              minLength: 2
+              maxLength: 4
+              example: TP
+            requestDetails:
+              type: object
+              description: Request Details.
+              example: Request URL
+            responseDetails:
+              type: object
+              description: Response Details.
+              example: Response Data
+    OtpVerificationResult:
+      required:
+        - pds
+        - responseCode
+        - responseMessage
+        - transactionId
+      type: object
+      properties:
+        responseCode:
+          description: '`SUCCESS`, `FAILURE` or `ATTEMPTS_EXCEEDED`.'
+          type: string
+          minLength: 7
+          maxLength: 50
+          example: SUCCESS
+        responseMessage:
+          type: string
+          description: A short message describing the response code.
+          minLength: 1
+          maxLength: 100
+          example: OTP verified
+        attemptsRemaining:
+          type: integer
+          description: >-
+            The number of attempts remaining. This field is only populated for
+            the `FAILURE` response code.
+          format: int32
+          minimum: 1
+          maximum: 10
+          example: 2
+        transactionId:
+          type: string
+          description: A random 128-bit UUID represents the transaction.
+          minLength: 1
+          maxLength: 40
+          example: 28eae1aa-6744-433e-879d-7da48d63e89a
+        pds:
+          $ref: '#/components/schemas/PDS'
+    Otp:
+      required:
+        - otpId
+        - pds
+        - transactionId
+      type: object
+      properties:
+        otpId:
+          type: string
+          description: A random 128-bit UUID represents an OTP request.
+          minLength: 36
+          maxLength: 36
+          example: 47281d64-9784-400f-9dfe-c098e9a92bc6
+        transactionId:
+          type: string
+          description: A random 128-bit UUID for the transaction.
+          minLength: 36
+          maxLength: 36
+          example: 3a86f4b9-bc2d-4fac-822e-0488aafb8971
+        pds:
+          $ref: '#/components/schemas/PDS'
+    CreatedEmailOtp:
+      allOf:
+        - $ref: '#/components/schemas/Otp'
+    CreatedSMSOtp:
+      allOf:
+        - $ref: '#/components/schemas/Otp'
+    OtpVerification:
+      required:
+        - code
+        - countryCode
+        - userConsent
+        - otpId
+        - pds
+      type: object
+      properties:
+        code:
+          type: string
+          description: The 6-digit code sent to the user.
+          pattern: ^[0-9]{6}$
+          minLength: 6
+          maxLength: 6
+          example: '123456'
+        otpId:
+          type: string
+          description: The Otp ID in the response body to create an OTP request.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 63d04933-02b6-4ea4-adf9-68696e675a01
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        pds:
+          $ref: '#/components/schemas/PDS'
+        sdkAuditEvents:
+          type: array
+          description: >-
+            Array of objects containing a record of any auditable steps
+            occurring between the App and the SDK. A call must be made by the TP
+            App from the MIDS Audit SDK prior to all API calls, with any audit
+            events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    EmailOtp:
+      required:
+        - countryCode
+        - emailAddress
+        - userConsent
+        - pds
+      type: object
+      properties:
+        emailAddress:
+          type: string
+          description: The email address to which to send the OTP.
+          pattern: ^[\w-\.\'\\]+@([\w-]+\.)+[\w-]{2,4}$
+          minLength: 1
+          maxLength: 255
+          example: john.dunne@domain.com
+        locale:
+          $ref: '#/components/schemas/Locale'
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        pds:
+          $ref: '#/components/schemas/PDS'
+        sdkAuditEvents:
+          type: array
+          description: >-
+            Array of objects containing a record of any auditable steps
+            occurring between the App and the SDK. A call must be made by the TP
+            App from the MIDS Audit SDK prior to all API calls, with any audit
+            events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    SMSOtp:
+      required:
+        - countryCode
+        - userConsent
+        - pds
+        - phoneNumber
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: >-
+            The phone number to which to send the OTP. It should be prefixed
+            with the international dialing code, without the '+'.
+          pattern: ^[1-9]\d{2,14}$
+          minLength: 1
+          maxLength: 15
+          example: '553453554563'
+        locale:
+          $ref: '#/components/schemas/Locale'
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        pds:
+          $ref: '#/components/schemas/PDS'
+        sdkAuditEvents:
+          type: array
+          description: >-
+            Array of objects containing a record of any auditable steps
+            occurring between the App and the SDK. A call must be made by the TP
+            App from the MIDS Audit SDK prior to all API calls, with any audit
+            events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    UserProfile:
+      required:
+        - countryCode
+        - userProfileId
+      type: object
+      properties:
+        userProfileId:
+          type: string
+          description: >-
+            UUID identifying the user, which the TP App generates using the MIDS
+            Core SDK.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: c908bc7c-9917-48fd-b862-d901a0880fef
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        sdkAuditEvents:
+          type: array
+          description: >-
+            Array of objects containing a record of any auditable steps
+            occurring between the App and the SDK. A call must be made by the TP
+            App from the MIDS Audit SDK prior to all API calls, with any audit
+            events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    TpAuditMetadata:
+      required:
+        - sessionId
+        - transactionGroupId
+      type: object
+      description: Object containing metadata related to the request.
+      properties:
+        sessionId:
+          type: string
+          description: >-
+            UUID which uniquely identifies a set of transactions being executed
+            within the same authentication session.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+        transactionGroupId:
+          type: string
+          description: >-
+            UUID which uniquely identifies a set of transactions being executed
+            within a single use-case.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+    IdentityAttributes:
+      type: array
+      description: >-
+        Array of attribute name-value pairs, which indicate the users preferred
+        values for the attributes listed.
+      items:
+        $ref: '#/components/schemas/IdentityAttributeItem'
+    IdentityAttributeItem:
+      type: object
+      description: Identity attributes array item.
+      properties:
+        attributeName:
+          type: string
+          description: The name of the attribute to update.
+          enum:
+            - LEGAL_NAME
+            - FATHERS_NAME
+            - MOTHERS_NAME
+          minLength: 1
+          maxLength: 50
+          example: LEGAL_NAME
+        attributeValue:
+          type: string
+          description: >-
+            A value that the user picked to represent the default value of this
+            attribute. The value needs to match with one of the scanned
+            documents.
+          minLength: 1
+          maxLength: 255
+          example: BALL,ELLA
+    MultiDocumentConfirmedPDS:
+      required:
+        - pds
+        - transactionId
+      allOf:
+        - $ref: '#/components/schemas/ConfirmedPDS'
+        - type: object
+          properties:
+            conflictAttributes:
+              type: array
+              description: Conflict Attributes.
+              items:
+                $ref: '#/components/schemas/ConflictAttributeItem'
+    ConflictAttributeItem:
+      required:
+        - attributeName
+        - values
+      type: object
+      properties:
+        attributeName:
+          type: string
+          description: >
+            Conflict Attribute Key. Possible values: LEGAL_NAME, MOTHERS_NAME,
+            FATHERS_NAME.
+          minLength: 1
+          maxLength: 50
+          example: LEGAL_NAME
+        existingValue:
+          type: string
+          description: Existing value.
+          minLength: 1
+          maxLength: 255
+          example: Doe, John
+        newValue:
+          type: string
+          description: New value.
+          minLength: 1
+          maxLength: 255
+          example: Doe, John M
+    ConfirmedPDS:
+      required:
+        - pds
+        - transactionId
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: |
+            UUID represents the MIDS transaction.
+          minLength: 36
+          maxLength: 36
+          example: 021fea3c-d17c-11ea-87d0-0242ac130003
+        pds:
+          $ref: '#/components/schemas/PDS'
+        fraudDetectionMeta:
+          $ref: '#/components/schemas/FraudDetectionMeta'
+        eligibleForMobileID:
+          type: boolean
+          description: Indicates whether user is eligible to enroll with Mobile ID.
+          example: false
+    MultiDocConfirmData:
+      required:
+        - documentData
+        - userConsent
+        - userProfileId
+        - countryCode
+        - locale
+        - pds
+      allOf:
+        - type: object
+          properties:
+            pds:
+              $ref: '#/components/schemas/PDS'
+        - $ref: '#/components/schemas/DocumentVerificationConfirmData'
+    DocumentVerificationConfirmData:
+      required:
+        - documentData
+        - userConsent
+        - userProfileId
+        - countryCode
+        - locale
+      type: object
+      properties:
+        sdkAuditEvents:
+          type: array
+          description: >-
+            Array of objects containing a record of any auditable steps
+            occurring between the App and the SDK. A call must be made by the TP
+            App from the MIDS Audit SDK prior to all API calls, with any audit
+            events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+        documentData:
+          $ref: '#/components/schemas/ConfirmDocumentData'
+        userProfileId:
+          type: string
+          description: >-
+            UUID identifying the user, which the TP App generates using the MIDS
+            Core SDK.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: 1f52649e-4096-456a-bca0-751ee4703058
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        locale:
+          $ref: '#/components/schemas/Locale'
+        fraudDetection:
+          $ref: '#/components/schemas/FraudDetection'
+        deviceInfo:
+          $ref: '#/components/schemas/DeviceInfo'
+        visaMatched:
+          type: boolean
+          description: >-
+            Flag indicating if the documentDetails are to be checked against a
+            visa for a particular country.
+          example: false
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    UpdateIdentityAttributesData:
+      required:
+        - pds
+        - userConsent
+        - identityAttributes
+      type: object
+      properties:
+        identityAttributes:
+          description: >-
+            Array of attribute name-value pairs, which indicate the users
+            preferred values for the attributes listed.
+          $ref: '#/components/schemas/IdentityAttributes'
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    ClaimScopes:
+      required:
+        - pds
+        - scopedFields
+        - userConsent
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        scopedFields:
+          type: array
+          description: >
+            Array of enums representing the identity attributes which the TP is
+            requesting access to.
+
+            The acceptable values are any/all of: 'all', 'legalName', 'email',
+            'phone', 'dateOfBirth', 'driverLicense', 'passport', 'address'
+          minItems: 1
+          items:
+            enum:
+              - >-
+                all - legalName - email - phone - dateOfBirth - selfie - address
+                - ageOver - ageUnder - city - postalCode - subDivision - govtId
+                - govtIdDetails - govtIdImage - passportIdentity -
+                passportDetails - passportImage - driverLicenseIdentity -
+                driverLicenseCardNumber - driverLicenseDetails -
+                driverLicenseImage - driverLicenseIssuingState - visaMatched -
+                cpf - rgNumber - cnh - mothersName - fathersName
+            type: string
+            example: all
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    FraudDetectionScore:
+      type: object
+      description: An object represents the result of the fraud risk assessment.
+      properties:
+        value:
+          type: integer
+          description: The score value. This is 0 for a GREEN result.
+          minimum: 0
+          example: 0
+        band:
+          type: string
+          description: >-
+            The Score Band for the result of the risk assessment.
+            GREEN/YELLOW/RED
+          minLength: 3
+          maxLength: 10
+          example: GREEN
+        signals:
+          type: array
+          items:
+            type: string
+            description: The specific signals which caused the above score band.
+            example: anonymous_ip
+    FraudDetectionResponseMeta:
+      type: object
+      description: An object that represents the result of the fraud risk assessment.
+      properties:
+        score:
+          $ref: '#/components/schemas/FraudDetectionScore'
+    AuthenticationDecisions:
+      required:
+        - transactionId
+        - status
+        - attributes
+        - rotatedPds
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: A random 128-bit UUID represents the MIDS transaction.
+          minLength: 36
+          maxLength: 36
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+        status:
+          type: string
+          description: Status of the authentication.
+          pattern: ^(SUCCESS|FAILURE)$
+          minLength: 1
+          maxLength: 50
+          example: SUCCESS
+        attributes:
+          type: object
+          description: >-
+            Keys will be in RetrieveIdentities.scopedFields and data structure
+            will be the data object named after the key.
+          example:
+            legalName:
+              aa6dee5a-6e4d-4932-8189-2ecb7ad6f676:
+                value: SMITH, JOHN
+                lastVerifiedDate: '2022-04-04T02:49:27.915Z'
+          additionalProperties: {}
+          minLength: 1
+        rotatedPds:
+          type: string
+          description: >-
+            A rotated PDS is created and returned when the encryption key
+            expires and a new key is generated.
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          minLength: 1
+          example: >-
+            ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    EnterpriseBioAuthToken:
+      required:
+        - accessToken
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Token to be verified at the enterprise's BIOAPI server
+          minLength: 3
+          maxLength: 4000
+          example: >-
+            eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAB3NQQpCMQwE0Lt0baBJ0yZ159KtN0jTBgTBjYgg3t3__3KGN8w3rc_llc4JG6KUhrmoYjolc7_OvWfPKJ2hUzNgagE2hcC5hsYIUeOdH7gStVr6AtElwNUcrBNDFppYMjqxb9hvKzb9fNzfa4_HVkORomdoggsYp8HgPqAWF43VtsOcfn_stx4UsAAAAA.tDRVowYYcpQ03Vlt7D3MiovleiyRFQMv4qzXb7Lf_6CarphRrlWXan8-jE-YesNiAiT8tk0b-i8TKHGrcgT1VQ
+        enterpriseUserId:
+          type: string
+          description: The enterprise user UUID
+          minLength: 36
+          maxLength: 36
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+    ClaimIdentities:
+      required:
+        - claims
+        - pds
+        - rpSpecificIdentifier
+        - transactionId
+        - fraudDetectionMeta
+      type: object
+      properties:
+        claims:
+          type: object
+          description: >-
+            Keys will be the scopes that come as part of the request and data
+            the structure will be the data object named after the key.
+          example:
+            driverLicense.firstName: John
+            driverLicense.lastName: Doe
+          additionalProperties: {}
+        transactionId:
+          type: string
+          description: UUID represents the MIDS transaction.
+          minLength: 36
+          maxLength: 36
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+        rpSpecificIdentifier:
+          type: string
+          description: RP identifier.
+          minLength: 64
+          maxLength: 64
+          example: 46eb72430ffeca3daf31360264fa0424ba4facfdcb69c6f43e73063f290a75a8
+        pds:
+          $ref: '#/components/schemas/PDS'
+        fraudDetectionMeta:
+          $ref: '#/components/schemas/FraudDetectionResponseMeta'
+    ErrorResponse:
+      required:
+        - Errors
+      type: object
+      description: The error response model used by all the API endpoints.
+      properties:
+        Errors:
+          required:
+            - Error
+          type: object
+          description: The error response model used by all the API endpoints.
+          properties:
+            Error:
+              type: array
+              description: A list of Error objects.
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: >-
+                      The source of the problem. That is where the error
+                      occurred.
+                    example: mids
+                  ReasonCode:
+                    type: string
+                    description: A code defining the error, as defined in documentation.
+                    example: USER_PROFILE_ID_NOT_FOUND
+                  Description:
+                    type: string
+                    description: >-
+                      A description of this specific occurrence of the Reason
+                      code.
+                    example: The provided user profile ID does not exist.
+                  Recoverable:
+                    type: boolean
+                    description: >-
+                      Whether or not retrying this request could result in a
+                      successful response.
+                    example: false
+                  Details:
+                    type: string
+                    description: >-
+                      More details of this specific error. This is an optional
+                      field and is sometimes used to give a more comprehensive
+                      description of the error that has occurred, when required.
+                    example: User X was not found
+                  redirectUri:
+                    type: string
+                    description: TP will use this URI to redirect to RP.
+                    pattern: >-
+                      ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+                    example: >-
+                      https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    Selfie:
+      required:
+        - lastVerifiedDate
+        - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          example: U29tZSBTdHJpbmc=
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    GovtId:
+      oneOf:
+        - $ref: '#/components/schemas/PassportIdentity'
+        - $ref: '#/components/schemas/DriverLicenseIdentity'
+    GovtIdDetails:
+      oneOf:
+        - $ref: '#/components/schemas/PassportDetails'
+        - $ref: '#/components/schemas/DriverLicenseDetails'
+    GovtIdImage:
+      oneOf:
+        - $ref: '#/components/schemas/PassportImage'
+        - $ref: '#/components/schemas/DriverLicenseImage'
+    PassportIdentity:
+      type: object
+      properties:
+        lastName:
+          type: string
+          description: Last name.
+          minLength: 1
+          maxLength: 255
+          example: Doe
+        firstName:
+          type: string
+          description: First name.
+          minLength: 1
+          maxLength: 255
+          example: John
+        dateOfBirth:
+          type: string
+          description: Date of birth.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+    PassportDetails:
+      type: object
+      properties:
+        expiryDate:
+          type: string
+          description: Expiry date.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        issuingCountry:
+          type: string
+          description: Country code.
+          minLength: 1
+          maxLength: 255
+          example: USA
+        passportNumber:
+          type: string
+          description: Passport number.
+          minLength: 1
+          maxLength: 255
+          example: 1234567890
+    PassportImage:
+      type: object
+      description: Passport License Images.
+      properties:
+        front:
+          type: string
+          description: Value.
+          minLength: 1
+          example: JH65ghKHG76KS=
+    DriverLicenseIdentity:
+      type: object
+      properties:
+        lastName:
+          type: string
+          description: Last name.
+          minLength: 1
+          maxLength: 255
+          example: Doe
+        firstName:
+          type: string
+          description: First name.
+          minLength: 1
+          maxLength: 255
+          example: John
+        dateOfBirth:
+          type: string
+          description: Date of birth.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+    DriverLicenseCardNumber:
+      type: string
+      description: Document number.
+      minLength: 1
+      maxLength: 255
+      example: 7435675436
+    DriverLicenseDetails:
+      properties:
+        expiryDate:
+          type: string
+          description: Expiry date.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        issuingCountry:
+          type: string
+          description: Country code.
+          minLength: 1
+          maxLength: 255
+          example: USA
+        documentNumber:
+          type: string
+          description: Passport number.
+          minLength: 1
+          maxLength: 255
+          example: 1234567890
+    DriverLicenseImage:
+      type: object
+      description: Driver License Images.
+      properties:
+        front:
+          type: string
+          description: Value.
+          minLength: 1
+          example: U29tZSBTdHJpbmc=
+        back:
+          type: string
+          description: Value.
+          minLength: 1
+          example: YGS75JHSljhs86K=
+    VisaMatched:
+      type: boolean
+      description: >-
+        Flag indicating if the documentDetails are to be checked against a visa
+        for a particular country.
+      example: false
+    Cnh:
+      allOf:
+        - $ref: '#/components/schemas/DriverLicenseCardNumber'
+    Cpf:
+      type: string
+      description: >-
+        CPF Number. This will only be available when the Brazilian DL is
+        scanned.
+      minLength: 1
+      maxLength: 255
+      example: 12345
+    Rg:
+      type: string
+      description: RG Number. This will only be available when the Brazilian DL is scanned.
+      minLength: 1
+      maxLength: 255
+      example: 12345
+    MothersName:
+      required:
+        - lastVerifiedDate
+        - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: Jane Doe
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    FathersName:
+      required:
+        - lastVerifiedDate
+        - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: Josh Doe
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    LegalName:
+      required:
+        - lastVerifiedDate
+        - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: John Doe
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    Email:
+      required:
+        - lastVerifiedDate
+        - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: person@mastercard.com
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    Phone:
+      required:
+        - lastVerifiedDate
+        - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: 11234567890
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    DateOfBirth:
+      required:
+        - lastVerifiedDate
+        - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: '1996-07-10T00:00:00.000Z'
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    MobileIdEligibility:
+      required:
+        - lastVerifiedDate
+        - value
+      type: object
+      properties:
+        value:
+          type: boolean
+          description: Value of whether user is eligible for mobile id enrollment.
+          example: true
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    AddressData:
+      type: object
+      properties:
+        addressLine1:
+          type: string
+          description: Address line 1.
+          minLength: 1
+          maxLength: 255
+          example: 36271 GrandRiver Ave
+        addressLine2:
+          type: string
+          description: Address line 2.
+          minLength: 1
+          maxLength: 255
+          example: Building no 2
+        addressZipCode:
+          type: string
+          description: Zip code.
+          minLength: 1
+          maxLength: 255
+          example: 48335
+        addressCity:
+          type: string
+          description: City.
+          minLength: 1
+          maxLength: 255
+          example: Farmington
+        addressSubdivision:
+          type: string
+          description: >-
+            Subdivision of the user address, possible values include county,
+            state, province, and municipality.
+          minLength: 2
+          maxLength: 2
+          example: MO
+        addressCountry:
+          type: string
+          description: Country provided in the address from the scanned document.
+          minLength: 1
+          maxLength: 255
+          example: USA
+    Address:
+      required:
+        - lastVerifiedDate
+      allOf:
+        - $ref: '#/components/schemas/AddressData'
+        - type: object
+          properties:
+            value:
+              type: string
+              description: Formatted address.
+              minLength: 1
+              maxLength: 255
+              example: 36271 GrandRiver Ave Building no 2 48335 Farmington MI USA
+            lastVerifiedDate:
+              type: string
+              description: Last verified date and time.
+              format: date-time
+              example: '2021-02-19T10:55:58.165Z'
+    BaseEvidenceData:
+      type: object
+      properties:
+        lastName:
+          type: string
+          description: Last name.
+          minLength: 1
+          maxLength: 255
+          example: Doe
+        firstName:
+          type: string
+          description: First name.
+          minLength: 1
+          maxLength: 255
+          example: John
+        dateOfBirth:
+          type: string
+          description: Date of birth.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        issuingCountry:
+          type: string
+          description: Country code.
+          minLength: 1
+          maxLength: 255
+          example: USA
+        issuingDate:
+          type: string
+          description: Issuing date.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        expiryDate:
+          type: string
+          description: Expiry date.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        gender:
+          type: string
+          description: M/F.
+          example: M
+          minLength: 1
+          maxLength: 1
+        fathersName:
+          type: string
+          description: >-
+            Father's Name. This will only be available when the Brazilian DL is
+            scanned. scanned.
+          minLength: 1
+          maxLength: 255
+          example: John Smith
+        mothersName:
+          type: string
+          description: >-
+            Mother's Name. This will only be available when the Brazilian DL is
+            scanned.
+          minLength: 1
+          maxLength: 255
+          example: Paula Smith
+    Authentications:
+      required:
+        - transactionId
+        - apiDataCenter
+        - sdkToken
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: A random 128-bit UUID represents the MIDS transaction.
+          minLength: 36
+          maxLength: 36
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+        apiDataCenter:
+          type: string
+          description: >-
+            Identity verification vendor SDK datacenter to be used by API.
+            Possible values.
+          example: SG
+          minLength: 1
+          maxLength: 2
+        sdkToken:
+          type: string
+          description: Passed into the MIDS verification SDK for authentication.
+          minLength: 1
+          maxLength: 400
+          example: >-
+            eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAB3NQQpCMQwE0Lt0baBJ0yZ159KtN0jTBgTBjYgg3t3__3KGN8w3rc_llc4JG6KUhrmoYjolc7_OvWfPKJ2hUzNgagE2hcC5hsYIUeOdH7gStVr6AtElwNUcrBNDFppYMjqxb9hvKzb9fNzfa4_HVkORomdoggsYp8HgPqAWF43VtsOcfn_stx4UsAAAAA.tDRVowYYcpQ03Vlt7D3MiovleiyRFQMv4qzXb7Lf_6CarphRrlWXan8-jE-YesNiAiT8tk0b-i8TKHGrcgT1VQ
+        privacyPolicyVersion:
+          type: string
+          description: >-
+            The version of the privacy policy which the API call is being
+            conducted under, this can be retrieved from the MIDS Core SDK.
+          minLength: 1
+          maxLength: 20
+          example: 1.0.0
+        privacyPolicyUrl:
+          type: string
+          description: Privacy policy static URL.
+          minLength: 1
+          maxLength: 255
+          example: >-
+            https://www.mastercard.us/en-us/vision/corp-responsibility/commitment-to-privacy/privacy.html
+        privacyPolicyVersionUpdated:
+          type: boolean
+          description: Flag indicating if the privacy policy has been updated.
+          example: true
+        rotatedPds:
+          type: string
+          description: >-
+            A rotated PDS is created and returned when the encryption key
+            expires and a new key is generated.
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          minLength: 1
+          example: >-
+            ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    InitPremiumAuthentications:
+      required:
+        - countryCode
+        - sdkVersion
+        - userProfileId
+        - userConsent
+        - channelType
+        - pds
+        - locale
+      allOf:
+        - $ref: '#/components/schemas/InitializeAuthentications'
+    InitializeAuthentications:
+      required:
+        - countryCode
+        - sdkVersion
+        - userProfileId
+        - userConsent
+        - channelType
+        - pds
+        - locale
+      type: object
+      properties:
+        deviceInfo:
+          $ref: '#/components/schemas/DeviceInfo'
+        isNewDeviceAppId:
+          type: boolean
+          description: >-
+            A flag indicating that this is the first time the identity is being
+            accessed on a new device, usually as a result of a backup and
+            restore.
+          example: false
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+        userProfileId:
+          type: string
+          description: >-
+            UUID identifying the user, which the TP App generates using the MIDS
+            Core SDK.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        locale:
+          $ref: '#/components/schemas/Locale'
+        channelType:
+          type: string
+          description: The platform from where the request is originating Web/SDK.
+          enum:
+            - WEB
+            - SDK
+          minLength: 3
+          maxLength: 3
+          example: WEB
+        sdkAuditEvents:
+          type: array
+          description: >-
+            Array of objects containing a record of any auditable steps
+            occurring between the App and the SDK. A call must be made by the TP
+            App from the MIDS Audit SDK prior to all API calls, with any audit
+            events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+    DeviceInfo:
+      description: >-
+        Object containing the details of the device from which the enrollment is
+        being conducted.
+      required:
+        - deviceAppId
+        - make
+        - model
+      type: object
+      properties:
+        deviceAppId:
+          type: string
+          description: The device application ID is retrieved from the mobile SDK.
+          minLength: 1
+          maxLength: 255
+          example: 599F9C00-92DC-4B5C-9464-7971F01F8370
+        make:
+          type: string
+          description: The make of the mobile device.
+          minLength: 1
+          maxLength: 255
+          example: Samsung
+        model:
+          type: string
+          description: The model of the mobile device.
+          minLength: 1
+          maxLength: 255
+          example: S8
+    AuthenticationResults:
+      required:
+        - transactionId
+        - status
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: A random 128-bit UUID represents the MIDS transaction.
+          minLength: 36
+          maxLength: 36
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+        pds:
+          $ref: '#/components/schemas/PDS'
+        status:
+          type: string
+          description: >-
+            Status of the authentication. Possible values are SUCCESS or
+            FAILURE.
+          minLength: 1
+          maxLength: 50
+          example: SUCCESS
+    VerifyAuthentication:
+      required:
+        - countryCode
+        - workflowId
+        - pds
+        - userProfileId
+        - privacyPolicyVersion
+      type: object
+      properties:
+        deviceInfo:
+          $ref: '#/components/schemas/DeviceInfo'
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        workflowId:
+          type: string
+          description: >-
+            UUID returned to the TP after the initial enrollment /
+            re-authentication is completed, which is used to return the outcome
+            of the associated verification process.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        userProfileId:
+          type: string
+          description: >-
+            UUID identifying the user, which the TP App generates using the MIDS
+            Core SDK.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        pds:
+          $ref: '#/components/schemas/PDS'
+        privacyPolicyVersion:
+          type: string
+          description: >-
+            The version of the privacy policy which the API call is being
+            conducted under, this can be retrieved from the MIDS Core SDK.
+          minLength: 1
+          maxLength: 20
+          example: 1.0.0
+        sdkAuditEvents:
+          type: array
+          description: >-
+            Array of objects containing a record of any auditable steps
+            occurring between the App and the SDK. A call must be made by the TP
+            App from the MIDS Audit SDK prior to all API calls, with any audit
+            events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        fraudDetection:
+          $ref: '#/components/schemas/FraudDetection'
+        arid:
+          $ref: '#/components/schemas/ARID'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    FraudDetection:
+      type: object
+      description: >-
+        Object containing the signals from the device to be used for fraud
+        detection.
+      properties:
+        nuDetectMeta:
+          description: >-
+            The data retrieved from the MIDS Fraud Detection SDK which will be
+            used to determine whether the device is trusted.
+          required:
+            - behaviourData
+            - remoteIp
+            - sessionId
+            - requestUrl
+            - userAgent
+            - xForwardedFor
+          type: object
+          properties:
+            behaviourData:
+              type: string
+              description: base64 encoded JSON generated by MIDS (nuDetect) SDK.
+              pattern: >-
+                ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+              example: >-
+                ewogICJuZHMtcG1kIiA6ICJ7XCJmdnFcIjpcIjBONjROOVAzLVBPM1ItNDcyNi04MDBPLTNQMzM2Mzg2Tk5RT1wiLFwianZxdHJnUW5nblwiOntcInp2cXNpXCI6XCJRUTYzOTc5Ny1OUFAyLTQ0OVItOVA0MS04UTM0NDdOODU5UzdcIixcInpjdlwiOlwidmJmXCIsXCJ6b3pzXCI6XCJOY2N5clwiLFwiemZ6XCI6MTcxNzk4NjkxODQsXCJqeGVcIjo0OTcwLFwiem9vXCI6XCJOY2N5clwiLFwienVmXCI6W1wienZ6Z1wiXSxcInF2cWdtXCI6NDIwLFwidmNlXCI6XCJhcHZjLDAsNXM5bzg0MXAsMywxO2ZnLDAsYXF2Y2V2YWNoZzAsMCxhcXZjZXZhY2hnMSwwO3NzLDAsYXF2Y2V2YWNoZzA7eHEsc3A7eHEsNG47eHEsNW87eHEsNjY7eHEsMjUzO3hxLDg1O3hxLHBxO3hxLDM4O3hxLDVuO3hxLDcyO3hxLDU2O3hxLDUyO3hxLDJwO3NvLG45LGFxdmNldmFjaGcwO3NzLDEsYXF2Y2V2YWNoZzE7eHEsMTI1O3hxLDQwO3hxLG82O3hxLDRyO3hxLG87Z3IscXMsNzcsMjM0LGFxdmNlcGJhZ2VieTBcIixcInpjemlcIjoxMixcInpvelwiOlwidkN1YmFyXCIsXCJ6Y3p2aVwiOjIsXCJ6ZmZcIjo0OTk5NjMxNzQ5MTIsXCJ6dW9wZlwiOi0xLFwiem9jXCI6XCJ2Q3ViYXIgS8qAXCIsXCJ6dmh2XCI6XCJjdWJhclwiLFwiZmVcIjpcIjE3OTJrODI4XCIsXCJoblwiOlwiMi4yLjEzODA2NVwiLFwiemh5XCI6XCJIRlwifSxcImpnXCI6XCIxLmotNDUxNjgwLjEuMi56U0dVQk56cHZNeUFoQjBOR2h2ZlRqLCwuM3hCRWhxSGhKZFREb1ZYY0hjYXJOSDUzVWFFS2t2amxNVF9RQTl5dUlYcWUwbV9iX0k0WWtBWGExUExTVXJzS1R4c0NFWHB2bkJjNkpEajhNTzhGZFVXMEcyaE9BWXZDRWZ5NXRLOHdJdVN4MzBnZmszZDF0MWhnc2NJODdFTG9MVlozNi1BcjhhV0pFSjJ1Ungza3RJYW5teDktOExZZmZsMWlFbVhSd1pqQ3FaQTVVMUZ1dzYzUERKZ2lIYzFUendFVjN3ak8yZDBrbUZIWUJaZTAxd0hnajVKQThTM0R6Z3FydE9pN1d3Q0VqZldZMHFITXFGT1g1d2RBYkl5LVNmOGVkYXBaeHNxaTItc0N6ejhRN2osLFwifSIsCiAgInNpZCIgOiAiMEE2NEE5QzMtQ0IzRS00NzI2LTgwMEItM0MzMzYzODZBQURCIgp9
+            remoteIp:
+              type: string
+              description: The IP of user app to TP backend.
+              minLength: 1
+              maxLength: 255
+              example: 127.0.0.1
+            sessionId:
+              type: string
+              description: >-
+                UUID which uniquely identifies a set of transactions being
+                executed within the same authentication session.
+              minLength: 36
+              maxLength: 36
+              example: da3fe5be-2a8e-11eb-adc1-0242ac120002
+            userAgent:
+              type: string
+              description: The user-agent sent by the app to the TP backend.
+              minLength: 1
+              maxLength: 255
+              example: >-
+                Mozilla: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0)
+                Gecko/20100101 Firefox/47.3 Mozilla/5.0 (Macintosh; Intel Mac OS
+                X x.y; rv:42.0) Gecko/20100101 Firefox/43.4.
+            xForwardedFor:
+              type: string
+              description: X-Forwarded-For header sent by the app to TP backend.
+              minLength: 1
+              maxLength: 255
+              example: 203.0.113.195,70.41.3.18,150.172.238.178
+            requestUrl:
+              type: string
+              description: The requested URL is hit by the app to the TP backend.
+              pattern: >-
+                ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+              example: http://tp-backend.com/api/path
+    FraudDetectionMeta:
+      description: Fraud detection meta-data.
+      type: object
+      properties:
+        requiredAttributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/FraudDetectionMetaRequiredItem'
+    FraudDetectionMetaRequiredItem:
+      description: An item that is required from fraud detection meta.
+      type: object
+      properties:
+        field:
+          type: string
+          description: The property which is required.
+          minLength: 1
+          maxLength: 255
+          example: email
+        assuranceLevel:
+          type: integer
+          description: The assurance level required for the property.
+          minimum: 0
+          example: 1
+    RPClaimsUserConsent:
+      required:
+        - arid
+        - userConsent
+        - pds
+      type: object
+      properties:
+        arid:
+          $ref: '#/components/schemas/ARID'
+        userConsent:
+          type: string
+          enum:
+            - ACCEPT
+            - DECLINE
+          pattern: ^(ACCEPT|DECLINE)$
+          description: >-
+            Confirmation provided by the TP that the user has consented that the
+            ID-Network can have access to their identity for the purposes of the
+            API call. Should be ACCEPT, a forbidden exception will be thrown if
+            it is any other value.
+          example: ACCEPT
+        pds:
+          $ref: '#/components/schemas/PDS'
+        sdkAuditEvents:
+          type: array
+          description: >-
+            Array of objects containing a record of any auditable steps
+            occurring between the App and the SDK. A call must be made by the TP
+            App from the MIDS Audit SDK prior to all API calls, with any audit
+            events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+        locale:
+          $ref: '#/components/schemas/Locale'
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+    RPClaimsUserConsentData:
+      required:
+        - flow
+        - pds
+        - rpSpecificIdentifier
+        - redirectUri
+      type: object
+      properties:
+        flow:
+          type: string
+          description: The user navigation flow for the RP Claim Sharing process.
+          minLength: 1
+          maxLength: 20
+          example: APP2APP
+        pds:
+          $ref: '#/components/schemas/PDS'
+        rpSpecificIdentifier:
+          type: string
+          description: >-
+            The field rpSpecificIdentifier refers to a unique value for the
+            Relying Party to identify the user for future reporting.
+          minLength: 64
+          maxLength: 64
+          example: 46eb72430ffeca3daf31360264fa0424ba4facfdcb69c6f43e73063f290a75a8
+        redirectUri:
+          type: string
+          description: TP will use this URI to redirect to RP.
+          pattern: >-
+            ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+          minLength: 1
+          example: >-
+            https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    RPClaimsUserDetails:
+      required:
+        - arid
+        - pds
+      type: object
+      properties:
+        arid:
+          $ref: '#/components/schemas/ARID'
+        pds:
+          $ref: '#/components/schemas/PDS'
+        sdkAuditEvents:
+          type: array
+          description: >-
+            Array of objects containing a record of any auditable steps
+            occurring between the App and the SDK. A call must be made by the TP
+            App from the MIDS Audit SDK prior to all API calls, with any audit
+            events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+        locale:
+          $ref: '#/components/schemas/Locale'
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+    RPClaimsUserData:
+      required:
+        - transactionId
+        - rpName
+        - rpLogoUrl
+        - claimsData
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: A random 128-bit. UUID represents the MIDS transaction.
+          minLength: 36
+          maxLength: 36
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+        rpName:
+          type: string
+          description: The display name of the RP.
+          minLength: 1
+          maxLength: 255
+          example: RP Name
+        rpLogoUrl:
+          type: string
+          description: The URL of the logo of the RP.
+          pattern: >-
+            ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+          minLength: 1
+          example: https://www.rpsite.com/logo.jpg
+        claimsData:
+          $ref: '#/components/schemas/ClaimsData'
+        redirectUri:
+          type: string
+          description: TP will use this URI to redirect to RP.
+          pattern: >-
+            ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+          minLength: 1
+          example: >-
+            https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+        rotatedPds:
+          type: string
+          description: >-
+            A rotated PDS is created and returned when the encryption key
+            expires and a new key is generated.
+          minLength: 1
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          example: >-
+            ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    UserConsent:
+      enum:
+        - ACCEPT
+        - DECLINE
+        - REVOKE
+        - EXPIRE
+      type: string
+      description: >-
+        Confirmation provided by the TP that the user has consented that the
+        ID-Network can have access to their identity for the purposes of the API
+        call. Should be ACCEPT, a forbidden exception will be thrown if it is
+        any other value.
+      pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+      minLength: 6
+      maxLength: 7
+      example: ACCEPT
+    SdkVersion:
+      type: string
+      description: >-
+        Mastercard SDK version integrated with TP App, it is a constant
+        extracted from MIDS SDK Configurations (generated while bundling SDK
+        artifacts). If the TP app supports split PDS, this attribute MUST be
+        specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
+    PDS:
+      type: string
+      description: >-
+        Encrypted Personal Device Storage (PDS) which hosts the users identity
+        attributes. The PDS can be retrieved from the MIDS Core SDK, please
+        refer to the SDK guide for details on how to retrieve this.
+      pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+      minLength: 1
+      example: >-
+        ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    ARID:
+      type: string
+      description: >-
+        A unique identifier for any activity being executed arising out of a
+        Claim Share request. This value is passed as a parameter in the URL
+        redirecting a User to the TP Flow during a Claim Share.
+      format: uuid
+      pattern: >-
+        ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+      minLength: 36
+      maxLength: 36
+      example: a15fa6de-b199-11eb-8529-0242ac130003
+    ClaimsData:
+      type: object
+      properties:
+        dataMatch:
+          type: string
+          description: >-
+            The overall data match the status result of the claim sharing
+            request. Possible values are FULL or PARTIAL.
+          minLength: 4
+          maxLength: 7
+          example: FULL
+        claimsAttributes:
+          type: object
+          description: An object that represents the claims data.
+          example:
+            claims:
+              legalName: John
+            dataMatch: FULL
+          additionalProperties:
+            $ref: '#/components/schemas/Scopes'
+    Scopes:
+      type: object
+      description: An object that represents a list of requested scopes and values.
+      properties:
+        claims:
+          type: object
+          description: >-
+            The keys will be the scopes that come as part of the request and the
+            data structure will be the data object named after the key.
+          example:
+            legalName: John
+          additionalProperties:
+            type: string
+        dataMatch:
+          description: The data match the status result of the individual scope.
+          type: string
+          minLength: 4
+          maxLength: 7
+          example: FULL
+    CountryCode:
+      type: string
+      description: The country code of the country where the transaction originates from.
+      pattern: ^[a-zA-Z]{2}$
+      example: US
+    Locale:
+      type: string
+      description: >-
+        IETF BCP 47 code which identifies the language to be used in any dialogs
+        being shown to the user during the flow.  The default value is "en-US".
+      pattern: ^[a-z]{2}-[a-zA-Z]{2}$
+      example: en-US
+    AuthRuleDecisionQuery:
+      required:
+        - tpId
+        - behaviourData
+        - userProfileId
+        - sessionId
+        - countryCode
+        - locale
+      type: object
+      properties:
+        tpId:
+          type: string
+          description: A unique identifier for a trust party.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          maxLength: 255
+          minLength: 1
+          example: ef52649e-4096-456a-bca0-751ee470009f
+        behaviourData:
+          type: string
+          description: base64 encoded JSON generated by MIDS (nuDetect) SDK
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          example: >-
+            ewogICJuZHMtcG1kIiA6ICJ7XCJmdnFcIjpcIjBONjROOVAzLVBPM1ItNDcyNi04MDBPLTNQMzM2Mzg2Tk5RT1wiLFwianZxdHJnUW5nblwiOntcInp2cXNpXCI6XCJRUTYzOTc5Ny1OUFAyLTQ0OVItOVA0MS04UTM0NDdOODU5UzdcIixcInpjdlwiOlwidmJmXCIsXCJ6b3pzXCI6XCJOY2N5clwiLFwiemZ6XCI6MTcxNzk4NjkxODQsXCJqeGVcIjo0OTcwLFwiem9vXCI6XCJOY2N5clwiLFwienVmXCI6W1wienZ6Z1wiXSxcInF2cWdtXCI6NDIwLFwidmNlXCI6XCJhcHZjLDAsNXM5bzg0MXAsMywxO2ZnLDAsYXF2Y2V2YWNoZzAsMCxhcXZjZXZhY2hnMSwwO3NzLDAsYXF2Y2V2YWNoZzA7eHEsc3A7eHEsNG47eHEsNW87eHEsNjY7eHEsMjUzO3hxLDg1O3hxLHBxO3hxLDM4O3hxLDVuO3hxLDcyO3hxLDU2O3hxLDUyO3hxLDJwO3NvLG45LGFxdmNldmFjaGcwO3NzLDEsYXF2Y2V2YWNoZzE7eHEsMTI1O3hxLDQwO3hxLG82O3hxLDRyO3hxLG87Z3IscXMsNzcsMjM0LGFxdmNlcGJhZ2VieTBcIixcInpjemlcIjoxMixcInpvelwiOlwidkN1YmFyXCIsXCJ6Y3p2aVwiOjIsXCJ6ZmZcIjo0OTk5NjMxNzQ5MTIsXCJ6dW9wZlwiOi0xLFwiem9jXCI6XCJ2Q3ViYXIgS8qAXCIsXCJ6dmh2XCI6XCJjdWJhclwiLFwiZmVcIjpcIjE3OTJrODI4XCIsXCJoblwiOlwiMi4yLjEzODA2NVwiLFwiemh5XCI6XCJIRlwifSxcImpnXCI6XCIxLmotNDUxNjgwLjEuMi56U0dVQk56cHZNeUFoQjBOR2h2ZlRqLCwuM3hCRWhxSGhKZFREb1ZYY0hjYXJOSDUzVWFFS2t2amxNVF9RQTl5dUlYcWUwbV9iX0k0WWtBWGExUExTVXJzS1R4c0NFWHB2bkJjNkpEajhNTzhGZFVXMEcyaE9BWXZDRWZ5NXRLOHdJdVN4MzBnZmszZDF0MWhnc2NJODdFTG9MVlozNi1BcjhhV0pFSjJ1Ungza3RJYW5teDktOExZZmZsMWlFbVhSd1pqQ3FaQTVVMUZ1dzYzUERKZ2lIYzFUendFVjN3ak8yZDBrbUZIWUJaZTAxd0hnajVKQThTM0R6Z3FydE9pN1d3Q0VqZldZMHFITXFGT1g1d2RBYkl5LVNmOGVkYXBaeHNxaTItc0N6ejhRN2osLFwifSIsCiAgInNpZCIgOiAiMEE2NEE5QzMtQ0IzRS00NzI2LTgwMEItM0MzMzYzODZBQURCIgp9
+        userProfileId:
+          type: string
+          description: >-
+            UUID identifying the user, which the TP App generates using the MIDS
+            Core SDK.
+          maxLength: 36
+          minLength: 36
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        sessionId:
+          type: string
+          description: >-
+            UUID which uniquely identifies a set of transactions being executed
+            within the same authentication session.
+          pattern: >-
+            ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 123ae1aa-6744-433e-879d-7da48d631234
+        arid:
+          $ref: '#/components/schemas/ARID'
+        locale:
+          $ref: '#/components/schemas/Locale'
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+    AuthRuleDecision:
+      required:
+        - allowedAuthenticationType
+      type: object
+      properties:
+        allowedAuthenticationType:
+          type: string
+          description: Authentication rule decision based on device or liveness
+          minLength: 1
+          maxLength: 255
+          example: deviceBased
+    ScopedFields:
+      type: array
+      description: Array of identity attributes which the TP is requesting access to.
+      minItems: 1
+      items:
+        enum:
+          - all
+          - legalName
+          - email
+          - phone
+          - dateOfBirth
+          - selfie
+          - address
+          - ageOver
+          - ageUnder
+          - city
+          - postalCode
+          - subDivision
+          - govtId
+          - govtIdDetails
+          - govtIdImage
+          - passportIdentity
+          - passportDetails
+          - passportImage
+          - driverLicenseIdentity
+          - driverLicenseCardNumber
+          - driverLicenseDetails
+          - driverLicenseImage
+          - driverLicenseIssuingState
+          - visaMatched
+          - cpf
+          - rgNumber
+          - cnh
+          - mothersName
+          - fathersName
+        type: string
+        description: Scopes requested for data contained in PDS.
+        example: all
+  responses:
+    TPDataShareSuccessResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TPDataShareSuccessData'
+    RPScopesSuccessResponse:
+      description: Success
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RPScopes'
+    NotFoundError:
+      description: The request didn't match an existing resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
+    NotFoundErrorClaimSharing:
+      description: The request didn't match an existing resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            NotFoundExampleARIDnotExists:
+              $ref: '#/components/examples/NotFoundExampleARIDnotExists'
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
+    BadRequestErrorClaimSharing:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BadRequestARIDErrorExample:
+              $ref: '#/components/examples/BadRequestARIDErrorExample'
+            BadRequestPDSErrorExample:
+              $ref: '#/components/examples/BadRequestPDSErrorExample'
+    UnauthorizedError:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    SmsOtpsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreatedSMSOtp'
+    EmailOtpsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreatedEmailOtp'
+    OtpVerificationsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OtpVerificationResult'
+          examples:
+            OtpVerificationSuccessfulExample:
+              $ref: '#/components/examples/OtpVerificationSuccessfulExample'
+            IncorrectOtpCodeProvidedExample:
+              $ref: '#/components/examples/IncorrectOtpCodeProvidedExample'
+            OtpDoesNotExistExample:
+              $ref: '#/components/examples/OtpDoesNotExistExample'
+    DocumentDataRetrievalsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DocumentVerificationExtractedData'
+          examples:
+            DocumentRetrievalUnencryptedResponse:
+              $ref: '#/components/examples/DocumentExtractedDataExample'
+            DocumentRetrievalEncryptedResponse:
+              $ref: '#/components/examples/EncryptedPayloadNoPDSExample'
+    ActivationCodeResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ActivationCode'
+    ConfigurationResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Configuration'
+    MultiDocumentConfirmResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MultiDocumentConfirmedPDS'
+    DocumentDataConfirmationsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConfirmedPDS'
+    AccessTokensResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccessToken'
+          examples:
+            AccessTokensUnencryptedResponse:
+              $ref: '#/components/examples/AccessTokenExample'
+            AccessTokensEncryptedResponse:
+              $ref: '#/components/examples/EncryptedPayloadNoPDSExample'
+    InitiateAuthenticationsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Authentications'
+          examples:
+            InitiateAuthenticationsUnencryptedResponse:
+              $ref: '#/components/examples/AuthenticationsExample'
+            InitiateAuthenticationsEncryptedResponse:
+              $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
+    AuthenticationResultsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthenticationResults'
+    RPActivitySearchResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RPActivities'
+          examples:
+            UnencryptedResponseExample:
+              $ref: '#/components/examples/RPActivitiesResponseExample'
+            EncryptedResponseExample:
+              $ref: '#/components/examples/EncryptedPayloadNoPDSExample'
+    IdentitySearchResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClientIdentities'
+          examples:
+            ClientIdentitiesSuccessfulExampleUnencrypted:
+              $ref: '#/components/examples/ClientIdentitiesSuccessfulExample'
+            ClientIdentitiesSuccessfulExampleEncrypted:
+              $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
+    UserAccountActivitySearchesResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserAccountActivities'
+          examples:
+            UserAccountActivitySearchesUnencryptedResponse:
+              $ref: '#/components/examples/UserAccountActivitiesExample'
+            UserAccountActivitySearchesEncryptedResponse:
+              $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
+    AuthenticationDecisionsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthenticationDecisions'
+          examples:
+            AuthenticationDecisionsUnencryptedResponse:
+              $ref: '#/components/examples/AuthenticationDecisionsExample'
+            AuthenticationDecisionsEncryptedResponse:
+              $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
+    TPRPClaimsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClaimIdentities'
+          examples:
+            TPRPClaimsUnencryptedResponse:
+              $ref: '#/components/examples/ClaimIdentitiesExample'
+            TPRPClaimsEncryptedResponse:
+              $ref: '#/components/examples/EncryptedPayloadWithPDSExample'
+    AuditEventsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+    UserProfilesResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+    UpdateIdConfirmationsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+    UserConsentResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RPClaimsUserConsentData'
+          examples:
+            RPClaimsUserConsentDataSuccess:
+              $ref: '#/components/examples/RPClaimsUserConsentDataSuccessExample'
+            RPClaimsUserDataConsentNotGiven:
+              $ref: >-
+                #/components/examples/RPClaimsUserConsentDataExampleConsentNotGiven
+    RPClaimsDataResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RPClaimsUserData'
+          examples:
+            RPClaimsUserDataUnencryptedSuccess:
+              $ref: '#/components/examples/RPClaimsUserDataSuccessExample'
+            RPClaimsUserDataEncryptedSuccess:
+              $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
+            RPClaimsUserDataClaimsNotSatisfied:
+              $ref: '#/components/examples/RPClaimsUserDataExampleClaimsNotSatisfied'
+    IdentityAttributeDeletionsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentityAttributeDeleted'
+    EnterpriseBioAuthTokenResponse:
+      description: Success
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID representing the transaction
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EnterpriseBioAuthToken'
+    AuthenticationRuleDecisionResponse:
+      description: Success
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID representing the transaction
+        X-Authtype-Decisions:
+          schema:
+            type: string
+          description: JWT token holding the authentication decision based on rule results
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthRuleDecision'
+    MobileIdRegistrationResponse:
+      description: Success
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID representing the transaction
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MobileIdRegistration'
+  requestBodies:
+    TpDataShareRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TpDataShare'
+          examples:
+            TPDataShareRequestExampleUnencrypted:
+              $ref: '#/components/examples/TPDataShareRequestExample'
+            TPDataShareRequestExampleEncrypted:
+              $ref: '#/components/examples/EncryptedPayloadWithPDSExample'
+      required: true
+    DocumentDataRetrievalsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DocumentDataRetrieval'
+      required: true
+    MultiDocumentDataRetrievalsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MultiDocumentDataRetrieval'
+      required: true
+    MultiDocumentConfirmationsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MultiDocConfirmData'
+          examples:
+            MultiDocumentDataConfirmationsUnencryptedRequest:
+              $ref: >-
+                #/components/examples/MultiDocumentVerificationConfirmDataExample
+            MultiDocumentDataConfirmationsEncryptedRequest:
+              $ref: '#/components/examples/EncryptedPayloadWithPDSExample'
+      required: true
+    DocumentDataConfirmationsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DocumentVerificationConfirmData'
+          examples:
+            DocumentDataConfirmationsUnencryptedRequest:
+              $ref: '#/components/examples/DocumentVerificationConfirmDataExample'
+            DocumentDataConfirmationsEncryptedRequest:
+              $ref: '#/components/examples/EncryptedPayloadNoPDSExample'
+      required: true
+    UpdateIdentityAttributesRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateIdentityAttributesData'
+          examples:
+            UpdateIdentityAttributesUnencryptedRequest:
+              $ref: '#/components/examples/UpdateIdentityAttributesExample'
+            UpdateIdentityAttributesEncryptedRequest:
+              $ref: '#/components/examples/EncryptedPayloadWithPDSExample'
+      required: true
+    UpdateIdConfirmationsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DocumentIdConfirmation'
+      required: true
+    InitializeAuthenticationsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InitializeAuthentications'
+      required: true
+    InitializePremiumAuthenticationsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InitPremiumAuthentications'
+      required: true
+    AuthenticationResultsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VerifyAuthentication'
+      required: true
+    SmsOtpsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SMSOtp'
+          examples:
+            SmsOtpsRequestUnencryptedExample:
+              $ref: '#/components/examples/SmsOtpsRequestExample'
+            SmsOtpRequestEncryptedExample:
+              $ref: '#/components/examples/EncryptedPayloadWithPDSExample'
+      required: true
+    EmailOtpsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EmailOtp'
+          examples:
+            EmailOtpsRequestUnencryptedExample:
+              $ref: '#/components/examples/EmailOtpsRequestExample'
+            EmailOtpRequestEncryptedExample:
+              $ref: '#/components/examples/EncryptedPayloadWithPDSExample'
+      required: true
+    SmsOtpVerificationsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OtpVerification'
+          examples:
+            SmsOtpVerificationsRequestUnencrypted:
+              $ref: '#/components/examples/OtpVerificationsRequestExample'
+            SmsOtpVerificationsRequestEncrypted:
+              $ref: '#/components/examples/EncryptedPayloadWithPDSExample'
+      required: true
+    EmailOtpVerificationsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OtpVerification'
+          examples:
+            EmailOtpVerificationsRequestUnencrypted:
+              $ref: '#/components/examples/OtpVerificationsRequestExample'
+            EmailOtpVerificationsRequestEncrypted:
+              $ref: '#/components/examples/EncryptedPayloadWithPDSExample'
+      required: true
+    UserProfilesRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserProfile'
+      required: true
+    RPActivitySearchRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RPActivitySearch'
+      required: true
+    AuthenticationDecisionRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VerifyAuthenticationDecisions'
+      required: true
+    IdentitySearchRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentitySearch'
+      required: true
+    UserAccountActivitySearchRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserAccountActivitySearch'
+      required: true
+    AccessTokensRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RetrieveAccessToken'
+      required: true
+    MultiAccessTokensRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MultiRetrieveAccessToken'
+      required: true
+    TPRPClaimsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClaimScopes'
+      required: true
+    AuditEventsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuditEvents'
+      required: true
+    UserConsentRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RPClaimsUserConsent'
+      required: true
+    RPClaimsDataRequestData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RPClaimsUserDetails'
+      required: true
+    IdentityAttributeDeletionsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentityAttributeDeletions'
+      required: true
+    MobileIdRegistrationRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MobileIdUserEligibilityInfo'
+      required: true
+    AuthenticationRuleDecisionRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthRuleDecisionQuery'
+      required: true
+  examples:
+    ClientIdentitiesSuccessfulExample:
+      value:
+        attributes:
+          dateOfBirth:
+            e95b7c68-ebcb-4a88-9978-c33d78cde128:
+              value: '1980-01-01'
+              lastVerifiedDate: '2022-04-04T02:49:27.915Z'
+        rotatedPds: >-
+          ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    OtpVerificationSuccessfulExample:
+      value:
+        responseCode: SUCCESS
+        responseMessage: Verification Successful.
+        transactionId: 9060c8ca-c5ec-11ea-87d0-0242ac130003
+        pds: >-
+          ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    IncorrectOtpCodeProvidedExample:
+      value:
+        responseCode: FAILURE
+        responseMessage: Incorrect code provided.
+        attemptsRemaining: '2'
+        transactionId: 9060c8ca-c5ec-11ea-87d0-0242ac130003
+    OtpDoesNotExistExample:
+      value:
+        responseCode: FAILURE
+        responseMessage: The OTP request does not exist or has timed out.
+        transactionId: 9060c8ca-c5ec-11ea-87d0-0242ac130003
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+            - Source: mids
+              ReasonCode: USER_PROFILE_ID_NOT_FOUND
+              Description: The provided user profile ID does not exist.
+              Recoverable: false
+    NotFoundExampleARIDnotExists:
+      value:
+        Errors:
+          Error:
+            - Source: mids
+              ReasonCode: CLAIM_SHARING_ARID_DOES_NOT_EXIST
+              Description: 'CLAIM_SHARING_ARID_DOES_NOT_EXIST: ARID does not Exist'
+              Recoverable: false
+              Details: ARID does not exist.
+              redirectUri: >-
+                https://sample-rp-redirect-uri.com/?arid=b6990018-73bb-4e8c-9658-556012c22a25&state=random%20string&error=server_error
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+            - Source: mids
+              ReasonCode: UNAUTHORIZED_REQUEST
+              Description: Unauthorized request.
+              Recoverable: false
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+            - Source: mids
+              ReasonCode: CONSENT_NOT_GIVEN
+              Description: User Consent Not Given.
+              Recoverable: false
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
+        Errors:
+          Error:
+            - Source: mids
+              ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+              Description: >-
+                UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part
+                of whitelisted fields.
+              Recoverable: false
+    UserProfileDeletedErrorExample:
+      value:
+        Errors:
+          Error:
+            - Source: mids
+              ReasonCode: USER_PROFILE_DELETED
+              Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
+              Recoverable: false
+              redirectUri: >-
+                https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    BadRequestARIDErrorExample:
+      value:
+        Errors:
+          Error:
+            - Source: mids
+              ReasonCode: VALIDATION_ERROR
+              Description: Invalid value null for ARID.
+              Recoverable: false
+              Details: Must not be null.
+              redirectUri: >-
+                https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    BadRequestPDSErrorExample:
+      value:
+        Errors:
+          Error:
+            - Source: mids
+              ReasonCode: VALIDATION_ERROR
+              Description: Invalid value null for PDS.
+              Recoverable: false
+              Details: Must not be null.
+              redirectUri: >-
+                https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    RPClaimsUserDataSuccessExample:
+      value:
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+        rpName: RP Name
+        rpLogoUrl: https://www.rpsite.com/logo.jpg
+        claimsData:
+          claimsAttributes:
+            postalCode:
+              claims:
+                postalCode: '63368'
+              dataMatch: FULL
+          dataMatch: FULL
+        redirectUri: null
+        rotatedPds: null
+    RPClaimsUserDataExampleClaimsNotSatisfied:
+      value:
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+        rpName: RP Name
+        rpLogoUrl: https://www.rpsite.com/logo.jpg
+        claimsData: null
+        redirectUri: >-
+          https://sample-rp-redirect-uri.com/?arid=c00dc42f-fb5c-49a0-80c7-69faa65ac2af&error_description=scope_data_not_available&state=random%20string&error=invalid_scope
+        rotatedPds: null
+    RPClaimsUserConsentDataSuccessExample:
+      value:
+        flow: APP2APP
+        pds: >-
+          ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        rpSpecificIdentifier: 46eb72430ffeca3daf31360264fa0424ba4facfdcb69c6f43e73063f290a75a8
+        redirectUri: >-
+          https://sample-rp-redirect-uri.com/?arid=2cd8ed7e-0cbc-44cc-b393-45e42915d6db&code=eyJ4NXQjUzI1NiI6Ildvank5ekFZQzFCWlMxMTJDeTIzM&state=random%20string%22
+    RPClaimsUserConsentDataExampleConsentNotGiven:
+      value:
+        flow: APP2APP
+        pds: >-
+          ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        rpSpecificIdentifier: null
+        redirectUri: >-
+          https://sample-rp-redirect-uri.com/?arid=966eaf60-fa83-46d6-8ed5-7029609b4601&error_description=access_to_claims_denied&state=random%20string&error=access_denied
+    EncryptedPayloadNoPDSExample:
+      value:
+        encryptedData: >-
+          eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyf
+    EncryptedPayloadWithPDSExample:
+      value:
+        encryptedData: >-
+          eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyf
+        pds: >-
+          ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    EncryptedPayloadWithRotatedPDSExample:
+      value:
+        encryptedData: >-
+          eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IoxNTE2MjM5MDIyf
+        rotatedPds: >-
+          ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    RPActivitiesResponseExample:
+      value:
+        rpActivities:
+          - rpName: Toys Inc
+            consentType: OneTime
+            createdDate: '2020-01-28T18:16:01.714Z'
+            attributesConsented:
+              passport.firstName: John
+              passport.lastName: Doe
+        rotatedPds: >-
+          ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    TPDataShareRequestExample:
+      value:
+        pds: >-
+          ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        userConsent: ACCEPT
+        userProfileId: df52649e-4096-456a-bca0-751ee470009f
+        address:
+          addressLine1: 36271 GrandRiver Ave
+          addressLine2: Building no 2
+          addressZipCode: '48335'
+          addressCity: Farmington
+          addressSubdivision: MO
+          addressCountry: USA
+          value: 36271 GrandRiver Ave Building no 2 48335 Farmington MI USA
+          lastVerifiedDate: '2021-02-19T10:55:58.165Z'
+        email:
+          value: person@mastercard.com
+          lastVerifiedDate: '2021-02-19T10:55:58.165Z'
+        phone:
+          value: '11234567890'
+          lastVerifiedDate: '2021-02-19T10:55:58.165Z'
+    SmsOtpsRequestExample:
+      value:
+        phoneNumber: '553453554563'
+        locale: en-US
+        countryCode: US
+        userConsent: ACCEPT
+        pds: >-
+          ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        sdkAuditEvents:
+          - dateTime: '2020-01-28T13:16:01.714-05:00'
+            softwareVersion: 1.0.0
+            userProfileId: df52649e-4096-456a-bca0-751ee470009f
+            sessionId: 123ae1aa-6744-433e-879d-7da48d631234
+            transactionGroupId: 28eae1aa-6744-433e-879d-7da48d63e89a
+            logRequestFlow: CoreSDK-TP
+            logEvent: ID Enrollment
+            logEventType: User Profile Creation
+            osVersion: Android 5.0
+            deviceMake: Samsung S10
+            type: audit
+            audit:
+              privacyPolicy: 1.0.0
+              userBiometricConsent: 'TRUE'
+              event: Document Scan
+              eventType: Enrollment
+              result: 'TRUE'
+              eventGeneratedSource: CoreSDK
+              owner: TP
+        tpAuditMetadata:
+          sessionId: be3ad617-04ad-43e1-a438-79425b6511b6
+          transactionGroupId: be3ad617-04ad-43e1-a438-79425b6511b6
+        arid: a15fa6de-b199-11eb-8529-0242ac130003
+        sdkVersion: 2.3.0
+    EmailOtpsRequestExample:
+      value:
+        emailAddress: john.dunne@domain.com
+        locale: en-US
+        countryCode: US
+        userConsent: ACCEPT
+        pds: >-
+          ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        sdkAuditEvents:
+          - dateTime: '2020-01-28T13:16:01.714-05:00'
+            softwareVersion: 1.0.0
+            userProfileId: df52649e-4096-456a-bca0-751ee470009f
+            sessionId: 123ae1aa-6744-433e-879d-7da48d631234
+            transactionGroupId: 28eae1aa-6744-433e-879d-7da48d63e89a
+            logRequestFlow: CoreSDK-TP
+            logEvent: ID Enrollment
+            logEventType: User Profile Creation
+            osVersion: Android 5.0
+            deviceMake: Samsung S10
+            type: audit
+            audit:
+              privacyPolicy: 1.0.0
+              userBiometricConsent: 'TRUE'
+              event: Document Scan
+              eventType: Enrollment
+              result: 'TRUE'
+              eventGeneratedSource: CoreSDK
+              owner: TP
+        tpAuditMetadata:
+          sessionId: be3ad617-04ad-43e1-a438-79425b6511b6
+          transactionGroupId: be3ad617-04ad-43e1-a438-79425b6511b6
+        arid: a15fa6de-b199-11eb-8529-0242ac130003
+        sdkVersion: 2.3.0
+    OtpVerificationsRequestExample:
+      value:
+        code: '123456'
+        otpId: 63d04933-02b6-4ea4-adf9-68696e675a01
+        countryCode: US
+        userConsent: ACCEPT
+        pds: >-
+          ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        sdkAuditEvents:
+          - dateTime: '2020-01-28T13:16:01.714-05:00'
+            softwareVersion: 1.0.0
+            userProfileId: df52649e-4096-456a-bca0-751ee470009f
+            sessionId: 123ae1aa-6744-433e-879d-7da48d631234
+            transactionGroupId: 28eae1aa-6744-433e-879d-7da48d63e89a
+            logRequestFlow: CoreSDK-TP
+            logEvent: ID Enrollment
+            logEventType: User Profile Creation
+            osVersion: Android 5.0
+            deviceMake: Samsung S10
+            type: audit
+            audit:
+              privacyPolicy: 1.0.0
+              userBiometricConsent: 'TRUE'
+              event: Document Scan
+              eventType: Enrollment
+              result: 'TRUE'
+              eventGeneratedSource: CoreSDK
+              owner: TP
+        tpAuditMetadata:
+          sessionId: be3ad617-04ad-43e1-a438-79425b6511b6
+          transactionGroupId: be3ad617-04ad-43e1-a438-79425b6511b6
+        arid: a15fa6de-b199-11eb-8529-0242ac130003
+        sdkVersion: 2.3.0
+    UserAccountActivitiesExample:
+      value:
+        userAccountActivities:
+          - action: ID Created
+            createdDate: '2020-01-28T13:16:01.714-05:00'
+            values:
+              - attributeName: legalName
+                previousValue: John Doe
+                value: John Dow
+                source: passport
+        rotatedPds: >-
+          ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    DocumentExtractedDataExample:
+      value:
+        documentData:
+          addressLine1: 36271 GrandRiver Ave
+          addressLine2: Building no 2
+          addressZipCode: '48335'
+          addressCity: Farmington
+          addressSubdivision: MO
+          addressCountry: USA
+          lastName: Doe
+          firstName: John
+          dateOfBirth: '1996-07-10'
+          issuingCountry: USA
+          issuingDate: '1996-07-10'
+          expiryDate: '1996-07-10'
+          gender: M
+          fathersName: John Smith
+          mothersName: Paula Smith
+          documentNumber: 1LViI488YkFZh8YjNlLf61BMn29cmQn
+          documentType: passport
+          issuingPlace: New York
+          issuingAuthority: United States
+          placeOfBirth: Boston
+          issuingState: MO
+          formattedAddress: 220 BLVD O FALLON MO
+          rgNumber: '12345'
+          cpf: '12345'
+          cardNumber: C876687JK
+          documentStatus: SUCCESS
+        status: SUCCESS
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+    DocumentVerificationConfirmDataExample:
+      value:
+        sdkAuditEvents:
+          - dateTime: '2020-01-28T13:16:01.714-05:00'
+            softwareVersion: 1.0.0
+            userProfileId: df52649e-4096-456a-bca0-751ee470009f
+            sessionId: 123ae1aa-6744-433e-879d-7da48d631234
+            transactionGroupId: 28eae1aa-6744-433e-879d-7da48d63e89a
+            logRequestFlow: CoreSDK-TP
+            logEvent: ID Enrollment
+            logEventType: User Profile Creation
+            osVersion: Android 5.0
+            deviceMake: Samsung S10
+            type: audit
+            audit:
+              privacyPolicy: 1.0.0
+              userBiometricConsent: 'TRUE'
+              event: Document Scan
+              eventType: Enrollment
+              result: 'TRUE'
+              eventGeneratedSource: CoreSDK
+              owner: TP
+        tpAuditMetadata:
+          sessionId: be3ad617-04ad-43e1-a438-79425b6511b6
+          transactionGroupId: be3ad617-04ad-43e1-a438-79425b6511b6
+        arid: a15fa6de-b199-11eb-8529-0242ac130003
+        documentData:
+          addressLine1: 36271 GrandRiver Ave
+          addressLine2: Building no 2
+          addressZipCode: '48335'
+          addressCity: Farmington
+          addressSubdivision: MO
+          addressCountry: USA
+          lastName: Doe
+          firstName: John
+          dateOfBirth: '1996-07-10'
+          issuingCountry: USA
+          issuingDate: '1996-07-10'
+          expiryDate: '1996-07-10'
+          gender: M
+          fathersName: John Smith
+          mothersName: Paula Smith
+          documentNumber: 1LViI488YkFZh8YjNlLf61BMn29cmQn
+          documentType: passport
+          issuingPlace: New York
+          issuingAuthority: United States
+          placeOfBirth: Boston
+          issuingState: MO
+          formattedAddress: 220 BLVD O FALLON MO
+          rgNumber: '12345'
+          cpf: '12345'
+          cardNumber: C876687JK
+          workflowId: be3ad617-04ad-43e1-a438-79425b6511b6
+        userProfileId: 1f52649e-4096-456a-bca0-751ee4703058
+        userConsent: ACCEPT
+        countryCode: US
+        locale: en-US
+        fraudDetection:
+          nuDetectMeta:
+            behaviourData: >-
+              ewogICJuZHMtcG1kIiA6ICJ7XCJmdnFcIjpcIjBONjROOVAzLVBPM1ItNDcyNi04MDBPLTNQMzM2Mzg2Tk5RT1wiLFwianZxdHJnUW5nblwiOntcInp2cXNpXCI6XCJRUTYzOTc5Ny1OUFAyLTQ0OVItOVA0MS04UTM0NDdOODU5UzdcIixcInpjdlwiOlwidmJmXCIsXCJ6b3pzXCI6XCJOY2N5clwiLFwiemZ6XCI6MTcxNzk4NjkxODQsXCJqeGVcIjo0OTcwLFwiem9vXCI6XCJOY2N5clwiLFwienVmXCI6W1wienZ6Z1wiXSxcInF2cWdtXCI6NDIwLFwidmNlXCI6XCJhcHZjLDAsNXM5bzg0MXAsMywxO2ZnLDAsYXF2Y2V2YWNoZzAsMCxhcXZjZXZhY2hnMSwwO3NzLDAsYXF2Y2V2YWNoZzA7eHEsc3A7eHEsNG47eHEsNW87eHEsNjY7eHEsMjUzO3hxLDg1O3hxLHBxO3hxLDM4O3hxLDVuO3hxLDcyO3hxLDU2O3hxLDUyO3hxLDJwO3NvLG45LGFxdmNldmFjaGcwO3NzLDEsYXF2Y2V2YWNoZzE7eHEsMTI1O3hxLDQwO3hxLG82O3hxLDRyO3hxLG87Z3IscXMsNzcsMjM0LGFxdmNlcGJhZ2VieTBcIixcInpjemlcIjoxMixcInpvelwiOlwidkN1YmFyXCIsXCJ6Y3p2aVwiOjIsXCJ6ZmZcIjo0OTk5NjMxNzQ5MTIsXCJ6dW9wZlwiOi0xLFwiem9jXCI6XCJ2Q3ViYXIgS8qAXCIsXCJ6dmh2XCI6XCJjdWJhclwiLFwiZmVcIjpcIjE3OTJrODI4XCIsXCJoblwiOlwiMi4yLjEzODA2NVwiLFwiemh5XCI6XCJIRlwifSxcImpnXCI6XCIxLmotNDUxNjgwLjEuMi56U0dVQk56cHZNeUFoQjBOR2h2ZlRqLCwuM3hCRWhxSGhKZFREb1ZYY0hjYXJOSDUzVWFFS2t2amxNVF9RQTl5dUlYcWUwbV9iX0k0WWtBWGExUExTVXJzS1R4c0NFWHB2bkJjNkpEajhNTzhGZFVXMEcyaE9BWXZDRWZ5NXRLOHdJdVN4MzBnZmszZDF0MWhnc2NJODdFTG9MVlozNi1BcjhhV0pFSjJ1Ungza3RJYW5teDktOExZZmZsMWlFbVhSd1pqQ3FaQTVVMUZ1dzYzUERKZ2lIYzFUendFVjN3ak8yZDBrbUZIWUJaZTAxd0hnajVKQThTM0R6Z3FydE9pN1d3Q0VqZldZMHFITXFGT1g1d2RBYkl5LVNmOGVkYXBaeHNxaTItc0N6ejhRN2osLFwifSIsCiAgInNpZCIgOiAiMEE2NEE5QzMtQ0IzRS00NzI2LTgwMEItM0MzMzYzODZBQURCIgp9
+            remoteIp: 127.0.0.1
+            sessionId: da3fe5be-2a8e-11eb-adc1-0242ac120002
+            userAgent: >-
+              Mozilla: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0)
+              Gecko/20100101 Firefox/47.3 Mozilla/5.0 (Macintosh; Intel Mac OS X
+              x.y; rv:42.0) Gecko/20100101 Firefox/43.4.
+            xForwardedFor: 203.0.113.195,70.41.3.18,150.172.238.178
+            requestUrl: http://tp-backend.com/api/path
+        deviceInfo: null
+        deviceAppId: 599F9C00-92DC-4B5C-9464-7971F01F8370
+        make: Samsung
+        model: S8
+        visaMatched: false
+        sdkVersion: 2.3.0
+    MultiDocumentVerificationConfirmDataExample:
+      value:
+        pds: >-
+          ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        sdkAuditEvents:
+          - dateTime: '2020-01-28T13:16:01.714-05:00'
+            softwareVersion: 1.0.0
+            userProfileId: df52649e-4096-456a-bca0-751ee470009f
+            sessionId: 123ae1aa-6744-433e-879d-7da48d631234
+            transactionGroupId: 28eae1aa-6744-433e-879d-7da48d63e89a
+            logRequestFlow: CoreSDK-TP
+            logEvent: ID Enrollment
+            logEventType: User Profile Creation
+            osVersion: Android 5.0
+            deviceMake: Samsung S10
+            type: audit
+            audit:
+              privacyPolicy: 1.0.0
+              userBiometricConsent: 'TRUE'
+              event: Document Scan
+              eventType: Enrollment
+              result: 'TRUE'
+              eventGeneratedSource: CoreSDK
+              owner: TP
+        tpAuditMetadata:
+          sessionId: be3ad617-04ad-43e1-a438-79425b6511b6
+          transactionGroupId: be3ad617-04ad-43e1-a438-79425b6511b6
+        arid: a15fa6de-b199-11eb-8529-0242ac130003
+        documentData:
+          addressLine1: 36271 GrandRiver Ave
+          addressLine2: Building no 2
+          addressZipCode: '48335'
+          addressCity: Farmington
+          addressSubdivision: MO
+          addressCountry: USA
+          lastName: Doe
+          firstName: John
+          dateOfBirth: '1996-07-10'
+          issuingCountry: USA
+          issuingDate: '1996-07-10'
+          expiryDate: '1996-07-10'
+          gender: M
+          fathersName: John Smith
+          mothersName: Paula Smith
+          documentNumber: 1LViI488YkFZh8YjNlLf61BMn29cmQn
+          documentType: passport
+          issuingPlace: New York
+          issuingAuthority: United States
+          placeOfBirth: Boston
+          issuingState: MO
+          formattedAddress: 220 BLVD O FALLON MO
+          rgNumber: '12345'
+          cpf: '12345'
+          cardNumber: C876687JK
+          workflowId: be3ad617-04ad-43e1-a438-79425b6511b6
+        userProfileId: 1f52649e-4096-456a-bca0-751ee4703058
+        userConsent: ACCEPT
+        countryCode: US
+        locale: en-US
+        fraudDetection:
+          nuDetectMeta:
+            behaviourData: >-
+              ewogICJuZHMtcG1kIiA6ICJ7XCJmdnFcIjpcIjBONjROOVAzLVBPM1ItNDcyNi04MDBPLTNQMzM2Mzg2Tk5RT1wiLFwianZxdHJnUW5nblwiOntcInp2cXNpXCI6XCJRUTYzOTc5Ny1OUFAyLTQ0OVItOVA0MS04UTM0NDdOODU5UzdcIixcInpjdlwiOlwidmJmXCIsXCJ6b3pzXCI6XCJOY2N5clwiLFwiemZ6XCI6MTcxNzk4NjkxODQsXCJqeGVcIjo0OTcwLFwiem9vXCI6XCJOY2N5clwiLFwienVmXCI6W1wienZ6Z1wiXSxcInF2cWdtXCI6NDIwLFwidmNlXCI6XCJhcHZjLDAsNXM5bzg0MXAsMywxO2ZnLDAsYXF2Y2V2YWNoZzAsMCxhcXZjZXZhY2hnMSwwO3NzLDAsYXF2Y2V2YWNoZzA7eHEsc3A7eHEsNG47eHEsNW87eHEsNjY7eHEsMjUzO3hxLDg1O3hxLHBxO3hxLDM4O3hxLDVuO3hxLDcyO3hxLDU2O3hxLDUyO3hxLDJwO3NvLG45LGFxdmNldmFjaGcwO3NzLDEsYXF2Y2V2YWNoZzE7eHEsMTI1O3hxLDQwO3hxLG82O3hxLDRyO3hxLG87Z3IscXMsNzcsMjM0LGFxdmNlcGJhZ2VieTBcIixcInpjemlcIjoxMixcInpvelwiOlwidkN1YmFyXCIsXCJ6Y3p2aVwiOjIsXCJ6ZmZcIjo0OTk5NjMxNzQ5MTIsXCJ6dW9wZlwiOi0xLFwiem9jXCI6XCJ2Q3ViYXIgS8qAXCIsXCJ6dmh2XCI6XCJjdWJhclwiLFwiZmVcIjpcIjE3OTJrODI4XCIsXCJoblwiOlwiMi4yLjEzODA2NVwiLFwiemh5XCI6XCJIRlwifSxcImpnXCI6XCIxLmotNDUxNjgwLjEuMi56U0dVQk56cHZNeUFoQjBOR2h2ZlRqLCwuM3hCRWhxSGhKZFREb1ZYY0hjYXJOSDUzVWFFS2t2amxNVF9RQTl5dUlYcWUwbV9iX0k0WWtBWGExUExTVXJzS1R4c0NFWHB2bkJjNkpEajhNTzhGZFVXMEcyaE9BWXZDRWZ5NXRLOHdJdVN4MzBnZmszZDF0MWhnc2NJODdFTG9MVlozNi1BcjhhV0pFSjJ1Ungza3RJYW5teDktOExZZmZsMWlFbVhSd1pqQ3FaQTVVMUZ1dzYzUERKZ2lIYzFUendFVjN3ak8yZDBrbUZIWUJaZTAxd0hnajVKQThTM0R6Z3FydE9pN1d3Q0VqZldZMHFITXFGT1g1d2RBYkl5LVNmOGVkYXBaeHNxaTItc0N6ejhRN2osLFwifSIsCiAgInNpZCIgOiAiMEE2NEE5QzMtQ0IzRS00NzI2LTgwMEItM0MzMzYzODZBQURCIgp9
+            remoteIp: 127.0.0.1
+            sessionId: da3fe5be-2a8e-11eb-adc1-0242ac120002
+            userAgent: >-
+              Mozilla: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0)
+              Gecko/20100101 Firefox/47.3 Mozilla/5.0 (Macintosh; Intel Mac OS X
+              x.y; rv:42.0) Gecko/20100101 Firefox/43.4.
+            xForwardedFor: 203.0.113.195,70.41.3.18,150.172.238.178
+            requestUrl: http://tp-backend.com/api/path
+        deviceInfo: null
+        deviceAppId: 599F9C00-92DC-4B5C-9464-7971F01F8370
+        make: Samsung
+        model: S8
+        visaMatched: false
+        sdkVersion: 2.3.0
+    UpdateIdentityAttributesExample:
+      value:
+        identityAttributes:
+          - attributeName: LEGAL_NAME
+            attributeValue: BALL,ELLA
+        pds: >-
+          ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        userConsent: ACCEPT
+        tpAuditMetadata:
+          sessionId: be3ad617-04ad-43e1-a438-79425b6511b6
+          transactionGroupId: be3ad617-04ad-43e1-a438-79425b6511b6
+        sdkVersion: 2.3.0
+    ClaimIdentitiesExample:
+      value:
+        claims:
+          driverLicense.firstName: John
+          driverLicense.lastName: Doe
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+        rpSpecificIdentifier: 46eb72430ffeca3daf31360264fa0424ba4facfdcb69c6f43e73063f290a75a8
+        pds: >-
+          ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        fraudDetectionMeta:
+          score:
+            value: 0
+            band: GREEN
+            signals:
+              - anonymous_ip
+    AuthenticationsExample:
+      value:
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+        apiDataCenter: SG
+        sdkToken: >-
+          eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAB3NQQpCMQwE0Lt0baBJ0yZ159KtN0jTBgTBjYgg3t3__3KGN8w3rc_llc4JG6KUhrmoYjolc7_OvWfPKJ2hUzNgagE2hcC5hsYIUeOdH7gStVr6AtElwNUcrBNDFppYMjqxb9hvKzb9fNzfa4_HVkORomdoggsYp8HgPqAWF43VtsOcfn_stx4UsAAAAA.tDRVowYYcpQ03Vlt7D3MiovleiyRFQMv4qzXb7Lf_6CarphRrlWXan8-jE-YesNiAiT8tk0b-i8TKHGrcgT1VQ
+        privacyPolicyVersion: 1.0.0
+        privacyPolicyUrl: >-
+          https://www.mastercard.us/en-us/vision/corp-responsibility/commitment-to-privacy/privacy.html
+        privacyPolicyVersionUpdated: true
+        rotatedPds: >-
+          ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    AccessTokenExample:
+      value:
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+        sdkToken: >-
+          eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAB3NQQpCMQwE0Lt0baBJ0yZ159KtN0jTBgTBjYgg3t3__3KGN8w3rc_llc4JG6KUhrmoYjolc7_OvWfPKJ2hUzNgagE2hcC5hsYIUeOdH7gStVr6AtElwNUcrBNDFppYMjqxb9hvKzb9fNzfa4_HVkORomdoggsYp8HgPqAWF43VtsOcfn_stx4UsAAAAA.tDRVowYYcpQ03Vlt7D3MiovleiyRFQMv4qzXb7Lf_6CarphRrlWXan8-jE-YesNiAiT8tk0b-i8TKHGrcgT1VQ
+        apiDataCenter: SG
+    AuthenticationDecisionsExample:
+      value:
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+        status: SUCCESS
+        attributes:
+          legalName:
+            aa6dee5a-6e4d-4932-8189-2ecb7ad6f676:
+              value: SMITH, JOHN
+              lastVerifiedDate: '2022-04-04T02:49:27.915Z'
+        rotatedPds: >-
+          ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+  parameters:
+    AridParameter:
+      name: arid
+      in: path
+      description: >-
+        A unique identifier for any activity being executed arising out of a
+        Claim Share request. This value is passed as a parameter in the URL
+        redirecting a User to the TP Flow during a Claim Share. .
+      example: df52649e-4096-456a-bca0-751ee470009f
+      required: true
+      schema:
+        type: string
+        pattern: >-
+          ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+        maxLength: 36
+        minLength: 36
+    XUserIdentityParameter:
+      in: header
+      name: X-User-Identity
+      example: >-
+        eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      description: >
+        JWT token for session validation. Returned as response header in
+        previous API calls with key X-User-Identity.
+      schema:
+        type: string
+    XEncryptedPayload:
+      in: header
+      name: X-Encrypted-Payload
+      type: boolean
+      description: >
+        An indicator that the request is encrypted or indicates that the client
+        is able to receive an encrypted response. If not set, the payload will
+        be treated as plaintext.
+      example: true
+      schema: null
+    UserProfileIdParameter:
+      name: user_profile_id
+      in: query
+      description: >-
+        UUID identifying the user, which the TP App generates using the MIDS
+        Core SDK.
+      example: ee13a7ec-5a5a-4618-a55d-5e1ed016ccd5
+      required: true
+      schema:
+        type: string
+        pattern: >-
+          ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+    UserConsentParameter:
+      name: user_consent
+      in: query
+      description: >-
+        Confirmation provided by the TP that the user has consented that the
+        ID-Network can have access to their identity for the purposes of the API
+        call. Should be ACCEPT, a forbidden exception will be thrown if it is
+        any other value.
+      example: ACCEPT
+      required: true
+      schema:
+        type: string
+        pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+    DeviceTypeParameter:
+      name: device_type
+      in: query
+      description: The type of device operating system that user is using to register with.
+      example: ANDROID
+      required: true
+      schema:
+        type: string
+        pattern: ^(ANDROID|IOS)$
+    ScanIdPathParameter:
+      name: scan_id
+      in: path
+      description: Scan ID.
+      example: 1234
+      required: true
+      schema:
+        type: string
+        pattern: >-
+          ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+    UserProfileIdPathParameter:
+      name: user_profile_id
+      in: path
+      description: >-
+        UUID identifying the user, which the TP App generates using the MIDS
+        Core SDK.
+      example: ee13a7ec-5a5a-4618-a55d-5e1ed016ccd5
+      required: true
+      schema:
+        type: string
+        pattern: >-
+          ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+    RegistrationIdPathParameter:
+      name: registration_id
+      in: path
+      description: Registration id for mobile ID
+      example: ee13a7ec-5a5a-4618-a55d-5e1ed016ccd5
+      required: true
+      schema:
+        type: string
+        pattern: >-
+          ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
