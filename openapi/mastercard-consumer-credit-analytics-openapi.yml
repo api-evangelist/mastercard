@@ -1,0 +1,334 @@
+openapi: 3.0.3
+info:
+  description: >-
+    A collection of Mastercard-provided APIs for retrieving Mastercard
+    transaction-based credit scores to improve their consumer credit
+    underwriting decisions.
+  version: 1.0.0
+  title: Consumer Credit Analytics API
+  contact:
+    name: API Support
+    url: https://developer.mastercard.com/support
+    email: apisupport@mastercard.com
+servers:
+  - url: https://api.mastercard.com/consumer/credit-analytics
+    description: Production server
+  - url: https://sandbox.api.mastercard.com/consumer/credit-analytics
+    description: Sandbox server
+tags:
+  - name: scores
+    description: Retrieval of Mastercard transaction-based credit scores and data insights.
+paths:
+  /scores:
+    post:
+      tags:
+        - scores
+      summary: >-
+        Retrieval of Mastercard transaction-based credit scores and data
+        insights.
+      description: |
+        Using the provided encrypted list of PAN and consent,
+        returns a delinquency score,
+        that can be used by lenders to make credit application decisions.
+      operationId: getScores
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/ConsumerCreditAnalytics'
+      responses:
+        '200':
+          $ref: '#/components/responses/ConsumerCreditAnalyticsScore'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+components:
+  examples:
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+            - Source: ConsumerCreditAnalytics
+              ReasonCode: MISSING_REQUIRED_FIELD
+              Description: The parameter is required but not provided.
+              Recoverable: false
+              Details: The countryCode parameter is required but was not provided.
+  responses:
+    ConsumerCreditAnalyticsScore:
+      description: |
+        Operation was successful
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConsumerCreditAnalyticsScore'
+    BadRequest:
+      description: >-
+        We couldn't handle your request, see response payload for more
+        information.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+  securitySchemes:
+    credit_analytics_auth:
+      type: apiKey
+      name: api_key
+      in: header
+      description: >-
+        Mastercard uses one-legged OAuth1.0a to authenticate its APIs. See
+        https://developer.mastercard.com/platform/documentation/security-and-authentication/using-oauth-1a-to-access-mastercard-apis/
+        for more details.
+  requestBodies:
+    ConsumerCreditAnalytics:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConsumerCreditAnalytics'
+  schemas:
+    ConsumerCreditAnalytics:
+      type: object
+      description: >
+        Object containing list of customer PAN's along with score type and
+        product type for which score will be fetched.
+      properties:
+        hasEmbedding:
+          type: boolean
+          description: >-
+            A boolean indicating that the user of this API has requested for
+            embedding data for the PANs. Possible value - true or false
+          example: true
+        countryCode:
+          type: string
+          description: >-
+            The 3-letter country abbreviation for the customer. These
+            abbreviations follow
+            https://www.iso.org/iso-3166-country-codes.html.
+          example: USA
+        customerPANs:
+          type: array
+          description: >-
+            The card numbers and consents for which score needs to be retrieved.
+            Max 20 PAN numbers are allowed in a request.
+          items:
+            $ref: '#/components/schemas/CustomerPAN'
+          example:
+            - customerPAN: 5553********4105
+              hasConsent: true
+            - customerPAN: 5553********4106
+              hasConsent: true
+        scoreTypes:
+          type: array
+          description: >-
+            Type of score needs to be retrieved for the card number, Possible
+            value - DELINQUENCY.
+          example:
+            - DELINQUENCY
+          items:
+            type: string
+            description: >-
+              Type of score needs to be retrieved for the card number, Possible
+              value - DELINQUENCY.
+            example: DELINQUENCY
+        productTypes:
+          type: array
+          description: >-
+            Type of products for which score needs to be retrieved of the card
+            number, Possible value - CREDIT_CARD.
+          example:
+            - CREDIT_CARD
+          items:
+            type: string
+            description: >-
+              Type of product for which score needs to be retrieved of the card
+              number, Possible value - CREDIT_CARD.
+            example: CREDIT_CARD
+    ConsumerCreditAnalyticsScore:
+      type: object
+      properties:
+        predictionDataSuccesses:
+          type: array
+          description: List of scores retrieved for the card numbers.
+          items:
+            $ref: '#/components/schemas/PredictionDataSuccess'
+        predictionDataErrors:
+          type: array
+          description: List of errors while retrieving the score for the card numbers.
+          items:
+            $ref: '#/components/schemas/PredictionDataError'
+    PredictionDataError:
+      type: object
+      properties:
+        customerPAN:
+          type: string
+          description: The card number for which error is thrown
+          example: 5553********4106
+        errors:
+          type: array
+          description: List of errors for card number.
+          items:
+            $ref: '#/components/schemas/ErrorData'
+    ErrorData:
+      type: object
+      properties:
+        reasonCode:
+          type: string
+          description: A short description of the ErrorCode field.
+          example: PAN_NOT_FOUND
+        errorMessage:
+          type: string
+          description: A detailed description of the Error.
+          example: >-
+            This error is thrown when a PAN number is not found in Mastercard
+            database
+        modelName:
+          type: string
+          description: Name of the model used for scoring against customerPANs.
+          example: CCA_CCS_Del_M1_v1.0
+        scoreType:
+          type: string
+          description: A score type for which score is not retrieved.
+          example: DELINQUENCY
+        productType:
+          type: string
+          description: A product type for which score is not retrieved.
+          example: CREDIT_CARD
+    CustomerPAN:
+      type: object
+      properties:
+        customerPAN:
+          type: string
+          description: >-
+            The card number for which the score needs to be retrieved. A minimum
+            of 16 and a maximum of 19 digits are allowed.
+          example: 5553********4105
+        hasConsent:
+          type: boolean
+          description: >-
+            A parameter indicating that the user of this API has consent to pull
+            the score for the requested PAN number.
+          example: true
+    PredictionDataSuccess:
+      type: object
+      properties:
+        customerPAN:
+          type: string
+          description: The card number for which the score is retrieved.
+          example: 5553********4105
+          minimum: 16
+          maximum: 19
+        scores:
+          type: array
+          description: Score data for the card numbers.
+          items:
+            $ref: '#/components/schemas/score'
+    score:
+      type: object
+      properties:
+        scoreType:
+          type: string
+          description: >-
+            A score type for which score is retrieved, Possible value -
+            DELINQUENCY.
+          example: DELINQUENCY
+        productType:
+          type: string
+          description: >-
+            A product type for which score is retrieved, Possible value -
+            CREDIT_CARD.
+          example: CREDIT_CARD
+        score:
+          type: integer
+          description: The score retrieved for the card number.
+          example: 790
+          minimum: 1
+          maximum: 999
+        decile:
+          type: integer
+          description: >-
+            The decile is any of the values in a series that divides the
+            distribution of individuals in that series into ten groups of equal
+            frequency.
+          example: 7
+        modelName:
+          type: string
+          description: Name of the model used for scoring against customerPANs.
+          example: CCA_CCS_Del_M1_v1.0
+        embeddingFeatures:
+          type: string
+          description: >-
+            Optional parameter embeddings is intermediate machine readable
+            output from score calculation.
+          example: >-
+            {f1:0.113484,f2:0.113484,f3:0.070811,f4:0.059630,......................f16:0.020333}
+        hasScoreChangedFromLastWeek:
+          type: boolean
+          description: >-
+            Indicates whether the change in score has resulted in a change in
+            decile classification compared to the previous week. For new
+            prospects, this value is always set to 'false' based on the
+            underlying model's criteria.
+          example: true
+        isNewProspect:
+          type: boolean
+          description: >-
+            Indicates whether the card is not issued by the bank requesting the
+            score.
+          example: true
+    ErrorWrapper:
+      type: object
+      required:
+        - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Errors:
+      type: object
+      required:
+        - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    Error:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: The name of the application that generated this error.
+          example: ConsumerCreditAnalytics
+        ReasonCode:
+          type: string
+          description: >-
+            A unique constant identifying the error case encountered while
+            processing the API request.
+          example: INVALID_ARGUMENT
+        Description:
+          type: string
+          description: A short description of the ReasonCode field.
+          example: >-
+            This error is thrown when an argument passed to the API doesn't pass
+            validation
+        Recoverable:
+          type: boolean
+          description: >-
+            Indicates whether this error will always be returned for this
+            request, or retrying could change the outcome. For example, if the
+            request contains an invalid signature, retrying will never result in
+            a success. However, if the error is related to some unexpected
+            timeout with the service, retrying the call could result in a
+            successful response.
+          example: true
+        Details:
+          type: string
+          description: >-
+            Where appropriate, indicates detailed information about data
+            received and calculated during request processing, to help the user
+            with diagnosing errors.
+          example: >-
+            The PAN argument does not match any of the supported, valid PAN
+            numbers
