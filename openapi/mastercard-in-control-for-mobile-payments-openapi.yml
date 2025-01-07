@@ -1,0 +1,1428 @@
+openapi: 3.0.3
+info:
+  title: In Control For Mobile Payments Outbound API
+  description: >-
+    In Control for Mobile Payments (ICMP) utilizes Mastercard Digital Enablement
+    Service (MDES) to tokenize virtual cards into a digital wallet. In addition
+    to e-commerce purchasing, end users can utilize tap-and-go (contactless)
+    purchasing and enjoy a faster checkout experience.
+       The ICMP Outbound services are used to inform consumers of End User, Virtual Card and Token related information
+  version: 1.0.6
+  contact:
+    name: API Support
+    email: apisupport@mastercard.com
+    url: https://developer.mastercard.com/support
+servers:
+  - url: https://apiedge.mastercard.com/commercial
+    description: Production Server
+  - url: https://mtf.apiedge.mastercard.com/commercial
+    description: Sandbox Server
+tags:
+  - name: User
+    description: Operations to manage a user
+  - name: Real Card
+    description: Operation to delete all virtual cards linked to a real card
+  - name: User card and controls
+    description: Operations to manage  virtual cards and controls
+  - name: Token
+    description: Operations to manage tokens for virtual cards
+paths:
+  /users:
+    post:
+      tags:
+        - User
+      summary: Register a new user
+      description: This endpoint allows users to register a new user
+      operationId: Users
+      requestBody:
+        $ref: '#/components/requestBodies/User'
+      responses:
+        '201':
+          $ref: '#/components/responses/ResourceIdentifier'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /users/{user_guid}/virtual-card-accounts:
+    get:
+      tags:
+        - User card and controls
+      summary: Retrieve a list of all virtual cards linked to a user
+      description: >-
+        This endpoint allows users to retrieve a list of all virtual cards
+        linked to a user
+      operationId: findVcnCardsByUser
+      parameters:
+        - $ref: '#/components/parameters/userGUID'
+      responses:
+        '200':
+          $ref: '#/components/responses/VirtualCards'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    post:
+      parameters:
+        - $ref: '#/components/parameters/userGUID'
+      tags:
+        - User card and controls
+      summary: Register a virtual card linked to a user
+      description: This endpoint allows users to register a virtual card linked to a user
+      operationId: createVirtualCardWithControls
+      requestBody:
+        $ref: '#/components/requestBodies/NewVirtualCard'
+      responses:
+        '201':
+          $ref: '#/components/responses/ResourceCreated'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /users/{user_guid}/virtual-card-accounts/{account_guid}:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/userGUID'
+        - $ref: '#/components/parameters/accountGUID'
+      tags:
+        - User card and controls
+      summary: Retrieve virtual card account details linked to a user
+      description: >-
+        This endpoint allows users to retrieve virtual card account details
+        linked to a user
+      operationId: findVcnCardByUser
+      responses:
+        '200':
+          $ref: '#/components/responses/VirtualCard'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    put:
+      parameters:
+        - $ref: '#/components/parameters/userGUID'
+        - $ref: '#/components/parameters/accountGUID'
+      tags:
+        - User card and controls
+      summary: Update virtual card account details linked to a user
+      description: >-
+        This endpoint allows users to update virtual card account details linked
+        to a user
+      operationId: updateUserCardAndControls
+      requestBody:
+        $ref: '#/components/requestBodies/UpdatedVirtualCard'
+      responses:
+        '200':
+          $ref: '#/components/responses/OKResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    delete:
+      tags:
+        - User card and controls
+      summary: Delete a virtual card account linked to a user
+      description: >-
+        This endpoint allows users to delete a virtual card account linked to a
+        user
+      parameters:
+        - $ref: '#/components/parameters/userGUID'
+        - $ref: '#/components/parameters/accountGUID'
+      operationId: deleteUserVirtualCard
+      responses:
+        '204':
+          $ref: '#/components/responses/NOContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /users/{user_guid}:
+    get:
+      tags:
+        - User
+      summary: Retrieve user details
+      description: This endpoint allows users to retrieve details of a particular user
+      operationId: getUserById
+      parameters:
+        - $ref: '#/components/parameters/userGUID'
+      responses:
+        '200':
+          $ref: '#/components/responses/User'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    put:
+      tags:
+        - User
+      summary: Update a user
+      description: This endpoint allows users to update details of a particular user
+      operationId: updateUserById
+      parameters:
+        - $ref: '#/components/parameters/userGUID'
+      requestBody:
+        $ref: '#/components/requestBodies/User'
+      responses:
+        '200':
+          $ref: '#/components/responses/OKResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    delete:
+      tags:
+        - User
+      summary: Delete a user
+      description: This endpoint allows users to delete a particular user
+      parameters:
+        - $ref: '#/components/parameters/userGUID'
+      operationId: deleteUser
+      responses:
+        '204':
+          $ref: '#/components/responses/NOContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /real-card-accounts/{account_guid}:
+    delete:
+      tags:
+        - Real Card
+      summary: Delete all virtual cards linked to a real card
+      description: >-
+        This endpoint allows users to delete all virtual cards linked to a real
+        card account_guid
+      parameters:
+        - $ref: '#/components/parameters/accountGUID'
+      operationId: DeleteVcnsByRealCardAccountGuid
+      responses:
+        '204':
+          $ref: '#/components/responses/NOContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /users/{user_guid}/virtual-card-accounts/{account_guid}/tokens:
+    post:
+      parameters:
+        - $ref: '#/components/parameters/userGUID'
+        - $ref: '#/components/parameters/accountGUID'
+      tags:
+        - Token
+      summary: Register a token linked to a user and a virtual card
+      description: >-
+        This endpoint allows users to register a token linked to a user and a
+        virtual card
+      operationId: TokenCreate
+      requestBody:
+        $ref: '#/components/requestBodies/NewToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/ResourceCreated'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /users/{user_guid}/virtual-card-accounts/{account_guid}/tokens/{token_guid}:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/userGUID'
+        - $ref: '#/components/parameters/accountGUID'
+        - $ref: '#/components/parameters/tokenGUID'
+      tags:
+        - Token
+      summary: Retrieve token details linked to a user and a virtual card
+      description: >-
+        This endpoint allows users to retrieve token details linked to a user
+        and a virtual card
+      operationId: getTokenById
+      responses:
+        '200':
+          $ref: '#/components/responses/Token'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    put:
+      tags:
+        - Token
+      parameters:
+        - $ref: '#/components/parameters/userGUID'
+        - $ref: '#/components/parameters/accountGUID'
+        - $ref: '#/components/parameters/tokenGUID'
+      summary: Update a token linked to a user and a virtual card
+      description: >-
+        This endpoint allows users to update a token linked to a user and a
+        virtual card
+      operationId: updateTokenById
+      requestBody:
+        $ref: '#/components/requestBodies/UpdatedToken'
+      responses:
+        '200':
+          $ref: '#/components/responses/OKResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    delete:
+      tags:
+        - Token
+      parameters:
+        - $ref: '#/components/parameters/userGUID'
+        - $ref: '#/components/parameters/accountGUID'
+        - $ref: '#/components/parameters/tokenGUID'
+      summary: Delete a token linked to a user and a virtual card
+      description: >-
+        This endpoint allows users to delete a token linked to a user and a
+        virtual card
+      operationId: deleteTokenById
+      responses:
+        '204':
+          $ref: '#/components/responses/NOContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+components:
+  examples:
+    NotFoundError:
+      value:
+        Errors:
+          Error:
+            - Source: token-management-service
+              ReasonCode: not.found
+              Description: Error description
+              Recoverable: true
+              Details: Detail information
+    AuthorizationError:
+      value:
+        Errors:
+          Error:
+            - Source: token-management-service
+              ReasonCode: authorization.missing
+              Description: Error description
+              Recoverable: true
+              Details: Detail information
+    BadRequestError:
+      value:
+        Errors:
+          Error:
+            - Source: token-management-service
+              ReasonCode: invalid.parameter
+              Description: Error description
+              Recoverable: true
+              Details: Detail information
+    ForbiddenError:
+      value:
+        Errors:
+          Error:
+            - Source: token-management-service
+              ReasonCode: authorization.forbidden
+              Description: Error description
+              Recoverable: true
+              Details: Detail information
+    UserDetail:
+      value:
+        firstName: Emerson
+        lastName: Bloggs
+        phone: '+12345678910111'
+        email: emersonbloggs@gmail.com
+    CardDetails:
+      value:
+        - firstName: Emerson
+          lastName: Bloggs
+          phone: '+353871123456'
+          realCardAccountGuid: 123e4567-e89b-12d3-a456-426614174000
+          accountNumber: '1234567891234567'
+          expiry: 2021-11
+          accountGuid: 123e4567-e89b-12d3-a456-426614174000
+          description: This is the description of what the VCN will be used for
+          realCardBillingCurrencyCode: '840'
+          rules:
+            - action: A
+              alias: DAILY LIMIT
+              transactionLimits:
+                - amount: 12
+                  negate: true
+              geographies:
+                - countryCodes:
+                    - USA
+                  negate: true
+              velocities:
+                - maxTrans: 12
+                  cumulativeLimit: 1200
+                  period: DAILY
+                  availableBalance: 1200
+                  currencyType: MERCHANT
+                  currencyCode: '825'
+                  endDate: '2020-10-06T11:09:42.10Z'
+                  negate: true
+              validityPeriods:
+                - from: '2020-10-06T11:09:42.10Z'
+                  to: '2020-11-06T11:09:42.10Z'
+                  strictPreAuthCheck: true
+                  negate: true
+              amountRanges:
+                - minAmount: 1000
+                  maxAmount: 10000
+                  strictPreAuthCheck: true
+                  currencyType: MERCHANT
+                  currencyCode: '825'
+                  negate: true
+              merchantIds:
+                - acceptorId: '123456789012345'
+                  acquirerId: '123456'
+                  negate: true
+              ageingVelocities:
+                - authorizationHoldDays: 1234
+                  cumulativeLimit: 1000
+                  timeZone: UTC-06:00
+                  availableBalance: 1000
+                  currencyType: MERCHANT
+                  currencyCode: '825'
+                  negate: true
+              curfews:
+                - fromTime: '08:20'
+                  toTime: '11:00'
+                  timeZone: UTC
+                  days:
+                    - SUNDAY
+                  negate: true
+              timeOfDays:
+                - times:
+                    - day: SUNDAY
+                      fromTime: '08:21'
+                      toTime: '12:40'
+                  timeZone: UTC
+                  negate: true
+              merchantCategories:
+                - negate: true
+                  mccs:
+                    - 1234
+                    - 5678
+    Token:
+      value:
+        accountNumber: '1234567891234567'
+        expiry: 2021-11
+        accountGuid: 123e4567-e89b-12d3-a456-426614174000
+        tokenUniqueRef: DE9JOVYK6FVSO8I32DLDPHGTC9NZ7SLKPVLMDQ0RRGK3WYD2
+        paymentAppInstanceId: '128652974320250630'
+        status: ACTIVE
+    TokenUpdate:
+      value:
+        accountNumber: '1234567891234567'
+        expiry: 2021-11
+        status: ACTIVE
+    UpdateUserCardAndControl:
+      value:
+        firstName: Emerson
+        lastName: Bloggs
+        phone: '+353871123456'
+        expiry: 2021-11
+        description: This is the description of what the VCN will be used for
+        realCardBillingCurrencyCode: '840'
+        rules:
+          - action: A
+            alias: DAILY LIMIT
+            transactionLimits:
+              - amount: 12
+                negate: true
+            geographies:
+              - countryCodes:
+                  - USA
+                negate: true
+            velocities:
+              - maxTrans: 12
+                cumulativeLimit: 1200
+                period: DAILY
+                availableBalance: 1200
+                currencyType: MERCHANT
+                currencyCode: '825'
+                negate: true
+            validityPeriods:
+              - from: '2020-10-06T11:09:42.10Z'
+                to: '2020-11-06T11:09:42.10Z'
+                strictPreAuthCheck: true
+                negate: true
+            amountRanges:
+              - minAmount: 1000
+                maxAmount: 10000
+                strictPreAuthCheck: true
+                currencyType: MERCHANT
+                currencyCode: '825'
+                negate: true
+            merchantIds:
+              - acceptorId: '123456789012345'
+                acquirerId: '123456'
+                negate: true
+            ageingVelocities:
+              - authorizationHoldDays: 1234
+                cumulativeLimit: 1000
+                timeZone: UTC-06:00
+                currencyType: MERCHANT
+                currencyCode: '825'
+                negate: true
+            curfews:
+              - fromTime: '08:20'
+                toTime: '11:00'
+                timeZone: UTC
+                days:
+                  - SUNDAY
+                negate: true
+            timeOfDays:
+              - times:
+                  - day: SUNDAY
+                    fromTime: '08:21'
+                    toTime: '12:40'
+                timeZone: UTC
+                negate: true
+            merchantCategories:
+              - negate: true
+                mccs:
+                  - 1234
+                  - 5678
+  parameters:
+    userGUID:
+      name: user_guid
+      in: path
+      description: The globally unique identifier of the user being queried
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceIdentifier'
+      example: 8f242496-b71a-11eb-8529-0242ac130003
+    accountGUID:
+      name: account_guid
+      in: path
+      description: The globally unique identifier of the card being queried
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceIdentifier'
+      example: 8f242496-b71a-11eb-8529-0242ac130003
+    tokenGUID:
+      name: token_guid
+      in: path
+      description: The globally unique identifier of the token being queried
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceIdentifier'
+      example: 8f242496-b71a-11eb-8529-0242ac130003
+  schemas:
+    ResourceIdentifier:
+      description: A UUID which uniquely identifies a resource
+      type: string
+      format: uuid
+      example: c63de020-a446-11eb-bcbc-0242ac130002
+    Token:
+      allOf:
+        - $ref: '#/components/schemas/Card'
+      properties:
+        accountGuid:
+          type: string
+          format: uuid
+          description: The globally unique identifier of the token
+          example: 123e4567-e89b-12d3-a456-426614174000
+        tokenUniqueRef:
+          type: string
+          maxLength: 64
+          description: The unique reference identifier of the token
+          example: DE9JOVYK6FVSO8I32DLDPHGTC9NZ7SLKPVLMDQ0RRGK3WYD2
+        paymentAppInstanceId:
+          type: string
+          maxLength: 64
+          description: The unique app device identifier
+          example: '128652974320250630'
+        status:
+          type: string
+          pattern: ^(ACTIVE|SUSPENDED)$
+          description: Token Status. Valid values are ACTIVE and SUSPENDED
+          example: ACTIVE
+    TokenUpdate:
+      allOf:
+        - $ref: '#/components/schemas/Card'
+      properties:
+        status:
+          type: string
+          pattern: ^(ACTIVE|SUSPENDED)$
+          description: Token Status. Valid values are ACTIVE and SUSPENDED
+          example: ACTIVE
+    VcnUserDetail:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - phone
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: First Name of User
+          example: Emerson
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Last Name of User
+          example: Bloggs
+        phone:
+          type: string
+          minLength: 4
+          maxLength: 16
+          description: Phone number of User
+          example: '+13556434378'
+    Card:
+      type: object
+      required:
+        - accountNumber
+        - expiry
+      properties:
+        accountNumber:
+          type: string
+          minLength: 12
+          maxLength: 19
+          pattern: ^[0-9]+
+          example: '1234567891234567'
+          description: Card Account Number
+        expiry:
+          minLength: 7
+          maxLength: 7
+          type: string
+          pattern: ^20[2-9][0-9]-(0[1-9]|1[012])$
+          description: Card expiry date in yyyy-MM format
+          example: 2021-11
+    Vcn:
+      allOf:
+        - $ref: '#/components/schemas/Card'
+        - properties:
+            accountGuid:
+              type: string
+              format: uuid
+              description: The globally unique identifier of the virtual card account
+              example: 123e4567-e89b-12d3-a456-426614174000
+            description:
+              type: string
+              example: This is the description of what the VCN will be used for
+              description: The description of what the VCN will be used for
+    UpdateVCN:
+      type: object
+      properties:
+        expiry:
+          minLength: 7
+          maxLength: 7
+          type: string
+          pattern: ^20[2-9][0-9]-(0[1-9]|1[012])$
+          description: Expiry date in yyyy-MM format
+          example: 2021-11
+        description:
+          type: string
+          example: This is the description of what the VCN will be used for
+          description: The description of what the VCN will be used for
+    UserDetail:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - phone
+        - email
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: .*\S.*
+          description: First Name of User
+          example: Emerson
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: .*\S.*
+          description: Last Name of User
+          example: Bloggs
+        phone:
+          type: string
+          minLength: 4
+          maxLength: 16
+          description: Phone number of User
+          example: '+12345678910111'
+        email:
+          type: string
+          minLength: 1
+          maxLength: 300
+          description: Email address of User
+          example: emersonbloggs@gmail.com
+    VirtualCardAccount:
+      type: object
+      required:
+        - realCardAccountGuid
+        - accountGuid
+      allOf:
+        - $ref: '#/components/schemas/VcnUserDetail'
+        - $ref: '#/components/schemas/Vcn'
+        - properties:
+            realCardAccountGuid:
+              type: string
+              format: uuid
+              description: The globally unique identifier of the real card account
+              example: 123e4567-e89b-12d3-a456-426614174000
+            realCardBillingCurrencyCode:
+              pattern: ^[0-9]{3}$
+              type: string
+              description: Currency code of the RCN
+              example: '825'
+            rules:
+              $ref: '#/components/schemas/Controls'
+    UpdateVirtualCardAccount:
+      type: object
+      required:
+        - expiry
+      allOf:
+        - $ref: '#/components/schemas/VcnUserDetail'
+        - $ref: '#/components/schemas/UpdateVCN'
+        - properties:
+            realCardBillingCurrencyCode:
+              pattern: ^[0-9]{3}$
+              type: string
+              description: Currency code of the RCN
+              example: '825'
+            rules:
+              $ref: '#/components/schemas/Controls'
+    Controls:
+      type: array
+      description: In Control Card Controls
+      items:
+        $ref: '#/components/schemas/Control'
+    Control:
+      type: object
+      required:
+        - action
+        - alias
+      description: In Control Rule
+      properties:
+        action:
+          minLength: 1
+          maxLength: 1
+          type: string
+          description: >-
+            control rule actions. Valid values are A (Approve), D (Decline), W
+            (Warn), P (Promo) and F (Forced)
+          example: A
+        alias:
+          type: string
+          description: control rule alias name. alias should be unique
+          maxLength: 100
+          minLength: 1
+          pattern: .*\S.*
+          example: DAILY LIMIT
+        transactionLimits:
+          type: array
+          description: >-
+            transaction limit controls provides the ability to limit individual
+            transaction authorizations to a maximum amount
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/TransactionLimitControl'
+        geographies:
+          type: array
+          description: >-
+            geography controls provides the ability to control where a card is
+            physically used
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/GeographyControl'
+        velocities:
+          type: array
+          description: >-
+            velocity controls can limit the frequency, and the total cumulative
+            amount of authorizations performed on the cardholders account
+            within a specified time period
+          items:
+            $ref: '#/components/schemas/VelocityControl'
+        validityPeriods:
+          type: array
+          description: validity period controls
+          items:
+            $ref: '#/components/schemas/ValidityPeriodControl'
+        amountRanges:
+          type: array
+          description: amount range controls
+          items:
+            $ref: '#/components/schemas/AmountRangeControl'
+        merchantIds:
+          type: array
+          description: merchant id controls
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/MerchantIdControl'
+        ageingVelocities:
+          type: array
+          description: ageing velocity controls
+          items:
+            $ref: '#/components/schemas/AgeingVelocityControl'
+        curfews:
+          type: array
+          description: >-
+            curfew controls allows you to limit authorization activity on a card
+            to a certain time period during set days. You can also set the time
+            zone for this control
+          items:
+            $ref: '#/components/schemas/CurfewControl'
+        timeOfDays:
+          type: array
+          description: >-
+            time of day controls provides the ability to limit authorization
+            activity to defined time periods for each day
+          items:
+            $ref: '#/components/schemas/TimeOfDayControl'
+        merchantCategories:
+          type: array
+          description: merchant category controls
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/MccControl'
+    TransactionLimitControl:
+      required:
+        - amount
+        - negate
+      type: object
+      properties:
+        amount:
+          minimum: 0
+          type: number
+          description: The limit that will apply on a per transaction basis
+          example: 12
+          format: float
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: >-
+        The TransactionLimit control provides the ability to limit individual
+        transaction authorizations to a maximum amount
+    GeographyControl:
+      required:
+        - countryCodes
+        - negate
+      type: object
+      properties:
+        countryCodes:
+          minItems: 1
+          type: array
+          description: Country codes to be included in the rule
+          items:
+            type: string
+          example:
+            - '840'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: >-
+        The GeographicControl provides the ability to control where a card is
+        physically used
+    VelocityControl:
+      required:
+        - period
+        - negate
+      type: object
+      properties:
+        maxTrans:
+          minimum: 1
+          type: integer
+          description: Maximum number of transactions allowed
+          format: int32
+          example: 12
+        cumulativeLimit:
+          minimum: 0
+          type: number
+          description: Maximum allowed cumulative amount
+          example: 1200
+          format: float
+        period:
+          minLength: 5
+          maxLength: 10
+          type: string
+          description: >-
+            Velocity period. Valid values are DAILY, WEEKLY, QUARTERLY,
+            CONTINUOUS, MONTHLY, and YEARLY
+          example: DAILY
+          pattern: ^(DAILY|WEEKLY|QUARTERLY|CONTINUOUS|MONTHLY|YEARLY)
+        availableBalance:
+          minimum: 0
+          type: number
+          description: >-
+            The cumulative spend available for the velocity control for the
+            specified period
+          example: 1200
+          format: float
+        currencyType:
+          minLength: 4
+          maxLength: 8
+          type: string
+          description: Type of the currency being used. Valid values are BASE and MERCHANT
+          pattern: ^(BASE|MERCHANT)
+          example: MERCHANT
+        currencyCode:
+          minLength: 3
+          maxLength: 3
+          pattern: ^[0-9]{3}$
+          type: string
+          description: >-
+            Mastercard supported International Organization for Standardization
+            (ISO) 4217 currency codes
+          example: '825'
+        endDate:
+          type: string
+          format: date-time
+          description: >-
+            End date until which the control is valid, in ISO 8601 extended
+            format "YYYY-MM-DDThh:mm:ss[.sss]Z", where [.sss] is optional and
+            can be 1 to 3 digits
+          example: '2020-10-06T11:09:42.10Z'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: >-
+        The VelocityControl can limit the frequency, and the total cumulative
+        amount of authorizations performed on the cardholders account within a
+        specified time period
+    ValidityPeriodControl:
+      required:
+        - from
+        - negate
+        - to
+      type: object
+      properties:
+        from:
+          type: string
+          format: date-time
+          description: >-
+            The start date from which the control is valid, in ISO 8601 extended
+            format "YYYY-MM-DDThh:mm:ss[.sss]Z", where [.sss] is optional and
+            can be 1 to 3 digits
+          example: '2020-10-26T00:00:00Z'
+        to:
+          type: string
+          format: date-time
+          description: >-
+            The end date till which the control is valid, in ISO 8601 extended
+            format "YYYY-MM-DDThh:mm:ss[.sss]Z", where [.sss] is optional and
+            can be 1 to 3 digits
+          example: '2020-11-06T23:59:59Z'
+        strictPreAuthCheck:
+          type: boolean
+          description: Defines if strict pre-auth check needs to be applied
+          default: false
+          example: true
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: >-
+        The ValidityPeriod control provides the ability to limit authorization
+        activity to a defined time period
+    AmountRangeControl:
+      required:
+        - currencyType
+        - maxAmount
+        - minAmount
+        - negate
+      type: object
+      properties:
+        minAmount:
+          minimum: 0
+          type: number
+          description: Minimum allowed amount
+          format: float
+          example: 1000
+        maxAmount:
+          minimum: 0
+          type: number
+          description: Maximum allowed amount
+          format: float
+          example: 10000
+        strictPreAuthCheck:
+          type: boolean
+          description: Defines if strict pre-auth check needs to be applied
+          default: false
+          example: true
+        currencyType:
+          minLength: 4
+          maxLength: 8
+          type: string
+          description: Type of the currency being used. Valid values are BASE and MERCHANT
+          example: MERCHANT
+          pattern: ^(BASE|MERCHANT)
+        currencyCode:
+          minLength: 3
+          maxLength: 3
+          pattern: ^[0-9]{3}$
+          type: string
+          description: >-
+            Mastercard supported International Organization for Standardization
+            (ISO) 4217 currency codes
+          example: '825'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: >-
+        The exact amount range control will approve a transaction only if the
+        requested amount is equal or greater than MinAmount and less than or
+        equal to MaxAmount. In other words, if Min Amount <= Amount <= Max
+        Amount
+    MerchantIdControl:
+      required:
+        - acquirerId
+        - acceptorId
+        - negate
+      type: object
+      properties:
+        acceptorId:
+          minLength: 15
+          maxLength: 15
+          type: string
+          description: The Merchant Id
+          example: '123456789012345'
+        acquirerId:
+          minLength: 1
+          maxLength: 10
+          pattern: .*\S.*
+          type: string
+          description: >-
+            The Acquiring Institution ID Code which identifies the acquiring
+            institution (for example, merchant bank) or its agent
+          example: '123456'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: >-
+        The Merchant ID control provides the ability to limit authorizations to
+        particular merchants
+    AgeingVelocityControl:
+      required:
+        - authorizationHoldDays
+        - cumulativeLimit
+        - timeZone
+        - negate
+      type: object
+      properties:
+        authorizationHoldDays:
+          type: integer
+          minimum: 0
+          maximum: 9999
+          description: Number of days an authorization holds before ageing off
+          format: int32
+          example: 1234
+        cumulativeLimit:
+          minimum: 0
+          type: number
+          description: Maximum allowed cumulative amount
+          example: 1000
+          format: float
+        timeZone:
+          type: string
+          description: Time zone that is used for age-off calculations
+          example: UTC-06:00
+        availableBalance:
+          minimum: 0
+          type: number
+          description: >-
+            The cumulative spend available for the velocity control for the
+            specified period
+          example: 1000
+          format: float
+        currencyType:
+          minLength: 4
+          maxLength: 8
+          type: string
+          description: Type of the currency being used. Valid values are BASE and MERCHANT
+          example: MERCHANT
+          pattern: ^(BASE|MERCHANT)
+        currencyCode:
+          minLength: 3
+          maxLength: 3
+          pattern: ^[0-9]{3}$
+          type: string
+          description: >-
+            Mastercard supported International Organization for Standardization
+            (ISO) 4217 currency codes
+          example: '825'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: >-
+        The AgingVelocityControl provides the requester with the ability to set
+        a notional credit line through the CumulativeControl. This control keeps
+        track of the current remaining available credit and approves a
+        transaction only if the requested amount is less than or equal to the
+        remaining available credit
+    CurfewControl:
+      required:
+        - days
+        - fromTime
+        - negate
+        - toTime
+      type: object
+      properties:
+        fromTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The start time from which authorizations will be allowed
+          example: '08:20'
+        toTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The end time at which authorizations will be allowed
+          example: '11:00'
+        timeZone:
+          type: string
+          description: Time zone of the from and to times
+          example: UTC
+        days:
+          maxItems: 7
+          minItems: 1
+          type: array
+          description: >-
+            Days of week. Valid values are SUNDAY, MONDAY, TUESDAY, WEDNESDAY,
+            THURSDAY, FRIDAY, and SATURDAY
+          example: SUNDAY
+          pattern: ^(SUNDAY|MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY)$
+          items:
+            type: string
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: Curfew Control
+    MccControl:
+      required:
+        - mccs
+        - negate
+      type: object
+      properties:
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+        mccs:
+          minItems: 1
+          type: array
+          description: List of merchant category codes
+          example:
+            - '1234'
+            - '5678'
+          items:
+            type: string
+            example: '1234'
+          uniqueItems: true
+      description: >-
+        The Card Acceptor Business Codes (MCC) control can control the type of
+        purchases for which a card is used
+    TimeOfDayControl:
+      required:
+        - negate
+        - timeZone
+        - times
+      type: object
+      properties:
+        times:
+          maxItems: 7
+          minItems: 1
+          type: array
+          description: Times of day
+          items:
+            $ref: '#/components/schemas/TimeOfDay'
+        timeZone:
+          type: string
+          description: Time zone of the from and to times
+          example: UTC
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: >-
+        The TimeOfDayControl provides the ability to limit authorization
+        activity to defined time periods for each day
+    TimeOfDay:
+      required:
+        - day
+        - fromTime
+        - toTime
+      type: object
+      properties:
+        day:
+          minLength: 6
+          maxLength: 9
+          type: string
+          example: SUNDAY
+          description: >-
+            Days of week. Valid values are SUNDAY, MONDAY, TUESDAY, WEDNESDAY,
+            THURSDAY, FRIDAY, and SATURDAY
+          pattern: ^(SUNDAY|MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY)
+        fromTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The start time from which authorizations will be allowed
+          example: '08:21'
+        toTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The end time from which authorizations will be allowed
+          example: '12:00'
+    ErrorWrapper:
+      type: object
+      required:
+        - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Errors:
+      type: object
+      required:
+        - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    Error:
+      type: object
+      properties:
+        Source:
+          type: string
+          example: source
+          description: Source of error
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error
+          example: '123'
+        Description:
+          type: string
+          example: Error desc
+          description: Short description of the error
+        Recoverable:
+          type: boolean
+          example: true
+          description: Is recoverable error
+        Details:
+          type: string
+          example: Detail information
+          description: Optional detailed description of the issue
+  requestBodies:
+    User:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserDetail'
+          examples:
+            UserDetail:
+              $ref: '#/components/examples/UserDetail'
+    NewVirtualCard:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VirtualCardAccount'
+          examples:
+            VirtualCardAccount:
+              $ref: '#/components/examples/CardDetails'
+    UpdatedVirtualCard:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateVirtualCardAccount'
+          examples:
+            UpdateVirtualCardAccount:
+              $ref: '#/components/examples/UpdateUserCardAndControl'
+    NewToken:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Token'
+          examples:
+            Token:
+              $ref: '#/components/examples/Token'
+    UpdatedToken:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TokenUpdate'
+          examples:
+            TokenUpdate:
+              $ref: '#/components/examples/TokenUpdate'
+  responses:
+    Token:
+      description: Token detail
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Token'
+          examples:
+            Token:
+              $ref: '#/components/examples/Token'
+    User:
+      description: User details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserDetail'
+          examples:
+            UserDetail:
+              $ref: '#/components/examples/UserDetail'
+    OKResponse:
+      description: OK
+    NOContentResponse:
+      description: No Content
+    ResourceCreated:
+      description: Resource Created
+      headers:
+        Location:
+          description: location of the resource
+          schema:
+            type: string
+    ResourceIdentifier:
+      description: Resource Created
+      headers:
+        Location:
+          description: location of the resource
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResourceIdentifier'
+    VirtualCard:
+      description: Virtual card details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VirtualCardAccount'
+          examples:
+            VirtualCardAccount:
+              $ref: '#/components/examples/CardDetails'
+    VirtualCards:
+      description: List of virtual cards
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/VirtualCardAccount'
+          examples:
+            UserCardsDetails:
+              $ref: '#/components/examples/CardDetails'
+    BadRequestError:
+      description: Invalid Request
+      content:
+        application/json:
+          examples:
+            BadRequest:
+              $ref: '#/components/examples/BadRequestError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+    UnauthorizedError:
+      description: Authentication Required
+      headers:
+        WWW-Authenticate:
+          description: Method of authentication
+          schema:
+            type: string
+      content:
+        application/json:
+          examples:
+            Unauthorized:
+              $ref: '#/components/examples/AuthorizationError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+    ForbiddenError:
+      description: Not Authorized
+      content:
+        application/json:
+          examples:
+            Forbidden:
+              $ref: '#/components/examples/ForbiddenError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+    ResourceNotFoundError:
+      description: Resource Not Found
+      content:
+        application/json:
+          examples:
+            ResourceNotFound:
+              $ref: '#/components/examples/NotFoundError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
