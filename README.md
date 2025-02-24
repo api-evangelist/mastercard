@@ -1,5 +1,5 @@
 # Mastercard (mastercard)
-Mastercard Inc. is the second-largest payment-processing corporation worldwide. It offers a range of payment transaction processing and other related-payment services. 
+Mastercard is a leading global payments technology company that connects consumers, businesses, merchants, and governments worldwide. The company provides innovative payment solutions, including credit, debit, and prepaid cards, as well as digital payment services, to make transactions more convenient and secure. By leveraging its network and technology infrastructure, Mastercard enables seamless and quick transactions across borders and currencies, helping to drive financial inclusion and economic growth. Additionally, Mastercard is committed to advancing sustainable practices, diversity and inclusion, and social impact initiatives to create a more inclusive and sustainable world.
 
 **URL:** [Visit APIs.json URL](https://github.com/api-evangelist/mastercard/raw/refs/heads/main/apis.yml)
 
@@ -16,7 +16,7 @@ Mastercard Inc. is the second-largest payment-processing corporation worldwide. 
 ## Timestamps
 
 - **Created:** 2023/11/14 
-- **Modified:** 2025-01-06 
+- **Modified:** 2025-02-20 
 
 ## APIs
 
@@ -2031,6 +2031,7 @@ Empowers you in the ongoing battle against money laundering View Resources
 - [Terms of Service](https://developer.mastercard.com/terms-of-use)
 - [Privacy Policy](https://www.mastercard.us/en-us/about-mastercard/what-we-do/privacy.html)
 - [Status](https://developer.mastercard.com/api-status)
+- [Summary](undefined)
 
 ## Maintainers
 
