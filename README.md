@@ -1,5 +1,5 @@
 # Mastercard (mastercard)
-Mastercard is a leading global payments technology company that connects consumers, businesses, merchants, and governments worldwide. The company provides innovative payment solutions, including credit, debit, and prepaid cards, as well as digital payment services, to make transactions more convenient and secure. By leveraging its network and technology infrastructure, Mastercard enables seamless and quick transactions across borders and currencies, helping to drive financial inclusion and economic growth. Additionally, Mastercard is committed to advancing sustainable practices, diversity and inclusion, and social impact initiatives to create a more inclusive and sustainable world.
+Mastercard is a global technology company in the payments industry, providing APIs for payment processing, fraud detection, data analytics, and financial services.
 
 **URL:** [Visit APIs.json URL](https://github.com/api-evangelist/mastercard/raw/refs/heads/main/apis.yml)
 
@@ -11,7 +11,7 @@ Mastercard is a leading global payments technology company that connects consume
 
 ## Tags:
 
- - Credit Cards
+ - Credit Cards, digital identity, financial services, fraud detection, open banking, payments
 
 ## Timestamps
 
@@ -25,13 +25,6 @@ The Universal Specification Submission API is currently being used by Mastercard
 
 **Human URL:** [https://developer.mastercard.com/product/account-services-catalogue/](https://developer.mastercard.com/product/account-services-catalogue/)
 
-**Base URL:** [https://api.example.com](https://api.example.com)
-
-
-#### Tags:
-
- - No Tags
-
 #### Properties
 
 - [Documentation](https://developer.mastercard.com/product/account-services-catalogue/)
@@ -43,17 +36,11 @@ The Universal Specification Submission API is currently being used by Mastercard
 - [FAQ](https://developer.mastercard.com/account-to-account-commerce-for-csp/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/account-to-account-commerce-for-csp/documentation/support/#get-help)
 - [ChangeLog](https://developer.mastercard.com/account-to-account-commerce-for-csp/documentation/release-history/)
+
 ### Mastercard Account to Account Commerce for Creditor Service Providers
 Online checkouts can be frustrating and tedious. As shopping habits shift to digital, consumers and merchants require secure and streamlined online experiences. Mastercard Account to Account Commerce enables creditor service providers (CSP) to provide their creditors (merchants) and debtors (consumers) with an intuitive checkout experience that will improve the overall online payments experience, reduce friction at checkout, and improve customer conversions. Through Account to Account Commerce, creditors can initiate payment requests, offer refunds, and offer account-on-file services to debtors of participating debtor service providers.
 
 **Human URL:** [https://developer.mastercard.com/account-to-account-commerce-for-csp/documentation/](https://developer.mastercard.com/account-to-account-commerce-for-csp/documentation/)
-
-**Base URL:** [https://api.example.com](https://api.example.com)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -66,17 +53,11 @@ Online checkouts can be frustrating and tedious. As shopping habits shift to dig
 - [FAQ](https://developer.mastercard.com/account-to-account-commerce-for-csp/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/account-to-account-commerce-for-csp/documentation/support/#get-help)
 - [ChangeLog](https://developer.mastercard.com/account-to-account-commerce-for-csp/documentation/release-history/)
+
 ### Mastercard Debtor Service Provider Resources API
 Online checkouts can be frustrating and tedious. As shopping habits shift to digital, consumers and merchants require secure and streamlined online experiences. Mastercard Account to Account Commerce enables debtor service providers (DSP) to provide their debtors (customers) with a fast, secure, and convenient way to pay using their mobile banking app.= Through Account to Account Commerce, the debtors can view their balance before checkout, initiate refunds, and use their accounts for recurring payments or frequent purchases.
 
 **Human URL:** [https://developer.mastercard.com/account-to-account-commerce-for-dsp/documentation/](https://developer.mastercard.com/account-to-account-commerce-for-dsp/documentation/)
-
-**Base URL:** [https://api.example.com](https://api.example.com)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -89,17 +70,11 @@ Online checkouts can be frustrating and tedious. As shopping habits shift to dig
 - [FAQ](https://developer.mastercard.com/account-to-account-commerce-for-dsp/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/account-to-account-commerce-for-dsp/documentation/support/#get-help)
 - [ChangeLog](https://developer.mastercard.com/account-to-account-commerce-for-dsp/documentation/release-history/)
+
 ### Mastercard Automatic Billing Updater API
 Automatic Billing Updater (ABU) is a web service that provides access to updated account credentials (cards). This can be leveraged by Merchant/Acquirers/Payment Service Providers to ensure that they always have their customers' most up to date card credentials on file; the main benefit being a big reduction in declines for recurring and card-on-file payments. This service can be used in two different ways, either pulling updates or having updates pushed to an endpoint on the Merchant/Acquirers/Payment Service Provider's system for account numbers that they are watching.
 
 **Human URL:** [https://developer.mastercard.com/automatic-billing-updater/documentation](https://developer.mastercard.com/automatic-billing-updater/documentation)
-
-**Base URL:** [https://api.example.com](https://api.example.com)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -113,17 +88,11 @@ Automatic Billing Updater (ABU) is a web service that provides access to updated
 - [Announcements](https://developer.mastercard.com/automatic-billing-updater/documentation/change-log/#release-history)
 - [FAQ](https://developer.mastercard.com/automatic-billing-updater/documentation/support/#frequently-asked-questions)
 - [Support](https://developer.mastercard.com/automatic-billing-updater/documentation/support/#get-help)
+
 ### Mastercard Benefit Eligibility Service API
 This API is for third-parties who want to enable eligibility checks based on input criteria including card number. The Eligibility API is a PAN (Primary Account Number) level verification service designed to promote targeted distribution of Mastercard card level benefits. This service enables merchants and third-party developers to use a PAN to check the eligibility and access rights to the benefits for those cardholders.
 
 **Human URL:** [https://developer.mastercard.com/eligibility-api/documentation/](https://developer.mastercard.com/eligibility-api/documentation/)
-
-**Base URL:** [https://api.example.com](https://api.example.com)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -138,17 +107,11 @@ This API is for third-parties who want to enable eligibility checks based on inp
 - [ChangeLog](https://developer.mastercard.com/eligibility-api/documentation/release-history/)
 - [FAQ](https://developer.mastercard.com/eligibility-api/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/eligibility-api/documentation/support/#get-help)
+
 ### Mastercard Bill Pay API
 The Mastercard Bill Pay Experience Design Guide was created to provide you, our customer, with our best user experience recommendations and cutting edge resources for implementation. You will find white label Figma flows to improve the speed, quality and cost of implementation and scale. Our goal is to make it easier than ever to go to market efficiently and effectively and achieve adoption and long-term use of Mastercard Bill Pay.
 
 **Human URL:** [https://developer.mastercard.com/product/bill-pay](https://developer.mastercard.com/product/bill-pay)
-
-**Base URL:** [https://api.example.com](https://api.example.com)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -163,15 +126,11 @@ The Mastercard Bill Pay Experience Design Guide was created to provide you, our 
 - [Sandbox](https://developer.mastercard.com/rpps-biller-maintenance-service/documentation/tutorials-and-guides/sandbox-key/)
 - [FAQ](https://developer.mastercard.com/rpps-biller-maintenance-service/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/rpps-biller-maintenance-service/documentation/support/#get-help)
+
 ### Mastercard Bill Payment Validator
 This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
 
 **Human URL:** [https://developer.mastercard.com/bill-payment-validator/documentation/](https://developer.mastercard.com/bill-payment-validator/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -183,15 +142,11 @@ This service is provided on behalf of the Mastercard Remote Payment and Presentm
 - [Errors](https://developer.mastercard.com/bill-payment-validator/documentation/code-and-formats/#error-codes)
 - [FAQ](https://developer.mastercard.com/bill-payment-validator/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/bill-payment-validator/documentation/support/#get-help)
+
 ### Mastercard BIN Lookup API
 The BIN Lookup service provides two distinct APIs, a full or filtered list of available Mastercard BINs and information for a single BIN. Filtering allows you to search for BIN data that is relevant to your business needs, for example filtering on issuer, product code or country.
 
 **Human URL:** [https://developer.mastercard.com/product/bin-lookup](https://developer.mastercard.com/product/bin-lookup)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -208,15 +163,11 @@ The BIN Lookup service provides two distinct APIs, a full or filtered list of av
 - [Errors](https://developer.mastercard.com/bin-lookup/documentation/code-and-formats/#error-codes)
 - [FAQ](https://developer.mastercard.com/bin-lookup/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/bin-lookup/documentation/support/#get-help)
+
 ### Mastercard Business Payment Controls
 Business Payment Controls is an application programming interface (API) based solution that simplifies business payments by using configurable controls to limit spending on real and virtual cards, while allowing finance teams to reconcile payments using transaction-level reporting.
 
 **Human URL:** [https://developer.mastercard.com/product/business-payment-controls](https://developer.mastercard.com/product/business-payment-controls)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -231,15 +182,11 @@ Business Payment Controls is an application programming interface (API) based so
 - [Glossary](https://developer.mastercard.com/business-payment-controls/documentation/glossary/)
 - [FAQ](https://developer.mastercard.com/business-payment-controls/documentation/support/#frequently-asked-questions)
 - [Support](https://developer.mastercard.com/business-payment-controls/documentation/support/#get-help-1)
+
 ### Mastercard Carbon Calculator API
 The Carbon Calculator API enables issuers to provide their consumers with visibility into the environmental impact based on their spending. This API allows the issuer to calculate the carbon footprint based on consumers' payment transactions using their Mastercard cards. This API can be used inside a banking application or website to provide meaningful and actionable insights.
 
 **Human URL:** [https://developer.mastercard.com/product/carbon-calculator](https://developer.mastercard.com/product/carbon-calculator)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -256,15 +203,11 @@ The Carbon Calculator API enables issuers to provide their consumers with visibi
 - [ChangeLog](https://developer.mastercard.com/carbon-calculator/documentation/release-history/)
 - [FAQ](https://developer.mastercard.com/carbon-calculator/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/carbon-calculator/documentation/support/#get-help)
+
 ### Mastercard Carbon Calculator Experience API
 The Carbon Calculator Experience API enables issuers to provide their cardholders with visibility into their environmental impact and carbon footprint based on their spending habits. This API also provides cardholders with the option to make donations in support of environmental causes like forest restoration projects and support a positive impact on the environment.
 
 **Human URL:** [https://developer.mastercard.com/product/carbon-calculator-experience](https://developer.mastercard.com/product/carbon-calculator-experience)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -279,15 +222,11 @@ The Carbon Calculator Experience API enables issuers to provide their cardholder
 - [ChangeLog](https://developer.mastercard.com/priceless-planet-carbon-tracker/documentation/release-history/)
 - [FAQ](https://developer.mastercard.com/priceless-planet-carbon-tracker/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/priceless-planet-carbon-tracker/documentation/support/#get-help)
+
 ### Mastercard Checkout Solutions
 Developed by Mastercard and built upon EMV_ Secure Remote Commerce standards1, Mastercard Checkout Solutions provides ecommerce solutions which offer guest checkout and card tokenization services that deliver the same security, convenience and control as offered in the physical world.
 
 **Human URL:** [https://developer.mastercard.com/mastercard-checkout-solutions/documentation](https://developer.mastercard.com/mastercard-checkout-solutions/documentation)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -303,15 +242,11 @@ Developed by Mastercard and built upon EMV_ Secure Remote Commerce standards1, M
 - [ChangeLog](https://developer.mastercard.com/mastercard-checkout-solutions/documentation/release-history/)
 - [FAQ](https://developer.mastercard.com/mastercard-checkout-solutions/documentation/support/#misc-faqs)
 - [Support](https://developer.mastercard.com/mastercard-checkout-solutions/documentation/support/#get-help)
+
 ### Mastercard Unified Checkout Solutions
 Unified Checkout Solutions offer products that cater to a suite of digital commerce use cases to support a more streamlined and secure online checkout experience.
 
 **Human URL:** [https://developer.mastercard.com/unified-checkout-solutions/documentation](https://developer.mastercard.com/unified-checkout-solutions/documentation)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -326,15 +261,11 @@ Unified Checkout Solutions offer products that cater to a suite of digital comme
 - [Glossary](https://developer.mastercard.com/unified-checkout-solutions/documentation/glossary/)
 - [ChangeLog](https://developer.mastercard.com/unified-checkout-solutions/documentation/release-history/)
 - [Support](https://developer.mastercard.com/unified-checkout-solutions/documentation/support/)
+
 ### Mastercard Commercial Event Notifications
 Receive near real-time payment alerts enabling accurate completion and reconciliation of commercial payments
 
 **Human URL:** [https://developer.mastercard.com/product/commercial-event-notifications](https://developer.mastercard.com/product/commercial-event-notifications)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -350,15 +281,11 @@ Receive near real-time payment alerts enabling accurate completion and reconcili
 - [FAQ](https://developer.mastercard.com/commercial-event-notifications/documentation/support/#frequently-asked-questions)
 - [Support](https://developer.mastercard.com/commercial-event-notifications/documentation/support/#get-help-1)
 - [ChangeLog](https://developer.mastercard.com/commercial-event-notifications/documentation/release_notes/)
+
 ### Mastercard Community Pass Digital Identity (CPDI) and Acceptance (CPA)
 Digital credentials are at the center of the Community Pass Ecosystem which allows for secure identification of individuals as well as data and payment exchanges across the ecosystem. Community Pass Digital Identity (CPDI) and Community Pass Acceptance (CPA) are a 'privacy-first' digital identity & authentication solution using multiple authentication modalities, including tap card, PIN-based and biometric-based verification capabilities.
 
 **Human URL:** [https://developer.mastercard.com/cp-kernel-integration-api/documentation/](https://developer.mastercard.com/cp-kernel-integration-api/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -367,15 +294,11 @@ Digital credentials are at the center of the Community Pass Ecosystem which allo
 - [ChangeLog](https://developer.mastercard.com/cp-kernel-integration-api/documentation/release-history/)
 - [FAQ](https://developer.mastercard.com/cp-kernel-integration-api/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/cp-kernel-integration-api/documentation/support/#get-help)
+
 ### Mastercard Commerce Pass (CxP)
 Commerce Pass is an offline stored value account (SVA) that enables consumers and MSMEs to store, receive, and spend funds digitally making transactions secure and transparent. This enables both merchants and consumers to build a financial persona, made up of a digital identity and transaction history, allowing banks the ability to offer credit and other suitable financial products to previously excluded communities.
 
 **Human URL:** [https://developer.mastercard.com/cp-platform/documentation/commerce-pass/](https://developer.mastercard.com/cp-platform/documentation/commerce-pass/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -383,15 +306,11 @@ Commerce Pass is an offline stored value account (SVA) that enables consumers an
 - [Documentation](https://developer.mastercard.com/cp-platform/documentation/commerce-pass/backend/api-reference/)
 - [Errors](https://developer.mastercard.com/cp-platform/documentation/commerce-pass/code-and-formats/)
 - [Support](https://developer.mastercard.com/cp-platform/documentation/support/)
+
 ### Mastercard Community Pass Payment APIs
 A secure way to validate customer information and notify Community Pass applications on payment status
 
 **Human URL:** [https://developer.mastercard.com/community-pass-payment-apis/product/mastercard-community-pass-payments-apis/](https://developer.mastercard.com/community-pass-payment-apis/product/mastercard-community-pass-payments-apis/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -409,15 +328,11 @@ A secure way to validate customer information and notify Community Pass applicat
 - [ChangeLog](https://developer.mastercard.com/community-pass-payment-apis/documentation/release-history/)
 - [FAQ](https://developer.mastercard.com/community-pass-payment-apis/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/community-pass-payment-apis/documentation/support/#get-help)
+
 ### Mastercard Consumer Credit Analytics
 Lenders are increasingly turning to alternative data sources to gain a clearer picture of a consumer's true creditworthiness beyond credit bureau reports.
 
 **Human URL:** [https://developer.mastercard.com/consumer-credit-analytics/documentation/](https://developer.mastercard.com/consumer-credit-analytics/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -433,15 +348,11 @@ Lenders are increasingly turning to alternative data sources to gain a clearer p
 - [Sandbox](https://developer.mastercard.com/consumer-credit-analytics/documentation/testing/#testing-in-sandbox)
 - [FAQ](https://developer.mastercard.com/consumer-credit-analytics/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/consumer-credit-analytics/documentation/support/#get-help)
+
 ### Mastercard Enhanced Currency Conversion Calculator
 The Enhanced Currency Conversion Calculator is a subscription-based service that provides access to Mastercard's daily currency conversion rates and historical currency conversion rates. Additionally, the API provides electronic access to European Central Bank (ECB) reference rates that European Economic Area (EEA) issuing customers may require for the purposes of compliance with EU Regulation 2019 / 518.
 
 **Human URL:** [https://developer.mastercard.com/enhanced-currency-conversion-calculator/documentation](https://developer.mastercard.com/enhanced-currency-conversion-calculator/documentation)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -456,15 +367,11 @@ The Enhanced Currency Conversion Calculator is a subscription-based service that
 - [PostmanCollection](https://developer.mastercard.com/enhanced-currency-conversion-calculator/documentation/postman-collection/)
 - [FAQ](https://developer.mastercard.com/enhanced-currency-conversion-calculator/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/enhanced-currency-conversion-calculator/documentation/support/#get-help)
+
 ### Mastercard Standard Currency Conversion Calculator
 The Mastercard Standard Currency Conversion Calculator enables issuers (for example, financial institutions, fintechs) to access daily cardholder currency conversion rates for cross-border payments when the transaction currency differs from the cardholder's billing currency.
 
 **Human URL:** [https://developer.mastercard.com/currency-conversion-calculator/documentation](https://developer.mastercard.com/currency-conversion-calculator/documentation)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -477,15 +384,11 @@ The Mastercard Standard Currency Conversion Calculator enables issuers (for exam
 - [Errors](https://developer.mastercard.com/currency-conversion-calculator/documentation/code-and-formats/)
 - [FAQ](https://developer.mastercard.com/currency-conversion-calculator/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/currency-conversion-calculator/documentation/support/#get-help)
+
 ### Mastercard Authentication Consent
 The Authentication Consent API enables merchants and Payment Service Providers (PSPs) to submit the details of the cardholder consent for future authentication processes. For example, a cardholder providing consent for future frictionless authentications in specific markets.
 
 **Human URL:** [https://developer.mastercard.com/authentication-consent/documentation](https://developer.mastercard.com/authentication-consent/documentation)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -499,15 +402,11 @@ The Authentication Consent API enables merchants and Payment Service Providers (
 - [Testing](https://developer.mastercard.com/authentication-consent/documentation/testing/)
 - [FAQ](https://developer.mastercard.com/authentication-consent/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/authentication-consent/documentation/support/#get-help)
+
 ### Mastercard Benefit Allocation Service
 The Benefit Allocation Service (BAS) allows issuers to efficiently manage cardholder value propositions in real-time. It enables the assignment and replacement of benefits, the freezing and unfreezing of cards, and the complete replacement of cards. Historically, benefits were assigned using a one-size-fits-all approach, limited by batch processing, which delayed critical changes and fragmented card management. BAS revolutionizes this process by offering instant, automated solutions on a single platform, enhancing operational efficiency and customer satisfaction. Its flexibility and responsiveness ensure issuers can meet the dynamic needs of their cardholders.
 
 **Human URL:** [https://developer.mastercard.com/benefit-allocations-service/documentation](https://developer.mastercard.com/benefit-allocations-service/documentation)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -521,15 +420,11 @@ The Benefit Allocation Service (BAS) allows issuers to efficiently manage cardho
 - [Testing](https://developer.mastercard.com/benefit-allocations-service/documentation/testing/)
 - [FAQ](https://developer.mastercard.com/benefit-allocations-service/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/benefit-allocations-service/documentation/support/#get-help)
+
 ### Mastercard ID Verification
 In this digital world, user identity fraud is on the rise due to inadequate digital identity verification methods. The ID Networkopens in a new tab model provides users with greater control of their digital identityopens in a new tab and enables organizations to provide seamless digital interactions with reduced risk. The ID network protects personal data and privacy by allowing individuals to control when and with whom their identity data is shared.
 
 **Human URL:** [https://developer.mastercard.com/mastercard-id-assist/documentation/](https://developer.mastercard.com/mastercard-id-assist/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -544,6 +439,7 @@ In this digital world, user identity fraud is on the rise due to inadequate digi
 - [ChangeLog](https://developer.mastercard.com/mastercard-id-assist/documentation/release-history/)
 - [FAQ](https://developer.mastercard.com/mastercard-id-assist/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/mastercard-id-assist/documentation/support/#help)
+
 ### Mastercard ID for Trust Providers
 Mastercard ID for Trust Providers is a service that helps businesses and organizations verify the identity of their customers. By utilizing advanced technology and security measures, Mastercard ID for Trust Providers enables businesses to securely authenticate the identities of individuals in real-time, reducing the risk of fraud and ensuring a seamless and secure customer experience. This service allows businesses to confidently verify the identities of their customers, streamlining operations and improving trust and security in online transactions. With Mastercard ID for Trust Providers, businesses can effectively combat fraud and identity theft, safeguarding sensitive information and enhancing the overall customer experience.
 
@@ -569,6 +465,7 @@ Mastercard ID for Trust Providers is a service that helps businesses and organiz
 - [FAQ](https://developer.mastercard.com/mastercard-id-for-tp/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/mastercard-id-for-tp/documentation/support/#get-help)
 - [OpenAPI](properties/mastercard-id-for-trust-providers-openapi.yml)
+
 ### Mastercard ID for Identity Providers
 In this digital world, user identity fraud is on the rise due to inadequate digital identity verification methods. The ID Networkopens in a new tab model provides users with greater control of their digital identityopens in a new tab and enables organizations to provide seamless digital interactions with reduced risk.
 
@@ -593,6 +490,7 @@ In this digital world, user identity fraud is on the rise due to inadequate digi
 - [FAQ](https://developer.mastercard.com/mastercard-id-for-idp/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/mastercard-id-for-idp/documentation/support/#help)
 - [OpenAPI](properties/mastercard-id-for-identity-providers-openapi.yml)
+
 ### Mastercard Doconomy Aland Index
 The Doconomy Aland Index API enables issuers to provide their consumers with visibility into the environmental impact based on their spending habits.
 
@@ -617,6 +515,7 @@ The Doconomy Aland Index API enables issuers to provide their consumers with vis
 - [FAQ](https://developer.mastercard.com/doconomy-aland-index/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/doconomy-aland-index/documentation/support/#get-help)
 - [OpenAPI](properties/mastercard-doconomy-aland-index-openapi.yml)
+
 ### Mastercard Ethoca Alerts for Merchants and Merchant Partners
 Ethoca Alerts" is a collaborative tool that brings merchants (and merchant partners), acquirers, and issuers together to share fraud and dispute data, which enables a faster dispute resolution process that reduces the need for chargebacks altogether.
 
@@ -643,6 +542,7 @@ Ethoca Alerts" is a collaborative tool that brings merchants (and merchant partn
 - [FAQ](https://developer.mastercard.com/ethoca-alerts-for-merchants/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/ethoca-alerts-for-merchants/documentation/support/#get-help)
 - [OpenAPI](properties/mastercard-ethoca-alerts-for-merchants-and-merchant-partners-openapi.yml)
+
 ### Mastercard Ethoca Consumer Clarity for Merchant Transactions
 Ethoca's Consumer Clarity for Merchant Transactions brokers order information between an organization and an issuer or an organization and their customer. As a result, issuers are connected to merchant order and account history details in real time, which helps reduce disputes and friendly fraud.
 
@@ -669,6 +569,7 @@ Ethoca's Consumer Clarity for Merchant Transactions brokers order information be
 - [FAQ](https://developer.mastercard.com/ethoca-consumer-clarity-for-merchants/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/ethoca-consumer-clarity-for-merchants/documentation/support/#get-help)
 - [OpenAPI](properties/mastercard-ethoca-consumer-clarity-for-merchant-transactions-openapi.yml)
+
 ### Mastercard Ethoca Merchant Self Services
 The Ethoca Merchant Self Services API lets you enter your merchant details for your organization, including for all of your submerchants. Using the Merchant Self Services API helps you onboard and integrate your company and all of your submerchants as quickly as possible.
 
@@ -695,6 +596,7 @@ The Ethoca Merchant Self Services API lets you enter your merchant details for y
 - [FAQ](https://developer.mastercard.com/merchant-self-services/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/merchant-self-services/documentation/support/#get-help)
 - [OpenAPI](properties/mastercard-ethoca-merchant-self-services-openapi.yml)
+
 ### Mastercard Suspected Fraud
 The Suspected Fraud application sends a potentially fraudulent transaction for review to the relevant issuer to determine if the suspected transaction is fraudulent or valid. After the issuer's investigation, the application validates the transaction(s) as Confirmed Fraud or Confirmed Not Fraud.
 
@@ -718,6 +620,7 @@ The Suspected Fraud application sends a potentially fraudulent transaction for r
 - [FAQ](https://developer.mastercard.com/fld-suspected-fraud/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/fld-suspected-fraud/documentation/support/#get-help)
 - [OpenAPI](properties/mastercard-suspected-fraud-openapi.yml)
+
 ### Mastercard Confirmed Fraud
 The Fraud and Loss Database (FLD) is the Mastercard_repository for fraud transactions, and it serves as the source of truth for fraud information within the enterprise. As mentioned below, this platform currently provides multiple channels for submission and management of fraud records.
 
@@ -743,6 +646,7 @@ The Fraud and Loss Database (FLD) is the Mastercard_repository for fraud transac
 - [FAQ](https://developer.mastercard.com/fld-fraud-submission/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/fld-fraud-submission/documentation/support/#get-help)
 - [OpenAPI](properties/mastercard-confirmed-fraud-openapi.yml)
+
 ### Mastercard Identity Insights for Accounts
 Today's digital economy has transformed consumer behaviors and expectations. As more interactions are conducted virtually, consumers have come to expect every company to have a smooth, easy digital onboarding process. For financial institutions especially, the balance between consumer friction and fraud detection is even more acute when assessing thin-file or unbanked consumers. Risk-averse banks often treat applications as fraudulent until proven otherwise to protect against growing identity fraud, leading to poor user experiences that may drive good consumers to competitors.
 
@@ -768,6 +672,7 @@ Today's digital economy has transformed consumer behaviors and expectations. As 
 - [FAQ](https://developer.mastercard.com/identity-insights-for-accounts/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/identity-insights-for-accounts/documentation/support/#get-help)
 - [OpenAPI](properties/mastercard-identity-insights-for-accounts-openapi.yml)
+
 ### Mastercard Identity Insights for Transactions
 As payments increasingly shift to card-not-present transactions, businesses are faced with ensuring that customers experience smooth, frictionless, and secure commerce while balancing their risk of fraudulent transactions.
 
@@ -794,6 +699,7 @@ As payments increasingly shift to card-not-present transactions, businesses are 
 - [FAQ](https://developer.mastercard.com/identity-insights-for-transactions/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/identity-insights-for-transactions/documentation/support/#get-help)
 - [OpenAPI](properties/mastercard-identity-insights-for-transactions-openapi.yml)
+
 ### Mastercard In Control for Commercial Payments
 In Control for Commercial Payments (ICCP) streamlines business transactions using configurable spending controls and enhanced data.
 
@@ -819,6 +725,7 @@ In Control for Commercial Payments (ICCP) streamlines business transactions usin
 - [FAQ](https://developer.mastercard.com/iccp/documentation/08support/#frequently-asked-questions)
 - [Support](https://developer.mastercard.com/iccp/documentation/08support/#get-help)
 - [Glossary](https://developer.mastercard.com/iccp/documentation/glossary/)
+
 ### Mastercard In Control for Mobile Payments
 Mastercard In Control" for Mobile Payments (ICMP) utilizes Mastercard Digital Enablement Service (MDES) to tokenize virtual cards into a digital wallet. In addition to e-commerce purchasing, users can utilize tap-and-go (contactless) purchasing and enjoy a faster checkout experience.
 
@@ -843,6 +750,7 @@ Mastercard In Control" for Mobile Payments (ICMP) utilizes Mastercard Digital En
 - [Support](https://developer.mastercard.com/in-control-for-mobile-payments/documentation/support/#get-help)
 - [Glossary](https://developer.mastercard.com/in-control-for-mobile-payments/documentation/glossary/)
 - [OpenAPI](properties/mastercard-in-control-for-mobile-payments-openapi.yml)
+
 ### Mastercard Installments
 The Mastercard Installments program enables financial institutions, licensed lenders, fintechs, and Buy Now, Pay Later (BNPL) players to offer installment plans before, during, and post purchase. This can be done by utilizing either existing or new lines of consumer credit.
 
@@ -869,6 +777,7 @@ The Mastercard Installments program enables financial institutions, licensed len
 - [Testing](https://developer.mastercard.com/unified-installments/documentation/testing/)
 - [Support](https://developer.mastercard.com/unified-installments/documentation/support/)
 - [OpenAPI](properties/mastercard-installments-openapi.yml)
+
 ### Mastercard Merchant Locations
 The Merchants Locations API grants users access to Mastercards extensive merchant data. It can be used to enrich partial addresses, find the precise location of an address, or even a radius search by merchant type.
 
@@ -897,6 +806,7 @@ The Merchants Locations API grants users access to Mastercards extensive mercha
 - [Announcements](https://developer.mastercard.com/locations-merchants/documentation/announcements/)
 - [ChangeLog](https://developer.mastercard.com/locations-merchants/documentation/release-history/)
 - [OpenAPI](properties/mastercard-merchant-locations-openapi.yml)
+
 ### Mastercard ATM Locations
 The ATM Locations API grants users access to Mastercards extensive ATM data. It can be used to find the nearest ATMs, find the precise location of a specific ATM, or even a radius search specifying required features. 
 
@@ -925,6 +835,7 @@ The ATM Locations API grants users access to Mastercards extensive ATM data. It
 - [Announcements](https://developer.mastercard.com/locations/documentation/announcements/)
 - [ChangeLog](https://developer.mastercard.com/locations/documentation/release-history/)
 - [OpenAPI](properties/mastercard-atm-locations-openapi.yml)
+
 ### Mastercard Priceless Platform
 Tap into the world of offers, card benefits, Priceless experiences, and enable cardholders to personalize their portfolios to suit their lifestyle needs
 
@@ -934,8 +845,6 @@ Tap into the world of offers, card benefits, Priceless experiences, and enable c
 #### Tags:
 
  - Benefits, Offers, Experiences
-
-#### Properties
 
 ### Mastercard Cloud Commerce
 Enable a cloud-based, secure, and low-cost payment acceptance solution by integrating our API, SDK, deep linking, or by using our white-label application.
@@ -947,8 +856,6 @@ Enable a cloud-based, secure, and low-cost payment acceptance solution by integr
 
  - Payments, Commerce
 
-#### Properties
-
 ### Mastercard Contactless Reader SDK
 Turn any off-the-shelf eligible NFC-enabled device into an acceptance device
 
@@ -958,8 +865,6 @@ Turn any off-the-shelf eligible NFC-enabled device into an acceptance device
 #### Tags:
 
  - NFC, Readers
-
-#### Properties
 
 ### Mastercard Cross-Border Services
 Cross-Border Services is a global payment service that provides access to faster, transparent payments between Senders and Recipients through multiple channels and payout methods. Cross-Border Services provides:
@@ -983,6 +888,7 @@ Cross-Border Services is a global payment service that provides access to faster
 - [Errors](https://developer.mastercard.com/cross-border-services/documentation/response-error-codes/)
 - [Announcements](https://developer.mastercard.com/cross-border-services/documentation/release-announce/)
 - [Support](https://developer.mastercard.com/cross-border-services/documentation/support/)
+
 ### Mastercard Direct Services
 Providing seamless access to Mastercard value-added services for all transactions.
 
@@ -992,8 +898,6 @@ Providing seamless access to Mastercard value-added services for all transaction
 #### Tags:
 
  - Transactions, Seamless
-
-#### Properties
 
 ### Mastercard Donate API
 The Mastercard Donate Service provides a seamless and safe way for partners to enable cardholders to incorporate giving into their daily activities. Cardholders can make a one-time donation, a monthly donations, or donate a few cents for every transaction they make. A small gesture, like paying for groceries or a bus, becomes something bigger.
@@ -1019,6 +923,7 @@ The Mastercard Donate Service provides a seamless and safe way for partners to e
 - [Guide](https://developer.mastercard.com/donations/documentation/support/#guides)
 - [Tutorials](https://developer.mastercard.com/donations/documentation/tutorials/)
 - [OpenAPI](properties/mastercard-donate-api-openapi.yml)
+
 ### Mastercard Loyalty Insurance
 This service provides banks and customers with a digital solution that makes it easier to manage claims globally within their web apps rather than visiting multiple insurance sites. This facilitates claims submissions by gathering all details via issuer app before redirecting cardholder to claims processing website for pre-selecting benefit and pre-filling forms. This also provides capability to search claim status within banking app.
 
@@ -1042,6 +947,7 @@ This service provides banks and customers with a digital solution that makes it 
 - [FAQ](https://developer.mastercard.com/mastercard-insurance-programs/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/mastercard-insurance-programs/documentation/support/#get-help)
 - [OpenAPI](properties/mastercard-loyalty-insurance-openapi.yml)
+
 ### Mastercard Card Issuance
 Card Issuance APIs enable clients to open new card accounts from anywhere and at any time, as per their convenience. MI Issuing supports the issuance of primary, supplementary, and add-on cards in digital and physical modes.
 
@@ -1066,6 +972,7 @@ Card Issuance APIs enable clients to open new card accounts from anywhere and at
 - [FAQ](https://developer.mastercard.com/card-issuance/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/card-issuance/documentation/support/#get-help)
 - [OpenAPI](properties/mastercard-card-issuance-openapi.yml)
+
 ### Mastercard Traditional Fulfillment Service
 The Traditional Fulfillment Service delivers a seamless and secure way to enable a redemption experience. A rewards program allows for the retrieval of catalogs or items based on search criteria. The fulfillment items (such as gift cards) are displayed on a consumer-facing website or used to document details in a customer-servicing application.
 
@@ -1090,15 +997,11 @@ The Traditional Fulfillment Service delivers a seamless and secure way to enable
 - [FAQ](https://developer.mastercard.com/traditional-fulfillment-service/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/traditional-fulfillment-service/documentation/support/#get-help)
 - [OpenAPI](properties/mastercard-traditional-fulfillment-service-openapi.yml)
+
 ### Mastercard User Account Management
 The User Account Management API service enables issuers, merchants, and partners to manage their rewards programs in a real-time manner.
 
 **Human URL:** [https://developer.mastercard.com/user-account-management-service/documentation/](https://developer.mastercard.com/user-account-management-service/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1114,15 +1017,11 @@ The User Account Management API service enables issuers, merchants, and partners
 - [FAQ](https://developer.mastercard.com/user-account-management-service/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/user-account-management-service/documentation/support/#get-help)
 - [OpenAPI](properties/mastercard-user-account-management-openapi.yml)
+
 ### Mastercard Points Activity Service
 The Points Activity Service API provides a real-time update view of a consumers point activity details that are available, on hold, earned, and redeemed at the household, customer, or account level (within a specific timeframe).
 
 **Human URL:** [https://developer.mastercard.com/points-activity-service/documentation/](https://developer.mastercard.com/points-activity-service/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1137,27 +1036,16 @@ The Points Activity Service API provides a real-time update view of a consumers
 - [ChangeLog](https://developer.mastercard.com/points-activity-service/documentation/release-history/)
 - [FAQ](https://developer.mastercard.com/points-activity-service/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/points-activity-service/documentation/support/#get-help)
+
 ### Mastercard Loyalty Promotions
 Drive consumer engagement with customizable promotions delivered through your digital touchpoints to the right customers at the right time
 
 **Human URL:** [https://developer.mastercard.com/product/mastercard-loyalty-promotions/](https://developer.mastercard.com/product/mastercard-loyalty-promotions/)
 
-
-#### Tags:
-
- - No Tags
-
-#### Properties
-
 ### Mastercard Mastercard Send Funding
 The Mastercard Send Funding service enables a registered Program Participant (such as a Financial Institution or digital player) to secure funds from a consumers sending account (known as the Funding Account) that will then be transferred (given or sent) to a Recipient/beneficiary.
 
 **Human URL:** [https://developer.mastercard.com/mastercard-send-funding/documentation/](https://developer.mastercard.com/mastercard-send-funding/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1173,15 +1061,11 @@ The Mastercard Send Funding service enables a registered Program Participant (su
 - [ChangeLog](https://developer.mastercard.com/mastercard-send-funding/documentation/release-history/)
 - [FAQ](https://developer.mastercard.com/mastercard-send-funding/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/mastercard-send-funding/documentation/support/#get-help)
+
 ### Mastercard Send Person-to-Person
 The Mastercard Send Person-to-Person (P2P) services enable registered Program Participants (such as banks, issuers, and digital players) to provide P2P payment solutions that enable consumers/individuals (Senders) to transfer funds quickly, such as sending money to family and friends.
 
 **Human URL:** [https://developer.mastercard.com/mastercard-send-person-to-person/documentation/](https://developer.mastercard.com/mastercard-send-person-to-person/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1199,15 +1083,11 @@ The Mastercard Send Person-to-Person (P2P) services enable registered Program Pa
 - [ChangeLog](https://developer.mastercard.com/mastercard-send-person-to-person/documentation/release-history/)
 - [FAQ](https://developer.mastercard.com/mastercard-send-person-to-person/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/mastercard-send-person-to-person/documentation/support/#get-help)
+
 ### Mastercard Send Disbursements
 The Mastercard Send Disbursements services enable registered Program Participants (such as banks, issuers, and digital players) to provide disbursement solutions that enable businesses, governments, non-profit organizations and other entities to disburse funds to individuals and businesses quickly, such as pay staff wages, send insurance claim payments and social benefits payments, and pay individuals who have sold through an e-Marketplace.
 
 **Human URL:** [https://developer.mastercard.com/mastercard-send-disbursements/documentation/](https://developer.mastercard.com/mastercard-send-disbursements/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1238,15 +1118,11 @@ The Mastercard Send Disbursements services enable registered Program Participant
 - [ChangeLog](https://developer.mastercard.com/mastercard-send-disbursements/documentation/release-history/)
 - [FAQ](https://developer.mastercard.com/mastercard-send-disbursements/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/mastercard-send-disbursements/documentation/support/#get-help)
+
 ### Mastercard Send Account Information Service
 The Mastercard Send Account Information Service enables Originating Institutions and Transaction Initiators to validate the eligibility of sending/receiving card accounts, and get card details, before initiating funding transactions or payment transactions (person-to-person payments or disbursements) with those card accounts.
 
 **Human URL:** [https://developer.mastercard.com/mastercard-send-account-info/documentation/](https://developer.mastercard.com/mastercard-send-account-info/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1265,15 +1141,11 @@ The Mastercard Send Account Information Service enables Originating Institutions
 - [ChangeLog](https://developer.mastercard.com/mastercard-send-account-info/documentation/release-history/)
 - [FAQ](https://developer.mastercard.com/mastercard-send-account-info/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/mastercard-send-account-info/documentation/support/#get-help)
+
 ### Mastercard Send Account Verification Service
 The Mastercard Send Account Verification Service (AVS) enables Originating Institutions and Transaction Initiators to perform real-time card account checks with card issuers before initiating funding transactions or payment transactions (person-to-person payments or disbursements) with those card accounts.
 
 **Human URL:** [https://developer.mastercard.com/mastercard-send-avs/documentation/](https://developer.mastercard.com/mastercard-send-avs/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1290,15 +1162,11 @@ The Mastercard Send Account Verification Service (AVS) enables Originating Insti
 - [ChangeLog](https://developer.mastercard.com/mastercard-send-avs/documentation/release-history/)
 - [FAQ](https://developer.mastercard.com/mastercard-send-avs/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/mastercard-send-avs/documentation/support/#get-help)
+
 ### Mastercard Account Validation
 The Mastercard Account Validation API service enables Mastercard customers to check that the supplied name(s) and, optionally, Card Verification Code (CVC or CVV) for an account match the account records held by the card issuer. Mastercard routes validation requests to Mastercard or Visa issuers, depending on the account type. The API response will provide status values indicating the matching results from the issuer.
 
 **Human URL:** [https://developer.mastercard.com/account-validation/documentation/](https://developer.mastercard.com/account-validation/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1315,15 +1183,11 @@ The Mastercard Account Validation API service enables Mastercard customers to ch
 - [ChangeLog](https://developer.mastercard.com/account-validation/documentation/release-history/)
 - [FAQ](https://developer.mastercard.com/account-validation/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/account-validation/documentation/support/#get-help)
+
 ### Mastercard Currency Conversion Calculator for Originating Institution Reconciliation
 The Mastercard Send Currency Conversion Calculator enables Originating Institutions (Acquirers) to instantly access daily currency conversion rates for Mastercard Send cross-border payment transactions to Mastercard cards. This helps them determine the funds needed to reconcile with Mastercard before initiating a cross-border payment transaction.
 
 **Human URL:** [https://developer.mastercard.com/payment-currency-conversion/documentation/](https://developer.mastercard.com/payment-currency-conversion/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1339,15 +1203,11 @@ The Mastercard Send Currency Conversion Calculator enables Originating Instituti
 - [ChangeLog](https://developer.mastercard.com/payment-currency-conversion/documentation/release-history/)
 - [FAQ](https://developer.mastercard.com/payment-currency-conversion/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/payment-currency-conversion/documentation/support/#get-help)
+
 ### Mastercard Processing Credit APIs
 The Mastercard Processing Credit API is designed to specifically address the aspects of the card lifecycle related to credit card products. It serves as the supplementary API required for managing credit cards or credit cards with installment options issued through the Mastercard Processing Core API.
 
 **Human URL:** [https://developer.mastercard.com/mastercard-processing-credit/documentation/](https://developer.mastercard.com/mastercard-processing-credit/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1364,15 +1224,11 @@ The Mastercard Processing Credit API is designed to specifically address the asp
 - [Sandbox](https://developer.mastercard.com/mastercard-processing-credit/documentation/sandbox-testing/)
 - [FAQ](https://developer.mastercard.com/mastercard-processing-credit/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/mastercard-processing-credit/documentation/support/#get-help)
+
 ### Mastercard Processing Core APIs
 Mastercard Processing offers modern, scalable, and configurable card processing solutions to fintech companies and financial institutions. This program supports a wide range of consumer and commercial payment products. Our processing services are available to issuers through Open Application Programming Interfaces (APIs), allowing them to build Digital First card programs and secure payment instruments for cardholders.
 
 **Human URL:** [https://developer.mastercard.com/mastercard-processing-core/documentation/](https://developer.mastercard.com/mastercard-processing-core/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1394,15 +1250,11 @@ Mastercard Processing offers modern, scalable, and configurable card processing 
 - [Sandbox](https://developer.mastercard.com/mastercard-processing-core/documentation/sandbox-testing/)
 - [FAQ](https://developer.mastercard.com/mastercard-processing-core/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/mastercard-processing-core/documentation/support/#get-help)
+
 ### Mastercard Processing Dispute APIs
 The Mastercard Processing Dispute API provides APIs exposed by the Mastercard Processing Dispute Assistant Module (DAM). DAM is an extension to the Workbench 3.0 application suite, the Graphic User Interface (GUI) of our Card Management System (CMS).
 
 **Human URL:** [https://developer.mastercard.com/mastercard-processing-dispute/documentation/](https://developer.mastercard.com/mastercard-processing-dispute/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1419,15 +1271,11 @@ The Mastercard Processing Dispute API provides APIs exposed by the Mastercard Pr
 - [Sandbox](https://developer.mastercard.com/mastercard-processing-dispute/documentation/sandbox-testing/)
 - [FAQ](https://developer.mastercard.com/mastercard-processing-dispute/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/mastercard-processing-dispute/documentation/support/#get-help)
+
 ### Mastercard Merchant Presented QR
 Mastercard_ Merchant Presented QR (MPQR) is a Mastercard QR program providing a consumer-initiated, mobile payment solution. MPQR enables consumers to make cashless payments for goods and services from their mobile phones by simply scanning a Mastercard QR Code or manually inputting an alias provided by any Mastercard QR accepting merchant. This push payment method has the convenience of cash and the security of a card payment, without needing a card payment terminal. 
 
 **Human URL:** [https://developer.mastercard.com/mastercard-merchant-presented-qr/documentation/](https://developer.mastercard.com/mastercard-merchant-presented-qr/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1445,15 +1293,11 @@ Mastercard_ Merchant Presented QR (MPQR) is a Mastercard QR program providing a 
 - [Errors](https://developer.mastercard.com/mastercard-merchant-presented-qr/documentation/server-apis/response-error-codes/)
 - [FAQ](https://developer.mastercard.com/mastercard-merchant-presented-qr/documentation/server-apis/support/#faqs)
 - [Support](https://developer.mastercard.com/mastercard-merchant-presented-qr/documentation/server-apis/support/#get-help)
+
 ### Mastercard Buyer Payment Agent
 Todays business to business (B2B) payment landscape involves a growing number of solutions with various product offerings that rarely interoperate, leading to complex Buyer and Supplier onboarding processes, closed networks with limited reach and scalability, varying data formats, and lack of payment preference enforcement that cause reconciliation issues and increase in payment times.
 
 **Human URL:** [https://developer.mastercard.com/mastercard-track-buyer-payment-agent/documentation/](https://developer.mastercard.com/mastercard-track-buyer-payment-agent/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1468,15 +1312,11 @@ Todays business to business (B2B) payment landscape involves a growing number o
 - [Errors](https://developer.mastercard.com/mastercard-track-buyer-payment-agent/documentation/codes_formats/)
 - [FAQ](https://developer.mastercard.com/mastercard-track-buyer-payment-agent/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/mastercard-track-buyer-payment-agent/documentation/support/#get-help)
+
 ### Mastercard Supplier Payment Agent
 Todays business to business (B2B) payment landscape involves a growing number of solutions with various product offerings that rarely interoperate, leading to complex Buyer and Supplier onboarding processes, closed networks with limited reach and scalability, varying data formats, and lack of payment control enforcement that cause reconciliation issues and increase payment times.
 
 **Human URL:** [https://developer.mastercard.com/mastercard-track-supplier-payment-agent/documentation/](https://developer.mastercard.com/mastercard-track-supplier-payment-agent/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1492,15 +1332,11 @@ Todays business to business (B2B) payment landscape involves a growing number o
 - [Errors](https://developer.mastercard.com/mastercard-track-supplier-payment-agent/documentation/codes-and-messages/)
 - [FAQ](https://developer.mastercard.com/mastercard-track-supplier-payment-agent/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/mastercard-track-supplier-payment-agent/documentation/support/#get-help)
+
 ### Mastercard Straight Through Processing
 Straight Through Processing (STP) is a value-added service designed to increase virtual card account acceptance by Suppliers. With Mastercard STP, Suppliers no longer need to manually enter each card account number into their point of sale to accept payment. The Acquirer automatically generates an authorization request on behalf of the Supplier and delivers the funds for approved transactions to the Suppliers bank account.
 
 **Human URL:** [https://developer.mastercard.com/straight-through-processing/documentation/](https://developer.mastercard.com/straight-through-processing/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1516,15 +1352,11 @@ Straight Through Processing (STP) is a value-added service designed to increase 
 - [Testing](https://developer.mastercard.com/straight-through-processing/documentation/testing/)
 - [FAQ](https://developer.mastercard.com/straight-through-processing/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/straight-through-processing/documentation/support/#get-help)
+
 ### Mastercard Track" Search
 The current business-to-business landscape requires Buyers and Buyer Payment Agents to go through lengthy and costly processes to contact their Suppliers and Supplier Payment Agents to determine if they previously accepted card payments for their commercial payments. Mastercard Track" Search is a business to business (B2B) API service that allows you to search for the businesses your customers trade with in Mastercard databases to identify opportunities to optimize commercial payments.
 
 **Human URL:** [https://developer.mastercard.com/track-search/documentation/](https://developer.mastercard.com/track-search/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1539,15 +1371,11 @@ The current business-to-business landscape requires Buyers and Buyer Payment Age
 - [Errors](https://developer.mastercard.com/track-search/documentation/code-and-formats/)
 - [FAQ](https://developer.mastercard.com/track-search/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/track-search/documentation/support/#get-help)
+
 ### Mastercard Track" Decision Engine
 Mastercard Track" Decision Engine helps Buyer Payment Agents free up working capital and maximize payment acceptance for Buyers. The solution is an intelligence tool that automatically analyzes invoices against Buyers working capital goals and Suppliers payment preferences, and recommends the best time and method of payment.
 
 **Human URL:** [https://developer.mastercard.com/track-decision/documentation/](https://developer.mastercard.com/track-decision/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1563,15 +1391,11 @@ Mastercard Track" Decision Engine helps Buyer Payment Agents free up working cap
 - [FAQ](https://developer.mastercard.com/track-decision/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/track-decision/documentation/support/#get-help)
 - [ChangeLog](https://developer.mastercard.com/track-decision/documentation/release-history/)
+
 ### Mastercard ISSM Merchant Enrollment
 The Merchant Enrollment API enables acquirers and their service providers to manage merchant participation in Mastercard Identity Check on EMV 3DS (3DS2). Acquirers and service providers can add/delete merchants directly in Mastercard Identity Solutions Services Management (ISSM) by sending the enrollment data through API interfaces.
 
 **Human URL:** [https://developer.mastercard.com/issm-merchant-enrollment/documentation/](https://developer.mastercard.com/issm-merchant-enrollment/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1585,15 +1409,11 @@ The Merchant Enrollment API enables acquirers and their service providers to man
 - [Errors](https://developer.mastercard.com/issm-merchant-enrollment/documentation/code-and-formats/)
 - [FAQ](https://developer.mastercard.com/issm-merchant-enrollment/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/issm-merchant-enrollment/documentation/support/#get-help)
+
 ### Mastercard Mastercom
 Cardholder disputes usually begin when cardholders or issuers discover possible fraudulent charges or errors on accounts. Issuers and acquirers then attempt to resolve the fraudulent charges or errors by using Mastercom to navigate the dispute resolution cycle. 
 
 **Human URL:** [https://developer.mastercard.com/mastercom/documentation/](https://developer.mastercard.com/mastercom/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1609,15 +1429,11 @@ Cardholder disputes usually begin when cardholders or issuers discover possible 
 - [Errors](https://developer.mastercard.com/mastercom/documentation/code-and-formats/)
 - [FAQ](https://developer.mastercard.com/mastercom/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/mastercom/documentation/support/#get-help)
+
 ### Mastercard Mastercom Extended
 Cardholder disputes often begin when cardholders or issuers discover possible fraudulent charges or errors on accounts. Issuers and acquirers then attempt to resolve the fraudulent charges or errors by using Mastercom to navigate the dispute resolution cycle.
 
 **Human URL:** [https://developer.mastercard.com/mastercom-extended/documentation/](https://developer.mastercard.com/mastercom-extended/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1632,15 +1448,11 @@ Cardholder disputes often begin when cardholders or issuers discover possible fr
 - [Errors](https://developer.mastercard.com/mastercom-extended/documentation/code-and-formats/)
 - [FAQ](https://developer.mastercard.com/mastercom-extended/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/mastercom-extended/documentation/support/#get-help)
+
 ### Mastercard MATCH Pro
 The Mastercard Alert To Control High-risk Merchants (MATCH Pro) system allows an Authorized User to assess potential risks associated with a Merchant prior to enabling Mastercard acceptance, with the opportunity to develop and review enhanced or incremental risk information before entering into a Merchant agreement. MATCH Pro is a mandatory system for Mastercard Acquirers, unless exempted by Mastercard, or prohibited by law. The MATCH Pro database includes customer-reported information about MATCH Merchants (and their owners) that an Authorized user has terminated. When an Acquirer considers onboarding a MATCH Merchant, MATCH Pro can assist Acquirers with risk determinations during onboarding. By making independent risk determinations, Acquirers are able to add MATCH Merchants who have been added to MATCH PRO.
 
 **Human URL:** [https://developer.mastercard.com/match/documentation/](https://developer.mastercard.com/match/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1653,27 +1465,16 @@ The Mastercard Alert To Control High-risk Merchants (MATCH Pro) system allows an
 - [PostmanCollection](https://developer.mastercard.com/match/documentation/postman-collection/)
 - [FAQ](https://developer.mastercard.com/match/documentation/support/#pro-faq)
 - [Support](https://developer.mastercard.com/match/documentation/support/#get-help)
+
 ### Mastercard MCBP Mobile Payment SDK
 Simplifies the development of Mastercard Cloud-Based Payments (MCBP) applications for Android and iOS devices View documentation 
 
 **Human URL:** [https://developer.mastercard.com/product/mobile-payments-sdk/](https://developer.mastercard.com/product/mobile-payments-sdk/)
 
-
-#### Tags:
-
- - No Tags
-
-#### Properties
-
 ### Mastercard Token Requestor Identifier (TRID) API
 The Mastercard Digital Enablement Service (MDES) On-Behalf-Of (OBO) model for merchants allows Payment Service Providers (PSP) to perform Tokenization and Transaction activities for the merchants they represent. A PSP operating in this model is referred to as an On-behalf-Of Token Requestor (OBOTR) and the merchant they support is described as the Token Requestor.
 
 **Human URL:** [https://developer.mastercard.com/token-requestor-identifier-api/documentation/](https://developer.mastercard.com/token-requestor-identifier-api/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1687,15 +1488,11 @@ The Mastercard Digital Enablement Service (MDES) On-Behalf-Of (OBO) model for me
 - [Testing](https://developer.mastercard.com/token-requestor-identifier-api/documentation/testing/)
 - [FAQ](https://developer.mastercard.com/token-requestor-identifier-api/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/token-requestor-identifier-api/documentation/support/#get-help)
+
 ### Mastercard MDES Digital Enablement API
 MDES allows a merchant to tokenize Account PANs entered by consumers or existing Account PANs held on file, replacing each PAN with a unique MDES token (subject to issuer participation). These tokens can be used for ecommerce and in-app transactions in the same way as Account PANs. 
 
 **Human URL:** [https://developer.mastercard.com/mdes-digital-enablement/documentation/](https://developer.mastercard.com/mdes-digital-enablement/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1711,15 +1508,11 @@ MDES allows a merchant to tokenize Account PANs entered by consumers or existing
 - [Errors](https://developer.mastercard.com/mdes-digital-enablement/documentation/code-and-formats/)
 - [Support](https://developer.mastercard.com/mdes-digital-enablement/documentation/support/#faq)
 - [FAQ](https://developer.mastercard.com/mdes-digital-enablement/documentation/support/#get-help)
+
 ### Mastercard Authentication Facilitator
 The Authentication Facilitator API is a building block of the Mastercard Authentication Service that enables MDES token requestors to authenticate cardholders leveraging cardholder information maintained by card issuers. The Token Requestor determines when cardholder authentication has to take place for its own program. The Token Requestor is also responsible for specifying and implementing the actions required by the business logic resulting from the authentication code validation information returned by the Authentication Service.
 
 **Human URL:** [https://developer.mastercard.com/authentication-facilitator/documentation/](https://developer.mastercard.com/authentication-facilitator/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1735,15 +1528,11 @@ The Authentication Facilitator API is a building block of the Mastercard Authent
 - [Errors](https://developer.mastercard.com/authentication-facilitator/documentation/code-and-formats/)
 - [FAQ](https://developer.mastercard.com/authentication-facilitator/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/authentication-facilitator/documentation/support/#get-help)
+
 ### Mastercard Mexico Insights
 The regulations set by the Central Bank of Mexico requiring payment system operators like Mastercard to expose transaction data volumes will have significant implications for the payments industry in Mexico. This move aims to promote transparency and enable other clearinghouse entities, such as EGLOBAL, VISA, PROSA, the Mexico Central Bank, issuers, acquirers, and the public, to access and analyze transaction data.
 
 **Human URL:** [https://developer.mastercard.com/transaction-insights/documentation/](https://developer.mastercard.com/transaction-insights/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1756,15 +1545,11 @@ The regulations set by the Central Bank of Mexico requiring payment system opera
 - [Testing](https://developer.mastercard.com/transaction-insights/documentation/testing/)
 - [FAQ](https://developer.mastercard.com/transaction-insights/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/transaction-insights/documentation/support/#get-help)
+
 ### Mastercard Onboard Risk Check
 Onboard Risk Check (ORC) is a comprehensive solution designed to help make more informed decisions during merchant onboarding. 
 
 **Human URL:** [https://developer.mastercard.com/onboard-risk-check/documentation/](https://developer.mastercard.com/onboard-risk-check/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1780,15 +1565,11 @@ Onboard Risk Check (ORC) is a comprehensive solution designed to help make more 
 - [ChangeLog](https://developer.mastercard.com/onboard-risk-check/documentation/release-history/)
 - [FAQ](https://developer.mastercard.com/onboard-risk-check/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/onboard-risk-check/documentation/support/#get-help)
+
 ### Mastercard Open Banking Solutions
 Mastercard Open Banking in Europe provides a set of APIs that enables both licensed and unlicensed Third Party Providers (TPPs) to enrich their products, provide higher-quality services, and enable secure payment initiation. TPPs can either leverage Mastercards Open Banking license or their own, if applicable, for multiple use cases including payment initiation. Mastercard offers a fully owned, globally scaled suite of services integrated with security, loyalty, payments, decisions, and data enrichment capabilities.
 
 **Human URL:** [https://developer.mastercard.com/open-banking-europe/documentation](https://developer.mastercard.com/open-banking-europe/documentation)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1805,15 +1586,11 @@ Mastercard Open Banking in Europe provides a set of APIs that enables both licen
 - [FAQ](https://developer.mastercard.com/open-banking-connect/documentation/frequently-asked-questions/)
 - [Glossary](https://developer.mastercard.com/open-banking-connect/documentation/glossary/)
 - [ChangeLog](https://developer.mastercard.com/open-banking-connect/documentation/specification-release-notes/)
+
 ### Mastercard Pay By Bank App for Creditor Service Providers
 Online checkouts can be frustrating and tedious. As shopping habits shift to digital, consumers and merchants require secure and streamlined online experiences.
 
 **Human URL:** [https://developer.mastercard.com/pay-by-bank-app-for-csps/documentation/](https://developer.mastercard.com/pay-by-bank-app-for-csps/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1829,15 +1606,11 @@ Online checkouts can be frustrating and tedious. As shopping habits shift to dig
 - [FAQ](https://developer.mastercard.com/pay-by-bank-app-for-csps/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/pay-by-bank-app-for-csps/documentation/support/#get-help)
 - [ChangeLog](https://developer.mastercard.com/pay-by-bank-app-for-csps/documentation/release-history/)
+
 ### MastercardPay By Bank App for Debtor Service Providers
 Online checkouts can be frustrating and tedious. As shopping habits shift to digital, consumers and merchants require secure and streamlined online experiences.
 
 **Human URL:** [https://developer.mastercard.com/pay-by-bank-app-for-dsps/documentation/](https://developer.mastercard.com/pay-by-bank-app-for-dsps/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1853,15 +1626,11 @@ Online checkouts can be frustrating and tedious. As shopping habits shift to dig
 - [FAQ](https://developer.mastercard.com/pay-by-bank-app-for-dsps/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/pay-by-bank-app-for-dsps/documentation/support/#get-help)
 - [ChangeLog](https://developer.mastercard.com/pay-by-bank-app-for-dsps/documentation/release-history/)
+
 ### MastercardPayment Account Management
 Mastercard issuers can use the Payment Acount Management (PAM) API to uniformly perform account lifecycle management on accounts held across different Mastercard systems. The PAM API can be used to submit lifecycle management events that update associated Mastercard Digital Enablement Service (MDES) tokens. Automatic Billing Updater (ABU)-implemented issuers can also use PAM API to submit real-time account updates that the ABU system consumes in near real-time.
 
 **Human URL:** [https://developer.mastercard.com/payment-account-management/documentation/](https://developer.mastercard.com/payment-account-management/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1880,15 +1649,11 @@ Mastercard issuers can use the Payment Acount Management (PAM) API to uniformly 
 - [FAQ](https://developer.mastercard.com/payment-account-management/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/payment-account-management/documentation/support/#get-help)
 - [Glossary](https://developer.mastercard.com/payment-account-management/documentation/glossary/)
+
 ### MastercardPayment Account Reference Inquiry
 The Payment Account Reference (PAR) is a value linked to the Primary Account Number (PAN) of a Mastercard-branded cardholder account. EMVCo introduced the industry-wide solution to address merchant and acquirer challenges resulting from tokenization. PAR links tokenized and PAN-based transactions without the need for a PAN as the linkage mechanism (1:1 PAR to PAN). PAR enables merchants 
 
 **Human URL:** [https://developer.mastercard.com/payment-account-reference-inquiry/documentation/](https://developer.mastercard.com/payment-account-reference-inquiry/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1904,15 +1669,11 @@ The Payment Account Reference (PAR) is a value linked to the Primary Account Num
 - [Errors](https://developer.mastercard.com/payment-account-reference-inquiry/documentation/code-and-formats/error-codes/)
 - [FAQ](https://developer.mastercard.com/payment-account-reference-inquiry/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/payment-account-reference-inquiry/documentation/support/#get-help)
+
 ### Mastercard Personalized Offers
 Personalized Offers analyzes payment card transaction history to present cardholders with relevant card-linked offers. It identifies spending patterns and matches them with suitable offers, enhancing the customer experience and driving more transactions for merchants. The following APIs create the Personalized Offers user experience and can be used to power websites and applications.
 
 **Human URL:** [https://developer.mastercard.com/pclo-presentment/documentation/](https://developer.mastercard.com/pclo-presentment/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1925,15 +1686,11 @@ Personalized Offers analyzes payment card transaction history to present cardhol
 - [Tutorials](https://developer.mastercard.com/pclo-presentment/documentation/tutorials-and-guides/)
 - [FAQ](https://developer.mastercard.com/pclo-presentment/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/pclo-presentment/documentation/support/#get-help)
+
 ### Mastercard Places
 The Places API is designed to provide access to rich, analytics-driven merchant location information to help understand popularity, seasonality, and other trends of storefronts.
 
 **Human URL:** [https://developer.mastercard.com/places/documentation/](https://developer.mastercard.com/places/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1953,15 +1710,11 @@ The Places API is designed to provide access to rich, analytics-driven merchant 
 - [Support](https://developer.mastercard.com/places/documentation/support/#get-help)
 - [Announcements](https://developer.mastercard.com/places/documentation/announcements/)
 - [ChangeLog](https://developer.mastercard.com/places/documentation/release-history/)
+
 ### Mastercard Priceless Platform API
 Tap into the the world of Priceless experiences, offers, benefits and publish them your digital platforms
 
 **Human URL:** [https://developer.mastercard.com/product/priceless-platform/](https://developer.mastercard.com/product/priceless-platform/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1972,15 +1725,11 @@ Tap into the the world of Priceless experiences, offers, benefits and publish th
 - [Errors](https://developer.mastercard.com/priceless-specials/documentation/error-codes/)
 - [FAQ](https://developer.mastercard.com/priceless-specials/documentation/support/#faqs)
 - [Support](https://developer.mastercard.com/priceless-specials/documentation/support/#get-help)
+
 ### Mastercard Small Business Credit Analytics
 Small Business Credit Analytics provides underwriters with access to near real-time transaction-based insights to build a more complete view of business performance and creditworthiness, helping them underwrite more businesses and reduce risk
 
 **Human URL:** [https://developer.mastercard.com/small-business-credit-analytics/documentation/](https://developer.mastercard.com/small-business-credit-analytics/documentation/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -1995,15 +1744,11 @@ Small Business Credit Analytics provides underwriters with access to near real-t
 - [Testing](https://developer.mastercard.com/small-business-credit-analytics/documentation/testing/)
 - [FAQ](https://developer.mastercard.com/small-business-credit-analytics/documentation/support/#faq)
 - [Support](https://developer.mastercard.com/small-business-credit-analytics/documentation/support/#get-help)
+
 ### Mastercard Trace Financial Crime
 Empowers you in the ongoing battle against money laundering View Resources 
 
 **Human URL:** [https://developer.mastercard.com/product/trace-financial-crime/](https://developer.mastercard.com/product/trace-financial-crime/)
-
-
-#### Tags:
-
- - No Tags
 
 #### Properties
 
@@ -2031,11 +1776,14 @@ Empowers you in the ongoing battle against money laundering View Resources
 - [Terms of Service](https://developer.mastercard.com/terms-of-use)
 - [Privacy Policy](https://www.mastercard.us/en-us/about-mastercard/what-we-do/privacy.html)
 - [Status](https://developer.mastercard.com/api-status)
-- [Summary](undefined)
+- [Authentication](https://developer.mastercard.com/platform/documentation/security-and-authentication)
+- [SDKs](https://developer.mastercard.com/platform/documentation/sdk-and-sample-code)
 
 ## Maintainers
 
 **FN:** API Evangelist
 
 **Email:** info@apievangelist.com
+**FN:** Mastercard Developer Relations
 
+**Email:** developer_support@mastercard.com
