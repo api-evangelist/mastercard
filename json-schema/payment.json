@@ -1,0 +1,270 @@
+{
+  "$id": "https://github.com/api-evangelist/mastercard/blob/main/json-schema/payment.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mastercard Payment",
+  "description": "A payment transaction processed through the Mastercard network, representing a transfer of funds between a payer and payee. Applicable across Mastercard Send, Account to Account Commerce, Bill Pay, and checkout solutions.",
+  "type": "object",
+  "required": [
+    "paymentId",
+    "paymentType",
+    "amount",
+    "currency",
+    "status"
+  ],
+  "properties": {
+    "paymentId": {
+      "type": "string",
+      "description": "Unique identifier for the payment, generated using UUID logic to unambiguously link request and response messages.",
+      "format": "uuid",
+      "examples": ["ecb2d942-eabd-42b6-87fd-69c19692bdc6"]
+    },
+    "paymentType": {
+      "type": "string",
+      "description": "Classification of the payment indicating its purpose and processing path.",
+      "enum": [
+        "P2P",
+        "P2M",
+        "B2B",
+        "DISBURSEMENT",
+        "FUNDING",
+        "BILL_PAYMENT",
+        "ACCOUNT_TO_ACCOUNT",
+        "CARD_ON_FILE",
+        "RECURRING",
+        "REFUND"
+      ]
+    },
+    "amount": {
+      "type": "string",
+      "description": "Payment amount without decimal separators. The number of implied decimal places depends on the currency. For example, 10350 in USD represents $103.50.",
+      "pattern": "^[0-9]+$",
+      "minLength": 1,
+      "maxLength": 12,
+      "examples": ["10350"]
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 numeric currency code for the payment amount.",
+      "pattern": "^[0-9]{3}$",
+      "minLength": 3,
+      "maxLength": 3,
+      "examples": ["840"]
+    },
+    "status": {
+      "type": "string",
+      "description": "Current status of the payment in its lifecycle.",
+      "enum": [
+        "PENDING",
+        "AUTHORIZED",
+        "CAPTURED",
+        "SETTLED",
+        "DECLINED",
+        "CANCELLED",
+        "REFUNDED",
+        "FAILED"
+      ]
+    },
+    "timestamp": {
+      "type": "string",
+      "description": "Timestamp of the payment initiation in ISO 8601 format with timezone offset.",
+      "format": "date-time",
+      "examples": ["2024-02-02T02:34:37-06:00"]
+    },
+    "sender": {
+      "$ref": "#/$defs/PaymentParty",
+      "description": "The party initiating or funding the payment."
+    },
+    "recipient": {
+      "$ref": "#/$defs/PaymentParty",
+      "description": "The party receiving the payment funds."
+    },
+    "cardNumber": {
+      "type": "string",
+      "description": "Primary Account Number (PAN) of the card used for the payment. Must pass Luhn algorithm validation.",
+      "pattern": "^[0-9]{12,19}$",
+      "minLength": 12,
+      "maxLength": 19
+    },
+    "tokenNumber": {
+      "type": "string",
+      "description": "Payment token representing the card number for tokenized transactions (MDES).",
+      "pattern": "^[0-9]{12,19}$",
+      "minLength": 12,
+      "maxLength": 19
+    },
+    "merchantId": {
+      "type": "string",
+      "description": "Card acceptor or merchant unique identification number assigned by the acquirer.",
+      "maxLength": 15,
+      "examples": ["A42E51982100100"]
+    },
+    "merchantName": {
+      "type": "string",
+      "description": "Name of the card acceptor or merchant.",
+      "maxLength": 22,
+      "examples": ["ACME STORE"]
+    },
+    "merchantCategoryCode": {
+      "type": "string",
+      "description": "Four-digit ISO 18245 Merchant Category Code (MCC) classifying the type of business.",
+      "pattern": "^[0-9]{4}$",
+      "minLength": 4,
+      "maxLength": 4,
+      "examples": ["5411"]
+    },
+    "acquirerId": {
+      "type": "string",
+      "description": "Interbank Card Association (ICA) number of the acquiring institution.",
+      "minLength": 3,
+      "maxLength": 7,
+      "examples": ["5450"]
+    },
+    "icaNumber": {
+      "type": "string",
+      "description": "ICA number of the issuer or acquirer initiating the request.",
+      "minLength": 3,
+      "maxLength": 7,
+      "examples": ["1076"]
+    },
+    "authorizationCode": {
+      "type": "string",
+      "description": "Authorization code returned by the issuer for an approved transaction.",
+      "maxLength": 6
+    },
+    "billingAmount": {
+      "type": "string",
+      "description": "Amount appearing on the cardholder statement in the billing currency, without decimals.",
+      "pattern": "^[0-9]+$",
+      "minLength": 1,
+      "maxLength": 12,
+      "examples": ["10350"]
+    },
+    "billingCurrency": {
+      "type": "string",
+      "description": "ISO 4217 numeric currency code for the billing amount.",
+      "pattern": "^[0-9]{3}$",
+      "minLength": 3,
+      "maxLength": 3,
+      "examples": ["840"]
+    },
+    "conversionRate": {
+      "type": "string",
+      "description": "Currency conversion rate applied when the transaction and billing currencies differ."
+    },
+    "network": {
+      "type": "string",
+      "description": "Payment network through which the transaction was processed.",
+      "enum": [
+        "MASTERCARD",
+        "MAESTRO",
+        "CIRRUS"
+      ],
+      "default": "MASTERCARD"
+    },
+    "channel": {
+      "type": "string",
+      "description": "The channel through which the payment was initiated.",
+      "enum": [
+        "POS",
+        "ECOMMERCE",
+        "MOBILE",
+        "ATM",
+        "MOTO",
+        "RECURRING",
+        "IN_APP"
+      ]
+    },
+    "posEntryMode": {
+      "type": "string",
+      "description": "Point of service entry mode indicating how the card data was captured at the terminal.",
+      "maxLength": 3,
+      "examples": ["051"]
+    },
+    "terminalId": {
+      "type": "string",
+      "description": "Unique code identifying a terminal at the card acceptor location.",
+      "maxLength": 8,
+      "examples": ["5055D305"]
+    },
+    "settlementDate": {
+      "type": "string",
+      "description": "Date on which the transaction settles, in YYYYMMDD format.",
+      "pattern": "^[0-9]{8}$",
+      "examples": ["20240116"]
+    },
+    "referenceId": {
+      "type": "string",
+      "description": "External reference identifier provided by the originator for reconciliation.",
+      "maxLength": 36
+    },
+    "memo": {
+      "type": "string",
+      "description": "Brief description or comment provided by the originator supporting the payment.",
+      "maxLength": 1000
+    }
+  },
+  "$defs": {
+    "PaymentParty": {
+      "type": "object",
+      "description": "A party involved in a payment transaction, either as sender or recipient.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Full name of the payment party.",
+          "maxLength": 100
+        },
+        "accountNumber": {
+          "type": "string",
+          "description": "Account number of the payment party.",
+          "maxLength": 19
+        },
+        "institutionId": {
+          "type": "string",
+          "description": "Identifier for the financial institution of the payment party.",
+          "maxLength": 11
+        },
+        "address": {
+          "$ref": "#/$defs/Address"
+        }
+      }
+    },
+    "Address": {
+      "type": "object",
+      "description": "A postal address.",
+      "properties": {
+        "line1": {
+          "type": "string",
+          "description": "First line of the street address.",
+          "maxLength": 50
+        },
+        "line2": {
+          "type": "string",
+          "description": "Second line of the street address.",
+          "maxLength": 50
+        },
+        "city": {
+          "type": "string",
+          "description": "City name.",
+          "maxLength": 50
+        },
+        "stateProvinceCode": {
+          "type": "string",
+          "description": "State or province code.",
+          "maxLength": 3
+        },
+        "postalCode": {
+          "type": "string",
+          "description": "Postal or ZIP code.",
+          "maxLength": 10
+        },
+        "countryCode": {
+          "type": "string",
+          "description": "ISO 3166-1 alpha-3 country code.",
+          "pattern": "^[A-Z]{3}$",
+          "minLength": 3,
+          "maxLength": 3
+        }
+      }
+    }
+  }
+}

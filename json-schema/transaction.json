@@ -1,0 +1,294 @@
+{
+  "$id": "https://github.com/api-evangelist/mastercard/blob/main/json-schema/transaction.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mastercard Transaction",
+  "description": "A financial transaction record processed through the Mastercard network, capturing the full lifecycle from authorization through settlement. Used across fraud detection, analytics, and reconciliation services.",
+  "type": "object",
+  "required": [
+    "transactionId",
+    "cardNumber",
+    "transactionAmount",
+    "transactionCurrencyCode",
+    "transactionDate",
+    "merchantId"
+  ],
+  "properties": {
+    "transactionId": {
+      "type": "string",
+      "description": "Unique identifier for the transaction, generated using UUID logic.",
+      "format": "uuid",
+      "examples": ["ecb2d942-eabd-42b6-87fd-69c19692bdc6"]
+    },
+    "transactionIdentifiers": {
+      "type": "array",
+      "description": "One or more identifiers used to locate the transaction in the Mastercard Data Warehouse.",
+      "items": {
+        "$ref": "#/$defs/TransactionIdentifier"
+      }
+    },
+    "cardNumber": {
+      "type": "string",
+      "description": "Primary Account Number (PAN) used in the transaction. Must pass Luhn algorithm validation.",
+      "pattern": "^[0-9]{12,19}$",
+      "minLength": 12,
+      "maxLength": 19,
+      "examples": ["5505135664572870000"]
+    },
+    "cardProductCode": {
+      "type": "string",
+      "description": "Three-character code identifying the type of card used in the transaction (e.g., MSI for Mastercard Standard, MWE for World Elite).",
+      "minLength": 3,
+      "maxLength": 3,
+      "examples": ["MSI"]
+    },
+    "transactionAmount": {
+      "type": "string",
+      "description": "Transaction amount at the merchant location without decimal separators. Implied decimals depend on the currency.",
+      "pattern": "^[0-9]+$",
+      "minLength": 1,
+      "maxLength": 12,
+      "examples": ["10350"]
+    },
+    "transactionCurrencyCode": {
+      "type": "string",
+      "description": "ISO 4217 numeric currency code for the transaction amount.",
+      "pattern": "^[0-9]{3}$",
+      "minLength": 3,
+      "maxLength": 3,
+      "examples": ["826"]
+    },
+    "billingAmount": {
+      "type": "string",
+      "description": "Amount appearing on the cardholder statement in the cardholder billing currency, without decimals.",
+      "pattern": "^[0-9]+$",
+      "minLength": 1,
+      "maxLength": 12,
+      "examples": ["10350"]
+    },
+    "billingCurrencyCode": {
+      "type": "string",
+      "description": "ISO 4217 numeric currency code for the billing amount.",
+      "pattern": "^[0-9]{3}$",
+      "minLength": 3,
+      "maxLength": 3,
+      "examples": ["826"]
+    },
+    "transactionDate": {
+      "type": "string",
+      "description": "Local date at the merchant location when the transaction occurred, in YYYYMMDD format.",
+      "pattern": "^\\d{4}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$",
+      "minLength": 8,
+      "maxLength": 8,
+      "examples": ["20240115"]
+    },
+    "transactionTime": {
+      "type": "string",
+      "description": "Local time at the merchant location when the transaction occurred, in HHmmss format.",
+      "pattern": "^([01][0-9]|2[0-3])[0-5][0-9][0-5][0-9]$",
+      "minLength": 6,
+      "maxLength": 6
+    },
+    "settlementDate": {
+      "type": "string",
+      "description": "Date the transaction was settled, in YYYYMMDD format.",
+      "pattern": "^\\d{4}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$",
+      "minLength": 8,
+      "maxLength": 8,
+      "examples": ["20240116"]
+    },
+    "timestamp": {
+      "type": "string",
+      "description": "Timestamp of the request initiation in ISO 8601 format with CST timezone offset.",
+      "format": "date-time",
+      "examples": ["2024-02-02T02:34:37-06:00"]
+    },
+    "icaNumber": {
+      "type": "string",
+      "description": "Interbank Card Association (ICA) number of the issuer or acquirer initiating the request.",
+      "minLength": 3,
+      "maxLength": 7,
+      "examples": ["1076"]
+    },
+    "acquirerId": {
+      "type": "string",
+      "description": "ICA number of the acquiring institution for the transaction.",
+      "minLength": 3,
+      "maxLength": 7,
+      "examples": ["5450"]
+    },
+    "merchantId": {
+      "type": "string",
+      "description": "Card acceptor or merchant unique identification number assigned by the acquirer.",
+      "minLength": 1,
+      "maxLength": 15,
+      "examples": ["A42E51982100100"]
+    },
+    "merchantName": {
+      "type": "string",
+      "description": "Name of the card acceptor.",
+      "minLength": 1,
+      "maxLength": 22,
+      "examples": ["BANKNEWPORT"]
+    },
+    "merchantCity": {
+      "type": "string",
+      "description": "City in which the merchant is located.",
+      "minLength": 1,
+      "maxLength": 13,
+      "examples": ["PHOENIX"]
+    },
+    "merchantStateProvinceCode": {
+      "type": "string",
+      "description": "State or province code where the merchant is located.",
+      "minLength": 2,
+      "maxLength": 3,
+      "examples": ["AZ"]
+    },
+    "merchantCountryCode": {
+      "type": "string",
+      "description": "ISO 3166-1 alpha-3 country code where the merchant is located.",
+      "minLength": 3,
+      "maxLength": 3,
+      "examples": ["USA"]
+    },
+    "merchantPostalCode": {
+      "type": "string",
+      "description": "Postal code at the merchant location.",
+      "minLength": 1,
+      "maxLength": 10,
+      "examples": ["85001"]
+    },
+    "merchantCategoryCode": {
+      "type": "string",
+      "description": "Four-digit ISO 18245 Merchant Category Code (MCC) classifying the merchant business type.",
+      "pattern": "^[0-9]{4}$",
+      "minLength": 4,
+      "maxLength": 4,
+      "examples": ["6011"]
+    },
+    "terminalId": {
+      "type": "string",
+      "description": "Unique code identifying a terminal at the card acceptor location.",
+      "minLength": 1,
+      "maxLength": 8,
+      "examples": ["5055D305"]
+    },
+    "terminalAttendanceIndicator": {
+      "type": "string",
+      "description": "Indicates if the card acceptor was attending the terminal at the time of the transaction.",
+      "minLength": 1,
+      "maxLength": 1
+    },
+    "terminalOperatingEnvironment": {
+      "type": "string",
+      "description": "Indicates whether the terminal is attended and its location environment.",
+      "minLength": 1,
+      "maxLength": 1
+    },
+    "terminalCapabilityIndicator": {
+      "type": "string",
+      "description": "Indicates the capability of the terminal to read card data.",
+      "minLength": 1,
+      "maxLength": 1
+    },
+    "posEntryMode": {
+      "type": "string",
+      "description": "Point of service entry mode indicating how the card number and expiration date were captured.",
+      "maxLength": 3,
+      "examples": ["051"]
+    },
+    "accountDeviceType": {
+      "type": "string",
+      "description": "Indicates if the account uses magnetic stripe, chip, PIN, contactless, or combinations thereof.",
+      "minLength": 1,
+      "maxLength": 1,
+      "examples": ["1"]
+    },
+    "cardholderPresenceIndicator": {
+      "type": "string",
+      "description": "Indicates whether the cardholder was present at the point of transaction.",
+      "minLength": 1,
+      "maxLength": 1
+    },
+    "cardPresenceIndicator": {
+      "type": "string",
+      "description": "Indicates whether the card was present at the point of transaction.",
+      "minLength": 1,
+      "maxLength": 1
+    },
+    "catLevelIndicator": {
+      "type": "string",
+      "description": "Cardholder Activated Terminal (CAT) level indicator showing the type of automated terminal.",
+      "minLength": 1,
+      "maxLength": 1
+    },
+    "cvcInvalidIndicator": {
+      "type": "string",
+      "description": "Indicates whether the Card Verification Code (CVC) was invalid.",
+      "minLength": 1,
+      "maxLength": 1
+    },
+    "avsResponseCode": {
+      "type": "string",
+      "description": "Address Verification Service (AVS) response code from the authorization request.",
+      "minLength": 1,
+      "maxLength": 1,
+      "examples": ["U"]
+    },
+    "authResponseCode": {
+      "type": "string",
+      "description": "Authorization response code indicating the result of the authorization request.",
+      "minLength": 2,
+      "maxLength": 2,
+      "examples": ["01"]
+    },
+    "network": {
+      "type": "string",
+      "description": "Payment network through which the transaction was processed.",
+      "enum": [
+        "MASTERCARD",
+        "MAESTRO",
+        "CIRRUS"
+      ]
+    },
+    "refId": {
+      "type": "string",
+      "description": "Reference identifier generated by the originator to link request and response messages.",
+      "format": "uuid",
+      "examples": ["ecb2d942-eabd-42b6-87fd-69c19692bdc6"]
+    },
+    "memo": {
+      "type": "string",
+      "description": "Brief description by the originator providing context for the transaction.",
+      "maxLength": 1000
+    }
+  },
+  "$defs": {
+    "TransactionIdentifier": {
+      "type": "object",
+      "description": "An identifier used to locate a transaction within the Mastercard Data Warehouse. Exactly one of the identifier types should be provided.",
+      "properties": {
+        "banknetReferenceNumber": {
+          "type": "string",
+          "description": "Banknet Reference Number, a unique transaction identifier in the Mastercard network.",
+          "maxLength": 9
+        },
+        "systemTraceAuditNumber": {
+          "type": "string",
+          "description": "System Trace Audit Number used to identify transactions.",
+          "maxLength": 6
+        },
+        "authorizationCode": {
+          "type": "string",
+          "description": "Authorization code from the issuer.",
+          "maxLength": 6
+        },
+        "switchSerialNumber": {
+          "type": "string",
+          "description": "Switch serial number assigned during transaction processing.",
+          "maxLength": 22
+        }
+      }
+    }
+  }
+}

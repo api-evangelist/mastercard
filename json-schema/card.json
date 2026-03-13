@@ -1,0 +1,336 @@
+{
+  "$id": "https://github.com/api-evangelist/mastercard/blob/main/json-schema/card.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mastercard Card",
+  "description": "A Mastercard payment card representing a physical or virtual card instrument issued to a cardholder. Covers prepaid, debit, credit, and commercial card products across Card Issuance, BIN Lookup, Benefit Eligibility, and tokenization services.",
+  "type": "object",
+  "required": [
+    "cardNumber",
+    "cardType"
+  ],
+  "properties": {
+    "cardNumber": {
+      "type": "string",
+      "description": "Primary Account Number (PAN) for the card. Must pass Luhn algorithm validation.",
+      "pattern": "^[0-9]{12,19}$",
+      "minLength": 12,
+      "maxLength": 19,
+      "examples": ["5505135664572870000"]
+    },
+    "cardId": {
+      "type": "string",
+      "description": "Unique system-generated identifier for the card within the Mastercard issuing platform.",
+      "maxLength": 36
+    },
+    "cardPackId": {
+      "type": "string",
+      "description": "Identifier for the card pack, used in card issuance and fulfillment.",
+      "maxLength": 36
+    },
+    "cardType": {
+      "type": "string",
+      "description": "Classification of the card product.",
+      "enum": [
+        "CREDIT",
+        "DEBIT",
+        "PREPAID",
+        "COMMERCIAL",
+        "VIRTUAL"
+      ]
+    },
+    "cardProductCode": {
+      "type": "string",
+      "description": "Three-character code identifying the specific card product (e.g., MSI for Mastercard Standard, MWE for World Elite, MWO for World).",
+      "minLength": 3,
+      "maxLength": 3,
+      "examples": ["MSI"]
+    },
+    "planCode": {
+      "type": "string",
+      "description": "Card plan code defining the card product configuration and features.",
+      "maxLength": 10
+    },
+    "programCode": {
+      "type": "string",
+      "description": "Program code for the card product within the issuing institution.",
+      "maxLength": 20
+    },
+    "brand": {
+      "type": "string",
+      "description": "Card brand within the Mastercard network.",
+      "enum": [
+        "MASTERCARD",
+        "MAESTRO",
+        "CIRRUS"
+      ],
+      "default": "MASTERCARD"
+    },
+    "tier": {
+      "type": "string",
+      "description": "Card tier or level indicating the product benefits tier.",
+      "enum": [
+        "STANDARD",
+        "GOLD",
+        "PLATINUM",
+        "TITANIUM",
+        "WORLD",
+        "WORLD_ELITE",
+        "BLACK"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "description": "Current lifecycle status of the card.",
+      "enum": [
+        "ACTIVE",
+        "INACTIVE",
+        "SUSPENDED",
+        "BLOCKED",
+        "EXPIRED",
+        "CANCELLED",
+        "PENDING_ACTIVATION"
+      ]
+    },
+    "issuedDate": {
+      "type": "string",
+      "description": "Date the card was issued, in ISO 8601 date format.",
+      "format": "date",
+      "examples": ["2024-01-26"]
+    },
+    "expirationDate": {
+      "type": "string",
+      "description": "Card expiration date in MMYY format.",
+      "pattern": "^(0[1-9]|1[0-2])[0-9]{2}$",
+      "minLength": 4,
+      "maxLength": 4
+    },
+    "embossedName": {
+      "type": "string",
+      "description": "Name embossed or printed on the physical card.",
+      "maxLength": 26
+    },
+    "numberless": {
+      "type": "boolean",
+      "description": "Indicates whether the card number is printed on the physical card. True means the number is not printed.",
+      "default": false
+    },
+    "instant": {
+      "type": "boolean",
+      "description": "Indicates whether the card was issued as an instant card (immediately generated).",
+      "default": false
+    },
+    "virtual": {
+      "type": "boolean",
+      "description": "Indicates whether this is a virtual card with no physical plastic.",
+      "default": false
+    },
+    "contactless": {
+      "type": "boolean",
+      "description": "Indicates whether the card supports contactless (NFC/PayPass) transactions.",
+      "default": true
+    },
+    "photoIndicator": {
+      "type": "string",
+      "description": "Indicates whether a photo is required on the card.",
+      "enum": ["PHOTO", "NO_PHOTO"]
+    },
+    "deliveryMode": {
+      "type": "string",
+      "description": "Mode of card delivery to the cardholder.",
+      "enum": [
+        "BRANCH",
+        "COURIER",
+        "MAIL",
+        "DIGITAL",
+        "SELF_COLLECT"
+      ]
+    },
+    "deliveryDate": {
+      "type": "string",
+      "description": "Date the card was delivered or handed over to the client, in ISO 8601 format.",
+      "format": "date"
+    },
+    "tokenNumber": {
+      "type": "string",
+      "description": "MDES (Mastercard Digital Enablement Service) token representing this card for digital transactions.",
+      "pattern": "^[0-9]{12,19}$",
+      "minLength": 12,
+      "maxLength": 19
+    },
+    "binNumber": {
+      "type": "string",
+      "description": "Bank Identification Number (BIN), the first 6-8 digits of the card number identifying the issuing institution.",
+      "pattern": "^[0-9]{6,8}$",
+      "minLength": 6,
+      "maxLength": 8
+    },
+    "issuerId": {
+      "type": "string",
+      "description": "ICA (Interbank Card Association) number of the issuing institution.",
+      "minLength": 3,
+      "maxLength": 7
+    },
+    "issuerName": {
+      "type": "string",
+      "description": "Name of the financial institution that issued the card.",
+      "maxLength": 100
+    },
+    "issuerCountryCode": {
+      "type": "string",
+      "description": "ISO 3166-1 alpha-3 country code of the issuing institution.",
+      "pattern": "^[A-Z]{3}$",
+      "minLength": 3,
+      "maxLength": 3
+    },
+    "cardholder": {
+      "$ref": "#/$defs/Cardholder"
+    },
+    "limits": {
+      "$ref": "#/$defs/CardLimits"
+    },
+    "applicationType": {
+      "type": "string",
+      "description": "Type of card issuance application.",
+      "enum": [
+        "PRIMARY_NEW_CLIENT",
+        "PRIMARY_EXISTING_CLIENT",
+        "SUPPLEMENTARY",
+        "ADD_ON",
+        "REPLACEMENT",
+        "RENEWAL"
+      ]
+    },
+    "corporateCode": {
+      "type": "string",
+      "description": "Unique code of the corporate entity for commercial/corporate cards.",
+      "pattern": "^[0-9]+$",
+      "maxLength": 24
+    }
+  },
+  "$defs": {
+    "Cardholder": {
+      "type": "object",
+      "description": "The individual to whom the card is issued.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Full name of the cardholder.",
+          "maxLength": 100
+        },
+        "firstName": {
+          "type": "string",
+          "description": "First name of the cardholder.",
+          "maxLength": 50
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Last name of the cardholder.",
+          "maxLength": 50
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the cardholder.",
+          "format": "email"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Phone number of the cardholder.",
+          "maxLength": 20
+        },
+        "clientType": {
+          "type": "string",
+          "description": "Classification of the cardholder.",
+          "enum": [
+            "INDIVIDUAL",
+            "CORPORATE",
+            "SMALL_BUSINESS"
+          ]
+        },
+        "vip": {
+          "type": "boolean",
+          "description": "Indicates whether the cardholder is classified as a VIP client.",
+          "default": false
+        },
+        "address": {
+          "$ref": "#/$defs/Address"
+        }
+      }
+    },
+    "CardLimits": {
+      "type": "object",
+      "description": "Transaction limits configured for the card.",
+      "properties": {
+        "perTransactionLimit": {
+          "type": "string",
+          "description": "Maximum amount permitted per transaction, without decimals.",
+          "pattern": "^[0-9]+$",
+          "maxLength": 12,
+          "examples": ["100000"]
+        },
+        "dailyLimit": {
+          "type": "string",
+          "description": "Maximum total amount permitted per day, without decimals.",
+          "pattern": "^[0-9]+$",
+          "maxLength": 12
+        },
+        "totalTransactionLimit": {
+          "type": "string",
+          "description": "Maximum cumulative transaction limit for the card.",
+          "pattern": "^[0-9]+$",
+          "maxLength": 20,
+          "examples": ["10000000"]
+        },
+        "velocity": {
+          "type": "string",
+          "description": "Maximum number of transactions allowed within a configured duration.",
+          "pattern": "^[0-9]+$",
+          "maxLength": 20
+        },
+        "validity": {
+          "type": "string",
+          "description": "Card validity duration in ISO 8601 duration format (e.g., P3M4DT12H30M5S). Maximum validity is 3 years.",
+          "pattern": "^P(?!$)([0-9]+Y)?([0-9]+M)?([0-9]+W)?([0-9]+D)?(T(?=[0-9])([0-9]+H)?([0-9]+M)?([0-9]+S)?)?$",
+          "maxLength": 19
+        }
+      }
+    },
+    "Address": {
+      "type": "object",
+      "description": "A postal address.",
+      "properties": {
+        "line1": {
+          "type": "string",
+          "description": "First line of the street address.",
+          "maxLength": 50
+        },
+        "line2": {
+          "type": "string",
+          "description": "Second line of the street address.",
+          "maxLength": 50
+        },
+        "city": {
+          "type": "string",
+          "description": "City name.",
+          "maxLength": 50
+        },
+        "stateProvinceCode": {
+          "type": "string",
+          "description": "State or province code.",
+          "maxLength": 3
+        },
+        "postalCode": {
+          "type": "string",
+          "description": "Postal or ZIP code.",
+          "maxLength": 10
+        },
+        "countryCode": {
+          "type": "string",
+          "description": "ISO 3166-1 alpha-3 country code.",
+          "pattern": "^[A-Z]{3}$",
+          "minLength": 3,
+          "maxLength": 3
+        }
+      }
+    }
+  }
+}
