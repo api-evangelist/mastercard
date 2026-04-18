@@ -1,0 +1,151 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Merchant Services and Locations"
+  description: "Unified workflow for merchants and acquirers to manage merchant/ATM locations, Places data, Track merchant search, and acquirer transaction processing."
+  tags:
+    - Mastercard
+    - Merchant
+    - Locations
+    - Acquirer
+    - Track
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - import: merchant-locations
+      location: ./shared/merchant-locations.yaml
+    - import: atm-locations
+      location: ./shared/atm-locations.yaml
+    - import: places
+      location: ./shared/places.yaml
+    - import: track-search
+      location: ./shared/track-search.yaml
+    - import: transaction-api-acquirers
+      location: ./shared/transaction-api-acquirers.yaml
+
+  exposes:
+    - type: rest
+      port: 8091
+      namespace: merchant-services-api
+      description: "Unified REST API for merchant services and location data."
+      resources:
+        - path: /v1/merchant-locations
+          name: merchant-locations
+          description: "Merchant location search"
+          operations:
+            - method: POST
+              name: search-merchant-locations
+              description: "Search for merchant locations"
+              call: "merchant-locations.search-merchants"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/atm-locations
+          name: atm-locations
+          description: "ATM location search"
+          operations:
+            - method: POST
+              name: search-atm-locations
+              description: "Search for ATM locations"
+              call: "atm-locations.search-atms"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/places
+          name: places
+          description: "Places location intelligence"
+          operations:
+            - method: POST
+              name: search-places
+              description: "Search for merchant places"
+              call: "places.search-places"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/track-merchants
+          name: track-merchants
+          description: "Track merchant data"
+          operations:
+            - method: POST
+              name: search-track-merchants
+              description: "Search for merchants in Track"
+              call: "track-search.search-merchants"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+
+    - type: mcp
+      port: 9101
+      namespace: merchant-services-mcp
+      transport: http
+      description: "MCP server for AI-assisted merchant services and location queries."
+      tools:
+        - name: search-merchant-locations
+          description: "Search for Mastercard merchant locations"
+          hints:
+            readOnly: true
+            openWorld: true
+          call: "merchant-locations.search-merchants"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: list-merchant-countries
+          description: "List countries with merchant locations"
+          hints:
+            readOnly: true
+            idempotent: true
+          call: "merchant-locations.get-countries"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: search-atm-locations
+          description: "Search for Mastercard ATM locations"
+          hints:
+            readOnly: true
+            openWorld: true
+          call: "atm-locations.search-atms"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: list-atm-countries
+          description: "List countries with Mastercard ATMs"
+          hints:
+            readOnly: true
+            idempotent: true
+          call: "atm-locations.get-countries"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: search-places
+          description: "Search for merchant places with location intelligence"
+          hints:
+            readOnly: true
+            openWorld: true
+          call: "places.search-places"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: search-track-merchants
+          description: "Search for merchants in the Mastercard Track network"
+          hints:
+            readOnly: true
+          call: "track-search.search-merchants"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: submit-acquirer-transaction
+          description: "Submit a transaction as an acquirer"
+          hints:
+            readOnly: false
+          call: "transaction-api-acquirers.submit-transaction"
+          outputParameters:
+            - type: object
+              mapping: "$."

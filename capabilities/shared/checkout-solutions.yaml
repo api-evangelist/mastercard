@@ -1,0 +1,59 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Checkout Solutions"
+  description: "EMV Secure Remote Commerce based checkout API providing guest checkout and card tokenization services."
+  tags:
+    - Checkout
+    - E-Commerce
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: checkout-solutions
+      baseUri: https://api.mastercard.com/checkout
+      description: "Mastercard Checkout Solutions API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: checkout
+          path: /checkout
+          description: "Checkout operations"
+          operations:
+            - name: initiate-checkout
+              method: POST
+              description: "Initiate a checkout session"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  checkout: "{{tools.checkout}}"
+            - name: get-checkout-status
+              method: GET
+              description: "Get checkout session status"
+              inputParameters:
+                - name: session_id
+                  in: path
+                  type: string
+                  required: true
+                  description: "Checkout session identifier"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."

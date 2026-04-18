@@ -1,0 +1,148 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Bill Payments and Commercial"
+  description: "Unified workflow for treasury teams and accounts payable to manage bill payments, business payment controls, virtual cards, commercial event notifications, and installment plans."
+  tags:
+    - Mastercard
+    - Bill Payments
+    - Commercial
+    - Treasury
+    - Business Payments
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - import: bill-pay
+      location: ./shared/bill-pay.yaml
+    - import: bill-payment-validator
+      location: ./shared/bill-payment-validator.yaml
+    - import: business-payment-controls
+      location: ./shared/business-payment-controls.yaml
+    - import: in-control-commercial
+      location: ./shared/in-control-commercial.yaml
+    - import: commercial-notifications
+      location: ./shared/commercial-event-notifications.yaml
+
+  exposes:
+    - type: rest
+      port: 8087
+      namespace: bill-commercial-api
+      description: "Unified REST API for bill payments and commercial payment workflows."
+      resources:
+        - path: /v1/billers
+          name: billers
+          description: "Biller management"
+          operations:
+            - method: POST
+              name: search-billers
+              description: "Search for billers"
+              call: "bill-pay.search-billers"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/payment-validations
+          name: payment-validations
+          description: "Bill payment validation"
+          operations:
+            - method: POST
+              name: validate-payment
+              description: "Validate a bill payment"
+              call: "bill-payment-validator.validate-payment"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/spending-controls
+          name: spending-controls
+          description: "Business spending controls"
+          operations:
+            - method: POST
+              name: create-spending-control
+              description: "Create a spending control rule"
+              call: "business-payment-controls.create-control"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/virtual-cards
+          name: virtual-cards
+          description: "Virtual card management"
+          operations:
+            - method: POST
+              name: create-virtual-card
+              description: "Create a virtual card"
+              call: "in-control-commercial.create-virtual-card"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+
+    - type: mcp
+      port: 9097
+      namespace: bill-commercial-mcp
+      transport: http
+      description: "MCP server for AI-assisted bill payment and commercial operations."
+      tools:
+        - name: search-billers
+          description: "Search for billers in the RPPS network"
+          hints:
+            readOnly: true
+          call: "bill-pay.search-billers"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-biller-details
+          description: "Get biller details"
+          hints:
+            readOnly: true
+          call: "bill-pay.get-biller"
+          with:
+            biller_id: "tools.biller_id"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: validate-bill-payment
+          description: "Validate a bill payment before processing"
+          hints:
+            readOnly: true
+          call: "bill-payment-validator.validate-payment"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: create-spending-control
+          description: "Create a business spending control rule"
+          hints:
+            readOnly: false
+          call: "business-payment-controls.create-control"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: list-spending-controls
+          description: "List business spending control rules"
+          hints:
+            readOnly: true
+          call: "business-payment-controls.list-controls"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: create-virtual-card
+          description: "Create a virtual card for commercial payments"
+          hints:
+            readOnly: false
+          call: "in-control-commercial.create-virtual-card"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-commercial-notifications
+          description: "Retrieve commercial event notifications"
+          hints:
+            readOnly: true
+          call: "commercial-notifications.get-notifications"
+          outputParameters:
+            - type: object
+              mapping: "$."

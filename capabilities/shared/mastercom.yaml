@@ -1,0 +1,70 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Mastercom"
+  description: "API for managing chargebacks, disputes, and retrieval requests in the Mastercard network."
+  tags:
+    - Disputes
+    - Chargebacks
+    - Settlement
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: mastercom
+      baseUri: https://api.mastercard.com/mastercom
+      description: "Mastercard Mastercom API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: chargebacks
+          path: /chargebacks
+          description: "Chargeback management"
+          operations:
+            - name: create-chargeback
+              method: POST
+              description: "Create a chargeback"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  chargeback: "{{tools.chargeback}}"
+            - name: get-chargebacks
+              method: GET
+              description: "Retrieve chargebacks"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+        - name: retrievals
+          path: /retrievals
+          description: "Retrieval request management"
+          operations:
+            - name: create-retrieval
+              method: POST
+              description: "Create a retrieval request"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  retrieval: "{{tools.retrieval}}"

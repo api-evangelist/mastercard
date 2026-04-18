@@ -15,28 +15,28 @@ info:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
 servers:
-  - url: https://sandbox.api.mastercard.com/srci/onboarding
-    description: Sandbox server
-  - url: https://api.mastercard.com/srci/onboarding
-    description: Production server
+- url: https://sandbox.api.mastercard.com/srci/onboarding
+  description: Sandbox server
+- url: https://api.mastercard.com/srci/onboarding
+  description: Production server
 tags:
-  - name: Batch
-  - name: Merchant  Registration
-  - name: Organization
-  - name: Organizations
-  - name: Srci
+- name: Batch
+- name: Merchant  Registration
+- name: Organization
+- name: Organizations
+- name: Srci
 paths:
   /org/{organization_id}/dpas/batch:
     post:
-      summary: Mastercard Store DPA bulk load data
+      summary: Mastercard Store Dpa Bulk Load Data
       description: >
         This API is used to register DPAs in the Mastercard system against a
         customer's organizationId. DPAs can be added through this endpoint
         individually or in bulk.
       operationId: uploadMerchants
       parameters:
-        - $ref: '#/components/parameters/organization_id'
-        - $ref: '#/components/parameters/dpaCorrelationId'
+      - $ref: '#/components/parameters/organization_id'
+      - $ref: '#/components/parameters/dpaCorrelationId'
       requestBody:
         content:
           application/json:
@@ -44,16 +44,16 @@ paths:
               $ref: '#/components/schemas/DpaRequest'
             example:
               dpas:
-                - supportedCardBrands:
-                    - MASTERCARD
-                  dpaData:
-                    dpaName: myShop
-                    dpaPresentationName: myShop
-                    dpaUri: https://example.com/ecom-online-ltd/basket.html
-                  debitTokenRequested: true
-                  merchantCountryCode: US
-                  supportedCheckoutTypes:
-                    - CLICK_TO_PAY
+              - supportedCardBrands:
+                - MASTERCARD
+                dpaData:
+                  dpaName: myShop
+                  dpaPresentationName: myShop
+                  dpaUri: https://example.com/ecom-online-ltd/basket.html
+                debitTokenRequested: true
+                merchantCountryCode: US
+                supportedCheckoutTypes:
+                - CLICK_TO_PAY
         required: true
       responses:
         '200':
@@ -62,6 +62,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DpaResponse'
+              examples:
+                Uploadmerchants200Example:
+                  summary: Default uploadMerchants 200 response
+                  x-microcks-default: true
+                  value:
+                    dpaResults:
+                    - srciDpaId: '500123'
+                      status: SUCCESSFUL
+                      dpaName: example_value
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -71,13 +80,16 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       tags:
-        - Batch
-        - Merchant  Registration
-        - Organization
-        - Organizations
+      - Batch
+      - Merchant  Registration
+      - Organization
+      - Organizations
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
   /org/{organization_id}/dpas/{srci_dpa_id}:
     put:
-      summary: Mastercard Update DPA data
+      summary: Mastercard Update Dpa Data
       description: >
         This API is used to update an existing DPA (as referred to by srciDpaId)
         under a customer's organizationId.
@@ -101,9 +113,9 @@ paths:
         outside of these updatable fields will cause the request to fail.
       operationId: updateMerchant
       parameters:
-        - $ref: '#/components/parameters/organization_id'
-        - $ref: '#/components/parameters/srci_dpa_id'
-        - $ref: '#/components/parameters/dpaCorrelationId'
+      - $ref: '#/components/parameters/organization_id'
+      - $ref: '#/components/parameters/srci_dpa_id'
+      - $ref: '#/components/parameters/dpaCorrelationId'
       requestBody:
         content:
           application/json:
@@ -112,7 +124,7 @@ paths:
             example:
               dpa:
                 supportedCardBrands:
-                  - MASTERCARD
+                - MASTERCARD
                 dpaData:
                   dpaName: myShop
                   dpaPresentationName: myShop_updated
@@ -120,7 +132,7 @@ paths:
                 debitTokenRequested: true
                 merchantCountryCode: US
                 supportedCheckoutTypes:
-                  - CLICK_TO_PAY
+                - CLICK_TO_PAY
         required: true
       responses:
         '200':
@@ -134,20 +146,23 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       tags:
-        - Merchant  Registration
-        - Organization
-        - Organizations
-        - Srci
+      - Merchant  Registration
+      - Organization
+      - Organizations
+      - Srci
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
     delete:
-      summary: Mastercard Delete merchant from customer's organization Id.
+      summary: Mastercard Delete Merchant From Customer's Organization Id.
       description: >-
         This API is used to delete an existing DPA (as referred to by srciDpaId)
         from a customer's organization Id.
       operationId: deleteMerchant
       parameters:
-        - $ref: '#/components/parameters/dpaCorrelationId'
-        - $ref: '#/components/parameters/organization_id'
-        - $ref: '#/components/parameters/srci_dpa_id'
+      - $ref: '#/components/parameters/dpaCorrelationId'
+      - $ref: '#/components/parameters/organization_id'
+      - $ref: '#/components/parameters/srci_dpa_id'
       responses:
         '204':
           description: Returns 204 no content
@@ -160,10 +175,13 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       tags:
-        - Merchant  Registration
-        - Organization
-        - Organizations
-        - Srci
+      - Merchant  Registration
+      - Organization
+      - Organizations
+      - Srci
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
 components:
   parameters:
     organization_id:
@@ -219,14 +237,14 @@ components:
         contained in the request made outside of these updatable fields will
         cause the request to fail.
       required:
-        - dpa
+      - dpa
       properties:
         dpa:
           $ref: '#/components/schemas/Dpa'
     DpaRequest:
       type: object
       required:
-        - dpas
+      - dpas
       properties:
         dpas:
           type: array
@@ -241,13 +259,14 @@ components:
             Application (DPA) objects. Each DPA object is used to create a
             corresponding DPA. A minimum of 1 DPA object must be provided in the
             request.
+          example: []
     Dpa:
       type: object
       description: An array of objects to contain DPA registration details.
       required:
-        - supportedCardBrands
-        - dpaData
-        - merchantCountryCode
+      - supportedCardBrands
+      - dpaData
+      - merchantCountryCode
       properties:
         supportedCardBrands:
           type: array
@@ -257,10 +276,10 @@ components:
           maxItems: 4
           minItems: 1
           example:
-            - MASTERCARD
-            - VISA
-            - DISCOVER
-            - AMEX
+          - MASTERCARD
+          - VISA
+          - DISCOVER
+          - AMEX
           items:
             type: string
             maxLength: 20
@@ -287,9 +306,9 @@ components:
             CLICK_TO_PAY, GUEST_CHECKOUT_TOKENIZATION and
             CARD_ON_FILE_TOKENIZATION.
           example:
-            - CLICK_TO_PAY
-            - GUEST_CHECKOUT_TOKENIZATION
-            - CARD_ON_FILE_TOKENIZATION
+          - CLICK_TO_PAY
+          - GUEST_CHECKOUT_TOKENIZATION
+          - CARD_ON_FILE_TOKENIZATION
           items:
             type: string
         threeDSDefaultdata:
@@ -298,11 +317,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AcquirerData'
+          example: []
     DpaData:
       type: object
       required:
-        - dpaName
-        - dpaUri
+      - dpaName
+      - dpaUri
       properties:
         dpaName:
           type: string
@@ -333,8 +353,8 @@ components:
             Website or URL where the payment experience is placed on the
             checkout page.
           example:
-            - http://companyuri1.com
-            - http://companyuri2.com
+          - http://companyuri1.com
+          - http://companyuri2.com
           items:
             type: string
             maxLength: 1024
@@ -403,8 +423,8 @@ components:
         acquirerMerchantId and acquirerBin. This object may be used to improve
         transaction acceptance rates.
       required:
-        - acquirerIca
-        - acquirerMerchantId
+      - acquirerIca
+      - acquirerMerchantId
       properties:
         acquirerIca:
           type: string
@@ -450,12 +470,12 @@ components:
         used.
       maxItems: 200
       example:
-        - '0020'
-        - '4444'
-        - '1111'
-        - '4442'
-        - '5732'
-        - '5733'
+      - '0020'
+      - '4444'
+      - '1111'
+      - '4442'
+      - '5732'
+      - '5733'
       items:
         type: string
         maxLength: 4
@@ -522,6 +542,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DpaResults'
+          example: []
     DpaResults:
       type: object
       description: Status of uploaded dpas
@@ -543,8 +564,8 @@ components:
             see the error object for more details.
           example: SUCCESSFUL
           enum:
-            - SUCCESSFUL
-            - FAILED
+          - SUCCESSFUL
+          - FAILED
         dpaName:
           type: string
           description: Registered Legal Name of the Merchant
@@ -565,9 +586,9 @@ components:
         Please note: In the event of a SUCCESSFUL response, this error object
         may be sent as NULL.
       required:
-        - status
-        - reason
-        - message
+      - status
+      - reason
+      - message
       properties:
         status:
           type: integer
@@ -595,13 +616,14 @@ components:
             (DPA) item action.
           items:
             $ref: '#/components/schemas/ErrorDetail'
+          example: []
     ErrorDetail:
       type: object
       description: >-
         Error associated with a failed Digital Payment Application (DPA) item
         action.
       required:
-        - reason
+      - reason
       properties:
         reason:
           type: string
@@ -678,10 +700,10 @@ components:
           reason: INVALID_ARGUMENT
           message: Invalid orgId or clientId provided in request
           errordetail:
-            - reason: INVALID_VALUE
-              sourceType: BODY
-              message: Invalid orgId or clientId provided in request
-              source: name
+          - reason: INVALID_VALUE
+            sourceType: BODY
+            message: Invalid orgId or clientId provided in request
+            source: name
     UnAuthorized:
       value:
         error:
@@ -689,10 +711,10 @@ components:
           reason: DECLINED
           message: Unauthorized - Access Not Granted
           errordetail:
-            - reason: DECLINED
-              sourceType: Gateway
-              message: Unauthorized - Access Not Granted
-              source: Gateway
+          - reason: DECLINED
+            sourceType: Gateway
+            message: Unauthorized - Access Not Granted
+            source: Gateway
     ServerError:
       value:
         error:
@@ -709,7 +731,7 @@ components:
           reason: AUTHENTICATION_FAILED
           message:
           errordetail:
-            - reason: AUTHENTICATION_FAILED
-              sourceType: Gateway
-              message: OAuth Signature parameter failed verification.
-              source: Gateway
+          - reason: AUTHENTICATION_FAILED
+            sourceType: Gateway
+            message: OAuth Signature parameter failed verification.
+            source: Gateway

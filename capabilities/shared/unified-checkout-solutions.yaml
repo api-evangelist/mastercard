@@ -1,0 +1,46 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Unified Checkout Solutions"
+  description: "Unified checkout API supporting a suite of digital commerce use cases for streamlined online checkout."
+  tags:
+    - Checkout
+    - E-Commerce
+    - Digital Payments
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: unified-checkout
+      baseUri: https://api.mastercard.com/unified-checkout
+      description: "Mastercard Unified Checkout Solutions API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: sessions
+          path: /sessions
+          description: "Unified checkout session management"
+          operations:
+            - name: create-session
+              method: POST
+              description: "Create a unified checkout session"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  session: "{{tools.session}}"

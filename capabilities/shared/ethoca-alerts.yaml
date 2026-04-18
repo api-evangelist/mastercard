@@ -1,0 +1,55 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Ethoca Alerts"
+  description: "Ethoca Alerts API enabling merchants and partners to receive and manage fraud alerts to prevent chargebacks."
+  tags:
+    - Fraud Prevention
+    - Ethoca
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: ethoca-alerts
+      baseUri: https://api.mastercard.com/ethoca/alerts
+      description: "Mastercard Ethoca Alerts API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: alerts
+          path: /alerts
+          description: "Fraud alert management"
+          operations:
+            - name: get-alerts
+              method: GET
+              description: "Retrieve fraud alerts"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+            - name: update-alert
+              method: PUT
+              description: "Update a fraud alert status"
+              inputParameters:
+                - name: alert_id
+                  in: path
+                  type: string
+                  required: true
+                  description: "Alert identifier"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."

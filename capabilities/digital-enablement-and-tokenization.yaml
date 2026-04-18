@@ -1,0 +1,171 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Digital Enablement and Tokenization"
+  description: "Unified workflow for digital payment teams and issuer technology to manage card tokenization, MDES digital enablement, Click to Pay enrollment, and push provisioning to digital wallets."
+  tags:
+    - Mastercard
+    - Tokenization
+    - MDES
+    - Digital Payments
+    - Click to Pay
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - import: mdes-digital
+      location: ./shared/mdes-digital-enablement.yaml
+    - import: mdes-token-connect
+      location: ./shared/mdes-token-connect.yaml
+    - import: mdes-pre-digitization
+      location: ./shared/mdes-pre-digitization.yaml
+    - import: mdes-bulk-tokenization
+      location: ./shared/mdes-bulk-tokenization.yaml
+    - import: token-requestor-id
+      location: ./shared/token-requestor-id.yaml
+    - import: issuer-click-to-pay
+      location: ./shared/issuer-enrollment-click-to-pay.yaml
+
+  exposes:
+    - type: rest
+      port: 8088
+      namespace: digital-token-api
+      description: "Unified REST API for digital enablement and tokenization."
+      resources:
+        - path: /v1/tokens
+          name: tokens
+          description: "Token lifecycle management"
+          operations:
+            - method: POST
+              name: tokenize-card
+              description: "Tokenize a payment card"
+              call: "mdes-digital.tokenize"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/eligibility
+          name: eligibility
+          description: "Pre-digitization eligibility"
+          operations:
+            - method: POST
+              name: check-digitization-eligibility
+              description: "Check card eligibility for digitization"
+              call: "mdes-pre-digitization.check-eligibility"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/bulk-tokenization
+          name: bulk-tokenization
+          description: "Bulk tokenization operations"
+          operations:
+            - method: POST
+              name: submit-bulk-tokenization
+              description: "Submit bulk tokenization request"
+              call: "mdes-bulk-tokenization.submit-bulk-tokenization"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/provisioning
+          name: provisioning
+          description: "Push provisioning to wallets"
+          operations:
+            - method: POST
+              name: push-provision
+              description: "Push provision a token to a wallet"
+              call: "mdes-token-connect.push-provision"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+
+    - type: mcp
+      port: 9098
+      namespace: digital-token-mcp
+      transport: http
+      description: "MCP server for AI-assisted digital enablement and tokenization."
+      tools:
+        - name: tokenize-card
+          description: "Tokenize a payment card via MDES"
+          hints:
+            readOnly: false
+          call: "mdes-digital.tokenize"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-token-details
+          description: "Get token details"
+          hints:
+            readOnly: true
+          call: "mdes-digital.get-token"
+          with:
+            token_id: "tools.token_id"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: suspend-token
+          description: "Suspend an active token"
+          hints:
+            readOnly: false
+          call: "mdes-digital.suspend-token"
+          with:
+            token_id: "tools.token_id"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: delete-token
+          description: "Delete a token"
+          hints:
+            readOnly: false
+            destructive: true
+          call: "mdes-digital.delete-token"
+          with:
+            token_id: "tools.token_id"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: check-digitization-eligibility
+          description: "Check if a card is eligible for digitization"
+          hints:
+            readOnly: true
+          call: "mdes-pre-digitization.check-eligibility"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: push-provision-to-wallet
+          description: "Push provision a token to a digital wallet"
+          hints:
+            readOnly: false
+          call: "mdes-token-connect.push-provision"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: submit-bulk-tokenization
+          description: "Submit a bulk tokenization request for a card portfolio"
+          hints:
+            readOnly: false
+          call: "mdes-bulk-tokenization.submit-bulk-tokenization"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: register-token-requestor
+          description: "Register a new token requestor"
+          hints:
+            readOnly: false
+          call: "token-requestor-id.register-requestor"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: enroll-issuer-click-to-pay
+          description: "Enroll an issuer in Click to Pay"
+          hints:
+            readOnly: false
+          call: "issuer-click-to-pay.enroll-issuer"
+          outputParameters:
+            - type: object
+              mapping: "$."

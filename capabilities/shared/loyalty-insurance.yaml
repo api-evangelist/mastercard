@@ -1,0 +1,46 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Loyalty Insurance"
+  description: "API for managing insurance benefits associated with loyalty card programs."
+  tags:
+    - Loyalty
+    - Insurance
+    - Benefits
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: loyalty-insurance
+      baseUri: https://api.mastercard.com/loyalty/insurance
+      description: "Mastercard Loyalty Insurance API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: claims
+          path: /claims
+          description: "Insurance claim operations"
+          operations:
+            - name: submit-claim
+              method: POST
+              description: "Submit an insurance claim"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  claim: "{{tools.claim}}"

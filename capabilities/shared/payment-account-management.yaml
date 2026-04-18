@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Payment Account Management"
+  description: "API for managing payment accounts including lifecycle events and account data."
+  tags:
+    - Account Management
+    - Payments
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: payment-account-mgmt
+      baseUri: https://api.mastercard.com/payment-account-management
+      description: "Mastercard Payment Account Management API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: accounts
+          path: /accounts
+          description: "Payment account management"
+          operations:
+            - name: manage-account
+              method: POST
+              description: "Manage a payment account"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  account: "{{tools.account}}"

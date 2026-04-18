@@ -1,0 +1,57 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Merchant Locations"
+  description: "Provides access to Mastercard merchant location data for finding merchants by location, category, and features."
+  tags:
+    - Merchant
+    - Locations
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: merchant-locations
+      baseUri: https://api.mastercard.com/locations/merchants
+      description: "Mastercard Merchant Locations API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: countries
+          path: /countries
+          description: "Country data for merchant locations"
+          operations:
+            - name: get-countries
+              method: GET
+              description: "Returns a list of countries with merchant locations"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+        - name: searches
+          path: /searches
+          description: "Merchant location search operations"
+          operations:
+            - name: search-merchants
+              method: POST
+              description: "Search for merchant locations"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  location: "{{tools.location}}"

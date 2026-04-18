@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Places"
+  description: "Location intelligence API providing merchant place data and insights."
+  tags:
+    - Places
+    - Location Intelligence
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: places
+      baseUri: https://api.mastercard.com/places
+      description: "Mastercard Places API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: places
+          path: /places
+          description: "Place search and data"
+          operations:
+            - name: search-places
+              method: POST
+              description: "Search for merchant places"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  search: "{{tools.search}}"

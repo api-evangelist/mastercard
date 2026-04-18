@@ -1,0 +1,46 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Community Pass Payments"
+  description: "API for payment processing within the Community Pass financial inclusion ecosystem."
+  tags:
+    - Community Pass
+    - Payments
+    - Financial Inclusion
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: community-pass-payments
+      baseUri: https://api.mastercard.com/community-pass/payments
+      description: "Mastercard Community Pass Payment APIs"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: payments
+          path: /payments
+          description: "Community Pass payment operations"
+          operations:
+            - name: process-payment
+              method: POST
+              description: "Process a Community Pass payment"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  payment: "{{tools.payment}}"

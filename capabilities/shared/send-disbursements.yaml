@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Send Disbursements"
+  description: "API for disbursement transactions enabling businesses to send payments to consumers."
+  tags:
+    - Money Transfer
+    - Disbursements
+    - Mastercard Send
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: send-disbursements
+      baseUri: https://api.mastercard.com/send/v1/partners
+      description: "Mastercard Send Disbursements API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: disbursements
+          path: /disbursements
+          description: "Disbursement operations"
+          operations:
+            - name: create-disbursement
+              method: POST
+              description: "Create a disbursement transaction"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  disbursement: "{{tools.disbursement}}"

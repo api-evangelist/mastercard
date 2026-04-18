@@ -1,0 +1,183 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Fraud Prevention and Risk"
+  description: "Unified workflow for fraud analysts and risk managers to detect, report, and manage fraud using Mastercard's fraud database, Ethoca alerts, merchant screening (MATCH), and onboarding risk checks."
+  tags:
+    - Mastercard
+    - Fraud Prevention
+    - Risk Management
+    - Ethoca
+    - MATCH
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - import: confirmed-fraud
+      location: ./shared/confirmed-fraud.yaml
+    - import: suspected-fraud
+      location: ./shared/suspected-fraud.yaml
+    - import: ethoca-alerts
+      location: ./shared/ethoca-alerts.yaml
+    - import: ethoca-consumer-clarity
+      location: ./shared/ethoca-consumer-clarity.yaml
+    - import: ethoca-merchant-services
+      location: ./shared/ethoca-merchant-self-services.yaml
+    - import: onboard-risk-check
+      location: ./shared/onboard-risk-check.yaml
+    - import: match-pro
+      location: ./shared/match-pro.yaml
+
+  exposes:
+    - type: rest
+      port: 8082
+      namespace: fraud-risk-api
+      description: "Unified REST API for Mastercard fraud prevention and risk management."
+      resources:
+        - path: /v1/confirmed-frauds
+          name: confirmed-frauds
+          description: "Confirmed fraud record management"
+          operations:
+            - method: POST
+              name: submit-confirmed-fraud
+              description: "Submit a confirmed fraud record"
+              call: "confirmed-fraud.submit-mastercard-fraud"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/suspected-frauds
+          name: suspected-frauds
+          description: "Suspected fraud record management"
+          operations:
+            - method: POST
+              name: submit-suspected-fraud
+              description: "Submit a suspected fraud record"
+              call: "suspected-fraud.submit-suspected-fraud"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/alerts
+          name: alerts
+          description: "Ethoca fraud alerts"
+          operations:
+            - method: GET
+              name: get-fraud-alerts
+              description: "Retrieve Ethoca fraud alerts"
+              call: "ethoca-alerts.get-alerts"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/transaction-clarity
+          name: transaction-clarity
+          description: "Transaction detail lookups for dispute prevention"
+          operations:
+            - method: POST
+              name: lookup-transaction
+              description: "Look up transaction details for clarity"
+              call: "ethoca-consumer-clarity.lookup-transaction"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/merchant-risk-checks
+          name: merchant-risk-checks
+          description: "Merchant onboarding risk assessment"
+          operations:
+            - method: POST
+              name: check-merchant-risk
+              description: "Perform risk check on a merchant"
+              call: "onboard-risk-check.check-merchant-risk"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/terminated-merchants
+          name: terminated-merchants
+          description: "MATCH terminated merchant screening"
+          operations:
+            - method: POST
+              name: search-terminated-merchants
+              description: "Search the MATCH database"
+              call: "match-pro.search-terminated-merchants"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+
+    - type: mcp
+      port: 9092
+      namespace: fraud-risk-mcp
+      transport: http
+      description: "MCP server for AI-assisted fraud prevention and risk management."
+      tools:
+        - name: submit-confirmed-fraud
+          description: "Submit a confirmed fraud record to the Mastercard Fraud and Loss Database"
+          hints:
+            readOnly: false
+          call: "confirmed-fraud.submit-mastercard-fraud"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: submit-suspected-fraud
+          description: "Submit a suspected fraud record"
+          hints:
+            readOnly: false
+          call: "suspected-fraud.submit-suspected-fraud"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-fraud-alerts
+          description: "Retrieve Ethoca fraud alerts for chargeback prevention"
+          hints:
+            readOnly: true
+          call: "ethoca-alerts.get-alerts"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: update-fraud-alert
+          description: "Update the status of an Ethoca fraud alert"
+          hints:
+            readOnly: false
+          call: "ethoca-alerts.update-alert"
+          with:
+            alert_id: "tools.alert_id"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: lookup-transaction-clarity
+          description: "Look up transaction details to resolve disputes before chargebacks"
+          hints:
+            readOnly: true
+          call: "ethoca-consumer-clarity.lookup-transaction"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: check-merchant-risk
+          description: "Assess merchant risk during onboarding"
+          hints:
+            readOnly: true
+          call: "onboard-risk-check.check-merchant-risk"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: search-match-database
+          description: "Search the MATCH database for terminated merchants"
+          hints:
+            readOnly: true
+          call: "match-pro.search-terminated-merchants"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-fraud-statuses
+          description: "Get available fraud record statuses"
+          hints:
+            readOnly: true
+            idempotent: true
+          call: "confirmed-fraud.get-fraud-statuses"
+          outputParameters:
+            - type: object
+              mapping: "$."

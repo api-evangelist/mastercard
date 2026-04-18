@@ -1,0 +1,137 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Disputes and Settlement"
+  description: "Unified workflow for dispute managers and back-office teams to manage chargebacks, retrieval requests, transaction processing, and settlement through Mastercom and processing APIs."
+  tags:
+    - Mastercard
+    - Disputes
+    - Chargebacks
+    - Settlement
+    - Mastercom
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - import: mastercom
+      location: ./shared/mastercom.yaml
+    - import: processing-core
+      location: ./shared/processing-core.yaml
+    - import: ethoca-consumer-clarity
+      location: ./shared/ethoca-consumer-clarity.yaml
+    - import: currency-conversion
+      location: ./shared/currency-conversion.yaml
+
+  exposes:
+    - type: rest
+      port: 8092
+      namespace: disputes-settlement-api
+      description: "Unified REST API for dispute management and settlement."
+      resources:
+        - path: /v1/chargebacks
+          name: chargebacks
+          description: "Chargeback management"
+          operations:
+            - method: POST
+              name: create-chargeback
+              description: "Create a chargeback"
+              call: "mastercom.create-chargeback"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+            - method: GET
+              name: get-chargebacks
+              description: "Retrieve chargebacks"
+              call: "mastercom.get-chargebacks"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/retrievals
+          name: retrievals
+          description: "Retrieval request management"
+          operations:
+            - method: POST
+              name: create-retrieval
+              description: "Create a retrieval request"
+              call: "mastercom.create-retrieval"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/transaction-clarity
+          name: transaction-clarity
+          description: "Transaction clarity for dispute resolution"
+          operations:
+            - method: POST
+              name: lookup-transaction-clarity
+              description: "Look up transaction details for dispute resolution"
+              call: "ethoca-consumer-clarity.lookup-transaction"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+
+    - type: mcp
+      port: 9102
+      namespace: disputes-settlement-mcp
+      transport: http
+      description: "MCP server for AI-assisted dispute management and settlement."
+      tools:
+        - name: create-chargeback
+          description: "Create a chargeback in Mastercom"
+          hints:
+            readOnly: false
+          call: "mastercom.create-chargeback"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-chargebacks
+          description: "Retrieve chargebacks from Mastercom"
+          hints:
+            readOnly: true
+          call: "mastercom.get-chargebacks"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: create-retrieval-request
+          description: "Create a retrieval request in Mastercom"
+          hints:
+            readOnly: false
+          call: "mastercom.create-retrieval"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: lookup-transaction-for-dispute
+          description: "Look up transaction details to aid dispute resolution"
+          hints:
+            readOnly: true
+          call: "ethoca-consumer-clarity.lookup-transaction"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: authorize-transaction
+          description: "Authorize a transaction through core processing"
+          hints:
+            readOnly: false
+          call: "processing-core.authorize"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-settlement-rate
+          description: "Get currency conversion rate for settlement"
+          hints:
+            readOnly: true
+            idempotent: true
+          call: "currency-conversion.get-conversion-rate"
+          with:
+            fxDate: "tools.fxDate"
+            transCurr: "tools.transCurr"
+            crdhldBillCurr: "tools.crdhldBillCurr"
+          outputParameters:
+            - type: object
+              mapping: "$."

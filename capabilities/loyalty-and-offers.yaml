@@ -1,0 +1,218 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Loyalty and Offers"
+  description: "Unified workflow for loyalty managers and marketing teams to manage loyalty programs, personalized offers, rewards, benefits, and the Priceless experiences platform."
+  tags:
+    - Mastercard
+    - Loyalty
+    - Offers
+    - Rewards
+    - Priceless
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - import: loyalty-promotions
+      location: ./shared/loyalty-promotions.yaml
+    - import: loyalty-user-mgmt
+      location: ./shared/loyalty-user-management.yaml
+    - import: loyalty-insurance
+      location: ./shared/loyalty-insurance.yaml
+    - import: personalized-offers
+      location: ./shared/personalized-offers.yaml
+    - import: offers-merchant-content
+      location: ./shared/offers-merchant-content.yaml
+    - import: priceless-platform
+      location: ./shared/priceless-platform.yaml
+    - import: benefit-eligibility
+      location: ./shared/benefit-eligibility.yaml
+    - import: benefit-allocation
+      location: ./shared/benefit-allocation.yaml
+    - import: pay-with-rewards
+      location: ./shared/pay-with-rewards.yaml
+    - import: donate
+      location: ./shared/donate.yaml
+    - import: points-activity
+      location: ./shared/points-activity.yaml
+
+  exposes:
+    - type: rest
+      port: 8085
+      namespace: loyalty-offers-api
+      description: "Unified REST API for Mastercard loyalty and offers workflows."
+      resources:
+        - path: /v1/promotions
+          name: promotions
+          description: "Loyalty promotions"
+          operations:
+            - method: GET
+              name: list-promotions
+              description: "List available loyalty promotions"
+              call: "loyalty-promotions.list-promotions"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/offers
+          name: offers
+          description: "Personalized offers"
+          operations:
+            - method: POST
+              name: get-personalized-offers
+              description: "Get personalized offers for a cardholder"
+              call: "personalized-offers.get-offers"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/experiences
+          name: experiences
+          description: "Priceless experiences"
+          operations:
+            - method: GET
+              name: list-experiences
+              description: "List Priceless experiences"
+              call: "priceless-platform.list-experiences"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/eligibility
+          name: eligibility
+          description: "Benefit eligibility checks"
+          operations:
+            - method: POST
+              name: check-eligibility
+              description: "Check cardholder benefit eligibility"
+              call: "benefit-eligibility.check-eligibility"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+
+    - type: mcp
+      port: 9095
+      namespace: loyalty-offers-mcp
+      transport: http
+      description: "MCP server for AI-assisted loyalty and offers management."
+      tools:
+        - name: list-promotions
+          description: "List available loyalty promotions"
+          hints:
+            readOnly: true
+          call: "loyalty-promotions.list-promotions"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: enroll-in-promotion
+          description: "Enroll a cardholder in a loyalty promotion"
+          hints:
+            readOnly: false
+          call: "loyalty-promotions.enroll-promotion"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: create-loyalty-user
+          description: "Create a loyalty program user"
+          hints:
+            readOnly: false
+          call: "loyalty-user-mgmt.create-user"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-loyalty-user
+          description: "Get loyalty user details"
+          hints:
+            readOnly: true
+          call: "loyalty-user-mgmt.get-user"
+          with:
+            user_id: "tools.user_id"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-personalized-offers
+          description: "Get personalized merchant offers for a cardholder"
+          hints:
+            readOnly: true
+          call: "personalized-offers.get-offers"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: activate-offer
+          description: "Activate an offer for a cardholder"
+          hints:
+            readOnly: false
+          call: "personalized-offers.activate-offer"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: check-benefit-eligibility
+          description: "Check cardholder benefit eligibility by PAN"
+          hints:
+            readOnly: true
+          call: "benefit-eligibility.check-eligibility"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: allocate-benefit
+          description: "Allocate a benefit to a cardholder"
+          hints:
+            readOnly: false
+          call: "benefit-allocation.allocate-benefit"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: pay-with-rewards
+          description: "Apply loyalty rewards as payment"
+          hints:
+            readOnly: false
+          call: "pay-with-rewards.pay-with-rewards"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-points-balance
+          description: "Get loyalty points balance"
+          hints:
+            readOnly: true
+          call: "points-activity.get-points-balance"
+          with:
+            account_id: "tools.account_id"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: list-priceless-experiences
+          description: "List available Priceless experiences"
+          hints:
+            readOnly: true
+          call: "priceless-platform.list-experiences"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: submit-insurance-claim
+          description: "Submit a loyalty insurance claim"
+          hints:
+            readOnly: false
+          call: "loyalty-insurance.submit-claim"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: create-donation
+          description: "Create a charitable donation"
+          hints:
+            readOnly: false
+          call: "donate.create-donation"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-merchant-offer-content
+          description: "Get merchant offer content and promotional materials"
+          hints:
+            readOnly: true
+          call: "offers-merchant-content.get-merchant-content"
+          outputParameters:
+            - type: object
+              mapping: "$."

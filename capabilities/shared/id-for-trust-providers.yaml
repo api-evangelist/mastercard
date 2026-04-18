@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard ID for Trust Providers"
+  description: "API for trust service providers to integrate with Mastercard's digital identity network for identity verification."
+  tags:
+    - Identity
+    - Trust Providers
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: id-trust-providers
+      baseUri: https://api.mastercard.com/id/trust-providers
+      description: "Mastercard ID for Trust Providers API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: trust-services
+          path: /trust-services
+          description: "Trust provider operations"
+          operations:
+            - name: submit-verification
+              method: POST
+              description: "Submit identity verification as a trust provider"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  verification: "{{tools.verification}}"

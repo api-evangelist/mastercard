@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Onboard Risk Check"
+  description: "API for merchant risk assessment during onboarding to detect potential fraud and compliance risks."
+  tags:
+    - Risk
+    - Merchant Onboarding
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: onboard-risk-check
+      baseUri: https://api.mastercard.com/onboard/risk-check
+      description: "Mastercard Onboard Risk Check API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: risk-checks
+          path: /risk-checks
+          description: "Merchant risk assessment"
+          operations:
+            - name: check-merchant-risk
+              method: POST
+              description: "Perform risk assessment on a merchant"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  merchant: "{{tools.merchant}}"

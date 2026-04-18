@@ -16,20 +16,20 @@ info:
     name: API Support
     email: apisupport@mastercard.com
 servers:
-  - description: Production (open dropdown)
-    url: https://api.mastercard.com/abu/accounts/
-  - description: Sandbox (open dropdown)
-    url: https://sandbox.api.mastercard.com/abu/accounts/
+- description: Production (open dropdown)
+  url: https://api.mastercard.com/abu/accounts/
+- description: Sandbox (open dropdown)
+  url: https://sandbox.api.mastercard.com/abu/accounts/
 tags:
-  - name: Account  Subscriptions
-  - name: Inquiries
-  - name: Subscriptions
+- name: Account  Subscriptions
+- name: Inquiries
+- name: Subscriptions
 paths:
   /inquiries:
     post:
-      summary: Mastercard Inquiry request for an update on an account.
+      summary: Mastercard Inquiry Request for an Update on an Account.
       tags:
-        - Inquiries
+      - Inquiries
       description: >-
         An inquiry request is used to receive the most up-to-date account
         information available from issuers at any time. The parameters provided
@@ -46,12 +46,15 @@ paths:
           $ref: '#/components/responses/BadRequestErrorResponse'
         '401':
           $ref: '#/components/responses/UnauthorizedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
   /subscriptions:
     post:
       summary: >-
-        Mastercard Subscriptions to accounts to automatically receive notifications when an update to an account occurs.
+        Mastercard Subscriptions to Accounts to Automatically Receive Notifications When an Update to an Account Occurs.
       tags:
-        - Subscriptions
+      - Subscriptions
       description: >-
         A subscription request is used to watch an account. When an update is
         made available from the issuing banks, ABU will send a notification to
@@ -69,13 +72,16 @@ paths:
           $ref: '#/components/responses/BadRequestErrorResponse'
         '401':
           $ref: '#/components/responses/UnauthorizedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
   /subscription-inquiries:
     post:
       summary: >-
-        Mastercard Inquire on a subscription to determine if an account is already being watched or not.
+        Mastercard Inquire on a Subscription to Determine if an Account Is Already Being Watched or Not.
       tags:
-        - Inquiries
-        - Subscriptions
+      - Inquiries
+      - Subscriptions
       description: >-
         An inquiry request is used to check if an account is already being
         watched or not. Based on the response back, the ABU Integrator can
@@ -91,13 +97,16 @@ paths:
           $ref: '#/components/responses/BadRequestErrorResponse'
         '401':
           $ref: '#/components/responses/UnauthorizedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
   /subscription-deletions:
     post:
       summary: >-
-        Mastercard Unsubscribe from an account to stop receiving updates for account information in the future.
+        Mastercard Unsubscribe From an Account to Stop Receiving Updates for Account Information in the Future.
       tags:
-        - Account  Subscriptions
-        - Subscriptions
+      - Account  Subscriptions
+      - Subscriptions
       description: >-
         ABU Integrators can unsubscribe from an account to stop automatically
         receiving notifications with account information when updates occur.
@@ -111,6 +120,9 @@ paths:
           $ref: '#/components/responses/BadRequestErrorResponse'
         '401':
           $ref: '#/components/responses/UnauthorizedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
 components:
   examples:
     AccountInquiryValid:
@@ -147,20 +159,20 @@ components:
       value:
         Errors:
           Error:
-            - Source: Security.Credential
-              ReasonCode: AUTHENTICATION_FAILED
-              Description: Unauthorized Access to Web Service.
-              Recoverable: false
-              Details: No ICA configured for clientID
+          - Source: Security.Credential
+            ReasonCode: AUTHENTICATION_FAILED
+            Description: Unauthorized Access to Web Service.
+            Recoverable: false
+            Details: No ICA configured for clientID
     BadRequestExample:
       value:
         Errors:
           Error:
-            - Source: Validation
-              ReasonCode: ICA_VALUE_REQUIRED
-              Description: ICA required for ABU client eligibility validation.
-              Recoverable: false
-              Details: ICA is mandatory.
+          - Source: Validation
+            ReasonCode: ICA_VALUE_REQUIRED
+            Description: ICA required for ABU client eligibility validation.
+            Recoverable: false
+            Details: ICA is mandatory.
   requestBodies:
     InquiryRequest:
       description: >-
@@ -201,8 +213,8 @@ components:
       description: Properties common to all accounts
       type: object
       required:
-        - accountNumber
-        - expiryDate
+      - accountNumber
+      - expiryDate
       properties:
         accountNumber:
           $ref: '#/components/schemas/AccountNumber'
@@ -212,8 +224,8 @@ components:
       description: Properties common to all customer
       type: object
       required:
-        - ica
-        - merchantId
+      - ica
+      - merchantId
       properties:
         ica:
           $ref: '#/components/schemas/Ica'
@@ -221,12 +233,12 @@ components:
           $ref: '#/components/schemas/MerchantId'
     OutInquiry:
       allOf:
-        - $ref: '#/components/schemas/AccountUpdate'
-        - type: object
+      - $ref: '#/components/schemas/AccountUpdate'
+      - type: object
     OutSubscription:
       allOf:
-        - $ref: '#/components/schemas/AccountUpdate'
-        - type: object
+      - $ref: '#/components/schemas/AccountUpdate'
+      - type: object
     AccountUpdate:
       type: object
       properties:
@@ -248,14 +260,14 @@ components:
     ErrorWrapper:
       type: object
       required:
-        - Errors
+      - Errors
       properties:
         Errors:
           $ref: '#/components/schemas/Errors'
     Errors:
       type: object
       required:
-        - Error
+      - Error
       properties:
         Error:
           $ref: '#/components/schemas/ErrorList'
@@ -371,39 +383,39 @@ components:
       description: Representation of an account
       type: object
       allOf:
-        - $ref: '#/components/schemas/BaseAccount'
-        - type: object
+      - $ref: '#/components/schemas/BaseAccount'
+      - type: object
     Customer:
       description: Representation of a customer
       type: object
       allOf:
-        - $ref: '#/components/schemas/BaseCustomer'
-        - type: object
-          properties:
-            subMerchantId:
-              $ref: '#/components/schemas/SubMerchantId'
+      - $ref: '#/components/schemas/BaseCustomer'
+      - type: object
+        properties:
+          subMerchantId:
+            $ref: '#/components/schemas/SubMerchantId'
     SubscriptionInquiry:
       allOf:
-        - $ref: '#/components/schemas/CustomerAccount'
-        - type: object
+      - $ref: '#/components/schemas/CustomerAccount'
+      - type: object
     SubscriptionDeletion:
       allOf:
-        - $ref: '#/components/schemas/CustomerAccount'
-        - type: object
+      - $ref: '#/components/schemas/CustomerAccount'
+      - type: object
     Subscription:
       allOf:
-        - $ref: '#/components/schemas/CustomerAccount'
-        - type: object
+      - $ref: '#/components/schemas/CustomerAccount'
+      - type: object
     Inquiry:
       allOf:
-        - $ref: '#/components/schemas/CustomerAccount'
-        - type: object
+      - $ref: '#/components/schemas/CustomerAccount'
+      - type: object
     CustomerAccount:
       type: object
       required:
-        - requestId
-        - customer
-        - account
+      - requestId
+      - customer
+      - account
       properties:
         requestId:
           type: string

@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Contactless Reader SDK"
+  description: "SDK API for enabling contactless payment acceptance on mobile devices."
+  tags:
+    - Contactless
+    - POS
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: contactless-reader
+      baseUri: https://api.mastercard.com/contactless-reader
+      description: "Mastercard Contactless Reader SDK API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: readers
+          path: /readers
+          description: "Contactless reader management"
+          operations:
+            - name: register-reader
+              method: POST
+              description: "Register a contactless reader device"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  reader: "{{tools.reader}}"

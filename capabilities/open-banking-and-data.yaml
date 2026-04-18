@@ -1,0 +1,109 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Open Banking and Data Analytics"
+  description: "Unified workflow for fintech developers and data analysts to access open banking data, consumer-permissioned financial data, and credit analytics across Mastercard's data platform."
+  tags:
+    - Mastercard
+    - Open Banking
+    - Data Analytics
+    - Credit Analytics
+    - Fintech
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - import: open-banking
+      location: ./shared/open-banking-solutions.yaml
+    - import: consumer-credit-analytics
+      location: ./shared/consumer-credit-analytics.yaml
+    - import: small-biz-credit-analytics
+      location: ./shared/small-business-credit-analytics.yaml
+
+  exposes:
+    - type: rest
+      port: 8086
+      namespace: open-banking-data-api
+      description: "Unified REST API for open banking and data analytics."
+      resources:
+        - path: /v1/accounts
+          name: accounts
+          description: "Open banking account data"
+          operations:
+            - method: GET
+              name: get-accounts
+              description: "Retrieve consumer accounts"
+              call: "open-banking.get-accounts"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/consumer-analytics
+          name: consumer-analytics
+          description: "Consumer credit analytics"
+          operations:
+            - method: POST
+              name: get-consumer-analytics
+              description: "Get consumer credit analytics"
+              call: "consumer-credit-analytics.get-credit-analytics"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/small-business-analytics
+          name: small-business-analytics
+          description: "Small business credit analytics"
+          operations:
+            - method: POST
+              name: get-small-business-analytics
+              description: "Get small business credit analytics"
+              call: "small-biz-credit-analytics.get-sb-credit-analytics"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+
+    - type: mcp
+      port: 9096
+      namespace: open-banking-data-mcp
+      transport: http
+      description: "MCP server for AI-assisted open banking and data analytics."
+      tools:
+        - name: get-consumer-accounts
+          description: "Retrieve consumer accounts via open banking"
+          hints:
+            readOnly: true
+          call: "open-banking.get-accounts"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-account-transactions
+          description: "Retrieve account transactions via open banking"
+          hints:
+            readOnly: true
+          call: "open-banking.get-transactions"
+          with:
+            account_id: "tools.account_id"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-consumer-credit-analytics
+          description: "Get consumer credit analytics and spending insights"
+          hints:
+            readOnly: true
+          call: "consumer-credit-analytics.get-credit-analytics"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-small-business-credit-analytics
+          description: "Get small business credit analytics"
+          hints:
+            readOnly: true
+          call: "small-biz-credit-analytics.get-sb-credit-analytics"
+          outputParameters:
+            - type: object
+              mapping: "$."

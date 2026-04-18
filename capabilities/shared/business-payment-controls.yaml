@@ -1,0 +1,54 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Business Payment Controls"
+  description: "API for configurable spending controls on business cards with transaction-level reporting."
+  tags:
+    - Business Payments
+    - Spending Controls
+    - Commercial
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: business-payment-controls
+      baseUri: https://api.mastercard.com/business-payment-controls
+      description: "Mastercard Business Payment Controls API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: controls
+          path: /controls
+          description: "Payment control management"
+          operations:
+            - name: create-control
+              method: POST
+              description: "Create a spending control rule"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  control: "{{tools.control}}"
+            - name: list-controls
+              method: GET
+              description: "List spending control rules"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."

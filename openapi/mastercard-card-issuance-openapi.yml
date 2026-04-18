@@ -11,25 +11,25 @@ info:
     email: apisupport@mastercard.com
   version: 2.0.0
 servers:
-  - description: Sandbox server
-    url: https://sandbox.mi.api.mastercard.com/mi-issuing-sandbox/card-issuance/
-  - description: MEA MTF/UAT server
-    url: https://mtf.mea.api.mastercard.com/mi-issuing/card-issuance/
-  - description: SA MTF/UAT server
-    url: https://mtf.sa.api.mi.mastercard.com/mi-issuing/card-issuance/
-  - description: MEA Production server
-    url: https://mea.api.mastercard.com/mi-issuing/card-issuance/
-  - description: SA Production server
-    url: https://sa.api.mi.mastercard.com/mi-issuing/card-issuance/
+- description: Sandbox server
+  url: https://sandbox.mi.api.mastercard.com/mi-issuing-sandbox/card-issuance/
+- description: MEA MTF/UAT server
+  url: https://mtf.mea.api.mastercard.com/mi-issuing/card-issuance/
+- description: SA MTF/UAT server
+  url: https://mtf.sa.api.mi.mastercard.com/mi-issuing/card-issuance/
+- description: MEA Production server
+  url: https://mea.api.mastercard.com/mi-issuing/card-issuance/
+- description: SA Production server
+  url: https://sa.api.mi.mastercard.com/mi-issuing/card-issuance/
 tags:
-  - name: Cards
-  - name: Debit
+- name: Cards
+- name: Debit
 paths:
   /prepaid-cards:
     post:
       tags:
-        - Cards
-      summary: 'Mastercard **Prepaid Card Issuance** - Issue prepaid card to existing or new client'
+      - Cards
+      summary: 'Mastercard **prepaid Card Issuance** - Issue Prepaid Card to Existing or New Client'
       description: >-
         This API allows users to issue primary, add-on or supplementary
         physical/virtual card to existing or new client. It is applicable for
@@ -42,11 +42,11 @@ paths:
       operationId: createPrepaidCard
       x-mastercard-api-encrypted: true
       parameters:
-        - $ref: '#/components/parameters/BankCode'
-        - $ref: '#/components/parameters/CorrelationID'
-        - $ref: '#/components/parameters/Source'
-        - $ref: '#/components/parameters/EndUserID'
-        - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/BankCode'
+      - $ref: '#/components/parameters/CorrelationID'
+      - $ref: '#/components/parameters/Source'
+      - $ref: '#/components/parameters/EndUserID'
+      - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         $ref: '#/components/requestBodies/PrepaidCardApplicationRequest'
       responses:
@@ -60,12 +60,15 @@ paths:
           $ref: '#/components/responses/ForbiddenError'
         '409':
           $ref: '#/components/responses/ConflictError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
   /debit-cards:
     post:
       tags:
-        - Cards
-        - Debit
-      summary: 'Mastercard **Debit Card Issuance** - Issue debit card to existing or new client'
+      - Cards
+      - Debit
+      summary: 'Mastercard **debit Card Issuance** - Issue Debit Card to Existing or New Client'
       description: >-
         This API allows users to issue primary, add-on or supplementary debit
         card to existing/new client with the help of CBS system. The Mastercard
@@ -77,11 +80,11 @@ paths:
       operationId: createDebitCard
       x-mastercard-api-encrypted: true
       parameters:
-        - $ref: '#/components/parameters/BankCode'
-        - $ref: '#/components/parameters/CorrelationID'
-        - $ref: '#/components/parameters/Source'
-        - $ref: '#/components/parameters/EndUserID'
-        - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/BankCode'
+      - $ref: '#/components/parameters/CorrelationID'
+      - $ref: '#/components/parameters/Source'
+      - $ref: '#/components/parameters/EndUserID'
+      - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         $ref: '#/components/requestBodies/DebitCardApplicationRequest'
       responses:
@@ -95,14 +98,17 @@ paths:
           $ref: '#/components/responses/ForbiddenError'
         '409':
           $ref: '#/components/responses/ConflictError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
 components:
   schemas:
     BaseNewCardDetails:
       allOf:
-        - $ref: '#/components/schemas/RequestValidityTime'
+      - $ref: '#/components/schemas/RequestValidityTime'
       type: object
       required:
-        - dataValidUntilTimestamp
+      - dataValidUntilTimestamp
       properties:
         application:
           $ref: '#/components/schemas/Application'
@@ -146,7 +152,7 @@ components:
     Application:
       type: object
       required:
-        - type
+      - type
       properties:
         type:
           $ref: '#/components/schemas/OnboardingApplicationType'
@@ -178,10 +184,10 @@ components:
           example: free text
     FreshCard:
       allOf:
-        - $ref: '#/components/schemas/NewCard'
+      - $ref: '#/components/schemas/NewCard'
       type: object
       required:
-        - planCode
+      - planCode
       properties:
         alias:
           $ref: '#/components/schemas/ConditionalCardAlias'
@@ -208,8 +214,8 @@ components:
     NewCard:
       type: object
       required:
-        - type
-        - photoIndicator
+      - type
+      - photoIndicator
       properties:
         numberless:
           type: boolean
@@ -320,7 +326,7 @@ components:
           example: P3M4DT12H30M5S
     Client:
       allOf:
-        - $ref: '#/components/schemas/Person'
+      - $ref: '#/components/schemas/Person'
       type: object
       properties:
         type:
@@ -396,7 +402,7 @@ components:
           $ref: '#/components/schemas/Occupation'
     Person:
       allOf:
-        - $ref: '#/components/schemas/BasePerson'
+      - $ref: '#/components/schemas/BasePerson'
       type: object
       properties:
         kyc:
@@ -434,9 +440,9 @@ components:
               account plan.
             example: LOANPR
           example:
-            - LOANPR
-            - ''
-            - LOANB
+          - LOANPR
+          - ''
+          - LOANB
     RiskCategory:
       type: string
       description: >-
@@ -523,21 +529,23 @@ components:
           description: List of cards.
           items:
             $ref: '#/components/schemas/NewCardDetails'
+          example: []
         accounts:
           type: array
           description: List of accounts linked to the card returned
           items:
             $ref: '#/components/schemas/BaseAccount'
+          example: []
     NewCardDetails:
       allOf:
-        - $ref: '#/components/schemas/BaseCardWithSecrets'
+      - $ref: '#/components/schemas/BaseCardWithSecrets'
       type: object
       properties:
         embossedName:
           $ref: '#/components/schemas/EmbossedName'
     NewClient:
       allOf:
-        - $ref: '#/components/schemas/ClientSearchInfo'
+      - $ref: '#/components/schemas/ClientSearchInfo'
       type: object
       properties:
         alternateName:
@@ -545,7 +553,7 @@ components:
     NewApplication:
       type: object
       required:
-        - type
+      - type
       properties:
         formNumber:
           type: string
@@ -562,7 +570,7 @@ components:
           example: '200460102961'
     PrepaidCardApplication:
       allOf:
-        - $ref: '#/components/schemas/BaseNewCardDetails'
+      - $ref: '#/components/schemas/BaseNewCardDetails'
       type: object
       properties:
         travel:
@@ -712,7 +720,7 @@ components:
           $ref: '#/components/schemas/CardPlanCode'
     BaseCard:
       allOf:
-        - $ref: '#/components/schemas/BaseSearchCard'
+      - $ref: '#/components/schemas/BaseSearchCard'
       description: Base Card information
       type: object
       properties:
@@ -724,7 +732,7 @@ components:
           $ref: '#/components/schemas/CardStatus'
     BaseCardWithSecrets:
       allOf:
-        - $ref: '#/components/schemas/BaseCard'
+      - $ref: '#/components/schemas/BaseCard'
       description: Card information
       type: object
       properties:
@@ -903,7 +911,7 @@ components:
           $ref: '#/components/schemas/PhoneNumber2'
     OfficeContact:
       allOf:
-        - $ref: '#/components/schemas/Contact'
+      - $ref: '#/components/schemas/Contact'
       type: object
       properties:
         phoneNumber1:
@@ -936,12 +944,12 @@ components:
       minItems: 0
       maxItems: 45
       example:
-        - name: clientDateField1
-          value: '2021-09-21'
-        - name: cardDataField1
-          value: sample-data
-        - name: accountNumberField1
-          value: '234.78'
+      - name: clientDateField1
+        value: '2021-09-21'
+      - name: cardDataField1
+        value: sample-data
+      - name: accountNumberField1
+        value: '234.78'
     CustomField:
       type: object
       properties:
@@ -1332,14 +1340,14 @@ components:
       example: Owned
     CurrentAddress:
       allOf:
-        - $ref: '#/components/schemas/Address'
+      - $ref: '#/components/schemas/Address'
       type: object
       properties:
         lodgingMode:
           $ref: '#/components/schemas/LodgingMode'
     PermanentAddress:
       allOf:
-        - $ref: '#/components/schemas/Address'
+      - $ref: '#/components/schemas/Address'
       type: object
       properties:
         permanentAddressFrom:
@@ -1398,7 +1406,7 @@ components:
           $ref: '#/components/schemas/AlternateName'
     Profile:
       allOf:
-        - $ref: '#/components/schemas/BasicProfile'
+      - $ref: '#/components/schemas/BasicProfile'
       description: >-
         Set of Personally Identifiable Information (PII) associated with a given
         client.
@@ -1509,7 +1517,7 @@ components:
         minutes, then the system rejects the API request without processing.
       type: object
       required:
-        - dataValidUntilTimestamp
+      - dataValidUntilTimestamp
       properties:
         dataValidUntilTimestamp:
           type: string
@@ -1807,10 +1815,10 @@ components:
       example: FSFS_3122_13XV
     ErrorMessage:
       required:
-        - Description
-        - ReasonCode
-        - Recoverable
-        - Source
+      - Description
+      - ReasonCode
+      - Recoverable
+      - Source
       type: object
       properties:
         Source:
@@ -1851,7 +1859,7 @@ components:
           example: false
     Errors:
       required:
-        - Error
+      - Error
       type: object
       properties:
         Error:
@@ -1859,16 +1867,17 @@ components:
           description: Errors array wrapped in an error object
           items:
             $ref: '#/components/schemas/ErrorMessage'
+          example: []
     ErrorsInfo:
       required:
-        - Errors
+      - Errors
       type: object
       properties:
         Errors:
           $ref: '#/components/schemas/Errors'
     FreshDebitCard:
       allOf:
-        - $ref: '#/components/schemas/FreshCard'
+      - $ref: '#/components/schemas/FreshCard'
       description: >-
         Debit Card Details. <BR/>card number or card id or card packId must
         exist while issuing existing non personalized card.
@@ -1886,10 +1895,10 @@ components:
           $ref: '#/components/schemas/CardPackId'
     DebitCardDetails:
       allOf:
-        - $ref: '#/components/schemas/RequestValidityTime'
+      - $ref: '#/components/schemas/RequestValidityTime'
       type: object
       required:
-        - dataValidUntilTimestamp
+      - dataValidUntilTimestamp
       properties:
         application:
           $ref: '#/components/schemas/DebitApplication'
@@ -1934,7 +1943,7 @@ components:
           $ref: '#/components/schemas/CustomFields'
     DebitClient:
       allOf:
-        - $ref: '#/components/schemas/CbsCustomer'
+      - $ref: '#/components/schemas/CbsCustomer'
       type: object
       properties:
         type:
@@ -1956,13 +1965,13 @@ components:
       type: object
       description: Contains information about different types of debit cards
       required:
-        - type
+      - type
       properties:
         type:
           $ref: '#/components/schemas/OnboardingApplicationType'
     CbsCustomer:
       allOf:
-        - $ref: '#/components/schemas/BasePerson'
+      - $ref: '#/components/schemas/BasePerson'
       type: object
       properties:
         kyc:
@@ -1981,11 +1990,13 @@ components:
           description: List of cards.
           items:
             $ref: '#/components/schemas/NewCardDetails'
+          example: []
         accounts:
           type: array
           description: List of accounts linked to the card returned
           items:
             $ref: '#/components/schemas/BaseAccount'
+          example: []
     CbsAccount:
       type: object
       description: Core Banking System Account Info. Applicable for Debit Cards only
@@ -2311,74 +2322,74 @@ components:
       value:
         Errors:
           Error:
-            - Source: MI-Issuing
-              ReasonCode: UNAUTHORIZED
-              Description: We couldn't recognize you
-              Recoverable: false
-              Details: >-
-                The user does not have valid certificate for the target
-                resource.
+          - Source: MI-Issuing
+            ReasonCode: UNAUTHORIZED
+            Description: We couldn't recognize you
+            Recoverable: false
+            Details: >-
+              The user does not have valid certificate for the target
+              resource.
     ForbiddenExample:
       value:
         Errors:
           Error:
-            - Source: MI-Issuing
-              ReasonCode: AUTHORIZATION_ERROR
-              Description: It seems you don't have permission to access this API
-              Recoverable: false
-              Details: >-
-                Please ensure that access has been granted to the user in
-                customer portal
+          - Source: MI-Issuing
+            ReasonCode: AUTHORIZATION_ERROR
+            Description: It seems you don't have permission to access this API
+            Recoverable: false
+            Details: >-
+              Please ensure that access has been granted to the user in
+              customer portal
     ConflictExample:
       value:
         Errors:
           Error:
-            - Source: MI-Issuing
-              ReasonCode: CONFLICT
-              Description: >-
-                The requested operation failed because it tried to create a
-                resource that already exists.
-              Recoverable: false
-              Details: Record with same unique reference id already exists
+          - Source: MI-Issuing
+            ReasonCode: CONFLICT
+            Description: >-
+              The requested operation failed because it tried to create a
+              resource that already exists.
+            Recoverable: false
+            Details: Record with same unique reference id already exists
     MissingRequiredFieldExample:
       value:
         Errors:
           Error:
-            - Source: MI-Issuing
-              ReasonCode: MISSING_REQUIRED_FIELD
-              Description: Missing required field '<Field-Name>'
-              Recoverable: false
-              Details:
+          - Source: MI-Issuing
+            ReasonCode: MISSING_REQUIRED_FIELD
+            Description: Missing required field '<Field-Name>'
+            Recoverable: false
+            Details:
     InvalidFieldValueExample:
       value:
         Errors:
           Error:
-            - Source: MI-Issuing
-              ReasonCode: INVALID_FIELD_VALUE
-              Description: '''<Field-Name>'' field value ''<Field-Value>'' is invalid'
-              Recoverable: false
+          - Source: MI-Issuing
+            ReasonCode: INVALID_FIELD_VALUE
+            Description: '''<Field-Name>'' field value ''<Field-Value>'' is invalid'
+            Recoverable: false
     InvalidFieldFormatExample:
       value:
         Errors:
           Error:
-            - Source: MI-Issuing
-              ReasonCode: INVALID_FIELD_FORMAT
-              Description: '''<Field-Name>'' field value ''<Field-Value>'' format is invalid'
-              Recoverable: false
+          - Source: MI-Issuing
+            ReasonCode: INVALID_FIELD_FORMAT
+            Description: '''<Field-Name>'' field value ''<Field-Value>'' format is invalid'
+            Recoverable: false
     InvalidFieldLengthExample:
       value:
         Errors:
           Error:
-            - Source: MI-Issuing
-              ReasonCode: INVALID_FIELD_LENGTH
-              Description: '''<Field-Name>'' size must be between 1 and 3'
-              Recoverable: false
+          - Source: MI-Issuing
+            ReasonCode: INVALID_FIELD_LENGTH
+            Description: '''<Field-Name>'' size must be between 1 and 3'
+            Recoverable: false
     CryptographyErrorExample:
       value:
         Errors:
           Error:
-            - Source: MI-Issuing
-              ReasonCode: CRYPTOGRAPHY_ERROR
-              Description: Error occurred while decryption of the encrypted request payload
-              Recoverable: false
-              Details:
+          - Source: MI-Issuing
+            ReasonCode: CRYPTOGRAPHY_ERROR
+            Description: Error occurred while decryption of the encrypted request payload
+            Recoverable: false
+            Details:

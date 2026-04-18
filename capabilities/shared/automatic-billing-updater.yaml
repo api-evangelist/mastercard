@@ -1,0 +1,46 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Automatic Billing Updater"
+  description: "API for accessing updated card credentials to reduce declines for recurring and card-on-file payments."
+  tags:
+    - Billing
+    - Card on File
+    - Account Updates
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: automatic-billing-updater
+      baseUri: https://api.mastercard.com/automatic-billing-updater
+      description: "Mastercard Automatic Billing Updater API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: updates
+          path: /updates
+          description: "Card update operations"
+          operations:
+            - name: get-updates
+              method: POST
+              description: "Request updated card credentials"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  request: "{{tools.request}}"

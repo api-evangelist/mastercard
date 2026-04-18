@@ -1,0 +1,53 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Loyalty Promotions"
+  description: "API for managing loyalty promotions and digital enablement for cardholders."
+  tags:
+    - Loyalty
+    - Promotions
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: loyalty-promotions
+      baseUri: https://api.mastercard.com/loyalty/promotions
+      description: "Mastercard Loyalty Promotions API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: promotions
+          path: /promotions
+          description: "Loyalty promotion management"
+          operations:
+            - name: list-promotions
+              method: GET
+              description: "List available loyalty promotions"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+            - name: enroll-promotion
+              method: POST
+              description: "Enroll a cardholder in a promotion"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  enrollment: "{{tools.enrollment}}"

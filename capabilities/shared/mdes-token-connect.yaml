@@ -1,0 +1,46 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard MDES Token Connect"
+  description: "API for connecting token requestors with MDES for push provisioning to wallets."
+  tags:
+    - Tokenization
+    - Token Connect
+    - MDES
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: mdes-token-connect
+      baseUri: https://api.mastercard.com/mdes/token-connect
+      description: "Mastercard MDES Token Connect API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: provisioning
+          path: /provisioning
+          description: "Token provisioning operations"
+          operations:
+            - name: push-provision
+              method: POST
+              description: "Push provision a token to a wallet"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  provisioning: "{{tools.provisioning}}"

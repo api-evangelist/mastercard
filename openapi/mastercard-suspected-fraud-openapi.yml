@@ -12,28 +12,28 @@ info:
     url: https://developer.mastercard.com/support
   version: 1.2.11
 servers:
-  - url: https://api.mastercard.com/fld/suspected-frauds
-    description: Global Production server (uses live data)
-  - url: https://api.mastercard.co.in/fld/suspected-frauds
-    description: India Production server (uses live data)
-  - url: https://sandbox.api.mastercard.com/fld/suspected-frauds
-    description: Global Sandbox server (testing environment)
-  - url: https://sandbox.api.mastercard.co.in/fld/suspected-frauds
-    description: India Sandbox server (testing environment)
+- url: https://api.mastercard.com/fld/suspected-frauds
+  description: Global Production server (uses live data)
+- url: https://api.mastercard.co.in/fld/suspected-frauds
+  description: India Production server (uses live data)
+- url: https://sandbox.api.mastercard.com/fld/suspected-frauds
+  description: Global Sandbox server (testing environment)
+- url: https://sandbox.api.mastercard.co.in/fld/suspected-frauds
+  description: India Sandbox server (testing environment)
 tags:
-  - name: Fraud
-  - name: Ica
-  - name: Mastercard
-  - name: States
-  - name: Statuses
-  - name: Suspected  Fraud  Management
-  - name: Suspected  Fraud  Submission
+- name: Fraud
+- name: Ica
+- name: Mastercard
+- name: States
+- name: Statuses
+- name: Suspected  Fraud  Management
+- name: Suspected  Fraud  Submission
 paths:
   /mastercard-frauds:
     post:
       tags:
-        - Mastercard
-        - Suspected  Fraud  Submission
+      - Mastercard
+      - Suspected  Fraud  Submission
       operationId: submitSuspectedFraud
       description: >-
         This endpoint allows the initiator to add a new suspected fraud record
@@ -41,8 +41,7 @@ paths:
         submit a transaction as suspected fraud, a match has to be found in the
         Mastercard transaction data repository(Data Warehouse).
       summary: >-
-        Add a new suspected fraud record using minimal input parameters for
-        Mastercard built transactions.
+        Add a New Suspected Fraud Record Using Minimal Input Parameters for Mastercard Built Transactions.
       x-mastercard-api-encrypted: true
       requestBody:
         $ref: '#/components/requestBodies/SuspectedFraudRequest'
@@ -57,10 +56,13 @@ paths:
           $ref: '#/components/responses/ForbiddenError'
         '429':
           $ref: '#/components/responses/RateLimitExceededError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
     put:
       tags:
-        - Mastercard
-        - Suspected  Fraud  Management
+      - Mastercard
+      - Suspected  Fraud  Management
       operationId: updateSuspectedFraud
       description: >-
         This endpoint allows the initiator to change an existing suspected fraud
@@ -69,8 +71,7 @@ paths:
         transactions and also modify transactions which are submitted via other
         channels Online and API.
       summary: >-
-        Change an existing suspected fraud record using minimal input parameters
-        for Mastercard built transactions.
+        Change an Existing Suspected Fraud Record Using Minimal Input Parameters for Mastercard Built Transactions.
       x-mastercard-api-encrypted: true
       requestBody:
         $ref: '#/components/requestBodies/SuspectedFraudChangeRequest'
@@ -85,18 +86,21 @@ paths:
           $ref: '#/components/responses/ForbiddenError'
         '429':
           $ref: '#/components/responses/RateLimitExceededError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
   /fraud-states:
     put:
       tags:
-        - Fraud
-        - States
+      - Fraud
+      - States
       operationId: fraudState
       description: >-
         This endpoint allows the initiator to change an existing suspected fraud
         to confirmed fraud, delete suspected fraud record or mark the suspected
         transaction as not fraud.
       summary: >-
-        Mastercard Confirm, Delete or mark record as not fraud for an existing suspected fraud record.
+        Mastercard Confirm, Delete or Mark Record as Not Fraud for an Existing Suspected Fraud Record.
       x-mastercard-api-encrypted: true
       requestBody:
         $ref: '#/components/requestBodies/SuspectedFraudStateChangeRequest'
@@ -111,12 +115,15 @@ paths:
           $ref: '#/components/responses/ForbiddenError'
         '429':
           $ref: '#/components/responses/RateLimitExceededError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
   /fraud-statuses/icas/{ica}:
     get:
       tags:
-        - Fraud
-        - Ica
-        - Statuses
+      - Fraud
+      - Ica
+      - Statuses
       operationId: fraudRequestStatus
       description: >-
         This endpoint allows the initiator to get the status of an existing
@@ -124,12 +131,11 @@ paths:
         Mastercard built transactions. The initiator can get status of the
         suspected fraud transaction submitted via Online & API channel.
       summary: >-
-        Get status of an existing suspected fraud record for Mastercard built
-        transactions.
+        Get Status of an Existing Suspected Fraud Record for Mastercard Built Transactions.
       parameters:
-        - $ref: '#/components/parameters/ICA'
-        - $ref: '#/components/parameters/Ref_Id'
-        - $ref: '#/components/parameters/ACN'
+      - $ref: '#/components/parameters/ICA'
+      - $ref: '#/components/parameters/Ref_Id'
+      - $ref: '#/components/parameters/ACN'
       responses:
         '200':
           $ref: '#/components/responses/SuspectedFraudStatusResponse'
@@ -137,6 +143,9 @@ paths:
           $ref: '#/components/responses/SuspectedFraudStatusBadRequestError'
         '429':
           $ref: '#/components/responses/RateLimitExceededError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
 components:
   parameters:
     ICA:
@@ -179,9 +188,9 @@ components:
     APIDataElement:
       type: object
       required:
-        - icaNumber
-        - refId
-        - timestamp
+      - icaNumber
+      - refId
+      - timestamp
       properties:
         refId:
           description: >-
@@ -273,16 +282,16 @@ components:
       type: string
     SuspectedFraud:
       allOf:
-        - $ref: '#/components/schemas/APIDataElement'
+      - $ref: '#/components/schemas/APIDataElement'
       type: object
       required:
-        - cardNumber
-        - fraudPostedDate
-        - fraudTypeCode
-        - providerId
-        - transactionAmount
-        - transactionDate
-        - transactionIdentifiers
+      - cardNumber
+      - fraudPostedDate
+      - fraudTypeCode
+      - providerId
+      - transactionAmount
+      - transactionDate
+      - transactionIdentifiers
       properties:
         providerId:
           $ref: '#/components/schemas/SafeFraudProvider'
@@ -361,11 +370,11 @@ components:
           type: string
     SuspectedFraudChange:
       allOf:
-        - $ref: '#/components/schemas/APIDataElement'
+      - $ref: '#/components/schemas/APIDataElement'
       type: object
       required:
-        - providerId
-        - auditControlNumber
+      - providerId
+      - auditControlNumber
       properties:
         providerId:
           $ref: '#/components/schemas/SafeFraudProvider'
@@ -440,12 +449,12 @@ components:
       type: string
     SuspectedFraudStateChange:
       allOf:
-        - $ref: '#/components/schemas/APIDataElement'
+      - $ref: '#/components/schemas/APIDataElement'
       type: object
       required:
-        - providerId
-        - auditControlNumber
-        - operationType
+      - providerId
+      - auditControlNumber
+      - operationType
       properties:
         providerId:
           $ref: '#/components/schemas/SafeFraudProvider'
@@ -463,13 +472,14 @@ components:
           $ref: '#/components/schemas/FraudState'
         transactionIdentifiers:
           allOf:
-            - $ref: '#/components/schemas/TransactionIdentifier'
+          - $ref: '#/components/schemas/TransactionIdentifier'
           description: >-
             Contains the a single or dual message transaction identifier values
             used for searching the respective transaction. Acquirer Reference
             Number, Banknet Reference Number, Trace Id and Serial Id values are
             captured. This is a conditional parameter and is mandatory when
             operationType value is CONFIRMED_FRAUD.
+          example: example_value
         fraudPostedDate:
           description: >-
             Date on which the fraud is posted in FLD by the originator. Format
@@ -596,11 +606,11 @@ components:
           type: string
     Fraud:
       allOf:
-        - $ref: '#/components/schemas/FraudBase'
+      - $ref: '#/components/schemas/FraudBase'
       type: object
       required:
-        - responseCode
-        - responseMessage
+      - responseCode
+      - responseMessage
       properties:
         responseCode:
           description: >-
@@ -712,10 +722,10 @@ components:
       title: ErrorMessage
       type: object
       required:
-        - Description
-        - ReasonCode
-        - Recoverable
-        - Source
+      - Description
+      - ReasonCode
+      - Recoverable
+      - Source
       properties:
         Source:
           description: The application or component that generated this error.
@@ -757,13 +767,14 @@ components:
       title: Errors
       type: object
       required:
-        - Error
+      - Error
       properties:
         Error:
           description: Errors array wrapped in an error object.
           items:
             $ref: '#/components/schemas/Error'
           type: array
+          example: []
     ErrorWrapper:
       description: >-
         Object containing the list of combination of error reason codes and
@@ -773,7 +784,7 @@ components:
       title: Error Response
       type: object
       required:
-        - Errors
+      - Errors
       properties:
         Errors:
           $ref: '#/components/schemas/Errors'
@@ -997,10 +1008,10 @@ components:
         errorDetails:
           Errors:
             Error:
-              - ReasonCode: '60004'
-                Description: >-
-                  CardNumber attribute value length not in range. Minimum
-                  Length:12 and Maximum Length: 19.
+            - ReasonCode: '60004'
+              Description: >-
+                CardNumber attribute value length not in range. Minimum
+                Length:12 and Maximum Length: 19.
     SuspectedFraudChangeExample:
       value:
         refId: ecb2d942-eabd-42b6-87fd-69c19692bdc6
@@ -1031,8 +1042,8 @@ components:
         errorDetails:
           Errors:
             Error:
-              - ReasonCode: '60003'
-                Description: icaNumber incorrect datatype of attribute value.
+            - ReasonCode: '60003'
+              Description: icaNumber incorrect datatype of attribute value.
     SuspectedConfirmFraudExample:
       value:
         refId: ecb2d942-eabd-42b6-87fd-69c19692bdc6
@@ -1074,8 +1085,8 @@ components:
         errorDetails:
           Errors:
             Error:
-              - ReasonCode: '21508'
-                Description: Transaction date is older than 18 months.
+            - ReasonCode: '21508'
+              Description: Transaction date is older than 18 months.
     SuspectedConfirmNotFraudExample:
       value:
         refId: ecb2d942-eabd-42b6-87fd-69c19692bdc6
@@ -1203,10 +1214,10 @@ components:
         errorDetails:
           Errors:
             Error:
-              - ReasonCode: '60127'
-                Description: >-
-                  Record searched could not be found. Correct the input
-                  parameter and resubmit.
+            - ReasonCode: '60127'
+              Description: >-
+                Record searched could not be found. Correct the input
+                parameter and resubmit.
     200SuspectedFraudStatusNoParamRefIdAcnExample:
       value:
         ica: '1076'
@@ -1215,67 +1226,67 @@ components:
         errorDetails:
           Errors:
             Error:
-              - ReasonCode: '60002'
-                Description: >-
-                  ref_id or acn (Audit Control Number) attribute or attribute
-                  value is missing or incorrect.
+            - ReasonCode: '60002'
+              Description: >-
+                ref_id or acn (Audit Control Number) attribute or attribute
+                value is missing or incorrect.
     BadRequestRefIdMissing:
       value:
         Errors:
           Error:
-            - Source: FLD
-              ReasonCode: VALIDATION_ERROR
-              Description: Reference Id is not provided.
-              Recoverable: false
+          - Source: FLD
+            ReasonCode: VALIDATION_ERROR
+            Description: Reference Id is not provided.
+            Recoverable: false
     BadRequestInvalidIca:
       value:
         Errors:
           Error:
-            - Source: FLD
-              ReasonCode: VALIDATION_ERROR
-              Description: ica incorrect datatype of attribute value.
-              Recoverable: false
+          - Source: FLD
+            ReasonCode: VALIDATION_ERROR
+            Description: ica incorrect datatype of attribute value.
+            Recoverable: false
     BadRequestInvalidRefId:
       value:
         Errors:
           Error:
-            - Source: FLD
-              ReasonCode: VALIDATION_ERROR
-              Description: ref_id incorrect datatype of attribute value.
-              Recoverable: false
+          - Source: FLD
+            ReasonCode: VALIDATION_ERROR
+            Description: ref_id incorrect datatype of attribute value.
+            Recoverable: false
     BadRequestInvalidACN:
       value:
         Errors:
           Error:
-            - Source: FLD
-              ReasonCode: VALIDATION_ERROR
-              Description: >-
-                acn (Audit Control Number) incorrect datatype of attribute
-                value.
-              Recoverable: false
+          - Source: FLD
+            ReasonCode: VALIDATION_ERROR
+            Description: >-
+              acn (Audit Control Number) incorrect datatype of attribute
+              value.
+            Recoverable: false
     ForbiddenExample:
       value:
         Errors:
           Error:
-            - Source: FLD
-              ReasonCode: CONSENT_NOT_GIVEN
-              Description: User Consent Not Given
-              Recoverable: false
+          - Source: FLD
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given
+            Recoverable: false
     UnauthorizedExample:
       value:
         Errors:
           Error:
-            - Source: FLD
-              ReasonCode: UNAUTHORIZED_REQUEST
-              Description: Unauthorized request
-              Recoverable: false
+          - Source: FLD
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request
+            Recoverable: false
     RateLimitExceededExample:
       value:
         Errors:
           Error:
-            - Source: FLD
-              ReasonCode: RATE_LIMIT_EXCEEDED
-              Description: >-
-                You have exceeded the service rate limit. Maximum allowed 10
-                TPS.
-              Recoverable: true
+          - Source: FLD
+            ReasonCode: RATE_LIMIT_EXCEEDED
+            Description: >-
+              You have exceeded the service rate limit. Maximum allowed 10
+              TPS.
+            Recoverable: true

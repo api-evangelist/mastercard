@@ -1,0 +1,53 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard BIN Lookup"
+  description: "API for looking up BIN (Bank Identification Number) data including issuer, product, and country information."
+  tags:
+    - BIN Lookup
+    - Card Data
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: bin-lookup
+      baseUri: https://api.mastercard.com/bin-lookup
+      description: "Mastercard BIN Lookup API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: bins
+          path: /bins
+          description: "BIN lookup operations"
+          operations:
+            - name: lookup-bin
+              method: POST
+              description: "Look up BIN information"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  bin: "{{tools.bin}}"
+            - name: list-bins
+              method: GET
+              description: "List available Mastercard BINs"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."

@@ -1,0 +1,190 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Money Transfer and Disbursements"
+  description: "Unified workflow for fintech developers and payment processors to manage real-time money transfers, P2P payments, disbursements, and cross-border services through Mastercard Send and related APIs."
+  tags:
+    - Mastercard
+    - Money Transfer
+    - Disbursements
+    - Cross-Border
+    - Mastercard Send
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - import: send-funding
+      location: ./shared/send-funding.yaml
+    - import: send-p2p
+      location: ./shared/send-person-to-person.yaml
+    - import: send-disbursements
+      location: ./shared/send-disbursements.yaml
+    - import: send-account-info
+      location: ./shared/send-account-info.yaml
+    - import: send-account-verification
+      location: ./shared/send-account-verification.yaml
+    - import: cross-border
+      location: ./shared/cross-border-services.yaml
+    - import: direct-services
+      location: ./shared/direct-services.yaml
+    - import: account-validation
+      location: ./shared/account-validation.yaml
+    - import: currency-conversion
+      location: ./shared/currency-conversion.yaml
+
+  exposes:
+    - type: rest
+      port: 8081
+      namespace: money-transfer-api
+      description: "Unified REST API for Mastercard money transfer and disbursement workflows."
+      resources:
+        - path: /v1/funding
+          name: funding
+          description: "Funding transactions"
+          operations:
+            - method: POST
+              name: create-funding
+              description: "Create a funding transaction"
+              call: "send-funding.create-funding"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/transfers
+          name: transfers
+          description: "P2P transfers"
+          operations:
+            - method: POST
+              name: create-p2p-transfer
+              description: "Create a person-to-person transfer"
+              call: "send-p2p.create-p2p-transfer"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/disbursements
+          name: disbursements
+          description: "Disbursement transactions"
+          operations:
+            - method: POST
+              name: create-disbursement
+              description: "Create a disbursement"
+              call: "send-disbursements.create-disbursement"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/cross-border-payments
+          name: cross-border-payments
+          description: "Cross-border payment processing"
+          operations:
+            - method: POST
+              name: create-cross-border-payment
+              description: "Create a cross-border payment"
+              call: "cross-border.create-payment"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/conversion-rates
+          name: conversion-rates
+          description: "Currency conversion rates"
+          operations:
+            - method: GET
+              name: get-conversion-rate
+              description: "Get currency conversion rate"
+              call: "currency-conversion.get-conversion-rate"
+              with:
+                fxDate: "rest.fxDate"
+                transCurr: "rest.transCurr"
+                crdhldBillCurr: "rest.crdhldBillCurr"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+
+    - type: mcp
+      port: 9091
+      namespace: money-transfer-mcp
+      transport: http
+      description: "MCP server for AI-assisted money transfer and disbursement operations."
+      tools:
+        - name: create-funding
+          description: "Create a funding transaction via Mastercard Send"
+          hints:
+            readOnly: false
+          call: "send-funding.create-funding"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: create-p2p-transfer
+          description: "Create a person-to-person money transfer"
+          hints:
+            readOnly: false
+          call: "send-p2p.create-p2p-transfer"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: create-disbursement
+          description: "Create a disbursement to send money to a recipient"
+          hints:
+            readOnly: false
+          call: "send-disbursements.create-disbursement"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: verify-send-account
+          description: "Verify account eligibility for Mastercard Send"
+          hints:
+            readOnly: true
+          call: "send-account-verification.verify-account"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-account-info
+          description: "Get account information for a Send recipient"
+          hints:
+            readOnly: true
+          call: "send-account-info.get-account-info"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: validate-account
+          description: "Validate account details before transfer"
+          hints:
+            readOnly: true
+          call: "account-validation.validate-account"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: create-cross-border-payment
+          description: "Create a cross-border international payment"
+          hints:
+            readOnly: false
+          call: "cross-border.create-payment"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-conversion-rate
+          description: "Get currency conversion rate for cross-border transactions"
+          hints:
+            readOnly: true
+            idempotent: true
+          call: "currency-conversion.get-conversion-rate"
+          with:
+            fxDate: "tools.fxDate"
+            transCurr: "tools.transCurr"
+            crdhldBillCurr: "tools.crdhldBillCurr"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: process-direct-transaction
+          description: "Process a direct service transaction"
+          hints:
+            readOnly: false
+          call: "direct-services.process-transaction"
+          outputParameters:
+            - type: object
+              mapping: "$."

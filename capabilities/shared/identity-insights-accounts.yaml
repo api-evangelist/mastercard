@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Identity Insights for Accounts"
+  description: "API providing identity intelligence for account-level fraud prevention and risk scoring."
+  tags:
+    - Identity
+    - Fraud Prevention
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: identity-insights-accounts
+      baseUri: https://api.mastercard.com/idinsights/accounts
+      description: "Mastercard Identity Insights for Accounts API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: account-insights
+          path: /insights
+          description: "Account identity insights"
+          operations:
+            - name: get-account-insights
+              method: POST
+              description: "Get identity insights for an account"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  account: "{{tools.account}}"

@@ -1,0 +1,88 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard MDES Digital Enablement"
+  description: "API for Mastercard Digital Enablement Service supporting token lifecycle management for digital payments."
+  tags:
+    - Tokenization
+    - Digital Enablement
+    - MDES
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: mdes-digital
+      baseUri: https://api.mastercard.com/mdes
+      description: "Mastercard MDES Digital Enablement API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: tokens
+          path: /tokens
+          description: "Token lifecycle management"
+          operations:
+            - name: tokenize
+              method: POST
+              description: "Tokenize a payment card"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  card: "{{tools.card}}"
+            - name: get-token
+              method: GET
+              description: "Get token details"
+              inputParameters:
+                - name: token_id
+                  in: path
+                  type: string
+                  required: true
+                  description: "Token identifier"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+            - name: suspend-token
+              method: POST
+              description: "Suspend a token"
+              inputParameters:
+                - name: token_id
+                  in: path
+                  type: string
+                  required: true
+                  description: "Token identifier"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+            - name: delete-token
+              method: DELETE
+              description: "Delete a token"
+              inputParameters:
+                - name: token_id
+                  in: path
+                  type: string
+                  required: true
+                  description: "Token identifier"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."

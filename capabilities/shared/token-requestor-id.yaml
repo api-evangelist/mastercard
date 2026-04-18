@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Token Requestor Identifier (TRID)"
+  description: "API for managing Token Requestor Identifiers used in MDES tokenization."
+  tags:
+    - Tokenization
+    - TRID
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: token-requestor-id
+      baseUri: https://api.mastercard.com/trid
+      description: "Mastercard Token Requestor Identifier API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: requestors
+          path: /requestors
+          description: "Token requestor management"
+          operations:
+            - name: register-requestor
+              method: POST
+              description: "Register a token requestor"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  requestor: "{{tools.requestor}}"

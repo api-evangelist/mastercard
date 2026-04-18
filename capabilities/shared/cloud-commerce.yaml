@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Cloud Commerce"
+  description: "Cloud-based commerce API for digital payment enablement and cloud-based transaction processing."
+  tags:
+    - Cloud Commerce
+    - Digital Payments
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: cloud-commerce
+      baseUri: https://api.mastercard.com/cloud-commerce
+      description: "Mastercard Cloud Commerce API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: transactions
+          path: /transactions
+          description: "Cloud commerce transactions"
+          operations:
+            - name: process-transaction
+              method: POST
+              description: "Process a cloud commerce transaction"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  transaction: "{{tools.transaction}}"

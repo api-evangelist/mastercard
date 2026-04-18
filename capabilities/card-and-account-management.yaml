@@ -1,0 +1,189 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Card and Account Management"
+  description: "Unified workflow for issuers and card managers to handle card issuance, fulfillment, BIN lookups, billing updates, payment account management, and account catalog services."
+  tags:
+    - Mastercard
+    - Card Management
+    - Account Management
+    - Issuers
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - import: card-issuance
+      location: ./shared/card-issuance.yaml
+    - import: traditional-fulfillment
+      location: ./shared/traditional-fulfillment.yaml
+    - import: bin-lookup
+      location: ./shared/bin-lookup.yaml
+    - import: automatic-billing-updater
+      location: ./shared/automatic-billing-updater.yaml
+    - import: payment-account-mgmt
+      location: ./shared/payment-account-management.yaml
+    - import: payment-account-ref
+      location: ./shared/payment-account-reference.yaml
+    - import: account-catalog
+      location: ./shared/account-catalog.yaml
+    - import: universal-spec
+      location: ./shared/universal-spec-submission.yaml
+    - import: account-validation
+      location: ./shared/account-validation.yaml
+
+  exposes:
+    - type: rest
+      port: 8084
+      namespace: card-account-api
+      description: "Unified REST API for card and account management."
+      resources:
+        - path: /v1/cards
+          name: cards
+          description: "Card issuance and management"
+          operations:
+            - method: POST
+              name: issue-card
+              description: "Issue a new card"
+              call: "card-issuance.issue-card"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/bins
+          name: bins
+          description: "BIN lookup"
+          operations:
+            - method: POST
+              name: lookup-bin
+              description: "Look up BIN information"
+              call: "bin-lookup.lookup-bin"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/billing-updates
+          name: billing-updates
+          description: "Automatic billing updates"
+          operations:
+            - method: POST
+              name: get-billing-updates
+              description: "Request updated card credentials"
+              call: "automatic-billing-updater.get-updates"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/accounts
+          name: accounts
+          description: "Payment account management"
+          operations:
+            - method: POST
+              name: manage-account
+              description: "Manage a payment account"
+              call: "payment-account-mgmt.manage-account"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+
+    - type: mcp
+      port: 9094
+      namespace: card-account-mcp
+      transport: http
+      description: "MCP server for AI-assisted card and account management."
+      tools:
+        - name: issue-card
+          description: "Issue a new Mastercard card"
+          hints:
+            readOnly: false
+          call: "card-issuance.issue-card"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-card-details
+          description: "Get card details"
+          hints:
+            readOnly: true
+          call: "card-issuance.get-card"
+          with:
+            card_id: "tools.card_id"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: create-fulfillment-order
+          description: "Create a physical card fulfillment order"
+          hints:
+            readOnly: false
+          call: "traditional-fulfillment.create-order"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: lookup-bin
+          description: "Look up BIN information for a card"
+          hints:
+            readOnly: true
+          call: "bin-lookup.lookup-bin"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: list-bins
+          description: "List available Mastercard BINs"
+          hints:
+            readOnly: true
+            idempotent: true
+          call: "bin-lookup.list-bins"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-billing-updates
+          description: "Request updated card credentials for card-on-file"
+          hints:
+            readOnly: true
+          call: "automatic-billing-updater.get-updates"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: manage-payment-account
+          description: "Manage a payment account lifecycle"
+          hints:
+            readOnly: false
+          call: "payment-account-mgmt.manage-account"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-payment-account-reference
+          description: "Query payment account reference to link tokens to accounts"
+          hints:
+            readOnly: true
+          call: "payment-account-ref.get-par"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: validate-account
+          description: "Validate account details"
+          hints:
+            readOnly: true
+          call: "account-validation.validate-account"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-account-catalog
+          description: "Retrieve account catalog data"
+          hints:
+            readOnly: true
+            idempotent: true
+          call: "account-catalog.get-catalog"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: submit-pan-event
+          description: "Submit PAN-related event for account level management"
+          hints:
+            readOnly: false
+          call: "universal-spec.submit-spec"
+          outputParameters:
+            - type: object
+              mapping: "$."

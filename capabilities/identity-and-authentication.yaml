@@ -1,0 +1,152 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Identity and Authentication"
+  description: "Unified workflow for identity managers and compliance teams to verify identities, manage authentication consent, and leverage identity intelligence for fraud prevention across Mastercard's identity services."
+  tags:
+    - Mastercard
+    - Identity
+    - Authentication
+    - Verification
+    - KYC
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - import: id-verification
+      location: ./shared/id-verification.yaml
+    - import: id-trust-providers
+      location: ./shared/id-for-trust-providers.yaml
+    - import: id-identity-providers
+      location: ./shared/id-for-identity-providers.yaml
+    - import: authentication-consent
+      location: ./shared/authentication-consent.yaml
+    - import: authentication-facilitator
+      location: ./shared/authentication-facilitator.yaml
+    - import: identity-insights-accounts
+      location: ./shared/identity-insights-accounts.yaml
+    - import: identity-insights-transactions
+      location: ./shared/identity-insights-transactions.yaml
+
+  exposes:
+    - type: rest
+      port: 8083
+      namespace: identity-auth-api
+      description: "Unified REST API for Mastercard identity and authentication workflows."
+      resources:
+        - path: /v1/verifications
+          name: verifications
+          description: "Identity verification"
+          operations:
+            - method: POST
+              name: verify-identity
+              description: "Verify a consumer identity"
+              call: "id-verification.verify-identity"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/consents
+          name: consents
+          description: "Authentication consent management"
+          operations:
+            - method: POST
+              name: create-consent
+              description: "Create authentication consent"
+              call: "authentication-consent.create-consent"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/account-insights
+          name: account-insights
+          description: "Identity insights for accounts"
+          operations:
+            - method: POST
+              name: get-account-insights
+              description: "Get identity insights for an account"
+              call: "identity-insights-accounts.get-account-insights"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/transaction-insights
+          name: transaction-insights
+          description: "Identity insights for transactions"
+          operations:
+            - method: POST
+              name: get-transaction-insights
+              description: "Get identity insights for a transaction"
+              call: "identity-insights-transactions.get-transaction-insights"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+
+    - type: mcp
+      port: 9093
+      namespace: identity-auth-mcp
+      transport: http
+      description: "MCP server for AI-assisted identity verification and authentication."
+      tools:
+        - name: verify-identity
+          description: "Verify a consumer identity using Mastercard ID"
+          hints:
+            readOnly: true
+          call: "id-verification.verify-identity"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: create-auth-consent
+          description: "Create an authentication consent request"
+          hints:
+            readOnly: false
+          call: "authentication-consent.create-consent"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-consent-status
+          description: "Get authentication consent status"
+          hints:
+            readOnly: true
+          call: "authentication-consent.get-consent"
+          with:
+            consent_id: "tools.consent_id"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: initiate-authentication
+          description: "Initiate strong customer authentication"
+          hints:
+            readOnly: false
+          call: "authentication-facilitator.initiate-authentication"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-account-identity-insights
+          description: "Get identity intelligence insights for an account"
+          hints:
+            readOnly: true
+          call: "identity-insights-accounts.get-account-insights"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-transaction-identity-insights
+          description: "Get identity intelligence insights for a transaction"
+          hints:
+            readOnly: true
+          call: "identity-insights-transactions.get-transaction-insights"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: submit-trust-verification
+          description: "Submit identity verification as a trust provider"
+          hints:
+            readOnly: false
+          call: "id-trust-providers.submit-verification"
+          outputParameters:
+            - type: object
+              mapping: "$."

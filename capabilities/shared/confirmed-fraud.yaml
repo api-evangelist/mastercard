@@ -1,0 +1,53 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Confirmed Fraud"
+  description: "The Fraud and Loss Database (FLD) API for submission and management of confirmed fraud records on Mastercard transactions."
+  tags:
+    - Fraud
+    - Risk Management
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: confirmed-fraud
+      baseUri: https://api.mastercard.com/fld/confirmed-frauds
+      description: "Mastercard Confirmed Fraud API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: mastercard-frauds
+          path: /mastercard-frauds
+          description: "Confirmed fraud submission for Mastercard transactions"
+          operations:
+            - name: submit-mastercard-fraud
+              method: POST
+              description: "Add a new fraud record for Mastercard built transactions"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  fraud: "{{tools.fraud}}"
+            - name: get-fraud-statuses
+              method: GET
+              description: "Get available fraud record statuses"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."

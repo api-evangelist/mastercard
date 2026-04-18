@@ -1,0 +1,48 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Points Activity Service"
+  description: "API for managing loyalty points activity including earning, redemption, and balance inquiries."
+  tags:
+    - Loyalty
+    - Points
+    - Rewards
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: points-activity
+      baseUri: https://api.mastercard.com/loyalty/points
+      description: "Mastercard Points Activity Service API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: points
+          path: /points
+          description: "Points activity operations"
+          operations:
+            - name: get-points-balance
+              method: GET
+              description: "Get loyalty points balance"
+              inputParameters:
+                - name: account_id
+                  in: path
+                  type: string
+                  required: true
+                  description: "Account identifier"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."

@@ -1,0 +1,188 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Payment Processing and Checkout"
+  description: "Unified workflow for merchants and payment processors to manage checkout experiences, process payments, and accept contactless transactions across Mastercard's payment gateway, checkout solutions, and commerce APIs."
+  tags:
+    - Mastercard
+    - Payment Processing
+    - Checkout
+    - E-Commerce
+    - Merchant
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - import: checkout-solutions
+      location: ./shared/checkout-solutions.yaml
+    - import: unified-checkout
+      location: ./shared/unified-checkout-solutions.yaml
+    - import: cloud-commerce
+      location: ./shared/cloud-commerce.yaml
+    - import: contactless-reader
+      location: ./shared/contactless-reader-sdk.yaml
+    - import: gateway
+      location: ./shared/gateway.yaml
+    - import: merchant-qr
+      location: ./shared/merchant-presented-qr.yaml
+    - import: installments
+      location: ./shared/installments.yaml
+
+  exposes:
+    - type: rest
+      port: 8080
+      namespace: payment-checkout-api
+      description: "Unified REST API for Mastercard payment processing and checkout workflows."
+      resources:
+        - path: /v1/checkout-sessions
+          name: checkout-sessions
+          description: "Checkout session management"
+          operations:
+            - method: POST
+              name: create-checkout-session
+              description: "Create a new checkout session"
+              call: "checkout-solutions.initiate-checkout"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/unified-sessions
+          name: unified-sessions
+          description: "Unified checkout sessions"
+          operations:
+            - method: POST
+              name: create-unified-session
+              description: "Create a unified checkout session"
+              call: "unified-checkout.create-session"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/payments
+          name: payments
+          description: "Payment processing"
+          operations:
+            - method: POST
+              name: process-payment
+              description: "Process a payment through the gateway"
+              call: "gateway.process-payment"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+            - method: GET
+              name: get-payment
+              description: "Get payment details"
+              call: "gateway.get-payment"
+              with:
+                payment_id: "rest.payment_id"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/qr-payments
+          name: qr-payments
+          description: "QR code payment acceptance"
+          operations:
+            - method: POST
+              name: generate-qr-code
+              description: "Generate a merchant QR code for payment"
+              call: "merchant-qr.generate-qr"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/installment-plans
+          name: installment-plans
+          description: "Buy-now-pay-later installment plans"
+          operations:
+            - method: POST
+              name: create-installment-plan
+              description: "Create an installment plan"
+              call: "installments.create-plan"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+
+    - type: mcp
+      port: 9090
+      namespace: payment-checkout-mcp
+      transport: http
+      description: "MCP server for AI-assisted payment processing and checkout management."
+      tools:
+        - name: create-checkout-session
+          description: "Create a new checkout session for a merchant"
+          hints:
+            readOnly: false
+            idempotent: false
+          call: "checkout-solutions.initiate-checkout"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: create-unified-session
+          description: "Create a unified checkout session supporting multiple payment methods"
+          hints:
+            readOnly: false
+            idempotent: false
+          call: "unified-checkout.create-session"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: process-payment
+          description: "Process a payment through the Mastercard gateway"
+          hints:
+            readOnly: false
+            idempotent: false
+          call: "gateway.process-payment"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-payment-details
+          description: "Retrieve payment transaction details"
+          hints:
+            readOnly: true
+            idempotent: true
+          call: "gateway.get-payment"
+          with:
+            payment_id: "tools.payment_id"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: generate-qr-code
+          description: "Generate a merchant-presented QR code for payment"
+          hints:
+            readOnly: false
+            idempotent: false
+          call: "merchant-qr.generate-qr"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: process-cloud-transaction
+          description: "Process a cloud commerce transaction"
+          hints:
+            readOnly: false
+            idempotent: false
+          call: "cloud-commerce.process-transaction"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: register-contactless-reader
+          description: "Register a contactless reader device"
+          hints:
+            readOnly: false
+            idempotent: false
+          call: "contactless-reader.register-reader"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: create-installment-plan
+          description: "Create a buy-now-pay-later installment plan"
+          hints:
+            readOnly: false
+            idempotent: false
+          call: "installments.create-plan"
+          outputParameters:
+            - type: object
+              mapping: "$."

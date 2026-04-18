@@ -1,0 +1,46 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Identity Insights for Transactions"
+  description: "API providing identity intelligence for transaction-level fraud prevention and risk scoring."
+  tags:
+    - Identity
+    - Fraud Prevention
+    - Transactions
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: identity-insights-transactions
+      baseUri: https://api.mastercard.com/idinsights/transactions
+      description: "Mastercard Identity Insights for Transactions API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: transaction-insights
+          path: /insights
+          description: "Transaction identity insights"
+          operations:
+            - name: get-transaction-insights
+              method: POST
+              description: "Get identity insights for a transaction"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  transaction: "{{tools.transaction}}"

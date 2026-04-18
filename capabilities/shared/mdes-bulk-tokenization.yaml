@@ -1,0 +1,46 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard MDES Bulk Tokenization"
+  description: "API for bulk tokenization of card portfolios through MDES."
+  tags:
+    - Tokenization
+    - Bulk Operations
+    - MDES
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: mdes-bulk-tokenization
+      baseUri: https://api.mastercard.com/mdes/bulk-tokenization
+      description: "Mastercard MDES Bulk Tokenization API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: bulk
+          path: /bulk
+          description: "Bulk tokenization operations"
+          operations:
+            - name: submit-bulk-tokenization
+              method: POST
+              description: "Submit a bulk tokenization request"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  batch: "{{tools.batch}}"

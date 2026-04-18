@@ -1,0 +1,59 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Card Issuance"
+  description: "API for managing card issuance lifecycle including virtual and physical card creation."
+  tags:
+    - Card Issuance
+    - Card Management
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: card-issuance
+      baseUri: https://api.mastercard.com/card-issuance
+      description: "Mastercard Card Issuance API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: cards
+          path: /cards
+          description: "Card issuance operations"
+          operations:
+            - name: issue-card
+              method: POST
+              description: "Issue a new card"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  card: "{{tools.card}}"
+            - name: get-card
+              method: GET
+              description: "Get card details"
+              inputParameters:
+                - name: card_id
+                  in: path
+                  type: string
+                  required: true
+                  description: "Card identifier"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."

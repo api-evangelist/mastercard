@@ -13,24 +13,24 @@ externalDocs:
   description: ISO 4217 - Currency Code
   url: https://en.wikipedia.org/wiki/ISO_4217
 servers:
-  - url: https://sandbox.api.mastercard.com/doconomy
-    description: Sandbox
-  - url: https://api.mastercard.com/doconomy
-    description: Production
+- url: https://sandbox.api.mastercard.com/doconomy
+  description: Sandbox
+- url: https://api.mastercard.com/doconomy
+  description: Production
 tags:
-  - name: Categories
-  - name: Currencies
-  - name: Footprints
-  - name: Merchants
-  - name: Supported
-  - name: Supported  Parameters
-  - name: Transaction
+- name: Categories
+- name: Currencies
+- name: Footprints
+- name: Merchants
+- name: Supported
+- name: Supported  Parameters
+- name: Transaction
 paths:
   /transaction-footprints:
     post:
       tags:
-        - Footprints
-        - Transaction
+      - Footprints
+      - Transaction
       summary: Mastercard Calculate Transaction Footprints
       description: >-
         This service calculates carbon emission based on payment transaction
@@ -46,12 +46,15 @@ paths:
           $ref: '#/components/responses/BadRequestError'
         '415':
           $ref: '#/components/responses/UnsupportedMediaTypeError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
   /supported-currencies:
     get:
       tags:
-        - Currencies
-        - Supported
-        - Supported  Parameters
+      - Currencies
+      - Supported
+      - Supported  Parameters
       summary: Mastercard Provide Supported Currencies
       description: >-
         This service provides list of currencies supported by the application.
@@ -64,14 +67,17 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/MCSupportedCurrencies'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
   /supported-merchant-categories:
     get:
       tags:
-        - Categories
-        - Merchants
-        - Supported
-        - Supported  Parameters
-      summary: Mastercard Provide Supported MCCs
+      - Categories
+      - Merchants
+      - Supported
+      - Supported  Parameters
+      summary: Mastercard Provide Supported Mccs
       description: >-
         This service provides list of merchant category codes supported by the
         application. While sending a transaction data in Transaction object,
@@ -84,6 +90,9 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/MCSupportedMerchantCategories'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
 components:
   requestBodies:
     MCTransactions:
@@ -103,7 +112,7 @@ components:
         Request object which holds all the payment transactions from API
         consumer for calculating transaction footprint.
       required:
-        - transactions
+      - transactions
       properties:
         transactions:
           minItems: 1
@@ -112,24 +121,24 @@ components:
           items:
             $ref: '#/components/schemas/MCTransaction'
           example:
-            - transactionId: ee421c25-f928-4bf6-b884-3600b76b860d
-              mcc: 3997
-              amount:
-                value: 100
-                currencyCode: USD
-            - transactionId: fdc4626c-f51e-4ba6-9728-c79ac1d9aec8
-              mcc: 5962
-              amount:
-                value: 50
-                currencyCode: EUR
+          - transactionId: ee421c25-f928-4bf6-b884-3600b76b860d
+            mcc: 3997
+            amount:
+              value: 100
+              currencyCode: USD
+          - transactionId: fdc4626c-f51e-4ba6-9728-c79ac1d9aec8
+            mcc: 5962
+            amount:
+              value: 50
+              currencyCode: EUR
     MCTransaction:
       title: Transaction
       type: object
       description: This object holds data corresponding to a single payment transaction.
       required:
-        - amount
-        - mcc
-        - transactionId
+      - amount
+      - mcc
+      - transactionId
       properties:
         transactionId:
           $ref: '#/components/schemas/TransactionId'
@@ -160,8 +169,8 @@ components:
         Amount object that includes the value and the currency in which a
         payment transaction has been performed
       required:
-        - currencyCode
-        - value
+      - currencyCode
+      - value
       properties:
         value:
           type: number
@@ -187,7 +196,7 @@ components:
         Response object which holds all the transaction footprints corresponding
         to each transaction in Transactions request.
       required:
-        - transactionFootprints
+      - transactionFootprints
       properties:
         transactionFootprints:
           type: array
@@ -195,12 +204,13 @@ components:
           maxItems: 5000
           items:
             $ref: '#/components/schemas/MCTransactionFootprint'
+          example: []
     MCTransactionFootprint:
       title: TransactionFootprint
       type: object
       description: This object holds the transaction footprint for a payment transaction.
       required:
-        - transactionId
+      - transactionId
       properties:
         transactionId:
           $ref: '#/components/schemas/TransactionId'
@@ -229,12 +239,13 @@ components:
               type: number
               description: The transaction Currency value
               example: 40.51
+          example: example_value
     MCSupportedCurrencies:
       title: SupportedCurrencies
       type: object
       description: The response object that contains a list of supported curencies.
       required:
-        - currencies
+      - currencies
       properties:
         currencies:
           minItems: 1
@@ -242,12 +253,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MCCurrency'
+          example: []
     MCCurrency:
       title: Currency
       type: object
       description: This object represents one currency code information.
       required:
-        - currencyCode
+      - currencyCode
       properties:
         currencyCode:
           $ref: '#/components/schemas/CurrencyCode'
@@ -258,7 +270,7 @@ components:
         The response object that contains a list of supported merchant
         categories.
       required:
-        - merchantCategories
+      - merchantCategories
       properties:
         merchantCategories:
           minItems: 1
@@ -266,12 +278,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MCMerchantCategory'
+          example: []
     MCMerchantCategory:
       title: MerchantCategory
       type: object
       description: This object represents one merchant category information.
       required:
-        - mcc
+      - mcc
       properties:
         mcc:
           type: string
@@ -287,7 +300,7 @@ components:
       type: object
       description: The error response object which gets returned in case of any error.
       required:
-        - Errors
+      - Errors
       properties:
         Errors:
           $ref: '#/components/schemas/MCErrors'
@@ -296,21 +309,22 @@ components:
       type: object
       description: Error object which returns list of Error objects
       required:
-        - Error
+      - Error
       properties:
         Error:
           type: array
           items:
             $ref: '#/components/schemas/MCError'
+          example: []
     MCError:
       title: Error
       type: object
       description: Error object which contains details about error
       required:
-        - Source
-        - ReasonCode
-        - Description
-        - Recoverable
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
       properties:
         Source:
           type: string
@@ -417,61 +431,61 @@ components:
     MCTransactionFootprints:
       value:
         transactionFootprints:
-          - transactionId: ee421c25-f928-4bf6-b884-3600b76b860d
-            carbonEmissionInGrams: 48.52
-            carbonEmissionInOunces: 1.71
-            carbonSocialCost:
-              currencyCode: USD
-              value: 40.5
-          - transactionId: fdc4626c-f51e-4ba6-9728-c79ac1d9aec8
-            carbonEmissionInGrams: 27.98
-            carbonEmissionInOunces: 0.99
-            carbonSocialCost:
-              currencyCode: EUR
-              value: 30.5
+        - transactionId: ee421c25-f928-4bf6-b884-3600b76b860d
+          carbonEmissionInGrams: 48.52
+          carbonEmissionInOunces: 1.71
+          carbonSocialCost:
+            currencyCode: USD
+            value: 40.5
+        - transactionId: fdc4626c-f51e-4ba6-9728-c79ac1d9aec8
+          carbonEmissionInGrams: 27.98
+          carbonEmissionInOunces: 0.99
+          carbonSocialCost:
+            currencyCode: EUR
+            value: 30.5
     MCSupportedCurrencies:
       value:
         currencies:
-          - currencyCode: SEK
-          - currencyCode: USD
-          - currencyCode: EUR
-          - currencyCode: GBP
+        - currencyCode: SEK
+        - currencyCode: USD
+        - currencyCode: EUR
+        - currencyCode: GBP
     MCSupportedMerchantCategories:
       value:
         merchantCategories:
-          - mcc: 3860
-          - mcc: 3861
-          - mcc: 3620
-          - mcc: 3862
-          - mcc: 3621
-          - mcc: 3863
-          - mcc: 5800
+        - mcc: 3860
+        - mcc: 3861
+        - mcc: 3620
+        - mcc: 3862
+        - mcc: 3621
+        - mcc: 3863
+        - mcc: 5800
     BadRequestError:
       value:
         Errors:
           Error:
-            - Source: Carbon-Calculator-Proxy
-              ReasonCode: INVALID_REQUEST_PARAMETER
-              Description: >-
-                One of the request parameters is invalid, try again with correct
-                request.
-              Recoverable: false
-              Details: transactions[0].mcc size must be between 1 and 4
-            - Source: Carbon-Calculator-Proxy
-              ReasonCode: INVALID_REQUEST_PARAMETER
-              Description: >-
-                One of the request parameters is invalid, try again with correct
-                request.
-              Recoverable: false
-              Details: transactions[0].mcc must match "^\d{1,4}"
+          - Source: Carbon-Calculator-Proxy
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: >-
+              One of the request parameters is invalid, try again with correct
+              request.
+            Recoverable: false
+            Details: transactions[0].mcc size must be between 1 and 4
+          - Source: Carbon-Calculator-Proxy
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: >-
+              One of the request parameters is invalid, try again with correct
+              request.
+            Recoverable: false
+            Details: transactions[0].mcc must match "^\d{1,4}"
     UnsupportedMediaTypeError:
       value:
         Errors:
           Error:
-            - Source: Carbon-Calculator-Proxy
-              ReasonCode: UNSUPPORTED_MEDIA_TYPE
-              Description: >-
-                Requested media type is not supported, try again with supported
-                media type.
-              Recoverable: false
-              Details: ''
+          - Source: Carbon-Calculator-Proxy
+            ReasonCode: UNSUPPORTED_MEDIA_TYPE
+            Description: >-
+              Requested media type is not supported, try again with supported
+              media type.
+            Recoverable: false
+            Details: ''

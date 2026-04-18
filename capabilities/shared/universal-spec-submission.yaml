@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Universal Specification Submission"
+  description: "API for issuers to submit PAN-related events for account level management services."
+  tags:
+    - Account Services
+    - Issuers
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: universal-spec
+      baseUri: https://api.mastercard.com/universal-spec
+      description: "Mastercard Universal Specification Submission API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: submissions
+          path: /submissions
+          description: "Specification submissions"
+          operations:
+            - name: submit-spec
+              method: POST
+              description: "Submit PAN-related event specification"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  submission: "{{tools.submission}}"

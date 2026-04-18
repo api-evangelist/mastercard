@@ -1,0 +1,46 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Pay with Rewards"
+  description: "API enabling cardholders to pay with loyalty rewards points at checkout."
+  tags:
+    - Rewards
+    - Loyalty
+    - Payments
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: pay-with-rewards
+      baseUri: https://api.mastercard.com/pay-with-rewards
+      description: "Mastercard Pay with Rewards API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: rewards
+          path: /rewards
+          description: "Rewards payment operations"
+          operations:
+            - name: pay-with-rewards
+              method: POST
+              description: "Apply rewards as payment"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  payment: "{{tools.payment}}"

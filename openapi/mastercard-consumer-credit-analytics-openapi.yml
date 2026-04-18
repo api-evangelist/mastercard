@@ -11,21 +11,20 @@ info:
     url: https://developer.mastercard.com/support
     email: apisupport@mastercard.com
 servers:
-  - url: https://api.mastercard.com/consumer/credit-analytics
-    description: Production server
-  - url: https://sandbox.api.mastercard.com/consumer/credit-analytics
-    description: Sandbox server
+- url: https://api.mastercard.com/consumer/credit-analytics
+  description: Production server
+- url: https://sandbox.api.mastercard.com/consumer/credit-analytics
+  description: Sandbox server
 tags:
-  - name: Scores
-    description: Retrieval of Mastercard transaction-based credit scores and data insights.
+- name: Scores
+  description: Retrieval of Mastercard transaction-based credit scores and data insights.
 paths:
   /scores:
     post:
       tags:
-        - Scores
+      - Scores
       summary: >-
-        Retrieval of Mastercard transaction-based credit scores and data
-        insights.
+        Retrieval of Mastercard Transaction-based Credit Scores and Data Insights.
       description: |
         Using the provided encrypted list of PAN and consent,
         returns a delinquency score,
@@ -39,17 +38,20 @@ paths:
           $ref: '#/components/responses/ConsumerCreditAnalyticsScore'
         '400':
           $ref: '#/components/responses/BadRequest'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
 components:
   examples:
     BadRequestExample:
       value:
         Errors:
           Error:
-            - Source: ConsumerCreditAnalytics
-              ReasonCode: MISSING_REQUIRED_FIELD
-              Description: The parameter is required but not provided.
-              Recoverable: false
-              Details: The countryCode parameter is required but was not provided.
+          - Source: ConsumerCreditAnalytics
+            ReasonCode: MISSING_REQUIRED_FIELD
+            Description: The parameter is required but not provided.
+            Recoverable: false
+            Details: The countryCode parameter is required but was not provided.
   responses:
     ConsumerCreditAnalyticsScore:
       description: |
@@ -113,17 +115,17 @@ components:
           items:
             $ref: '#/components/schemas/CustomerPAN'
           example:
-            - customerPAN: 5553********4105
-              hasConsent: true
-            - customerPAN: 5553********4106
-              hasConsent: true
+          - customerPAN: 5553********4105
+            hasConsent: true
+          - customerPAN: 5553********4106
+            hasConsent: true
         scoreTypes:
           type: array
           description: >-
             Type of score needs to be retrieved for the card number, Possible
             value - DELINQUENCY.
           example:
-            - DELINQUENCY
+          - DELINQUENCY
           items:
             type: string
             description: >-
@@ -136,7 +138,7 @@ components:
             Type of products for which score needs to be retrieved of the card
             number, Possible value - CREDIT_CARD.
           example:
-            - CREDIT_CARD
+          - CREDIT_CARD
           items:
             type: string
             description: >-
@@ -151,11 +153,13 @@ components:
           description: List of scores retrieved for the card numbers.
           items:
             $ref: '#/components/schemas/PredictionDataSuccess'
+          example: []
         predictionDataErrors:
           type: array
           description: List of errors while retrieving the score for the card numbers.
           items:
             $ref: '#/components/schemas/PredictionDataError'
+          example: []
     PredictionDataError:
       type: object
       properties:
@@ -168,6 +172,7 @@ components:
           description: List of errors for card number.
           items:
             $ref: '#/components/schemas/ErrorData'
+          example: []
     ErrorData:
       type: object
       properties:
@@ -222,6 +227,7 @@ components:
           description: Score data for the card numbers.
           items:
             $ref: '#/components/schemas/score'
+          example: []
     score:
       type: object
       properties:
@@ -278,14 +284,14 @@ components:
     ErrorWrapper:
       type: object
       required:
-        - Errors
+      - Errors
       properties:
         Errors:
           $ref: '#/components/schemas/Errors'
     Errors:
       type: object
       required:
-        - Error
+      - Error
       properties:
         Error:
           $ref: '#/components/schemas/ErrorList'

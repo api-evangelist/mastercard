@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Small Business Credit Analytics"
+  description: "API providing credit analytics and spending insights for small businesses."
+  tags:
+    - Credit Analytics
+    - Small Business
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: small-biz-credit-analytics
+      baseUri: https://api.mastercard.com/credit-analytics/small-business
+      description: "Mastercard Small Business Credit Analytics API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: analytics
+          path: /analytics
+          description: "Small business credit analytics"
+          operations:
+            - name: get-sb-credit-analytics
+              method: POST
+              description: "Get small business credit analytics"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  query: "{{tools.query}}"

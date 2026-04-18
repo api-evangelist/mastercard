@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Send Account Verification Service"
+  description: "API for verifying accounts in the Mastercard Send network before initiating transfers."
+  tags:
+    - Money Transfer
+    - Account Verification
+    - Mastercard Send
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: send-account-verification
+      baseUri: https://api.mastercard.com/send/v1/partners
+      description: "Mastercard Send Account Verification Service API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: verifications
+          path: /verifications
+          description: "Account verification"
+          operations:
+            - name: verify-account
+              method: POST
+              description: "Verify an account for Send eligibility"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  account: "{{tools.account}}"

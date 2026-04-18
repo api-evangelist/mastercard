@@ -1,0 +1,46 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Transaction API for Acquirers"
+  description: "API for acquirers to process and manage Mastercard transactions."
+  tags:
+    - Transactions
+    - Acquirers
+    - Processing
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: transaction-api-acquirers
+      baseUri: https://api.mastercard.com/transactions/acquirers
+      description: "Mastercard Transaction API for Acquirers"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: transactions
+          path: /transactions
+          description: "Acquirer transaction operations"
+          operations:
+            - name: submit-transaction
+              method: POST
+              description: "Submit a transaction"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  transaction: "{{tools.transaction}}"

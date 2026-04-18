@@ -1,0 +1,59 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Bill Pay"
+  description: "API for the Remote Payment and Presentment Service (RPPS) enabling consumer-to-business bill payments."
+  tags:
+    - Bill Pay
+    - Payments
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: bill-pay
+      baseUri: https://api.mastercard.com/bill-pay
+      description: "Mastercard Bill Pay API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: billers
+          path: /billers
+          description: "Biller management"
+          operations:
+            - name: search-billers
+              method: POST
+              description: "Search for billers"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  search: "{{tools.search}}"
+            - name: get-biller
+              method: GET
+              description: "Get biller details"
+              inputParameters:
+                - name: biller_id
+                  in: path
+                  type: string
+                  required: true
+                  description: "Biller identifier"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."

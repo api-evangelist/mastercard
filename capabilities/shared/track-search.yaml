@@ -1,0 +1,46 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Track Search"
+  description: "API for searching and retrieving merchant and supplier data in the Mastercard Track network."
+  tags:
+    - Track
+    - Merchant Data
+    - B2B
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: track-search
+      baseUri: https://api.mastercard.com/track/search
+      description: "Mastercard Track Search API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: searches
+          path: /searches
+          description: "Track search operations"
+          operations:
+            - name: search-merchants
+              method: POST
+              description: "Search for merchants in Track"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  search: "{{tools.search}}"

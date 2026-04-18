@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Benefit Allocation Service"
+  description: "API for allocating and managing benefits across card programs."
+  tags:
+    - Benefits
+    - Allocation
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: benefit-allocation
+      baseUri: https://api.mastercard.com/benefit-allocation
+      description: "Mastercard Benefit Allocation Service API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: allocations
+          path: /allocations
+          description: "Benefit allocation operations"
+          operations:
+            - name: allocate-benefit
+              method: POST
+              description: "Allocate a benefit to a cardholder"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  allocation: "{{tools.allocation}}"

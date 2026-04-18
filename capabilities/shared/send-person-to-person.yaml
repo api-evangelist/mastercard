@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Send Person to Person"
+  description: "API for person-to-person money transfers via the Mastercard Send network."
+  tags:
+    - Money Transfer
+    - P2P
+    - Mastercard Send
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: send-p2p
+      baseUri: https://api.mastercard.com/send/v1/partners
+      description: "Mastercard Send Person to Person API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: transfers
+          path: /transfers
+          description: "P2P transfer operations"
+          operations:
+            - name: create-p2p-transfer
+              method: POST
+              description: "Create a person-to-person transfer"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  transfer: "{{tools.transfer}}"

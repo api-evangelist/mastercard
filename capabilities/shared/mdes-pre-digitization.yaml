@@ -1,0 +1,46 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard MDES Pre-Digitization"
+  description: "API for pre-digitization eligibility checks before tokenizing a card."
+  tags:
+    - Tokenization
+    - Pre-Digitization
+    - MDES
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: mdes-pre-digitization
+      baseUri: https://api.mastercard.com/mdes/pre-digitization
+      description: "Mastercard MDES Pre-Digitization API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: eligibility
+          path: /eligibility
+          description: "Pre-digitization eligibility"
+          operations:
+            - name: check-eligibility
+              method: POST
+              description: "Check card eligibility for digitization"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  card: "{{tools.card}}"

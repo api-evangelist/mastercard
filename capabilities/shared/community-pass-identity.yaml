@@ -1,0 +1,58 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Community Pass Digital Identity"
+  description: "API for privacy-first digital identity and authentication in the Community Pass ecosystem."
+  tags:
+    - Community Pass
+    - Digital Identity
+    - Financial Inclusion
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: community-pass-identity
+      baseUri: https://api.mastercard.com/community-pass/identity
+      description: "Mastercard Community Pass Digital Identity API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: identities
+          path: /identities
+          description: "Digital identity management"
+          operations:
+            - name: create-identity
+              method: POST
+              description: "Create a digital identity"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  identity: "{{tools.identity}}"
+            - name: verify-identity
+              method: POST
+              description: "Verify a digital identity"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  verification: "{{tools.verification}}"

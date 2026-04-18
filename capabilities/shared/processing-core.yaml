@@ -1,0 +1,46 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Processing Core"
+  description: "Core processing API for authorization, clearing, and settlement of Mastercard transactions."
+  tags:
+    - Processing
+    - Authorization
+    - Settlement
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: processing-core
+      baseUri: https://api.mastercard.com/processing/core
+      description: "Mastercard Processing Core API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: authorizations
+          path: /authorizations
+          description: "Transaction authorization"
+          operations:
+            - name: authorize
+              method: POST
+              description: "Authorize a transaction"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  authorization: "{{tools.authorization}}"

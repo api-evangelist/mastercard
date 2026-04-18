@@ -1,0 +1,60 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Installments"
+  description: "API for enabling buy-now-pay-later installment payment plans."
+  tags:
+    - Installments
+    - BNPL
+    - Payments
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: installments
+      baseUri: https://api.mastercard.com/installments
+      description: "Mastercard Installments API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: plans
+          path: /plans
+          description: "Installment plan management"
+          operations:
+            - name: create-plan
+              method: POST
+              description: "Create an installment plan"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  plan: "{{tools.plan}}"
+            - name: get-plan
+              method: GET
+              description: "Get installment plan details"
+              inputParameters:
+                - name: plan_id
+                  in: path
+                  type: string
+                  required: true
+                  description: "Plan identifier"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."

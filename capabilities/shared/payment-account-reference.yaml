@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Payment Account Reference Inquiry"
+  description: "API for querying Payment Account Reference (PAR) data to link tokens to underlying accounts."
+  tags:
+    - Account Reference
+    - Tokenization
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: payment-account-ref
+      baseUri: https://api.mastercard.com/par
+      description: "Mastercard Payment Account Reference Inquiry API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: references
+          path: /references
+          description: "PAR inquiry operations"
+          operations:
+            - name: get-par
+              method: POST
+              description: "Query payment account reference"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  account: "{{tools.account}}"

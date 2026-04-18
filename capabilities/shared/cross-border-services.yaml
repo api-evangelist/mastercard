@@ -1,0 +1,59 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Cross-Border Services"
+  description: "API for cross-border payment processing, currency conversion, and international money transfers."
+  tags:
+    - Cross-Border
+    - International Payments
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: cross-border
+      baseUri: https://api.mastercard.com/cross-border
+      description: "Mastercard Cross-Border Services API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: payments
+          path: /payments
+          description: "Cross-border payment operations"
+          operations:
+            - name: create-payment
+              method: POST
+              description: "Create a cross-border payment"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  payment: "{{tools.payment}}"
+            - name: get-payment-status
+              method: GET
+              description: "Get cross-border payment status"
+              inputParameters:
+                - name: payment_id
+                  in: path
+                  type: string
+                  required: true
+                  description: "Payment identifier"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."

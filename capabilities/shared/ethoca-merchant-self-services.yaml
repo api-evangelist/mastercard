@@ -1,0 +1,50 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Ethoca Merchant Self Services"
+  description: "Self-service API for merchants to manage their Ethoca integration, enrollment, and alert preferences."
+  tags:
+    - Fraud Prevention
+    - Ethoca
+    - Merchant
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: ethoca-merchant-services
+      baseUri: https://api.mastercard.com/ethoca/merchant-services
+      description: "Mastercard Ethoca Merchant Self Services API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: merchants
+          path: /merchants
+          description: "Merchant management for Ethoca"
+          operations:
+            - name: get-merchant-profile
+              method: GET
+              description: "Retrieve merchant Ethoca profile"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+            - name: update-merchant-profile
+              method: PUT
+              description: "Update merchant Ethoca preferences"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."

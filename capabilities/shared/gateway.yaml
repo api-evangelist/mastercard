@@ -1,0 +1,59 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Gateway"
+  description: "Payment gateway API for processing card-present and card-not-present transactions."
+  tags:
+    - Payment Gateway
+    - Transaction Processing
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: gateway
+      baseUri: https://api.mastercard.com/gateway
+      description: "Mastercard Gateway API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: payments
+          path: /payments
+          description: "Payment processing"
+          operations:
+            - name: process-payment
+              method: POST
+              description: "Process a payment transaction"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  payment: "{{tools.payment}}"
+            - name: get-payment
+              method: GET
+              description: "Retrieve payment transaction details"
+              inputParameters:
+                - name: payment_id
+                  in: path
+                  type: string
+                  required: true
+                  description: "Payment identifier"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."

@@ -1,0 +1,46 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Issuer Enrollment Click to Pay"
+  description: "API for issuer enrollment in Click to Pay for card tokenization and digital checkout."
+  tags:
+    - Click to Pay
+    - Issuer Enrollment
+    - Digital Checkout
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: issuer-click-to-pay
+      baseUri: https://api.mastercard.com/click-to-pay/issuers
+      description: "Mastercard Issuer Enrollment Click to Pay API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: enrollments
+          path: /enrollments
+          description: "Issuer enrollment operations"
+          operations:
+            - name: enroll-issuer
+              method: POST
+              description: "Enroll an issuer in Click to Pay"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  enrollment: "{{tools.enrollment}}"

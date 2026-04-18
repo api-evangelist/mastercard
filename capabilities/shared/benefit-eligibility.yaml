@@ -1,0 +1,46 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Benefit Eligibility Service"
+  description: "PAN-level verification API for checking cardholder benefit eligibility and access rights."
+  tags:
+    - Benefits
+    - Eligibility
+    - Card Verification
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: benefit-eligibility
+      baseUri: https://api.mastercard.com/eligibility
+      description: "Mastercard Benefit Eligibility Service API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: eligibility
+          path: /eligibility
+          description: "Benefit eligibility checks"
+          operations:
+            - name: check-eligibility
+              method: POST
+              description: "Check cardholder benefit eligibility"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  card: "{{tools.card}}"

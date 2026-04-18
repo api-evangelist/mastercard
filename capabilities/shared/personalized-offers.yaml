@@ -1,0 +1,58 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Personalized Offers"
+  description: "API for delivering personalized merchant offers and rewards to cardholders."
+  tags:
+    - Offers
+    - Personalization
+    - Rewards
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: personalized-offers
+      baseUri: https://api.mastercard.com/personalized-offers
+      description: "Mastercard Personalized Offers API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: offers
+          path: /offers
+          description: "Personalized offer operations"
+          operations:
+            - name: get-offers
+              method: POST
+              description: "Get personalized offers for a cardholder"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  cardholder: "{{tools.cardholder}}"
+            - name: activate-offer
+              method: POST
+              description: "Activate an offer for a cardholder"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  activation: "{{tools.activation}}"

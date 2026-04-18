@@ -1,0 +1,46 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Doconomy Aland Index"
+  description: "API providing the Aland Index for measuring environmental impact of financial transactions."
+  tags:
+    - Sustainability
+    - Environmental Impact
+    - ESG
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: doconomy-aland
+      baseUri: https://api.mastercard.com/doconomy/aland-index
+      description: "Mastercard Doconomy Aland Index API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: index
+          path: /index
+          description: "Aland Index operations"
+          operations:
+            - name: get-impact-score
+              method: POST
+              description: "Get environmental impact score for a transaction"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  transaction: "{{tools.transaction}}"

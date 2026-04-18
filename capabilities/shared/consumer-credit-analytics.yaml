@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Consumer Credit Analytics"
+  description: "API providing consumer credit analytics and spending insights for financial institutions."
+  tags:
+    - Credit Analytics
+    - Consumer Data
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: consumer-credit-analytics
+      baseUri: https://api.mastercard.com/credit-analytics/consumer
+      description: "Mastercard Consumer Credit Analytics API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: analytics
+          path: /analytics
+          description: "Credit analytics operations"
+          operations:
+            - name: get-credit-analytics
+              method: POST
+              description: "Get consumer credit analytics"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  query: "{{tools.query}}"

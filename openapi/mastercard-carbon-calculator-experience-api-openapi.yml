@@ -14,25 +14,25 @@ info:
     email: apisupport@mastercard.com
   version: 1.0.0
 servers:
-  - url: https://api.mastercard.com/cts
-    description: Production
-  - url: https://sandbox.api.mastercard.com/cts
-    description: Sandbox
+- url: https://api.mastercard.com/cts
+  description: Production
+- url: https://sandbox.api.mastercard.com/cts
+  description: Sandbox
 tags:
-  - name: Aggregate
-  - name: Carbon
-  - name: Dashboards
-  - name: Deletions
-  - name: Issuer
-    description: Contains APIs which will be consumed by the Issuer's backend system.
-  - name: Scores
-  - name: Users
+- name: Aggregate
+- name: Carbon
+- name: Dashboards
+- name: Deletions
+- name: Issuer
+  description: Contains APIs which will be consumed by the Issuer's backend system.
+- name: Scores
+- name: Users
 paths:
   /issuers:
     get:
       tags:
-        - Issuer
-      summary: Mastercard Fetches the Issuer details.
+      - Issuer
+      summary: Mastercard Fetches the Issuer Details.
       description: >-
         Allows fetching the Issuer details onboarded on the Carbon Calculator
         Experience. This API returns the Issuer's available details like a
@@ -46,11 +46,14 @@ paths:
           $ref: '#/components/responses/IssuerUnauthorisedError'
         '404':
           $ref: '#/components/responses/IssuerNotFoundError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
     put:
       tags:
-        - Issuer
+      - Issuer
       summary: >-
-        Mastercard Allows Issuer to update the Issuer details to the Carbon Calculator Experience platform.
+        Mastercard Allows Issuer to Update the Issuer Details to the Carbon Calculator Experience Platform.
       description: >-
         Allows a registered Issuer to update the configuration details to the
         Carbon Calculator Experience API.
@@ -68,13 +71,16 @@ paths:
           $ref: '#/components/responses/IssuerNotFoundError'
         '415':
           $ref: '#/components/responses/UnsupportedMediaTypeError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
   /issuers/users:
     post:
       tags:
-        - Issuer
-        - Users
+      - Issuer
+      - Users
       summary: >-
-        Mastercard Allows Issuer to enroll cardholders to the Carbon Calculator Experience platform.
+        Mastercard Allows Issuer to Enroll Cardholders to the Carbon Calculator Experience Platform.
       description: >
         Used to enroll users for the Carbon Calculator Experience API so that
 
@@ -109,17 +115,20 @@ paths:
           $ref: '#/components/responses/IssuerNotFoundError'
         '415':
           $ref: '#/components/responses/UnsupportedMediaTypeError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
   /issuers/users/{userid}:
     put:
       tags:
-        - Issuer
-        - Users
+      - Issuer
+      - Users
       summary: >-
-        Mastercard Allows issuer to update enrolled user information onto Carbon Calculator Experience platform.
+        Mastercard Allows Issuer to Update Enrolled User Information Onto Carbon Calculator Experience Platform.
       description: Used to update the user's information for Carbon Calculator Experience.
       operationId: updateUser
       parameters:
-        - $ref: '#/components/parameters/UserID'
+      - $ref: '#/components/parameters/UserID'
       x-mastercard-api-encrypted: true
       requestBody:
         $ref: '#/components/requestBodies/UpdateUserProfile'
@@ -134,14 +143,17 @@ paths:
           $ref: '#/components/responses/IssuerNotFoundError'
         '415':
           $ref: '#/components/responses/UnsupportedMediaTypeError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
   /issuers/users/{userid}/dashboards:
     get:
       tags:
-        - Dashboards
-        - Issuer
-        - Users
+      - Dashboards
+      - Issuer
+      - Users
       summary: >-
-        Mastercard Used to retrieve the short-lived URL of a user's dashboard to view their carbon footprints and contributions to Priceless Planet.
+        Mastercard Used to Retrieve the Short-lived Url of a User's Dashboard to View Their Carbon Footprints and Contributions to Priceless Planet.
       description: >-
         It allows issuers to retrieve a short-lived URL for an enrolled user. An
         Issuer needs to load this URL within their application so that the user
@@ -150,8 +162,8 @@ paths:
         Swedish, and Polish.
       operationId: getAuthToken
       parameters:
-        - $ref: '#/components/parameters/UserID'
-        - $ref: '#/components/parameters/Lang'
+      - $ref: '#/components/parameters/UserID'
+      - $ref: '#/components/parameters/Lang'
       responses:
         '200':
           $ref: '#/components/responses/Dashboard'
@@ -161,22 +173,25 @@ paths:
           $ref: '#/components/responses/DashboardsUnauthorisedError'
         '404':
           $ref: '#/components/responses/DashboardNotFoundError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
   /issuers/users/{userid}/aggregate-carbon-scores:
     get:
       tags:
-        - Aggregate
-        - Carbon
-        - Issuer
-        - Scores
-        - Users
+      - Aggregate
+      - Carbon
+      - Issuer
+      - Scores
+      - Users
       summary: >-
-        Mastercard Fetches monthly aggregate carbon score for the transactions made for the current month.
+        Mastercard Fetches Monthly Aggregate Carbon Score for the Transactions Made for the Current Month.
       description: >-
         Allows Issuers to retrieve an aggregate carbon footprint for the
         transactions done by a user.
       operationId: getAggregateCarbonScore
       parameters:
-        - $ref: '#/components/parameters/UserID'
+      - $ref: '#/components/parameters/UserID'
       responses:
         '200':
           $ref: '#/components/responses/AggregateCarbonScore'
@@ -186,13 +201,16 @@ paths:
           $ref: '#/components/responses/AggregateCarbonScoreUnauthorisedError'
         '404':
           $ref: '#/components/responses/AggregateCarbonScoreNotFoundError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
   /issuers/user-deletions:
     post:
       tags:
-        - Deletions
-        - Issuer
-        - Users
-      summary: Mastercard Delete one or more users.
+      - Deletions
+      - Issuer
+      - Users
+      summary: Mastercard Delete One or More Users.
       description: >-
         <ul><li>Allows a registered Service Provider to delete one or more
         users.</li> <li>Payment cards associated with the user will also be
@@ -213,6 +231,9 @@ paths:
           $ref: '#/components/responses/DeleteUserNotFoundError'
         '415':
           $ref: '#/components/responses/UnsupportedMediaTypeError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
 components:
   requestBodies:
     UserProfile:
@@ -265,17 +286,17 @@ components:
       type: object
       description: Information about an Issuer as available on the server.
       required:
-        - clientId
-        - supportedAccountRange
-        - status
-        - email
-        - currencyCode
-        - countryCode
-        - countryName
-        - termsAndConditionURL
-        - privacyNoticeURL
-        - optOutURL
-        - preferredTheme
+      - clientId
+      - supportedAccountRange
+      - status
+      - email
+      - currencyCode
+      - countryCode
+      - countryName
+      - termsAndConditionURL
+      - privacyNoticeURL
+      - optOutURL
+      - preferredTheme
       properties:
         clientId:
           type: string
@@ -348,11 +369,11 @@ components:
         The request object for enrolling a new user to Carbon Calculator
         Experience API.
       required:
-        - cardNumber
-        - email
-        - expiryInfo
-        - cardBaseCurrency
-        - cardholderName
+      - cardNumber
+      - email
+      - expiryInfo
+      - cardBaseCurrency
+      - cardholderName
       properties:
         email:
           $ref: '#/components/schemas/Email'
@@ -406,8 +427,8 @@ components:
     Address:
       type: object
       required:
-        - countryCode
-        - type
+      - countryCode
+      - type
       properties:
         countryCode:
           description: Denotes three-character country code.
@@ -486,8 +507,8 @@ components:
     UserName:
       type: object
       required:
-        - firstName
-        - lastName
+      - firstName
+      - lastName
       properties:
         firstName:
           type: string
@@ -509,8 +530,8 @@ components:
         The request object for updating a enrolled user onto Carbon Calculator
         Experience platform.
       required:
-        - name
-        - locale
+      - name
+      - locale
       properties:
         name:
           $ref: '#/components/schemas/UserName'
@@ -527,9 +548,9 @@ components:
       type: object
       description: Information about an Issuer as available on the server.
       required:
-        - clientId
-        - supportedAccountRange
-        - status
+      - clientId
+      - supportedAccountRange
+      - status
       properties:
         clientId:
           type: string
@@ -614,9 +635,9 @@ components:
       type: object
       description: Successful user enrollment response
       required:
-        - cardNumberLastFourDigits
-        - status
-        - userid
+      - cardNumberLastFourDigits
+      - status
+      - userid
       properties:
         userid:
           $ref: '#/components/schemas/UserID'
@@ -653,8 +674,8 @@ components:
     Dashboard:
       type: object
       required:
-        - url
-        - expiryInMillis
+      - url
+      - expiryInMillis
       properties:
         url:
           type: string
@@ -674,8 +695,8 @@ components:
     AggregateCarbonScore:
       type: object
       required:
-        - carbonEmissionInGrams
-        - aggregateDate
+      - carbonEmissionInGrams
+      - aggregateDate
       properties:
         carbonEmissionInGrams:
           type: string
@@ -694,7 +715,7 @@ components:
       type: object
       description: The error response object gets returned in case of error.
       required:
-        - Errors
+      - Errors
       properties:
         Errors:
           $ref: '#/components/schemas/Errors'
@@ -703,21 +724,22 @@ components:
       type: object
       description: Error object which contains a list of error objects.
       required:
-        - Error
+      - Error
       properties:
         Error:
           type: array
           items:
             $ref: '#/components/schemas/Error'
+          example: []
     Error:
       title: Error
       type: object
       description: Error object which contains details about a single error.
       required:
-        - Source
-        - ReasonCode
-        - Description
-        - Recoverable
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
       properties:
         Source:
           type: string
@@ -1108,8 +1130,8 @@ components:
   examples:
     UserIDs:
       value:
-        - 4ba581a55-bcea-4c3e-8e0f-9b4726e5e6d3
-        - c5d88571-ac15-465a-a0d8-1ad1327b9a06
+      - 4ba581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+      - c5d88571-ac15-465a-a0d8-1ad1327b9a06
     UpdateIssuerDetails:
       value:
         clientId: fjl2fxzsYl1OpvxkBItC9nVw1PSQc_b-eQMcmQFg011ab4b5
@@ -1175,268 +1197,268 @@ components:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: USER_NOT_FOUND
-              Description: >-
-                We cannot find user details for provided userId. Kindly register
-                the user through the enrollment process.
-              Recoverable: false
-              Details: >-
-                Make sure the user is enrolled through /issuers/users API
-                endpoint.
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: USER_NOT_FOUND
+            Description: >-
+              We cannot find user details for provided userId. Kindly register
+              the user through the enrollment process.
+            Recoverable: false
+            Details: >-
+              Make sure the user is enrolled through /issuers/users API
+              endpoint.
     RequestDecryptionError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: CRYPTO_ERROR
-              Description: >-
-                We are unable to decipher your request, kindly verify your
-                request before trying again. If the problem persists then reach
-                out to your Mastercard associate.
-              Recoverable: false
-              Details: ''
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: CRYPTO_ERROR
+            Description: >-
+              We are unable to decipher your request, kindly verify your
+              request before trying again. If the problem persists then reach
+              out to your Mastercard associate.
+            Recoverable: false
+            Details: ''
     BadRequestError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: INVALID_REQUEST_PARAMETER
-              Description: >-
-                One of the request parameters is invalid, try again with correct
-                request.
-              Recoverable: false
-              Details: 'Email must be in the format: xyz@mail.com'
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: >-
+              One of the request parameters is invalid, try again with correct
+              request.
+            Recoverable: false
+            Details: 'Email must be in the format: xyz@mail.com'
     IssuerEmptyRequestBodyError:
       value:
         Errors:
           Error:
-            - Source: Carbon-Calculator
-              ReasonCode: INVALID_REQUEST_PARAMETER
-              Description: >-
-                One of the request parameters is invalid, try again with correct
-                request.
-              Recoverable: false
-              Details: Required request body is missing
+          - Source: Carbon-Calculator
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: >-
+              One of the request parameters is invalid, try again with correct
+              request.
+            Recoverable: false
+            Details: Required request body is missing
     IssuerInvalidAccountRangeLengthError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: INVALID_REQUEST_PARAMETER
-              Description: >-
-                One of the request parameters is invalid, try again with correct
-                request.
-              Recoverable: false
-              Details: >-
-                Each value in supportedAccountRange must be numeric and size
-                should be between 4 and 8
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: >-
+              One of the request parameters is invalid, try again with correct
+              request.
+            Recoverable: false
+            Details: >-
+              Each value in supportedAccountRange must be numeric and size
+              should be between 4 and 8
     IssuerInvalidHexCodeError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: INVALID_REQUEST_PARAMETER
-              Description: >-
-                One of the request parameters is invalid, try again with correct
-                request.
-              Recoverable: false
-              Details: The hex code supplied for color preference is invalid
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: >-
+              One of the request parameters is invalid, try again with correct
+              request.
+            Recoverable: false
+            Details: The hex code supplied for color preference is invalid
     IssuerInvalidFontFormatError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: INVALID_REQUEST_PARAMETER
-              Description: >-
-                One of the request parameters is invalid, try again with correct
-                request.
-              Recoverable: false
-              Details: The font size should be in pixel format. For example, 15px.
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: >-
+              One of the request parameters is invalid, try again with correct
+              request.
+            Recoverable: false
+            Details: The font size should be in pixel format. For example, 15px.
     IssuerNullFontError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: INVALID_REQUEST_PARAMETER
-              Description: >-
-                One of the request parameters is invalid, try again with correct
-                request.
-              Recoverable: false
-              Details: The font type in request cannot be null.
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: >-
+              One of the request parameters is invalid, try again with correct
+              request.
+            Recoverable: false
+            Details: The font type in request cannot be null.
     EncryptedDataLengthError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: INVALID_REQUEST_PARAMETER
-              Description: >-
-                One of the request parameters is invalid, try again with correct
-                request.
-              Recoverable: false
-              Details: encryptedData size must be between 128 and 54000
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: >-
+              One of the request parameters is invalid, try again with correct
+              request.
+            Recoverable: false
+            Details: encryptedData size must be between 128 and 54000
     IssuerTerminatedError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: ACCOUNT_TERMINATED
-              Description: >-
-                Your account has been terminated, you won't be able to access
-                any service. Kindly register yourself again.
-              Recoverable: false
-              Details: >-
-                Your account has been terminated, you won't be able to access
-                any service. Kindly register yourself again.
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_TERMINATED
+            Description: >-
+              Your account has been terminated, you won't be able to access
+              any service. Kindly register yourself again.
+            Recoverable: false
+            Details: >-
+              Your account has been terminated, you won't be able to access
+              any service. Kindly register yourself again.
     UpdateUserNotAccessible:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: UPDATE_USER_NOT_ACCESSIBLE
-              Description: >-
-                You do not have permission to access this API. The Donate
-                feature for your bank is disabled.
-              Recoverable: false
-              Details: >-
-                You do not have permission to access this API. The Donate
-                feature for your bank is disabled.
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: UPDATE_USER_NOT_ACCESSIBLE
+            Description: >-
+              You do not have permission to access this API. The Donate
+              feature for your bank is disabled.
+            Recoverable: false
+            Details: >-
+              You do not have permission to access this API. The Donate
+              feature for your bank is disabled.
     InvalidUserIdError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: INVALID_REQUEST_PARAMETER
-              Description: >-
-                One of the request parameters is invalid, try again with correct
-                request.
-              Recoverable: false
-              Details: UserId should be of size 36
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: >-
+              One of the request parameters is invalid, try again with correct
+              request.
+            Recoverable: false
+            Details: UserId should be of size 36
     UnsupportedMediaTypeError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: UNSUPPORTED_MEDIA_TYPE
-              Description: >-
-                The requested media type is not supported, try again with
-                supported media type.
-              Recoverable: false
-              Details: ''
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: UNSUPPORTED_MEDIA_TYPE
+            Description: >-
+              The requested media type is not supported, try again with
+              supported media type.
+            Recoverable: false
+            Details: ''
     InvalidCardHolderNameError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: INVALID_REQUEST_PARAMETER
-              Description: >-
-                One of the request parameters is invalid, try again with correct
-                request.
-              Recoverable: false
-              Details: >-
-                CardholderName must only contain alphanumeric (A-Z, a-z, 0-9),
-                whitespace, and the characters ('), (,) and (')
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: >-
+              One of the request parameters is invalid, try again with correct
+              request.
+            Recoverable: false
+            Details: >-
+              CardholderName must only contain alphanumeric (A-Z, a-z, 0-9),
+              whitespace, and the characters ('), (,) and (')
     InvalidUserNameError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: INVALID_REQUEST_PARAMETER
-              Description: >-
-                One of the request parameters is invalid, try again with correct
-                request.
-              Recoverable: false
-              Details: >-
-                Username must only contain alphanumeric (A-Z, a-z, 0-9) and the
-                characters ('), (,) and (')
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: >-
+              One of the request parameters is invalid, try again with correct
+              request.
+            Recoverable: false
+            Details: >-
+              Username must only contain alphanumeric (A-Z, a-z, 0-9) and the
+              characters ('), (,) and (')
     UserInactiveError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: USER_INACTIVE
-              Description: >-
-                The user is inactive, kindly contact your Mastercard associate
-                to activate it. Until then you won't be able to access any
-                service.
-              Recoverable: false
-              Details: >-
-                The user is inactive, kindly contact your Mastercard associate
-                to activate it. Until then you won't be able to access any
-                service.
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: USER_INACTIVE
+            Description: >-
+              The user is inactive, kindly contact your Mastercard associate
+              to activate it. Until then you won't be able to access any
+              service.
+            Recoverable: false
+            Details: >-
+              The user is inactive, kindly contact your Mastercard associate
+              to activate it. Until then you won't be able to access any
+              service.
     IssuerInactiveError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: ACCOUNT_INACTIVE
-              Description: >-
-                Your account is inactive, kindly contact your Mastercard
-                associate to activate it. Until then you won't be able to access
-                any service.
-              Recoverable: false
-              Details: >-
-                Your account is inactive, kindly contact your Mastercard
-                associate to activate it. Until then you won't be able to access
-                any service.
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_INACTIVE
+            Description: >-
+              Your account is inactive, kindly contact your Mastercard
+              associate to activate it. Until then you won't be able to access
+              any service.
+            Recoverable: false
+            Details: >-
+              Your account is inactive, kindly contact your Mastercard
+              associate to activate it. Until then you won't be able to access
+              any service.
     IssuerNotFoundError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: SERVICE_PROVIDER_NOT_FOUND
-              Description: Service provider clientId is not Identified
-              Recoverable: false
-              Details: Client not found.
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: SERVICE_PROVIDER_NOT_FOUND
+            Description: Service provider clientId is not Identified
+            Recoverable: false
+            Details: Client not found.
     UserCountError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: INVALID_REQUEST_PARAMETER
-              Description: >-
-                One of the request parameters is invalid, try again with correct
-                request.
-              Recoverable: true
-              Details: Request body should have at least 1 or not more than 500 userIds
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: >-
+              One of the request parameters is invalid, try again with correct
+              request.
+            Recoverable: true
+            Details: Request body should have at least 1 or not more than 500 userIds
     InvalidUserIdLengthError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: INVALID_REQUEST_PARAMETER
-              Description: >-
-                One of the request parameters is invalid, try again with correct
-                request.
-              Recoverable: false
-              Details: userId must match "^[0-9A-Fa-f\-]{36}"
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: >-
+              One of the request parameters is invalid, try again with correct
+              request.
+            Recoverable: false
+            Details: userId must match "^[0-9A-Fa-f\-]{36}"
     IssuerSuspendedError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: ACCOUNT_SUSPENDED
-              Description: >-
-                Your account has been suspended temporarily, kindly contact your
-                Mastercard associate to activate it again. Until then you won't
-                be able to access any service.
-              Recoverable: false
-              Details: >-
-                Your account has been suspended temporarily, kindly contact your
-                Mastercard associate to activate it again. Until then you won't
-                be able to access any service.
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_SUSPENDED
+            Description: >-
+              Your account has been suspended temporarily, kindly contact your
+              Mastercard associate to activate it again. Until then you won't
+              be able to access any service.
+            Recoverable: false
+            Details: >-
+              Your account has been suspended temporarily, kindly contact your
+              Mastercard associate to activate it again. Until then you won't
+              be able to access any service.
     UserTerminatedError:
       value:
         Errors:
           Error:
-            - Source: CARBON CALCULATOR EXPERIENCE
-              ReasonCode: USER_TERMINATE_IN_PROGRESS
-              Description: >-
-                User termination is in progress, kindly contact your Mastercard
-                associate to activate it again. Until then you won't be able to
-                access any service.
-              Recoverable: false
-              Details: >-
-                User termination is in progress, kindly contact your Mastercard
-                associate to activate it again. Until then you won't be able to
-                access any service. 
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: USER_TERMINATE_IN_PROGRESS
+            Description: >-
+              User termination is in progress, kindly contact your Mastercard
+              associate to activate it again. Until then you won't be able to
+              access any service.
+            Recoverable: false
+            Details: >-
+              User termination is in progress, kindly contact your Mastercard
+              associate to activate it again. Until then you won't be able to
+              access any service. 

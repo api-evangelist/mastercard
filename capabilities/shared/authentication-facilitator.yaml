@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Authentication Facilitator"
+  description: "API for facilitating strong customer authentication in payment transactions."
+  tags:
+    - Authentication
+    - Payments
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: authentication-facilitator
+      baseUri: https://api.mastercard.com/authentication/facilitator
+      description: "Mastercard Authentication Facilitator API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: authentications
+          path: /authentications
+          description: "Authentication facilitation"
+          operations:
+            - name: initiate-authentication
+              method: POST
+              description: "Initiate a strong customer authentication"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  authentication: "{{tools.authentication}}"

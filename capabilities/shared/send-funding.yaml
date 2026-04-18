@@ -1,0 +1,59 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Send Funding"
+  description: "API for funding transactions in the Mastercard Send payment network."
+  tags:
+    - Money Transfer
+    - Funding
+    - Mastercard Send
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: send-funding
+      baseUri: https://api.mastercard.com/send/v1/partners
+      description: "Mastercard Send Funding API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: funding
+          path: /funding
+          description: "Funding transactions"
+          operations:
+            - name: create-funding
+              method: POST
+              description: "Create a funding transaction"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  funding: "{{tools.funding}}"
+            - name: get-funding-status
+              method: GET
+              description: "Get funding transaction status"
+              inputParameters:
+                - name: transfer_id
+                  in: path
+                  type: string
+                  required: true
+                  description: "Transfer identifier"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."

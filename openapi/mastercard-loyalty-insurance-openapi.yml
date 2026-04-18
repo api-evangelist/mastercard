@@ -14,25 +14,25 @@ info:
     email: apisupport@mastercard.com
   version: 1.0.0
 servers:
-  - url: https://api.mastercard.com/loyalty/insurance
-    description: Production server
-  - url: https://sandbox.api.mastercard.com/loyalty/insurance
-    description: Sandbox server
+- url: https://api.mastercard.com/loyalty/insurance
+  description: Production server
+- url: https://sandbox.api.mastercard.com/loyalty/insurance
+  description: Sandbox server
 tags:
-  - name: Claim
-  - name: Data
-  - name: Searches
-  - name: Tokens
-  - name: Users
+- name: Claim
+- name: Data
+- name: Searches
+- name: Tokens
+- name: Users
 paths:
   /user-data-tokens:
     post:
       tags:
-        - Data
-        - Tokens
-        - Users
+      - Data
+      - Tokens
+      - Users
       summary: >-
-        Mastercard Create a user data token which is used in the redirection url that redirects the cardholder to the website for submitting a new claim.
+        Mastercard Create a User Data Token Which Is Used in the Redirection Url That Redirects the Cardholder to the Website for Submitting a New Claim.
       description: Create a user data token for submitting claim.
       operationId: createUserToken
       x-mastercard-api-encrypted: true
@@ -45,12 +45,15 @@ paths:
           $ref: '#/components/responses/UserBadRequestError'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
   /claim-searches:
     post:
       tags:
-        - Claim
-        - Searches
-      summary: Mastercard Retrieve the claim status.
+      - Claim
+      - Searches
+      summary: Mastercard Retrieve the Claim Status.
       description: >-
         Retrieve the status of an insurance claim for the given claim ID and
         postal code.
@@ -64,6 +67,9 @@ paths:
           $ref: '#/components/responses/ClaimsBadRequestError'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
 components:
   requestBodies:
     UserDataClaim:
@@ -112,12 +118,12 @@ components:
             received.
     ErrorItems:
       required:
-        - Errors
+      - Errors
       type: object
       properties:
         Errors:
           required:
-            - Error
+          - Error
           type: object
           properties:
             Error:
@@ -125,11 +131,12 @@ components:
               description: Error Details
               items:
                 $ref: '#/components/schemas/ErrorItem'
+          example: example_value
     ClaimSearch:
       type: object
       required:
-        - claimId
-        - postalCode
+      - claimId
+      - postalCode
       properties:
         claimId:
           type: string
@@ -193,6 +200,7 @@ components:
           description: Array of insurance claim features associated with the claim.
           items:
             $ref: '#/components/schemas/ClaimFeature'
+          example: []
         uploadDocumentsUrl:
           type: string
           description: URL to web page that facilitates uploading documents.
@@ -202,10 +210,11 @@ components:
           description: Array of required documents for this claim.
           items:
             $ref: '#/components/schemas/RequiredClaimDocuments'
+          example: []
     SubmitClaimUserData:
       type: object
       required:
-        - pan
+      - pan
       properties:
         firstName:
           type: string
@@ -325,35 +334,35 @@ components:
       value:
         Errors:
           Error:
-            - Source: Loyalty Service - Insurance
-              ReasonCode: MISSING_REQ_FIELD_GW
-              Description: Missing Required Field(s).
-              Recoverable: false
-              Details: Missing required field(s) - 'claimId'.
+          - Source: Loyalty Service - Insurance
+            ReasonCode: MISSING_REQ_FIELD_GW
+            Description: Missing Required Field(s).
+            Recoverable: false
+            Details: Missing required field(s) - 'claimId'.
     UserBadRequestExample:
       value:
         Errors:
           Error:
-            - Source: Loyalty Service - Insurance
-              ReasonCode: INVALID_FIELD
-              Description: Invalid Field(s).
-              Recoverable: false
-              Details: Invalid field - 'pan' is not a string.
+          - Source: Loyalty Service - Insurance
+            ReasonCode: INVALID_FIELD
+            Description: Invalid Field(s).
+            Recoverable: false
+            Details: Invalid field - 'pan' is not a string.
     ClaimNotFoundExample:
       value:
         Errors:
           Error:
-            - Source: Loyalty Service - Insurance
-              ReasonCode: CLAIM_NOT_FOUND
-              Description: Claim not found.
-              Recoverable: false
-              Details: Claim not found
+          - Source: Loyalty Service - Insurance
+            ReasonCode: CLAIM_NOT_FOUND
+            Description: Claim not found.
+            Recoverable: false
+            Details: Claim not found
     UnauthorizedExample:
       value:
         Errors:
           Error:
-            - Source: Gateway
-              ReasonCode: DECLINED
-              Description: Unauthorized - Access Not Granted.
-              Recoverable: false
-              Details:
+          - Source: Gateway
+            ReasonCode: DECLINED
+            Description: Unauthorized - Access Not Granted.
+            Recoverable: false
+            Details:

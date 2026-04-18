@@ -12,21 +12,21 @@ info:
     email: apisupport@mastercard.com
   version: 1.0.0
 servers:
-  - url: https://sandbox.api.mastercard.com/loyalty/benefits
-    description: Sandbox server
-  - url: https://api.mastercard.com/loyalty/benefits
-    description: Production server
+- url: https://sandbox.api.mastercard.com/loyalty/benefits
+  description: Sandbox server
+- url: https://api.mastercard.com/loyalty/benefits
+  description: Production server
 tags:
-  - name: Benefit-Allocations-Card-Management
-    description: Endpoints to freeze/unfreeze a card and replace a card for a cardholder.
-  - name: Benefit-Allocations-Segment-Management
-    description: Endpoints to assign, cancel or replace a segment to a card.
+- name: Benefit-Allocations-Card-Management
+  description: Endpoints to freeze/unfreeze a card and replace a card for a cardholder.
+- name: Benefit-Allocations-Segment-Management
+  description: Endpoints to assign, cancel or replace a segment to a card.
 paths:
   /card-segments:
     post:
       tags:
-        - Benefit-Allocations-Segment-Management
-      summary: Mastercard Assign segment to a card
+      - Benefit-Allocations-Segment-Management
+      summary: Mastercard Assign Segment to a Card
       description: >-
         Assigns segment to a card by sending a card number, segment code and
         effective date in the input. The response is an array of bundles that
@@ -51,11 +51,14 @@ paths:
           $ref: '#/components/responses/BadRequestErrorResponse'
         '403':
           $ref: '#/components/responses/ForbiddenErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
   /card-segments-replacements:
     put:
       tags:
-        - Benefit-Allocations-Segment-Management
-      summary: Mastercard Replaces segment on a card
+      - Benefit-Allocations-Segment-Management
+      summary: Mastercard Replaces Segment on a Card
       description: >-
         Replaces the segment and the existing benefits with the new set of
         benefits that are on the new Segment Code. The existing benefits are
@@ -79,11 +82,14 @@ paths:
           $ref: '#/components/responses/BadRequestErrorResponse'
         '403':
           $ref: '#/components/responses/ForbiddenErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
   /card-segments-cancellations:
     put:
       tags:
-        - Benefit-Allocations-Segment-Management
-      summary: Mastercard Cancels segment from a card
+      - Benefit-Allocations-Segment-Management
+      summary: Mastercard Cancels Segment From a Card
       description: >-
         Cancels a segment and the benefits associated to the card for the input
         segment. The response is an array of bundles that are cancelled on the
@@ -107,11 +113,14 @@ paths:
           $ref: '#/components/responses/BadRequestErrorResponse'
         '403':
           $ref: '#/components/responses/ForbiddenErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
   /cards:
     post:
       tags:
-        - Benefit-Allocations-Card-Management
-      summary: Mastercard Replace card number for a cardholder
+      - Benefit-Allocations-Card-Management
+      summary: Mastercard Replace Card Number for a Cardholder
       description: >-
         Replaces the card number associated with the user. The benefits on the
         old card number are expired, and the same set of benefits are applied to
@@ -134,10 +143,13 @@ paths:
           $ref: '#/components/responses/BadRequestErrorResponse'
         '403':
           $ref: '#/components/responses/ForbiddenErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
     put:
       tags:
-        - Benefit-Allocations-Card-Management
-      summary: Mastercard Freeze/Unfreeze a card for benefits
+      - Benefit-Allocations-Card-Management
+      summary: Mastercard Freeze/unfreeze a Card for Benefits
       description: >-
         Freezes a card for benefits, or unfreezes the card for benefits.
         isFrozen set to true freezes the card, and isFrozen set to false
@@ -153,6 +165,9 @@ paths:
           $ref: '#/components/responses/BadRequestErrorResponse'
         '403':
           $ref: '#/components/responses/ForbiddenErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
 components:
   requestBodies:
     AssignBenefitAllocationsRequest:
@@ -211,7 +226,7 @@ components:
       description: A top level object for errors
       type: object
       required:
-        - errors
+      - errors
       properties:
         Errors:
           $ref: '#/components/schemas/errors'
@@ -248,7 +263,7 @@ components:
           example: Invalid JSON payload
     errors:
       required:
-        - Error
+      - Error
       type: object
       properties:
         Error:
@@ -256,10 +271,11 @@ components:
           description: Object that contains the list of errors
           items:
             $ref: '#/components/schemas/Error'
+          example: []
     AssignBenefitAllocation:
       required:
-        - cardNumber
-        - segments
+      - cardNumber
+      - segments
       type: object
       properties:
         cardNumber:
@@ -275,10 +291,11 @@ components:
             accepts arrays containing one segment.
           items:
             $ref: '#/components/schemas/Segment'
+          example: []
     Segment:
       required:
-        - code
-        - effectiveDate
+      - code
+      - effectiveDate
       type: object
       properties:
         code:
@@ -299,10 +316,10 @@ components:
           example: '2023-08-08'
     ReplaceBenefitAllocation:
       required:
-        - cardNumber
-        - oldSegmentCode
-        - newSegmentCode
-        - effectiveDate
+      - cardNumber
+      - oldSegmentCode
+      - newSegmentCode
+      - effectiveDate
       type: object
       properties:
         cardNumber:
@@ -336,8 +353,8 @@ components:
           example: '2023-08-08'
     CancelBenefitAllocation:
       required:
-        - cardNumber
-        - segments
+      - cardNumber
+      - segments
       type: object
       properties:
         cardNumber:
@@ -355,10 +372,11 @@ components:
             Only accepts arrays containing one segment.
           items:
             $ref: '#/components/schemas/SegmentToCancel'
+          example: []
     SegmentToCancel:
       required:
-        - code
-        - expiryDate
+      - code
+      - expiryDate
       type: object
       properties:
         code:
@@ -378,9 +396,9 @@ components:
           example: '2024-07-24'
     CardReplacement:
       required:
-        - oldCardNumber
-        - newCardNumber
-        - effectiveDate
+      - oldCardNumber
+      - newCardNumber
+      - effectiveDate
       type: object
       properties:
         oldCardNumber:
@@ -406,9 +424,9 @@ components:
           example: '2023-08-08'
     FrozenCard:
       required:
-        - cardNumber
-        - date
-        - isFrozen
+      - cardNumber
+      - date
+      - isFrozen
       type: object
       properties:
         cardNumber:
@@ -439,6 +457,7 @@ components:
             to a card number.
           items:
             $ref: '#/components/schemas/BundleDetails'
+          example: []
     BundleDetails:
       type: object
       properties:
@@ -468,45 +487,45 @@ components:
     AllocateBundlesExample:
       value:
         bundles:
-          - code: PC4657
-            effectiveDate: '2023-08-08'
-            expiryDate:
-          - code: PC6323
-            effectiveDate: '2023-08-08'
-            expiryDate:
+        - code: PC4657
+          effectiveDate: '2023-08-08'
+          expiryDate:
+        - code: PC6323
+          effectiveDate: '2023-08-08'
+          expiryDate:
     CancelBundlesExample:
       value:
         bundles:
-          - code: PC4657
-            effectiveDate: '2023-08-08'
-            expiryDate: '2024-07-18'
-          - code: PC6323
-            effectiveDate: '2023-08-08'
-            expiryDate: '2024-07-18'
+        - code: PC4657
+          effectiveDate: '2023-08-08'
+          expiryDate: '2024-07-18'
+        - code: PC6323
+          effectiveDate: '2023-08-08'
+          expiryDate: '2024-07-18'
     ReplaceCardExample:
       value:
         bundles:
-          - code: PC4657
-            effectiveDate: '2022-01-18'
-            expiryDate: '2024-07-18'
-          - code: PC6323
-            effectiveDate: '2022-01-18'
-            expiryDate: '2024-07-18'
+        - code: PC4657
+          effectiveDate: '2022-01-18'
+          expiryDate: '2024-07-18'
+        - code: PC6323
+          effectiveDate: '2022-01-18'
+          expiryDate: '2024-07-18'
     BadRequestExample:
       value:
         Errors:
           Error:
-            - Source: Benefit Allocation Service
-              ReasonCode: 50
-              Description: invalid card number, segment code, date
-              Recoverable: false
-              Details: invalid card number format
+          - Source: Benefit Allocation Service
+            ReasonCode: 50
+            Description: invalid card number, segment code, date
+            Recoverable: false
+            Details: invalid card number format
     ForbiddenExample:
       value:
         Errors:
           Error:
-            - Source: Benefit Allocation Service
-              ReasonCode: PERMISSION_DENIED
-              Description: You don't seem authorized to do that
-              Recoverable: false
-              Details: cardNumber not mapped to requester
+          - Source: Benefit Allocation Service
+            ReasonCode: PERMISSION_DENIED
+            Description: You don't seem authorized to do that
+            Recoverable: false
+            Details: cardNumber not mapped to requester

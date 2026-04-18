@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Direct Services"
+  description: "API for direct service access enabling real-time payment processing and settlement."
+  tags:
+    - Direct Services
+    - Payment Processing
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: direct-services
+      baseUri: https://api.mastercard.com/direct-services
+      description: "Mastercard Direct Services API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: transactions
+          path: /transactions
+          description: "Direct service transactions"
+          operations:
+            - name: process-transaction
+              method: POST
+              description: "Process a direct service transaction"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  transaction: "{{tools.transaction}}"

@@ -1,0 +1,59 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Loyalty User Management"
+  description: "API for managing loyalty program users, enrollment, and preferences."
+  tags:
+    - Loyalty
+    - User Management
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: loyalty-user-mgmt
+      baseUri: https://api.mastercard.com/loyalty/users
+      description: "Mastercard Loyalty User Management API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: users
+          path: /users
+          description: "Loyalty user management"
+          operations:
+            - name: create-user
+              method: POST
+              description: "Create a loyalty program user"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  user: "{{tools.user}}"
+            - name: get-user
+              method: GET
+              description: "Get loyalty user details"
+              inputParameters:
+                - name: user_id
+                  in: path
+                  type: string
+                  required: true
+                  description: "User identifier"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."

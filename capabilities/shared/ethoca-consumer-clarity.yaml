@@ -1,0 +1,46 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Ethoca Consumer Clarity"
+  description: "Consumer Clarity API providing transaction details to issuers and merchants to help resolve disputes before they become chargebacks."
+  tags:
+    - Fraud Prevention
+    - Ethoca
+    - Disputes
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: ethoca-consumer-clarity
+      baseUri: https://api.mastercard.com/ethoca/consumer-clarity
+      description: "Mastercard Ethoca Consumer Clarity API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: transactions
+          path: /transactions
+          description: "Transaction clarity lookups"
+          operations:
+            - name: lookup-transaction
+              method: POST
+              description: "Look up transaction details for dispute resolution"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  transaction: "{{tools.transaction}}"

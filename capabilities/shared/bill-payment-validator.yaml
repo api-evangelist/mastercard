@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Bill Payment Validator"
+  description: "API for validating bill payment information in the RPPS network."
+  tags:
+    - Bill Pay
+    - Validation
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: bill-payment-validator
+      baseUri: https://api.mastercard.com/bill-payment-validator
+      description: "Mastercard Bill Payment Validator API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: validations
+          path: /validations
+          description: "Bill payment validation"
+          operations:
+            - name: validate-payment
+              method: POST
+              description: "Validate a bill payment"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  payment: "{{tools.payment}}"

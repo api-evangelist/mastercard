@@ -1,0 +1,85 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Community Pass and Financial Inclusion"
+  description: "Unified workflow for development organizations and financial inclusion teams to manage digital identities, process payments, and deliver services through the Community Pass ecosystem in underserved communities."
+  tags:
+    - Mastercard
+    - Community Pass
+    - Financial Inclusion
+    - Digital Identity
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - import: community-pass-identity
+      location: ./shared/community-pass-identity.yaml
+    - import: community-pass-payments
+      location: ./shared/community-pass-payments.yaml
+
+  exposes:
+    - type: rest
+      port: 8089
+      namespace: community-pass-api
+      description: "Unified REST API for Community Pass and financial inclusion."
+      resources:
+        - path: /v1/identities
+          name: identities
+          description: "Digital identity management"
+          operations:
+            - method: POST
+              name: create-identity
+              description: "Create a digital identity"
+              call: "community-pass-identity.create-identity"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/payments
+          name: payments
+          description: "Community Pass payments"
+          operations:
+            - method: POST
+              name: process-payment
+              description: "Process a Community Pass payment"
+              call: "community-pass-payments.process-payment"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+
+    - type: mcp
+      port: 9099
+      namespace: community-pass-mcp
+      transport: http
+      description: "MCP server for AI-assisted Community Pass operations."
+      tools:
+        - name: create-digital-identity
+          description: "Create a digital identity in the Community Pass ecosystem"
+          hints:
+            readOnly: false
+          call: "community-pass-identity.create-identity"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: verify-digital-identity
+          description: "Verify a digital identity"
+          hints:
+            readOnly: true
+          call: "community-pass-identity.verify-identity"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: process-community-payment
+          description: "Process a payment in the Community Pass ecosystem"
+          hints:
+            readOnly: false
+          call: "community-pass-payments.process-payment"
+          outputParameters:
+            - type: object
+              mapping: "$."

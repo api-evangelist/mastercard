@@ -1,0 +1,46 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Carbon Calculator"
+  description: "API for calculating carbon footprint based on consumer payment transactions."
+  tags:
+    - Sustainability
+    - Carbon Footprint
+    - ESG
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: carbon-calculator
+      baseUri: https://api.mastercard.com/carbon-calculator
+      description: "Mastercard Carbon Calculator API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: calculations
+          path: /calculations
+          description: "Carbon footprint calculations"
+          operations:
+            - name: calculate-footprint
+              method: POST
+              description: "Calculate carbon footprint from transactions"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  transactions: "{{tools.transactions}}"

@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard ID for Identity Providers"
+  description: "API for identity providers to integrate with Mastercard's digital identity network."
+  tags:
+    - Identity
+    - Identity Providers
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: id-identity-providers
+      baseUri: https://api.mastercard.com/id/identity-providers
+      description: "Mastercard ID for Identity Providers API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: identity-services
+          path: /identity-services
+          description: "Identity provider operations"
+          operations:
+            - name: provide-identity
+              method: POST
+              description: "Provide identity data as an identity provider"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  identity: "{{tools.identity}}"

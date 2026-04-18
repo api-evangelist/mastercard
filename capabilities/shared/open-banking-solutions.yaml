@@ -1,0 +1,55 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Open Banking Solutions"
+  description: "API for open banking data access, account verification, and financial data aggregation."
+  tags:
+    - Open Banking
+    - Financial Data
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: open-banking
+      baseUri: https://api.mastercard.com/open-banking
+      description: "Mastercard Open Banking Solutions API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: accounts
+          path: /accounts
+          description: "Open banking account operations"
+          operations:
+            - name: get-accounts
+              method: GET
+              description: "Retrieve consumer accounts"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+            - name: get-transactions
+              method: GET
+              description: "Retrieve account transactions"
+              inputParameters:
+                - name: account_id
+                  in: path
+                  type: string
+                  required: true
+                  description: "Account identifier"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."

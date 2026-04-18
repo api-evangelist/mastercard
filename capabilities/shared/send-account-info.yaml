@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Send Account Information Service"
+  description: "API for retrieving account information in the Mastercard Send network."
+  tags:
+    - Money Transfer
+    - Account Information
+    - Mastercard Send
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: send-account-info
+      baseUri: https://api.mastercard.com/send/v1/partners
+      description: "Mastercard Send Account Information Service API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: accounts
+          path: /accounts
+          description: "Account information"
+          operations:
+            - name: get-account-info
+              method: POST
+              description: "Retrieve account information for a Send recipient"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  account: "{{tools.account}}"

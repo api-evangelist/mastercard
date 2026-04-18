@@ -1,0 +1,57 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Currency Conversion"
+  description: "APIs for enhanced and standard currency conversion calculations for cross-border transactions."
+  tags:
+    - Currency Conversion
+    - Cross-Border
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: currency-conversion
+      baseUri: https://api.mastercard.com/settlement/currencyrate
+      description: "Mastercard Currency Conversion API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: rates
+          path: /rates
+          description: "Currency conversion rates"
+          operations:
+            - name: get-conversion-rate
+              method: GET
+              description: "Get currency conversion rate"
+              inputParameters:
+                - name: fxDate
+                  in: query
+                  type: string
+                  required: true
+                  description: "Date for the conversion rate"
+                - name: transCurr
+                  in: query
+                  type: string
+                  required: true
+                  description: "Transaction currency"
+                - name: crdhldBillCurr
+                  in: query
+                  type: string
+                  required: true
+                  description: "Cardholder billing currency"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."

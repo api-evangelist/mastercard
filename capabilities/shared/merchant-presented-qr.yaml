@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Merchant Presented QR"
+  description: "API for generating and managing QR codes for merchant-presented payment acceptance."
+  tags:
+    - QR Payments
+    - Merchant
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: merchant-qr
+      baseUri: https://api.mastercard.com/merchant-qr
+      description: "Mastercard Merchant Presented QR API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: qr-codes
+          path: /qr-codes
+          description: "QR code management"
+          operations:
+            - name: generate-qr
+              method: POST
+              description: "Generate a merchant QR code for payment"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  qr: "{{tools.qr}}"

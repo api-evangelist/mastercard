@@ -1,0 +1,99 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Sustainability"
+  description: "Unified workflow for ESG and sustainability teams to calculate carbon footprints, measure environmental impact, and enable cardholders to support environmental causes through their spending data."
+  tags:
+    - Mastercard
+    - Sustainability
+    - Carbon Footprint
+    - ESG
+    - Environmental Impact
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - import: carbon-calculator
+      location: ./shared/carbon-calculator.yaml
+    - import: doconomy-aland
+      location: ./shared/doconomy-aland-index.yaml
+    - import: donate
+      location: ./shared/donate.yaml
+
+  exposes:
+    - type: rest
+      port: 8090
+      namespace: sustainability-api
+      description: "Unified REST API for sustainability and environmental impact."
+      resources:
+        - path: /v1/carbon-footprint
+          name: carbon-footprint
+          description: "Carbon footprint calculations"
+          operations:
+            - method: POST
+              name: calculate-carbon-footprint
+              description: "Calculate carbon footprint from transactions"
+              call: "carbon-calculator.calculate-footprint"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/environmental-impact
+          name: environmental-impact
+          description: "Environmental impact scoring"
+          operations:
+            - method: POST
+              name: get-impact-score
+              description: "Get environmental impact score"
+              call: "doconomy-aland.get-impact-score"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/environmental-donations
+          name: environmental-donations
+          description: "Environmental cause donations"
+          operations:
+            - method: POST
+              name: create-environmental-donation
+              description: "Create a donation to environmental causes"
+              call: "donate.create-donation"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+
+    - type: mcp
+      port: 9100
+      namespace: sustainability-mcp
+      transport: http
+      description: "MCP server for AI-assisted sustainability and environmental impact analysis."
+      tools:
+        - name: calculate-carbon-footprint
+          description: "Calculate the carbon footprint of payment transactions"
+          hints:
+            readOnly: true
+          call: "carbon-calculator.calculate-footprint"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-environmental-impact-score
+          description: "Get the environmental impact score for a transaction using the Aland Index"
+          hints:
+            readOnly: true
+          call: "doconomy-aland.get-impact-score"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: donate-to-environment
+          description: "Create a donation to support environmental causes"
+          hints:
+            readOnly: false
+          call: "donate.create-donation"
+          outputParameters:
+            - type: object
+              mapping: "$."

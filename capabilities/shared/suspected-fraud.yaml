@@ -1,0 +1,45 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Suspected Fraud"
+  description: "API for submission and management of suspected fraud records in the Mastercard Fraud and Loss Database."
+  tags:
+    - Fraud
+    - Risk Management
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: suspected-fraud
+      baseUri: https://api.mastercard.com/fld/suspected-frauds
+      description: "Mastercard Suspected Fraud API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: suspected-frauds
+          path: /suspected-frauds
+          description: "Suspected fraud management"
+          operations:
+            - name: submit-suspected-fraud
+              method: POST
+              description: "Submit a suspected fraud record"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  fraud: "{{tools.fraud}}"

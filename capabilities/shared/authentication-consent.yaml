@@ -1,0 +1,59 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Mastercard Authentication Consent"
+  description: "API for managing consumer authentication consent for secure transactions."
+  tags:
+    - Authentication
+    - Consent
+    - Mastercard
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
+
+capability:
+  consumes:
+    - type: http
+      namespace: authentication-consent
+      baseUri: https://api.mastercard.com/authentication/consent
+      description: "Mastercard Authentication Consent API"
+      authentication:
+        type: oauth1
+        consumerKey: "{{MASTERCARD_CONSUMER_KEY}}"
+        signingKey: "{{MASTERCARD_SIGNING_KEY}}"
+      resources:
+        - name: consents
+          path: /consents
+          description: "Consent management"
+          operations:
+            - name: create-consent
+              method: POST
+              description: "Create an authentication consent request"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  consent: "{{tools.consent}}"
+            - name: get-consent
+              method: GET
+              description: "Retrieve consent status"
+              inputParameters:
+                - name: consent_id
+                  in: path
+                  type: string
+                  required: true
+                  description: "Consent identifier"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
