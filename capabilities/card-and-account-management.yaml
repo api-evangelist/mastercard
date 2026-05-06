@@ -1,189 +1,410 @@
-naftiko: "1.0.0-alpha1"
-
+naftiko: 1.0.0-alpha2
 info:
-  label: "Mastercard Card and Account Management"
-  description: "Unified workflow for issuers and card managers to handle card issuance, fulfillment, BIN lookups, billing updates, payment account management, and account catalog services."
+  label: Mastercard Card and Account Management
+  description: Unified workflow for issuers and card managers to handle card issuance, fulfillment, BIN lookups, billing updates,
+    payment account management, and account catalog services.
   tags:
-    - Mastercard
-    - Card Management
-    - Account Management
-    - Issuers
-  created: "2026-04-18"
-  modified: "2026-04-18"
-
+  - Mastercard
+  - Card Management
+  - Account Management
+  - Issuers
+  created: '2026-04-18'
+  modified: '2026-05-06'
 binds:
-  - namespace: env
-    keys:
-      MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
-      MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
-
+- namespace: env
+  keys:
+    MASTERCARD_CONSUMER_KEY: MASTERCARD_CONSUMER_KEY
+    MASTERCARD_SIGNING_KEY: MASTERCARD_SIGNING_KEY
 capability:
   consumes:
-    - import: card-issuance
-      location: ./shared/card-issuance.yaml
-    - import: traditional-fulfillment
-      location: ./shared/traditional-fulfillment.yaml
-    - import: bin-lookup
-      location: ./shared/bin-lookup.yaml
-    - import: automatic-billing-updater
-      location: ./shared/automatic-billing-updater.yaml
-    - import: payment-account-mgmt
-      location: ./shared/payment-account-management.yaml
-    - import: payment-account-ref
-      location: ./shared/payment-account-reference.yaml
-    - import: account-catalog
-      location: ./shared/account-catalog.yaml
-    - import: universal-spec
-      location: ./shared/universal-spec-submission.yaml
-    - import: account-validation
-      location: ./shared/account-validation.yaml
-
+  - type: http
+    namespace: card-issuance
+    baseUri: https://api.mastercard.com/card-issuance
+    description: Mastercard Card Issuance API
+    authentication:
+      type: oauth1
+      consumerKey: '{{MASTERCARD_CONSUMER_KEY}}'
+      signingKey: '{{MASTERCARD_SIGNING_KEY}}'
+    resources:
+    - name: cards
+      path: /cards
+      description: Card issuance operations
+      operations:
+      - name: issue-card
+        method: POST
+        description: Issue a new card
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        body:
+          type: json
+          data:
+            card: '{{tools.card}}'
+      - name: get-card
+        method: GET
+        description: Get card details
+        inputParameters:
+        - name: card_id
+          in: path
+          type: string
+          required: true
+          description: Card identifier
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+  - type: http
+    namespace: traditional-fulfillment
+    baseUri: https://api.mastercard.com/fulfillment
+    description: Mastercard Traditional Fulfillment Service API
+    authentication:
+      type: oauth1
+      consumerKey: '{{MASTERCARD_CONSUMER_KEY}}'
+      signingKey: '{{MASTERCARD_SIGNING_KEY}}'
+    resources:
+    - name: orders
+      path: /orders
+      description: Card fulfillment orders
+      operations:
+      - name: create-order
+        method: POST
+        description: Create a card fulfillment order
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        body:
+          type: json
+          data:
+            order: '{{tools.order}}'
+  - type: http
+    namespace: bin-lookup
+    baseUri: https://api.mastercard.com/bin-lookup
+    description: Mastercard BIN Lookup API
+    authentication:
+      type: oauth1
+      consumerKey: '{{MASTERCARD_CONSUMER_KEY}}'
+      signingKey: '{{MASTERCARD_SIGNING_KEY}}'
+    resources:
+    - name: bins
+      path: /bins
+      description: BIN lookup operations
+      operations:
+      - name: lookup-bin
+        method: POST
+        description: Look up BIN information
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        body:
+          type: json
+          data:
+            bin: '{{tools.bin}}'
+      - name: list-bins
+        method: GET
+        description: List available Mastercard BINs
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+  - type: http
+    namespace: automatic-billing-updater
+    baseUri: https://api.mastercard.com/automatic-billing-updater
+    description: Mastercard Automatic Billing Updater API
+    authentication:
+      type: oauth1
+      consumerKey: '{{MASTERCARD_CONSUMER_KEY}}'
+      signingKey: '{{MASTERCARD_SIGNING_KEY}}'
+    resources:
+    - name: updates
+      path: /updates
+      description: Card update operations
+      operations:
+      - name: get-updates
+        method: POST
+        description: Request updated card credentials
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        body:
+          type: json
+          data:
+            request: '{{tools.request}}'
+  - type: http
+    namespace: payment-account-mgmt
+    baseUri: https://api.mastercard.com/payment-account-management
+    description: Mastercard Payment Account Management API
+    authentication:
+      type: oauth1
+      consumerKey: '{{MASTERCARD_CONSUMER_KEY}}'
+      signingKey: '{{MASTERCARD_SIGNING_KEY}}'
+    resources:
+    - name: accounts
+      path: /accounts
+      description: Payment account management
+      operations:
+      - name: manage-account
+        method: POST
+        description: Manage a payment account
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        body:
+          type: json
+          data:
+            account: '{{tools.account}}'
+  - type: http
+    namespace: payment-account-ref
+    baseUri: https://api.mastercard.com/par
+    description: Mastercard Payment Account Reference Inquiry API
+    authentication:
+      type: oauth1
+      consumerKey: '{{MASTERCARD_CONSUMER_KEY}}'
+      signingKey: '{{MASTERCARD_SIGNING_KEY}}'
+    resources:
+    - name: references
+      path: /references
+      description: PAR inquiry operations
+      operations:
+      - name: get-par
+        method: POST
+        description: Query payment account reference
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        body:
+          type: json
+          data:
+            account: '{{tools.account}}'
+  - type: http
+    namespace: account-catalog
+    baseUri: https://api.mastercard.com/account-catalog
+    description: Mastercard Account Catalog Services API
+    authentication:
+      type: oauth1
+      consumerKey: '{{MASTERCARD_CONSUMER_KEY}}'
+      signingKey: '{{MASTERCARD_SIGNING_KEY}}'
+    resources:
+    - name: catalog
+      path: /catalog
+      description: Account catalog operations
+      operations:
+      - name: get-catalog
+        method: GET
+        description: Retrieve account catalog
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+  - type: http
+    namespace: universal-spec
+    baseUri: https://api.mastercard.com/universal-spec
+    description: Mastercard Universal Specification Submission API
+    authentication:
+      type: oauth1
+      consumerKey: '{{MASTERCARD_CONSUMER_KEY}}'
+      signingKey: '{{MASTERCARD_SIGNING_KEY}}'
+    resources:
+    - name: submissions
+      path: /submissions
+      description: Specification submissions
+      operations:
+      - name: submit-spec
+        method: POST
+        description: Submit PAN-related event specification
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        body:
+          type: json
+          data:
+            submission: '{{tools.submission}}'
+  - type: http
+    namespace: account-validation
+    baseUri: https://api.mastercard.com/account-validation
+    description: Mastercard Account Validation API
+    authentication:
+      type: oauth1
+      consumerKey: '{{MASTERCARD_CONSUMER_KEY}}'
+      signingKey: '{{MASTERCARD_SIGNING_KEY}}'
+    resources:
+    - name: validations
+      path: /validations
+      description: Account validation operations
+      operations:
+      - name: validate-account
+        method: POST
+        description: Validate an account
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        body:
+          type: json
+          data:
+            account: '{{tools.account}}'
   exposes:
-    - type: rest
-      port: 8084
-      namespace: card-account-api
-      description: "Unified REST API for card and account management."
-      resources:
-        - path: /v1/cards
-          name: cards
-          description: "Card issuance and management"
-          operations:
-            - method: POST
-              name: issue-card
-              description: "Issue a new card"
-              call: "card-issuance.issue-card"
-              outputParameters:
-                - type: object
-                  mapping: "$."
-        - path: /v1/bins
-          name: bins
-          description: "BIN lookup"
-          operations:
-            - method: POST
-              name: lookup-bin
-              description: "Look up BIN information"
-              call: "bin-lookup.lookup-bin"
-              outputParameters:
-                - type: object
-                  mapping: "$."
-        - path: /v1/billing-updates
-          name: billing-updates
-          description: "Automatic billing updates"
-          operations:
-            - method: POST
-              name: get-billing-updates
-              description: "Request updated card credentials"
-              call: "automatic-billing-updater.get-updates"
-              outputParameters:
-                - type: object
-                  mapping: "$."
-        - path: /v1/accounts
-          name: accounts
-          description: "Payment account management"
-          operations:
-            - method: POST
-              name: manage-account
-              description: "Manage a payment account"
-              call: "payment-account-mgmt.manage-account"
-              outputParameters:
-                - type: object
-                  mapping: "$."
-
-    - type: mcp
-      port: 9094
-      namespace: card-account-mcp
-      transport: http
-      description: "MCP server for AI-assisted card and account management."
-      tools:
-        - name: issue-card
-          description: "Issue a new Mastercard card"
-          hints:
-            readOnly: false
-          call: "card-issuance.issue-card"
-          outputParameters:
-            - type: object
-              mapping: "$."
-        - name: get-card-details
-          description: "Get card details"
-          hints:
-            readOnly: true
-          call: "card-issuance.get-card"
-          with:
-            card_id: "tools.card_id"
-          outputParameters:
-            - type: object
-              mapping: "$."
-        - name: create-fulfillment-order
-          description: "Create a physical card fulfillment order"
-          hints:
-            readOnly: false
-          call: "traditional-fulfillment.create-order"
-          outputParameters:
-            - type: object
-              mapping: "$."
-        - name: lookup-bin
-          description: "Look up BIN information for a card"
-          hints:
-            readOnly: true
-          call: "bin-lookup.lookup-bin"
-          outputParameters:
-            - type: object
-              mapping: "$."
-        - name: list-bins
-          description: "List available Mastercard BINs"
-          hints:
-            readOnly: true
-            idempotent: true
-          call: "bin-lookup.list-bins"
-          outputParameters:
-            - type: object
-              mapping: "$."
-        - name: get-billing-updates
-          description: "Request updated card credentials for card-on-file"
-          hints:
-            readOnly: true
-          call: "automatic-billing-updater.get-updates"
-          outputParameters:
-            - type: object
-              mapping: "$."
-        - name: manage-payment-account
-          description: "Manage a payment account lifecycle"
-          hints:
-            readOnly: false
-          call: "payment-account-mgmt.manage-account"
-          outputParameters:
-            - type: object
-              mapping: "$."
-        - name: get-payment-account-reference
-          description: "Query payment account reference to link tokens to accounts"
-          hints:
-            readOnly: true
-          call: "payment-account-ref.get-par"
-          outputParameters:
-            - type: object
-              mapping: "$."
-        - name: validate-account
-          description: "Validate account details"
-          hints:
-            readOnly: true
-          call: "account-validation.validate-account"
-          outputParameters:
-            - type: object
-              mapping: "$."
-        - name: get-account-catalog
-          description: "Retrieve account catalog data"
-          hints:
-            readOnly: true
-            idempotent: true
-          call: "account-catalog.get-catalog"
-          outputParameters:
-            - type: object
-              mapping: "$."
-        - name: submit-pan-event
-          description: "Submit PAN-related event for account level management"
-          hints:
-            readOnly: false
-          call: "universal-spec.submit-spec"
-          outputParameters:
-            - type: object
-              mapping: "$."
+  - type: rest
+    port: 8084
+    namespace: card-account-api
+    description: Unified REST API for card and account management.
+    resources:
+    - path: /v1/cards
+      name: cards
+      description: Card issuance and management
+      operations:
+      - method: POST
+        name: issue-card
+        description: Issue a new card
+        call: card-issuance.issue-card
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/bins
+      name: bins
+      description: BIN lookup
+      operations:
+      - method: POST
+        name: lookup-bin
+        description: Look up BIN information
+        call: bin-lookup.lookup-bin
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/billing-updates
+      name: billing-updates
+      description: Automatic billing updates
+      operations:
+      - method: POST
+        name: get-billing-updates
+        description: Request updated card credentials
+        call: automatic-billing-updater.get-updates
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/accounts
+      name: accounts
+      description: Payment account management
+      operations:
+      - method: POST
+        name: manage-account
+        description: Manage a payment account
+        call: payment-account-mgmt.manage-account
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    port: 9094
+    namespace: card-account-mcp
+    transport: http
+    description: MCP server for AI-assisted card and account management.
+    tools:
+    - name: issue-card
+      description: Issue a new Mastercard card
+      hints:
+        readOnly: false
+      call: card-issuance.issue-card
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-card-details
+      description: Get card details
+      hints:
+        readOnly: true
+      call: card-issuance.get-card
+      with:
+        card_id: tools.card_id
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-fulfillment-order
+      description: Create a physical card fulfillment order
+      hints:
+        readOnly: false
+      call: traditional-fulfillment.create-order
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: lookup-bin
+      description: Look up BIN information for a card
+      hints:
+        readOnly: true
+      call: bin-lookup.lookup-bin
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-bins
+      description: List available Mastercard BINs
+      hints:
+        readOnly: true
+        idempotent: true
+      call: bin-lookup.list-bins
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-billing-updates
+      description: Request updated card credentials for card-on-file
+      hints:
+        readOnly: true
+      call: automatic-billing-updater.get-updates
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: manage-payment-account
+      description: Manage a payment account lifecycle
+      hints:
+        readOnly: false
+      call: payment-account-mgmt.manage-account
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-payment-account-reference
+      description: Query payment account reference to link tokens to accounts
+      hints:
+        readOnly: true
+      call: payment-account-ref.get-par
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: validate-account
+      description: Validate account details
+      hints:
+        readOnly: true
+      call: account-validation.validate-account
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-account-catalog
+      description: Retrieve account catalog data
+      hints:
+        readOnly: true
+        idempotent: true
+      call: account-catalog.get-catalog
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: submit-pan-event
+      description: Submit PAN-related event for account level management
+      hints:
+        readOnly: false
+      call: universal-spec.submit-spec
+      outputParameters:
+      - type: object
+        mapping: $.
