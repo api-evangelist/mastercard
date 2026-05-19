@@ -1,0 +1,228 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Carbon Calculator Experience API — Users
+  description: 'Mastercard Carbon Calculator Experience API — Users. 5 operations. Lead operation: Mastercard Delete One or
+    More Users.. Self-contained Naftiko capability covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Users
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: carbon-calculator-experience-users
+    baseUri: https://api.mastercard.com/cts
+    description: Mastercard Carbon Calculator Experience API — Users business capability. Self-contained, no shared references.
+    resources:
+    - name: issuers-user-deletions
+      path: /issuers/user-deletions
+      operations:
+      - name: deleteusers
+        method: POST
+        description: Mastercard Delete One or More Users.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: issuers-users
+      path: /issuers/users
+      operations:
+      - name: userregistration
+        method: POST
+        description: Mastercard Allows Issuer to Enroll Cardholders to the Carbon Calculator Experience Platform.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: issuers-users-userid
+      path: /issuers/users/{userid}
+      operations:
+      - name: updateuser
+        method: PUT
+        description: Mastercard Allows Issuer to Update Enrolled User Information Onto Carbon Calculator Experience Platform.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: issuers-users-userid-aggregate-carbon-scores
+      path: /issuers/users/{userid}/aggregate-carbon-scores
+      operations:
+      - name: getaggregatecarbonscore
+        method: GET
+        description: Mastercard Fetches Monthly Aggregate Carbon Score for the Transactions Made for the Current Month.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: issuers-users-userid-dashboards
+      path: /issuers/users/{userid}/dashboards
+      operations:
+      - name: getauthtoken
+        method: GET
+        description: Mastercard Used to Retrieve the Short-lived Url of a User's Dashboard to View Their Carbon Footprints
+          and Contributions to Priceless Planet.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+  exposes:
+  - type: rest
+    namespace: carbon-calculator-experience-users-rest
+    port: 8080
+    description: REST adapter for Mastercard Carbon Calculator Experience API — Users. One Spectral-compliant resource per
+      consumed operation, prefixed with /v1.
+    resources:
+    - path: /v1/issuers/user-deletions
+      name: issuers-user-deletions
+      description: REST surface for issuers-user-deletions.
+      operations:
+      - method: POST
+        name: deleteusers
+        description: Mastercard Delete One or More Users.
+        call: carbon-calculator-experience-users.deleteusers
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/issuers/users
+      name: issuers-users
+      description: REST surface for issuers-users.
+      operations:
+      - method: POST
+        name: userregistration
+        description: Mastercard Allows Issuer to Enroll Cardholders to the Carbon Calculator Experience Platform.
+        call: carbon-calculator-experience-users.userregistration
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/issuers/users/{userid}
+      name: issuers-users-userid
+      description: REST surface for issuers-users-userid.
+      operations:
+      - method: PUT
+        name: updateuser
+        description: Mastercard Allows Issuer to Update Enrolled User Information Onto Carbon Calculator Experience Platform.
+        call: carbon-calculator-experience-users.updateuser
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/issuers/users/{userid}/aggregate-carbon-scores
+      name: issuers-users-userid-aggregate-carbon-scores
+      description: REST surface for issuers-users-userid-aggregate-carbon-scores.
+      operations:
+      - method: GET
+        name: getaggregatecarbonscore
+        description: Mastercard Fetches Monthly Aggregate Carbon Score for the Transactions Made for the Current Month.
+        call: carbon-calculator-experience-users.getaggregatecarbonscore
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/issuers/users/{userid}/dashboards
+      name: issuers-users-userid-dashboards
+      description: REST surface for issuers-users-userid-dashboards.
+      operations:
+      - method: GET
+        name: getauthtoken
+        description: Mastercard Used to Retrieve the Short-lived Url of a User's Dashboard to View Their Carbon Footprints
+          and Contributions to Priceless Planet.
+        call: carbon-calculator-experience-users.getauthtoken
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: carbon-calculator-experience-users-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Carbon Calculator Experience API — Users. One tool per consumed operation, routed
+      inline through this capability's consumes block.
+    tools:
+    - name: mastercard-delete-one-more-users
+      description: Mastercard Delete One or More Users.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: carbon-calculator-experience-users.deleteusers
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: mastercard-allows-issuer-enroll-cardholders
+      description: Mastercard Allows Issuer to Enroll Cardholders to the Carbon Calculator Experience Platform.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: carbon-calculator-experience-users.userregistration
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: mastercard-allows-issuer-update-enrolled
+      description: Mastercard Allows Issuer to Update Enrolled User Information Onto Carbon Calculator Experience Platform.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: carbon-calculator-experience-users.updateuser
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: mastercard-fetches-monthly-aggregate-carbon
+      description: Mastercard Fetches Monthly Aggregate Carbon Score for the Transactions Made for the Current Month.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: carbon-calculator-experience-users.getaggregatecarbonscore
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: mastercard-used-retrieve-short-lived
+      description: Mastercard Used to Retrieve the Short-lived Url of a User's Dashboard to View Their Carbon Footprints and
+        Contributions to Priceless Planet.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: carbon-calculator-experience-users.getauthtoken
+      outputParameters:
+      - type: object
+        mapping: $.

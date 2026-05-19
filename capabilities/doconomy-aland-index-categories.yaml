@@ -1,0 +1,67 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Doconomy Aland Index — Categories
+  description: 'Mastercard Doconomy Aland Index — Categories. 1 operations. Lead operation: Mastercard Provide Supported Mccs.
+    Self-contained Naftiko capability covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Categories
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: doconomy-aland-index-categories
+    baseUri: https://sandbox.api.mastercard.com/doconomy
+    description: Mastercard Doconomy Aland Index — Categories business capability. Self-contained, no shared references.
+    resources:
+    - name: supported-merchant-categories
+      path: /supported-merchant-categories
+      operations:
+      - name: getsupportedmerchantcategories
+        method: GET
+        description: Mastercard Provide Supported Mccs
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+  exposes:
+  - type: rest
+    namespace: doconomy-aland-index-categories-rest
+    port: 8080
+    description: REST adapter for Mastercard Doconomy Aland Index — Categories. One Spectral-compliant resource per consumed
+      operation, prefixed with /v1.
+    resources:
+    - path: /v1/supported-merchant-categories
+      name: supported-merchant-categories
+      description: REST surface for supported-merchant-categories.
+      operations:
+      - method: GET
+        name: getsupportedmerchantcategories
+        description: Mastercard Provide Supported Mccs
+        call: doconomy-aland-index-categories.getsupportedmerchantcategories
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: doconomy-aland-index-categories-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Doconomy Aland Index — Categories. One tool per consumed operation, routed inline
+      through this capability's consumes block.
+    tools:
+    - name: mastercard-provide-supported-mccs
+      description: Mastercard Provide Supported Mccs
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: doconomy-aland-index-categories.getsupportedmerchantcategories
+      outputParameters:
+      - type: object
+        mapping: $.

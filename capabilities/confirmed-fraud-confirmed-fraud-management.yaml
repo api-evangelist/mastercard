@@ -1,0 +1,123 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Confirmed Fraud — Confirmed  Fraud  Management
+  description: 'Mastercard Confirmed Fraud — Confirmed  Fraud  Management. 2 operations. Lead operation: Change an Existing
+    Fraud Record Using Complete Input Parameters for Both Mastercard and Issuer Built Transactions.. Self-contained Naftiko
+    capability covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Confirmed  Fraud  Management
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: confirmed-fraud-confirmed-fraud-management
+    baseUri: https://api.mastercard.com/fld/confirmed-frauds
+    description: Mastercard Confirmed Fraud — Confirmed  Fraud  Management business capability. Self-contained, no shared
+      references.
+    resources:
+    - name: issuer-frauds
+      path: /issuer-frauds
+      operations:
+      - name: updateissuerfraud
+        method: PUT
+        description: Change an Existing Fraud Record Using Complete Input Parameters for Both Mastercard and Issuer Built
+          Transactions.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: mastercard-frauds
+      path: /mastercard-frauds
+      operations:
+      - name: updatemastercardfraud
+        method: PUT
+        description: Change an Existing Fraud Record Using Minimal Input Parameters for Mastercard Built Transactions.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+  exposes:
+  - type: rest
+    namespace: confirmed-fraud-confirmed-fraud-management-rest
+    port: 8080
+    description: REST adapter for Mastercard Confirmed Fraud — Confirmed  Fraud  Management. One Spectral-compliant resource
+      per consumed operation, prefixed with /v1.
+    resources:
+    - path: /v1/issuer-frauds
+      name: issuer-frauds
+      description: REST surface for issuer-frauds.
+      operations:
+      - method: PUT
+        name: updateissuerfraud
+        description: Change an Existing Fraud Record Using Complete Input Parameters for Both Mastercard and Issuer Built
+          Transactions.
+        call: confirmed-fraud-confirmed-fraud-management.updateissuerfraud
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/mastercard-frauds
+      name: mastercard-frauds
+      description: REST surface for mastercard-frauds.
+      operations:
+      - method: PUT
+        name: updatemastercardfraud
+        description: Change an Existing Fraud Record Using Minimal Input Parameters for Mastercard Built Transactions.
+        call: confirmed-fraud-confirmed-fraud-management.updatemastercardfraud
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: confirmed-fraud-confirmed-fraud-management-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Confirmed Fraud — Confirmed  Fraud  Management. One tool per consumed operation,
+      routed inline through this capability's consumes block.
+    tools:
+    - name: change-existing-fraud-record-using
+      description: Change an Existing Fraud Record Using Complete Input Parameters for Both Mastercard and Issuer Built Transactions.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: confirmed-fraud-confirmed-fraud-management.updateissuerfraud
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: change-existing-fraud-record-using-2
+      description: Change an Existing Fraud Record Using Minimal Input Parameters for Mastercard Built Transactions.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: confirmed-fraud-confirmed-fraud-management.updatemastercardfraud
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

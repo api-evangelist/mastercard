@@ -1,0 +1,113 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Confirmed Fraud — Fraud
+  description: 'Mastercard Confirmed Fraud — Fraud. 2 operations. Lead operation: Delete an Existing Fraud Record or Confirm
+    a Suspended Fraud Record for Both Mastercard and Issuer Built Transactions.. Self-contained Naftiko capability covering
+    one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Fraud
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: confirmed-fraud-fraud
+    baseUri: https://api.mastercard.com/fld/confirmed-frauds
+    description: Mastercard Confirmed Fraud — Fraud business capability. Self-contained, no shared references.
+    resources:
+    - name: fraud-states
+      path: /fraud-states
+      operations:
+      - name: fraudstate
+        method: PUT
+        description: Delete an Existing Fraud Record or Confirm a Suspended Fraud Record for Both Mastercard and Issuer Built
+          Transactions.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: fraud-statuses-icas-ica
+      path: /fraud-statuses/icas/{ica}
+      operations:
+      - name: fraudrequeststatus
+        method: GET
+        description: Get Status of an Existing Fraud Record for Both Mastercard and Issuer Built Transactions.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+  exposes:
+  - type: rest
+    namespace: confirmed-fraud-fraud-rest
+    port: 8080
+    description: REST adapter for Mastercard Confirmed Fraud — Fraud. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/fraud-states
+      name: fraud-states
+      description: REST surface for fraud-states.
+      operations:
+      - method: PUT
+        name: fraudstate
+        description: Delete an Existing Fraud Record or Confirm a Suspended Fraud Record for Both Mastercard and Issuer Built
+          Transactions.
+        call: confirmed-fraud-fraud.fraudstate
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/fraud-statuses/icas/{ica}
+      name: fraud-statuses-icas-ica
+      description: REST surface for fraud-statuses-icas-ica.
+      operations:
+      - method: GET
+        name: fraudrequeststatus
+        description: Get Status of an Existing Fraud Record for Both Mastercard and Issuer Built Transactions.
+        call: confirmed-fraud-fraud.fraudrequeststatus
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: confirmed-fraud-fraud-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Confirmed Fraud — Fraud. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: delete-existing-fraud-record-confirm
+      description: Delete an Existing Fraud Record or Confirm a Suspended Fraud Record for Both Mastercard and Issuer Built
+        Transactions.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: confirmed-fraud-fraud.fraudstate
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-status-existing-fraud-record
+      description: Get Status of an Existing Fraud Record for Both Mastercard and Issuer Built Transactions.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: confirmed-fraud-fraud.fraudrequeststatus
+      outputParameters:
+      - type: object
+        mapping: $.

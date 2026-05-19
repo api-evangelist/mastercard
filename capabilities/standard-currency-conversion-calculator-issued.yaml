@@ -1,0 +1,77 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Standard Currency Conversion Calculator — Issued
+  description: 'Mastercard Standard Currency Conversion Calculator — Issued. 1 operations. Lead operation: Mastercard Determine
+    if the Settlement Rate Has Been Issued.. Self-contained Naftiko capability covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Issued
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: standard-currency-conversion-calculator-issued
+    baseUri: https://sandbox.api.mastercard.com/settlement/currencyrate
+    description: Mastercard Standard Currency Conversion Calculator — Issued business capability. Self-contained, no shared
+      references.
+    resources:
+    - name: conversion-rate-issued
+      path: /conversion-rate-issued
+      operations:
+      - name: israteissuedusingget
+        method: GET
+        description: Mastercard Determine if the Settlement Rate Has Been Issued.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: date
+          in: query
+          type: string
+          description: The date by which the rate would have been issued.
+  exposes:
+  - type: rest
+    namespace: standard-currency-conversion-calculator-issued-rest
+    port: 8080
+    description: REST adapter for Mastercard Standard Currency Conversion Calculator — Issued. One Spectral-compliant resource
+      per consumed operation, prefixed with /v1.
+    resources:
+    - path: /v1/conversion-rate-issued
+      name: conversion-rate-issued
+      description: REST surface for conversion-rate-issued.
+      operations:
+      - method: GET
+        name: israteissuedusingget
+        description: Mastercard Determine if the Settlement Rate Has Been Issued.
+        call: standard-currency-conversion-calculator-issued.israteissuedusingget
+        with:
+          date: rest.date
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: standard-currency-conversion-calculator-issued-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Standard Currency Conversion Calculator — Issued. One tool per consumed operation,
+      routed inline through this capability's consumes block.
+    tools:
+    - name: mastercard-determine-if-settlement-rate
+      description: Mastercard Determine if the Settlement Rate Has Been Issued.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: standard-currency-conversion-calculator-issued.israteissuedusingget
+      with:
+        date: tools.date
+      outputParameters:
+      - type: object
+        mapping: $.

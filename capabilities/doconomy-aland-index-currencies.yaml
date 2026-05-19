@@ -1,0 +1,67 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Doconomy Aland Index — Currencies
+  description: 'Mastercard Doconomy Aland Index — Currencies. 1 operations. Lead operation: Mastercard Provide Supported Currencies.
+    Self-contained Naftiko capability covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Currencies
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: doconomy-aland-index-currencies
+    baseUri: https://sandbox.api.mastercard.com/doconomy
+    description: Mastercard Doconomy Aland Index — Currencies business capability. Self-contained, no shared references.
+    resources:
+    - name: supported-currencies
+      path: /supported-currencies
+      operations:
+      - name: getsupportedcurrencies
+        method: GET
+        description: Mastercard Provide Supported Currencies
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+  exposes:
+  - type: rest
+    namespace: doconomy-aland-index-currencies-rest
+    port: 8080
+    description: REST adapter for Mastercard Doconomy Aland Index — Currencies. One Spectral-compliant resource per consumed
+      operation, prefixed with /v1.
+    resources:
+    - path: /v1/supported-currencies
+      name: supported-currencies
+      description: REST surface for supported-currencies.
+      operations:
+      - method: GET
+        name: getsupportedcurrencies
+        description: Mastercard Provide Supported Currencies
+        call: doconomy-aland-index-currencies.getsupportedcurrencies
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: doconomy-aland-index-currencies-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Doconomy Aland Index — Currencies. One tool per consumed operation, routed inline
+      through this capability's consumes block.
+    tools:
+    - name: mastercard-provide-supported-currencies
+      description: Mastercard Provide Supported Currencies
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: doconomy-aland-index-currencies.getsupportedcurrencies
+      outputParameters:
+      - type: object
+        mapping: $.

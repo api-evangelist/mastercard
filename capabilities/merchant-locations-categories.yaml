@@ -1,0 +1,67 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Merchant Locations — Categories
+  description: 'Mastercard Merchant Locations — Categories. 1 operations. Lead operation: Mastercard Get a List of Merchant
+    Categories. Self-contained Naftiko capability covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Categories
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: merchant-locations-categories
+    baseUri: https://api.mastercard.com/locations/merchants
+    description: Mastercard Merchant Locations — Categories business capability. Self-contained, no shared references.
+    resources:
+    - name: categories
+      path: /categories
+      operations:
+      - name: getmerchantcategories
+        method: GET
+        description: Mastercard Get a List of Merchant Categories
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+  exposes:
+  - type: rest
+    namespace: merchant-locations-categories-rest
+    port: 8080
+    description: REST adapter for Mastercard Merchant Locations — Categories. One Spectral-compliant resource per consumed
+      operation, prefixed with /v1.
+    resources:
+    - path: /v1/categories
+      name: categories
+      description: REST surface for categories.
+      operations:
+      - method: GET
+        name: getmerchantcategories
+        description: Mastercard Get a List of Merchant Categories
+        call: merchant-locations-categories.getmerchantcategories
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: merchant-locations-categories-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Merchant Locations — Categories. One tool per consumed operation, routed inline
+      through this capability's consumes block.
+    tools:
+    - name: mastercard-get-list-merchant-categories
+      description: Mastercard Get a List of Merchant Categories
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: merchant-locations-categories.getmerchantcategories
+      outputParameters:
+      - type: object
+        mapping: $.

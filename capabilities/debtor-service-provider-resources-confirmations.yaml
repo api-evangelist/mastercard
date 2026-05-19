@@ -1,0 +1,78 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Debtor Service Provider Resources API — Confirmations
+  description: 'Mastercard Debtor Service Provider Resources API — Confirmations. 1 operations. Lead operation: Mastercard
+    Confirm Payment. Self-contained Naftiko capability covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Confirmations
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: debtor-service-provider-resources-confirmations
+    baseUri: https://mtf.services.mastercard.com/zapp/pbarfp/dsp
+    description: Mastercard Debtor Service Provider Resources API — Confirmations business capability. Self-contained, no
+      shared references.
+    resources:
+    - name: payment-requests-payment_request_lifecycle_id-payment-confirmation-advices
+      path: /payment-requests/{payment_request_lifecycle_id}/payment-confirmation-advices
+      operations:
+      - name: confirmpaymentadvice
+        method: POST
+        description: Mastercard Confirm Payment
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+  exposes:
+  - type: rest
+    namespace: debtor-service-provider-resources-confirmations-rest
+    port: 8080
+    description: REST adapter for Mastercard Debtor Service Provider Resources API — Confirmations. One Spectral-compliant
+      resource per consumed operation, prefixed with /v1.
+    resources:
+    - path: /v1/payment-requests/{payment-request-lifecycle-id}/payment-confirmation-advices
+      name: payment-requests-payment-request-lifecycle-id-payment-confirmation-advices
+      description: REST surface for payment-requests-payment_request_lifecycle_id-payment-confirmation-advices.
+      operations:
+      - method: POST
+        name: confirmpaymentadvice
+        description: Mastercard Confirm Payment
+        call: debtor-service-provider-resources-confirmations.confirmpaymentadvice
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: debtor-service-provider-resources-confirmations-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Debtor Service Provider Resources API — Confirmations. One tool per consumed operation,
+      routed inline through this capability's consumes block.
+    tools:
+    - name: mastercard-confirm-payment
+      description: Mastercard Confirm Payment
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: debtor-service-provider-resources-confirmations.confirmpaymentadvice
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

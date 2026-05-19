@@ -1,0 +1,79 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Suspected Fraud — Suspected  Fraud  Submission
+  description: 'Mastercard Suspected Fraud — Suspected  Fraud  Submission. 1 operations. Lead operation: Add a New Suspected
+    Fraud Record Using Minimal Input Parameters for Mastercard Built Transactions.. Self-contained Naftiko capability covering
+    one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Suspected  Fraud  Submission
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: suspected-fraud-suspected-fraud-submission
+    baseUri: https://api.mastercard.com/fld/suspected-frauds
+    description: Mastercard Suspected Fraud — Suspected  Fraud  Submission business capability. Self-contained, no shared
+      references.
+    resources:
+    - name: mastercard-frauds
+      path: /mastercard-frauds
+      operations:
+      - name: submitsuspectedfraud
+        method: POST
+        description: Add a New Suspected Fraud Record Using Minimal Input Parameters for Mastercard Built Transactions.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+  exposes:
+  - type: rest
+    namespace: suspected-fraud-suspected-fraud-submission-rest
+    port: 8080
+    description: REST adapter for Mastercard Suspected Fraud — Suspected  Fraud  Submission. One Spectral-compliant resource
+      per consumed operation, prefixed with /v1.
+    resources:
+    - path: /v1/mastercard-frauds
+      name: mastercard-frauds
+      description: REST surface for mastercard-frauds.
+      operations:
+      - method: POST
+        name: submitsuspectedfraud
+        description: Add a New Suspected Fraud Record Using Minimal Input Parameters for Mastercard Built Transactions.
+        call: suspected-fraud-suspected-fraud-submission.submitsuspectedfraud
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: suspected-fraud-suspected-fraud-submission-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Suspected Fraud — Suspected  Fraud  Submission. One tool per consumed operation,
+      routed inline through this capability's consumes block.
+    tools:
+    - name: add-new-suspected-fraud-record
+      description: Add a New Suspected Fraud Record Using Minimal Input Parameters for Mastercard Built Transactions.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: suspected-fraud-suspected-fraud-submission.submitsuspectedfraud
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

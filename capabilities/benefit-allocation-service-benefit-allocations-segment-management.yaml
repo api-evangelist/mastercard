@@ -1,0 +1,162 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Benefit Allocation Service API — Benefit-Allocations-Segment-Management
+  description: 'Mastercard Benefit Allocation Service API — Benefit-Allocations-Segment-Management. 3 operations. Lead operation:
+    Mastercard Assign Segment to a Card. Self-contained Naftiko capability covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Benefit-Allocations-Segment-Management
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: benefit-allocation-service-benefit-allocations-segment-management
+    baseUri: https://sandbox.api.mastercard.com/loyalty/benefits
+    description: Mastercard Benefit Allocation Service API — Benefit-Allocations-Segment-Management business capability. Self-contained,
+      no shared references.
+    resources:
+    - name: card-segments
+      path: /card-segments
+      operations:
+      - name: assignsegment
+        method: POST
+        description: Mastercard Assign Segment to a Card
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: card-segments-cancellations
+      path: /card-segments-cancellations
+      operations:
+      - name: cancelsegment
+        method: PUT
+        description: Mastercard Cancels Segment From a Card
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: card-segments-replacements
+      path: /card-segments-replacements
+      operations:
+      - name: replacesegment
+        method: PUT
+        description: Mastercard Replaces Segment on a Card
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+  exposes:
+  - type: rest
+    namespace: benefit-allocation-service-benefit-allocations-segment-management-rest
+    port: 8080
+    description: REST adapter for Mastercard Benefit Allocation Service API — Benefit-Allocations-Segment-Management. One
+      Spectral-compliant resource per consumed operation, prefixed with /v1.
+    resources:
+    - path: /v1/card-segments
+      name: card-segments
+      description: REST surface for card-segments.
+      operations:
+      - method: POST
+        name: assignsegment
+        description: Mastercard Assign Segment to a Card
+        call: benefit-allocation-service-benefit-allocations-segment-management.assignsegment
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/card-segments-cancellations
+      name: card-segments-cancellations
+      description: REST surface for card-segments-cancellations.
+      operations:
+      - method: PUT
+        name: cancelsegment
+        description: Mastercard Cancels Segment From a Card
+        call: benefit-allocation-service-benefit-allocations-segment-management.cancelsegment
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/card-segments-replacements
+      name: card-segments-replacements
+      description: REST surface for card-segments-replacements.
+      operations:
+      - method: PUT
+        name: replacesegment
+        description: Mastercard Replaces Segment on a Card
+        call: benefit-allocation-service-benefit-allocations-segment-management.replacesegment
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: benefit-allocation-service-benefit-allocations-segment-management-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Benefit Allocation Service API — Benefit-Allocations-Segment-Management. One tool
+      per consumed operation, routed inline through this capability's consumes block.
+    tools:
+    - name: mastercard-assign-segment-card
+      description: Mastercard Assign Segment to a Card
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: benefit-allocation-service-benefit-allocations-segment-management.assignsegment
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: mastercard-cancels-segment-card
+      description: Mastercard Cancels Segment From a Card
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: benefit-allocation-service-benefit-allocations-segment-management.cancelsegment
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: mastercard-replaces-segment-card
+      description: Mastercard Replaces Segment on a Card
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: benefit-allocation-service-benefit-allocations-segment-management.replacesegment
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

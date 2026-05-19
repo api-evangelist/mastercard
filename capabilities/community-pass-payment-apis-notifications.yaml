@@ -1,0 +1,77 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Community Pass Payment APIs — Notifications
+  description: 'Mastercard Community Pass Payment APIs — Notifications. 1 operations. Lead operation: Mastercard Notifications
+    Api. Self-contained Naftiko capability covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Notifications
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: community-pass-payment-apis-notifications
+    baseUri: https://api.mastercard.com/community-pass/payments
+    description: Mastercard Community Pass Payment APIs — Notifications business capability. Self-contained, no shared references.
+    resources:
+    - name: notifications
+      path: /notifications
+      operations:
+      - name: paymentnotification
+        method: POST
+        description: Mastercard Notifications Api
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+  exposes:
+  - type: rest
+    namespace: community-pass-payment-apis-notifications-rest
+    port: 8080
+    description: REST adapter for Mastercard Community Pass Payment APIs — Notifications. One Spectral-compliant resource
+      per consumed operation, prefixed with /v1.
+    resources:
+    - path: /v1/notifications
+      name: notifications
+      description: REST surface for notifications.
+      operations:
+      - method: POST
+        name: paymentnotification
+        description: Mastercard Notifications Api
+        call: community-pass-payment-apis-notifications.paymentnotification
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: community-pass-payment-apis-notifications-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Community Pass Payment APIs — Notifications. One tool per consumed operation,
+      routed inline through this capability's consumes block.
+    tools:
+    - name: mastercard-notifications-api
+      description: Mastercard Notifications Api
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: community-pass-payment-apis-notifications.paymentnotification
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

@@ -1,0 +1,162 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Debtor Service Provider Resources API — Agreement
+  description: 'Mastercard Debtor Service Provider Resources API — Agreement. 3 operations. Lead operation: Mastercard Retrieve
+    Agreement Details. Self-contained Naftiko capability covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Agreement
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: debtor-service-provider-resources-agreement
+    baseUri: https://mtf.services.mastercard.com/zapp/pbarfp/dsp
+    description: Mastercard Debtor Service Provider Resources API — Agreement business capability. Self-contained, no shared
+      references.
+    resources:
+    - name: agreement-retrievals
+      path: /agreement-retrievals
+      operations:
+      - name: retrieveagreement
+        method: POST
+        description: Mastercard Retrieve Agreement Details
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: agreement-searches
+      path: /agreement-searches
+      operations:
+      - name: retrieveagreementlist
+        method: POST
+        description: Mastercard Retrieve Agreement List
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: agreements-agreement_id-updates
+      path: /agreements/{agreement_id}/updates
+      operations:
+      - name: updateagreement
+        method: POST
+        description: Mastercard Update Agreement
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+  exposes:
+  - type: rest
+    namespace: debtor-service-provider-resources-agreement-rest
+    port: 8080
+    description: REST adapter for Mastercard Debtor Service Provider Resources API — Agreement. One Spectral-compliant resource
+      per consumed operation, prefixed with /v1.
+    resources:
+    - path: /v1/agreement-retrievals
+      name: agreement-retrievals
+      description: REST surface for agreement-retrievals.
+      operations:
+      - method: POST
+        name: retrieveagreement
+        description: Mastercard Retrieve Agreement Details
+        call: debtor-service-provider-resources-agreement.retrieveagreement
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/agreement-searches
+      name: agreement-searches
+      description: REST surface for agreement-searches.
+      operations:
+      - method: POST
+        name: retrieveagreementlist
+        description: Mastercard Retrieve Agreement List
+        call: debtor-service-provider-resources-agreement.retrieveagreementlist
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/agreements/{agreement-id}/updates
+      name: agreements-agreement-id-updates
+      description: REST surface for agreements-agreement_id-updates.
+      operations:
+      - method: POST
+        name: updateagreement
+        description: Mastercard Update Agreement
+        call: debtor-service-provider-resources-agreement.updateagreement
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: debtor-service-provider-resources-agreement-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Debtor Service Provider Resources API — Agreement. One tool per consumed operation,
+      routed inline through this capability's consumes block.
+    tools:
+    - name: mastercard-retrieve-agreement-details
+      description: Mastercard Retrieve Agreement Details
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: false
+      call: debtor-service-provider-resources-agreement.retrieveagreement
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: mastercard-retrieve-agreement-list
+      description: Mastercard Retrieve Agreement List
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: false
+      call: debtor-service-provider-resources-agreement.retrieveagreementlist
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: mastercard-update-agreement
+      description: Mastercard Update Agreement
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: debtor-service-provider-resources-agreement.updateagreement
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

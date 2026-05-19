@@ -1,0 +1,162 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Debtor Service Provider Resources API — Retrievals
+  description: 'Mastercard Debtor Service Provider Resources API — Retrievals. 3 operations. Lead operation: Mastercard Retrieve
+    Agreement Details. Self-contained Naftiko capability covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Retrievals
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: debtor-service-provider-resources-retrievals
+    baseUri: https://mtf.services.mastercard.com/zapp/pbarfp/dsp
+    description: Mastercard Debtor Service Provider Resources API — Retrievals business capability. Self-contained, no shared
+      references.
+    resources:
+    - name: agreement-retrievals
+      path: /agreement-retrievals
+      operations:
+      - name: retrieveagreement
+        method: POST
+        description: Mastercard Retrieve Agreement Details
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: payment-request-retrievals
+      path: /payment-request-retrievals
+      operations:
+      - name: retrievepaymentrequest
+        method: POST
+        description: Mastercard Retrieve Payment Request Details.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: payment-requests-payment_request_lifecycle_id-refunds-refund_request_lifecycle_i
+      path: /payment-requests/{payment_request_lifecycle_id}/refunds/{refund_request_lifecycle_id}/status-retrievals
+      operations:
+      - name: retrieverefundstatus
+        method: POST
+        description: Mastercard Refund Request Status Retrieval Request
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+  exposes:
+  - type: rest
+    namespace: debtor-service-provider-resources-retrievals-rest
+    port: 8080
+    description: REST adapter for Mastercard Debtor Service Provider Resources API — Retrievals. One Spectral-compliant resource
+      per consumed operation, prefixed with /v1.
+    resources:
+    - path: /v1/agreement-retrievals
+      name: agreement-retrievals
+      description: REST surface for agreement-retrievals.
+      operations:
+      - method: POST
+        name: retrieveagreement
+        description: Mastercard Retrieve Agreement Details
+        call: debtor-service-provider-resources-retrievals.retrieveagreement
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/payment-request-retrievals
+      name: payment-request-retrievals
+      description: REST surface for payment-request-retrievals.
+      operations:
+      - method: POST
+        name: retrievepaymentrequest
+        description: Mastercard Retrieve Payment Request Details.
+        call: debtor-service-provider-resources-retrievals.retrievepaymentrequest
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/payment-requests/{payment-request-lifecycle-id}/refunds/{refund-request-lifecycle-id}/status-retrievals
+      name: payment-requests-payment-request-lifecycle-id-refunds-refund-request-lifecycle-i
+      description: REST surface for payment-requests-payment_request_lifecycle_id-refunds-refund_request_lifecycle_i.
+      operations:
+      - method: POST
+        name: retrieverefundstatus
+        description: Mastercard Refund Request Status Retrieval Request
+        call: debtor-service-provider-resources-retrievals.retrieverefundstatus
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: debtor-service-provider-resources-retrievals-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Debtor Service Provider Resources API — Retrievals. One tool per consumed operation,
+      routed inline through this capability's consumes block.
+    tools:
+    - name: mastercard-retrieve-agreement-details
+      description: Mastercard Retrieve Agreement Details
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: false
+      call: debtor-service-provider-resources-retrievals.retrieveagreement
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: mastercard-retrieve-payment-request-details
+      description: Mastercard Retrieve Payment Request Details.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: false
+      call: debtor-service-provider-resources-retrievals.retrievepaymentrequest
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: mastercard-refund-request-status-retrieval
+      description: Mastercard Refund Request Status Retrieval Request
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: debtor-service-provider-resources-retrievals.retrieverefundstatus
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

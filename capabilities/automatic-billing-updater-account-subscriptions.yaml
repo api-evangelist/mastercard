@@ -1,0 +1,79 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Automatic Billing Updater API — Account  Subscriptions
+  description: 'Mastercard Automatic Billing Updater API — Account  Subscriptions. 1 operations. Lead operation: Mastercard
+    Unsubscribe From an Account to Stop Receiving Updates for Account Information in the Future.. Self-contained Naftiko capability
+    covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Account  Subscriptions
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: automatic-billing-updater-account-subscriptions
+    baseUri: https://api.mastercard.com/abu/accounts
+    description: Mastercard Automatic Billing Updater API — Account  Subscriptions business capability. Self-contained, no
+      shared references.
+    resources:
+    - name: subscription-deletions
+      path: /subscription-deletions
+      operations:
+      - name: accountsubscriptiondeletion
+        method: POST
+        description: Mastercard Unsubscribe From an Account to Stop Receiving Updates for Account Information in the Future.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+  exposes:
+  - type: rest
+    namespace: automatic-billing-updater-account-subscriptions-rest
+    port: 8080
+    description: REST adapter for Mastercard Automatic Billing Updater API — Account  Subscriptions. One Spectral-compliant
+      resource per consumed operation, prefixed with /v1.
+    resources:
+    - path: /v1/subscription-deletions
+      name: subscription-deletions
+      description: REST surface for subscription-deletions.
+      operations:
+      - method: POST
+        name: accountsubscriptiondeletion
+        description: Mastercard Unsubscribe From an Account to Stop Receiving Updates for Account Information in the Future.
+        call: automatic-billing-updater-account-subscriptions.accountsubscriptiondeletion
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: automatic-billing-updater-account-subscriptions-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Automatic Billing Updater API — Account  Subscriptions. One tool per consumed
+      operation, routed inline through this capability's consumes block.
+    tools:
+    - name: mastercard-unsubscribe-account-stop-receiving
+      description: Mastercard Unsubscribe From an Account to Stop Receiving Updates for Account Information in the Future.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: automatic-billing-updater-account-subscriptions.accountsubscriptiondeletion
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

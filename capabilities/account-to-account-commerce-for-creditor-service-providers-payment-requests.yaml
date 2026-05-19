@@ -1,0 +1,79 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Account to Account Commerce for Creditor Service Providers — Payment  Requests
+  description: 'Mastercard Account to Account Commerce for Creditor Service Providers — Payment  Requests. 1 operations. Lead
+    operation: Mastercard Payment Request Status Retrieval Request.. Self-contained Naftiko capability covering one Mastercard
+    business surface.'
+  tags:
+  - Mastercard
+  - Payment  Requests
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: account-to-account-commerce-for-creditor-service-providers-payment-requests
+    baseUri: https://mtf.services.mastercard.com/zapp/pbarfp/csp
+    description: Mastercard Account to Account Commerce for Creditor Service Providers — Payment  Requests business capability.
+      Self-contained, no shared references.
+    resources:
+    - name: payment-requests-payment_request_lifecycle_id-status-retrievals
+      path: /payment-requests/{payment_request_lifecycle_id}/status-retrievals
+      operations:
+      - name: retrievepaymentrequeststatus
+        method: POST
+        description: Mastercard Payment Request Status Retrieval Request.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+  exposes:
+  - type: rest
+    namespace: account-to-account-commerce-for-creditor-service-providers-payment-requests-rest
+    port: 8080
+    description: REST adapter for Mastercard Account to Account Commerce for Creditor Service Providers — Payment  Requests.
+      One Spectral-compliant resource per consumed operation, prefixed with /v1.
+    resources:
+    - path: /v1/payment-requests/{payment-request-lifecycle-id}/status-retrievals
+      name: payment-requests-payment-request-lifecycle-id-status-retrievals
+      description: REST surface for payment-requests-payment_request_lifecycle_id-status-retrievals.
+      operations:
+      - method: POST
+        name: retrievepaymentrequeststatus
+        description: Mastercard Payment Request Status Retrieval Request.
+        call: account-to-account-commerce-for-creditor-service-providers-payment-requests.retrievepaymentrequeststatus
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: account-to-account-commerce-for-creditor-service-providers-payment-requests-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Account to Account Commerce for Creditor Service Providers — Payment  Requests.
+      One tool per consumed operation, routed inline through this capability's consumes block.
+    tools:
+    - name: mastercard-payment-request-status-retrieval
+      description: Mastercard Payment Request Status Retrieval Request.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: account-to-account-commerce-for-creditor-service-providers-payment-requests.retrievepaymentrequeststatus
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

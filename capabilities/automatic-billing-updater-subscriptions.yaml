@@ -1,0 +1,165 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Automatic Billing Updater API — Subscriptions
+  description: 'Mastercard Automatic Billing Updater API — Subscriptions. 3 operations. Lead operation: Mastercard Unsubscribe
+    From an Account to Stop Receiving Updates for Account Information in the Future.. Self-contained Naftiko capability covering
+    one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Subscriptions
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: automatic-billing-updater-subscriptions
+    baseUri: https://api.mastercard.com/abu/accounts
+    description: Mastercard Automatic Billing Updater API — Subscriptions business capability. Self-contained, no shared references.
+    resources:
+    - name: subscription-deletions
+      path: /subscription-deletions
+      operations:
+      - name: accountsubscriptiondeletion
+        method: POST
+        description: Mastercard Unsubscribe From an Account to Stop Receiving Updates for Account Information in the Future.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: subscription-inquiries
+      path: /subscription-inquiries
+      operations:
+      - name: subscriptioninquiry
+        method: POST
+        description: Mastercard Inquire on a Subscription to Determine if an Account Is Already Being Watched or Not.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: subscriptions
+      path: /subscriptions
+      operations:
+      - name: accountsubscription
+        method: POST
+        description: Mastercard Subscriptions to Accounts to Automatically Receive Notifications When an Update to an Account
+          Occurs.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+  exposes:
+  - type: rest
+    namespace: automatic-billing-updater-subscriptions-rest
+    port: 8080
+    description: REST adapter for Mastercard Automatic Billing Updater API — Subscriptions. One Spectral-compliant resource
+      per consumed operation, prefixed with /v1.
+    resources:
+    - path: /v1/subscription-deletions
+      name: subscription-deletions
+      description: REST surface for subscription-deletions.
+      operations:
+      - method: POST
+        name: accountsubscriptiondeletion
+        description: Mastercard Unsubscribe From an Account to Stop Receiving Updates for Account Information in the Future.
+        call: automatic-billing-updater-subscriptions.accountsubscriptiondeletion
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/subscription-inquiries
+      name: subscription-inquiries
+      description: REST surface for subscription-inquiries.
+      operations:
+      - method: POST
+        name: subscriptioninquiry
+        description: Mastercard Inquire on a Subscription to Determine if an Account Is Already Being Watched or Not.
+        call: automatic-billing-updater-subscriptions.subscriptioninquiry
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/subscriptions
+      name: subscriptions
+      description: REST surface for subscriptions.
+      operations:
+      - method: POST
+        name: accountsubscription
+        description: Mastercard Subscriptions to Accounts to Automatically Receive Notifications When an Update to an Account
+          Occurs.
+        call: automatic-billing-updater-subscriptions.accountsubscription
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: automatic-billing-updater-subscriptions-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Automatic Billing Updater API — Subscriptions. One tool per consumed operation,
+      routed inline through this capability's consumes block.
+    tools:
+    - name: mastercard-unsubscribe-account-stop-receiving
+      description: Mastercard Unsubscribe From an Account to Stop Receiving Updates for Account Information in the Future.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: automatic-billing-updater-subscriptions.accountsubscriptiondeletion
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: mastercard-inquire-subscription-determine-if
+      description: Mastercard Inquire on a Subscription to Determine if an Account Is Already Being Watched or Not.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: automatic-billing-updater-subscriptions.subscriptioninquiry
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: mastercard-subscriptions-accounts-automatically-receive
+      description: Mastercard Subscriptions to Accounts to Automatically Receive Notifications When an Update to an Account
+        Occurs.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: automatic-billing-updater-subscriptions.accountsubscription
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

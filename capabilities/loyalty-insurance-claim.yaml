@@ -1,0 +1,77 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Loyalty Insurance — Claim
+  description: 'Mastercard Loyalty Insurance — Claim. 1 operations. Lead operation: Mastercard Retrieve the Claim Status..
+    Self-contained Naftiko capability covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Claim
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: loyalty-insurance-claim
+    baseUri: https://api.mastercard.com/loyalty/insurance
+    description: Mastercard Loyalty Insurance — Claim business capability. Self-contained, no shared references.
+    resources:
+    - name: claim-searches
+      path: /claim-searches
+      operations:
+      - name: retrieveclaimstatus
+        method: POST
+        description: Mastercard Retrieve the Claim Status.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+  exposes:
+  - type: rest
+    namespace: loyalty-insurance-claim-rest
+    port: 8080
+    description: REST adapter for Mastercard Loyalty Insurance — Claim. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/claim-searches
+      name: claim-searches
+      description: REST surface for claim-searches.
+      operations:
+      - method: POST
+        name: retrieveclaimstatus
+        description: Mastercard Retrieve the Claim Status.
+        call: loyalty-insurance-claim.retrieveclaimstatus
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: loyalty-insurance-claim-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Loyalty Insurance — Claim. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: mastercard-retrieve-claim-status
+      description: Mastercard Retrieve the Claim Status.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: false
+      call: loyalty-insurance-claim.retrieveclaimstatus
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

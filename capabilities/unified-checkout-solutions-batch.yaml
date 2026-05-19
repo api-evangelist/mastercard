@@ -1,0 +1,77 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Unified Checkout Solutions — Batch
+  description: 'Mastercard Unified Checkout Solutions — Batch. 1 operations. Lead operation: Mastercard Store Dpa Bulk Load
+    Data. Self-contained Naftiko capability covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Batch
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: unified-checkout-solutions-batch
+    baseUri: https://sandbox.api.mastercard.com/srci/onboarding
+    description: Mastercard Unified Checkout Solutions — Batch business capability. Self-contained, no shared references.
+    resources:
+    - name: org-organization_id-dpas-batch
+      path: /org/{organization_id}/dpas/batch
+      operations:
+      - name: uploadmerchants
+        method: POST
+        description: Mastercard Store Dpa Bulk Load Data
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+  exposes:
+  - type: rest
+    namespace: unified-checkout-solutions-batch-rest
+    port: 8080
+    description: REST adapter for Mastercard Unified Checkout Solutions — Batch. One Spectral-compliant resource per consumed
+      operation, prefixed with /v1.
+    resources:
+    - path: /v1/org/{organization-id}/dpas/batch
+      name: org-organization-id-dpas-batch
+      description: REST surface for org-organization_id-dpas-batch.
+      operations:
+      - method: POST
+        name: uploadmerchants
+        description: Mastercard Store Dpa Bulk Load Data
+        call: unified-checkout-solutions-batch.uploadmerchants
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: unified-checkout-solutions-batch-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Unified Checkout Solutions — Batch. One tool per consumed operation, routed inline
+      through this capability's consumes block.
+    tools:
+    - name: mastercard-store-dpa-bulk-load
+      description: Mastercard Store Dpa Bulk Load Data
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: unified-checkout-solutions-batch.uploadmerchants
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

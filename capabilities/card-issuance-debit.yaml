@@ -1,0 +1,77 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Card Issuance — Debit
+  description: 'Mastercard Card Issuance — Debit. 1 operations. Lead operation: Mastercard **debit Card Issuance** - Issue
+    Debit Card to Existing or New Client. Self-contained Naftiko capability covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Debit
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: card-issuance-debit
+    baseUri: https://sandbox.mi.api.mastercard.com/mi-issuing-sandbox/card-issuance
+    description: Mastercard Card Issuance — Debit business capability. Self-contained, no shared references.
+    resources:
+    - name: debit-cards
+      path: /debit-cards
+      operations:
+      - name: createdebitcard
+        method: POST
+        description: Mastercard **debit Card Issuance** - Issue Debit Card to Existing or New Client
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+  exposes:
+  - type: rest
+    namespace: card-issuance-debit-rest
+    port: 8080
+    description: REST adapter for Mastercard Card Issuance — Debit. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/debit-cards
+      name: debit-cards
+      description: REST surface for debit-cards.
+      operations:
+      - method: POST
+        name: createdebitcard
+        description: Mastercard **debit Card Issuance** - Issue Debit Card to Existing or New Client
+        call: card-issuance-debit.createdebitcard
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: card-issuance-debit-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Card Issuance — Debit. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: mastercard-debit-card-issuance-issue
+      description: Mastercard **debit Card Issuance** - Issue Debit Card to Existing or New Client
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: card-issuance-debit.createdebitcard
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

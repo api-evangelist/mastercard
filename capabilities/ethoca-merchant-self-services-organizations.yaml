@@ -1,0 +1,67 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Ethoca Merchant Self Services — Organizations
+  description: 'Mastercard Ethoca Merchant Self Services — Organizations. 1 operations. Lead operation: Mastercard Get Details
+    of Organization Profiles.. Self-contained Naftiko capability covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Organizations
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: ethoca-merchant-self-services-organizations
+    baseUri: https://api.ethocaweb.com/ethoca/merchant-self-services
+    description: Mastercard Ethoca Merchant Self Services — Organizations business capability. Self-contained, no shared references.
+    resources:
+    - name: alerts-merchants-org-profiles
+      path: /alerts/merchants/org-profiles
+      operations:
+      - name: getalertsorgprofiles
+        method: GET
+        description: Mastercard Get Details of Organization Profiles.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+  exposes:
+  - type: rest
+    namespace: ethoca-merchant-self-services-organizations-rest
+    port: 8080
+    description: REST adapter for Mastercard Ethoca Merchant Self Services — Organizations. One Spectral-compliant resource
+      per consumed operation, prefixed with /v1.
+    resources:
+    - path: /v1/alerts/merchants/org-profiles
+      name: alerts-merchants-org-profiles
+      description: REST surface for alerts-merchants-org-profiles.
+      operations:
+      - method: GET
+        name: getalertsorgprofiles
+        description: Mastercard Get Details of Organization Profiles.
+        call: ethoca-merchant-self-services-organizations.getalertsorgprofiles
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: ethoca-merchant-self-services-organizations-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Ethoca Merchant Self Services — Organizations. One tool per consumed operation,
+      routed inline through this capability's consumes block.
+    tools:
+    - name: mastercard-get-details-organization-profiles
+      description: Mastercard Get Details of Organization Profiles.
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: ethoca-merchant-self-services-organizations.getalertsorgprofiles
+      outputParameters:
+      - type: object
+        mapping: $.

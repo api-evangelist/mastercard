@@ -1,0 +1,77 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Doconomy Aland Index — Transaction
+  description: 'Mastercard Doconomy Aland Index — Transaction. 1 operations. Lead operation: Mastercard Calculate Transaction
+    Footprints. Self-contained Naftiko capability covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Transaction
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: doconomy-aland-index-transaction
+    baseUri: https://sandbox.api.mastercard.com/doconomy
+    description: Mastercard Doconomy Aland Index — Transaction business capability. Self-contained, no shared references.
+    resources:
+    - name: transaction-footprints
+      path: /transaction-footprints
+      operations:
+      - name: footprintsbytransactiondata
+        method: POST
+        description: Mastercard Calculate Transaction Footprints
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+  exposes:
+  - type: rest
+    namespace: doconomy-aland-index-transaction-rest
+    port: 8080
+    description: REST adapter for Mastercard Doconomy Aland Index — Transaction. One Spectral-compliant resource per consumed
+      operation, prefixed with /v1.
+    resources:
+    - path: /v1/transaction-footprints
+      name: transaction-footprints
+      description: REST surface for transaction-footprints.
+      operations:
+      - method: POST
+        name: footprintsbytransactiondata
+        description: Mastercard Calculate Transaction Footprints
+        call: doconomy-aland-index-transaction.footprintsbytransactiondata
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: doconomy-aland-index-transaction-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Doconomy Aland Index — Transaction. One tool per consumed operation, routed inline
+      through this capability's consumes block.
+    tools:
+    - name: mastercard-calculate-transaction-footprints
+      description: Mastercard Calculate Transaction Footprints
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: doconomy-aland-index-transaction.footprintsbytransactiondata
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

@@ -1,0 +1,68 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Standard Currency Conversion Calculator — Settlements
+  description: 'Mastercard Standard Currency Conversion Calculator — Settlements. 1 operations. Lead operation: Mastercard
+    Getcurrencyratedata. Self-contained Naftiko capability covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Settlements
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: standard-currency-conversion-calculator-settlements
+    baseUri: https://sandbox.api.mastercard.com/settlement/currencyrate
+    description: Mastercard Standard Currency Conversion Calculator — Settlements business capability. Self-contained, no
+      shared references.
+    resources:
+    - name: settlement-currencies
+      path: /settlement-currencies
+      operations:
+      - name: getcurrencyratedatausingget
+        method: GET
+        description: Mastercard Getcurrencyratedata
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+  exposes:
+  - type: rest
+    namespace: standard-currency-conversion-calculator-settlements-rest
+    port: 8080
+    description: REST adapter for Mastercard Standard Currency Conversion Calculator — Settlements. One Spectral-compliant
+      resource per consumed operation, prefixed with /v1.
+    resources:
+    - path: /v1/settlement-currencies
+      name: settlement-currencies
+      description: REST surface for settlement-currencies.
+      operations:
+      - method: GET
+        name: getcurrencyratedatausingget
+        description: Mastercard Getcurrencyratedata
+        call: standard-currency-conversion-calculator-settlements.getcurrencyratedatausingget
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: standard-currency-conversion-calculator-settlements-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Standard Currency Conversion Calculator — Settlements. One tool per consumed operation,
+      routed inline through this capability's consumes block.
+    tools:
+    - name: mastercard-getcurrencyratedata
+      description: Mastercard Getcurrencyratedata
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: standard-currency-conversion-calculator-settlements.getcurrencyratedatausingget
+      outputParameters:
+      - type: object
+        mapping: $.

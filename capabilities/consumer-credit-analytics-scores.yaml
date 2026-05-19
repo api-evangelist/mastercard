@@ -1,0 +1,82 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Mastercard Consumer Credit Analytics — Scores
+  description: 'Mastercard Consumer Credit Analytics — Scores. 1 operations. Lead operation: Retrieval of Mastercard Transaction-based
+    Credit Scores and Data Insights.. Self-contained Naftiko capability covering one Mastercard business surface.'
+  tags:
+  - Mastercard
+  - Scores
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MASTERCARD_API_KEY: MASTERCARD_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: consumer-credit-analytics-scores
+    baseUri: https://api.mastercard.com/consumer/credit-analytics
+    description: Mastercard Consumer Credit Analytics — Scores business capability. Self-contained, no shared references.
+    resources:
+    - name: scores
+      path: /scores
+      operations:
+      - name: getscores
+        method: POST
+        description: Retrieval of Mastercard Transaction-based Credit Scores and Data Insights.
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    authentication:
+      type: apikey
+      key: api_key
+      value: '{{env.MASTERCARD_API_KEY}}'
+      placement: header
+  exposes:
+  - type: rest
+    namespace: consumer-credit-analytics-scores-rest
+    port: 8080
+    description: REST adapter for Mastercard Consumer Credit Analytics — Scores. One Spectral-compliant resource per consumed
+      operation, prefixed with /v1.
+    resources:
+    - path: /v1/scores
+      name: scores
+      description: REST surface for scores.
+      operations:
+      - method: POST
+        name: getscores
+        description: Retrieval of Mastercard Transaction-based Credit Scores and Data Insights.
+        call: consumer-credit-analytics-scores.getscores
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: consumer-credit-analytics-scores-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Mastercard Consumer Credit Analytics — Scores. One tool per consumed operation, routed inline
+      through this capability's consumes block.
+    tools:
+    - name: retrieval-mastercard-transaction-based-credit
+      description: Retrieval of Mastercard Transaction-based Credit Scores and Data Insights.
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: consumer-credit-analytics-scores.getscores
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
