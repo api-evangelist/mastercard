@@ -1,0 +1,935 @@
+"""
+Conceptual GraphQL schema for Mastercard developer APIs.
+Derived from https://developer.mastercard.com/documentation
+Not an official Mastercard product. Covers transaction processing,
+card management, tokenization, payments, FX, 3DS, fraud/risk,
+open banking, identity, and digital commerce capabilities.
+"""
+
+# ─── Scalars ──────────────────────────────────────────────────────────────────
+
+scalar DateTime
+scalar Date
+scalar Decimal
+scalar JSON
+scalar ISO4217
+scalar ISO3166
+scalar URI
+
+# ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum TransactionType {
+  PURCHASE
+  CASH_ADVANCE
+  REFUND
+  REVERSAL
+  BALANCE_INQUIRY
+  TRANSFER
+  PAYMENT
+  QUASI_CASH
+}
+
+enum TransactionStatusCode {
+  APPROVED
+  DECLINED
+  PENDING
+  REVERSED
+  VOIDED
+  SETTLED
+  CLEARED
+  ERROR
+}
+
+enum AuthorizationResponseCode {
+  APPROVED
+  DECLINED_INSUFFICIENT_FUNDS
+  DECLINED_STOLEN_CARD
+  DECLINED_INVALID_CARD
+  DECLINED_EXPIRED_CARD
+  DECLINED_FRAUD
+  DECLINED_DO_NOT_HONOR
+  REFERRAL
+  PICK_UP_CARD
+  ERROR
+}
+
+enum CardStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+  EXPIRED
+  LOST
+  STOLEN
+  CLOSED
+}
+
+enum CardBrand {
+  MASTERCARD
+  MAESTRO
+  CIRRUS
+  DEBIT_MASTERCARD
+}
+
+enum TokenStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum TokenRequestorType {
+  ISSUER
+  MERCHANT
+  WALLET_PROVIDER
+  PAYMENT_GATEWAY
+}
+
+enum PaymentStatus {
+  INITIATED
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REVERSED
+}
+
+enum RiskDecision {
+  APPROVE
+  DECLINE
+  REVIEW
+  CHALLENGE
+}
+
+enum ThreeDSVersion {
+  V1
+  V2_1
+  V2_2
+}
+
+enum AuthenticationStatus {
+  AUTHENTICATED
+  NOT_AUTHENTICATED
+  ATTEMPTED
+  UNAVAILABLE
+  REJECTED
+}
+
+enum OpenBankingAccountType {
+  CHECKING
+  SAVINGS
+  CREDIT_CARD
+  LOAN
+  INVESTMENT
+  PENSION
+}
+
+enum IdentityVerificationStatus {
+  VERIFIED
+  UNVERIFIED
+  PENDING
+  FAILED
+}
+
+enum CurrencyConversionType {
+  DCC
+  MCC
+  SPOT
+}
+
+enum MerchantCategoryCode {
+  AIRLINES
+  AUTO_RENTAL
+  HOTELS
+  RESTAURANTS
+  RETAIL_STORES
+  GAS_STATIONS
+  GROCERY_STORES
+  PHARMACIES
+  UTILITIES
+  GOVERNMENT_SERVICES
+  HEALTHCARE
+  ECOMMERCE
+  FINANCIAL_SERVICES
+  OTHER
+}
+
+# ─── Address ──────────────────────────────────────────────────────────────────
+
+type Address {
+  line1: String
+  line2: String
+  city: String
+  state: String
+  postalCode: String
+  countryCode: ISO3166
+}
+
+# ─── Transaction ──────────────────────────────────────────────────────────────
+
+type Transaction {
+  transactionId: ID!
+  referenceNumber: String
+  type: TransactionType!
+  status: TransactionStatusCode!
+  amount: Decimal!
+  currency: Currency!
+  localAmount: Decimal
+  localCurrency: Currency
+  authorization: Authorization
+  clearing: Clearing
+  settlement: Settlement
+  card: Card
+  merchant: Merchant
+  merchantLocation: MerchantLocation
+  risk: Risk
+  threeDSData: Card3DSData
+  paymentToken: PaymentToken
+  initiatedAt: DateTime!
+  processedAt: DateTime
+  settledAt: DateTime
+  metadata: JSON
+}
+
+type TransactionStatus {
+  transactionId: ID!
+  status: TransactionStatusCode!
+  responseCode: String
+  responseMessage: String
+  authCode: String
+  arn: String
+  updatedAt: DateTime!
+}
+
+type TransactionConnection {
+  edges: [TransactionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type TransactionEdge {
+  node: Transaction!
+  cursor: String!
+}
+
+# ─── Authorization ────────────────────────────────────────────────────────────
+
+type Authorization {
+  authorizationId: ID!
+  transactionId: ID
+  responseCode: AuthorizationResponseCode!
+  authCode: String
+  approvedAmount: Decimal
+  currency: Currency
+  card: Card
+  merchant: Merchant
+  avsResult: String
+  cvvResult: String
+  risk: Risk
+  threeDSData: Card3DSData
+  requestedAt: DateTime!
+  respondedAt: DateTime
+  expiresAt: DateTime
+  partialApproval: Boolean
+  metadata: JSON
+}
+
+# ─── Clearing ─────────────────────────────────────────────────────────────────
+
+type Clearing {
+  clearingId: ID!
+  transactionId: ID!
+  authorizationId: ID
+  amount: Decimal!
+  currency: Currency!
+  feeAmount: Decimal
+  interchangeAmount: Decimal
+  merchant: Merchant
+  clearedAt: DateTime!
+  settlementDate: Date
+}
+
+# ─── Settlement ───────────────────────────────────────────────────────────────
+
+type Settlement {
+  settlementId: ID!
+  clearingId: ID!
+  amount: Decimal!
+  currency: Currency!
+  netAmount: Decimal
+  feeAmount: Decimal
+  interchangeAmount: Decimal
+  settledAt: DateTime!
+  settlementBatch: String
+  acquirerBin: String
+}
+
+# ─── Card ─────────────────────────────────────────────────────────────────────
+
+type Card {
+  cardId: ID!
+  maskedPan: String!
+  last4: String!
+  brand: CardBrand!
+  status: CardStatus!
+  expiryMonth: Int!
+  expiryYear: Int!
+  cardAccount: CardAccount
+  cardholder: Cardholder
+  tokens: [PaymentToken!]
+  issuedAt: Date
+  activatedAt: DateTime
+  billingAddress: Address
+  metadata: JSON
+}
+
+type CardAccount {
+  accountId: ID!
+  accountNumber: String
+  accountType: OpenBankingAccountType
+  cards: [Card!]
+  cardholder: Cardholder
+  balance: Decimal
+  availableCredit: Decimal
+  currency: Currency
+  openedAt: Date
+  status: CardStatus!
+  serviceProfile: ServiceProfile
+}
+
+type Cardholder {
+  cardholderId: ID!
+  firstName: String!
+  lastName: String!
+  email: String
+  phone: String
+  dateOfBirth: Date
+  address: Address
+  identity: Identity
+  cards: [Card!]
+  accounts: [CardAccount!]
+  consumerVault: ConsumerVault
+}
+
+# ─── Payment Methods ──────────────────────────────────────────────────────────
+
+type PaymentMethod {
+  paymentMethodId: ID!
+  type: String!
+  card: Card
+  paymentToken: PaymentToken
+  accountInfo: AccountInfo
+  cardholder: Cardholder
+  isDefault: Boolean!
+  addedAt: DateTime!
+  metadata: JSON
+}
+
+# ─── Tokens ───────────────────────────────────────────────────────────────────
+
+type Token {
+  tokenId: ID!
+  tokenValue: String!
+  tokenReferenceId: String
+  status: TokenStatus!
+  requestorType: TokenRequestorType
+  card: Card
+  createdAt: DateTime!
+  updatedAt: DateTime
+  expiresAt: DateTime
+}
+
+type PaymentToken {
+  tokenId: ID!
+  tokenUniqueReference: String!
+  tokenValue: String!
+  status: TokenStatus!
+  requestor: TokenRequestorType
+  card: Card
+  connectedDeviceTokens: [ConnectedDeviceToken!]
+  createdAt: DateTime!
+  updatedAt: DateTime
+  expiresAt: DateTime
+  metadata: JSON
+}
+
+type ConnectedDeviceToken {
+  deviceTokenId: ID!
+  paymentToken: PaymentToken!
+  deviceId: String!
+  deviceName: String
+  deviceType: String
+  status: TokenStatus!
+  provisionedAt: DateTime!
+  lastUsedAt: DateTime
+}
+
+type ProcessorToken {
+  processorTokenId: ID!
+  token: String!
+  processorId: String!
+  card: Card
+  paymentAccountRef: PaymentAccountRef
+  status: TokenStatus!
+  createdAt: DateTime!
+}
+
+# ─── Payments ─────────────────────────────────────────────────────────────────
+
+type SendPayment {
+  paymentId: ID!
+  status: PaymentStatus!
+  senderAccount: CardAccount
+  receiverCard: Card
+  amount: Decimal!
+  currency: Currency!
+  fxQuote: FXQuote
+  p2p: P2P
+  remittance: RemittancePayment
+  initiatedAt: DateTime!
+  completedAt: DateTime
+  referenceId: String
+  metadata: JSON
+}
+
+type SimplifyTransaction {
+  transactionId: ID!
+  amount: Decimal!
+  currency: Currency!
+  card: Card
+  merchant: Merchant
+  status: PaymentStatus!
+  description: String
+  createdAt: DateTime!
+  settledAt: DateTime
+  receiptUrl: URI
+  metadata: JSON
+}
+
+type P2P {
+  p2pId: ID!
+  senderCard: Card!
+  receiverCard: Card!
+  amount: Decimal!
+  currency: Currency!
+  status: PaymentStatus!
+  message: String
+  initiatedAt: DateTime!
+  completedAt: DateTime
+}
+
+type RemittancePayment {
+  remittanceId: ID!
+  senderCard: Card!
+  receiverAccount: AccountInfo!
+  sendAmount: Decimal!
+  sendCurrency: Currency!
+  receiveAmount: Decimal!
+  receiveCurrency: Currency!
+  fxQuote: FXQuote!
+  status: PaymentStatus!
+  purposeCode: String
+  initiatedAt: DateTime!
+  expectedDelivery: Date
+  completedAt: DateTime
+}
+
+# ─── Currency & FX ────────────────────────────────────────────────────────────
+
+type Currency {
+  code: ISO4217!
+  name: String!
+  symbol: String
+  decimalPlaces: Int!
+  numericCode: String
+}
+
+type FXQuote {
+  quoteId: ID!
+  sourceCurrency: Currency!
+  targetCurrency: Currency!
+  rate: Decimal!
+  inverseRate: Decimal!
+  conversionType: CurrencyConversionType!
+  marginPercent: Decimal
+  validUntil: DateTime!
+  requestedAt: DateTime!
+}
+
+type ConversionRate {
+  conversionRateId: ID!
+  sourceCurrency: Currency!
+  targetCurrency: Currency!
+  rate: Decimal!
+  date: Date!
+  source: String
+}
+
+# ─── 3-D Secure ───────────────────────────────────────────────────────────────
+
+type ThreeDS {
+  threeDSId: ID!
+  version: ThreeDSVersion!
+  authenticationStatus: AuthenticationStatus!
+  eci: String
+  cavv: String
+  xid: String
+  dsTransactionId: String
+  acsTransactionId: String
+  authenticationValue: String
+  card: Card
+  merchant: Merchant
+  requestedAt: DateTime!
+  completedAt: DateTime
+  acsData: ACS
+  directoryData: Directory
+}
+
+type ACS {
+  acsId: ID!
+  acsUrl: URI
+  acsTransactionId: String
+  acsSignedContent: String
+  acsChallengeMandated: Boolean
+  challengeCompletionIndicator: String
+  authenticationStatus: AuthenticationStatus
+}
+
+type Directory {
+  directoryServerTransactionId: String!
+  directoryServerName: String
+  acsUrl: URI
+  threeDSServerTransactionId: String
+  messageVersion: String
+  protocolVersion: String
+}
+
+type Card3DSData {
+  card3DSId: ID!
+  eci: String
+  cavv: String
+  xid: String
+  threeDSVersion: ThreeDSVersion
+  authenticationStatus: AuthenticationStatus
+  dsTransactionId: String
+  pareStatus: String
+  ucafIndicator: String
+  ucafData: String
+}
+
+# ─── Click to Pay / SRC ───────────────────────────────────────────────────────
+
+type SRCInitiator {
+  srcInitiatorId: ID!
+  srcClientId: String!
+  dpaId: String
+  dpaName: String
+  merchant: Merchant
+  supportedNetworks: [CardBrand!]
+  clickToPayProfile: ClickToPayProfile
+}
+
+type ClickToPayProfile {
+  profileId: ID!
+  srcCorrelationId: String
+  maskedConsumer: MaskedConsumer
+  cards: [Card!]
+  preferredCard: Card
+  lastUsedAt: DateTime
+}
+
+type MaskedConsumer {
+  maskedEmail: String
+  maskedMobileNumber: String
+  firstName: String
+  lastName: String
+}
+
+# ─── Risk & Fraud ─────────────────────────────────────────────────────────────
+
+type Risk {
+  riskId: ID!
+  transactionId: ID
+  fraudScore: FraudScore
+  decisionIntelligence: DecisionIntelligence
+  decision: RiskDecision!
+  decisionReasons: [String!]
+  processedAt: DateTime!
+}
+
+type DecisionIntelligence {
+  diId: ID!
+  score: Int!
+  scoreReason: String
+  recommendation: RiskDecision!
+  model: String
+  modelVersion: String
+  features: JSON
+  evaluatedAt: DateTime!
+}
+
+type FraudScore {
+  fraudScoreId: ID!
+  score: Int!
+  reason: String
+  riskLevel: String
+  model: String
+  version: String
+  calculatedAt: DateTime!
+}
+
+type Security {
+  securityId: ID!
+  avsResult: String
+  cvvResult: String
+  pin: Boolean
+  threeDSAuthenticated: Boolean
+  fraudIndicators: [String!]
+  deviceFingerprint: String
+}
+
+# ─── Auth & Identity ──────────────────────────────────────────────────────────
+
+type Auth {
+  authId: ID!
+  clientId: String!
+  scopes: [String!]!
+  accessToken: String
+  tokenType: String
+  expiresIn: Int
+  issuedAt: DateTime!
+  expiresAt: DateTime!
+}
+
+type Identity {
+  identityId: ID!
+  verificationStatus: IdentityVerificationStatus!
+  firstName: String
+  lastName: String
+  dateOfBirth: Date
+  governmentId: String
+  email: String
+  phone: String
+  address: Address
+  verifiedAt: DateTime
+  kycLevel: String
+  documents: [IdentityDocument!]
+}
+
+type IdentityDocument {
+  documentId: ID!
+  type: String!
+  number: String
+  issuingCountry: ISO3166
+  issuedAt: Date
+  expiresAt: Date
+  verified: Boolean!
+}
+
+# ─── Open Banking ─────────────────────────────────────────────────────────────
+
+type OpenBanking {
+  openBankingId: ID!
+  consentId: String!
+  accountInfo: AccountInfo
+  balanceInquiry: BalanceInquiry
+  paymentAccountRef: PaymentAccountRef
+  institution: FinancialInstitution
+  scopes: [String!]!
+  consentGrantedAt: DateTime!
+  consentExpiresAt: DateTime
+  lastAccessedAt: DateTime
+}
+
+type AccountInfo {
+  accountInfoId: ID!
+  accountType: OpenBankingAccountType!
+  maskedAccountNumber: String
+  routingNumber: String
+  iban: String
+  bic: String
+  currency: Currency
+  institution: FinancialInstitution
+  holder: Cardholder
+  openedAt: Date
+  status: String
+}
+
+type BalanceInquiry {
+  inquiryId: ID!
+  account: AccountInfo!
+  availableBalance: Decimal!
+  currentBalance: Decimal!
+  pendingAmount: Decimal
+  currency: Currency!
+  asOf: DateTime!
+  creditLimit: Decimal
+  outstandingBalance: Decimal
+}
+
+type PaymentAccountRef {
+  paymentAccountReferenceId: ID!
+  par: String!
+  card: Card
+  processorToken: ProcessorToken
+  issuedAt: DateTime!
+}
+
+type FinancialInstitution {
+  institutionId: ID!
+  name: String!
+  bic: String
+  routingNumber: String
+  country: ISO3166
+  openBankingSupported: Boolean!
+}
+
+# ─── Merchant ─────────────────────────────────────────────────────────────────
+
+type Merchant {
+  merchantId: ID!
+  name: String!
+  dba: String
+  mcc: MerchantCategoryCode!
+  acquirerBin: String
+  merchantNumber: String
+  locations: [MerchantLocation!]
+  address: Address
+  website: URI
+  acceptedBrands: [CardBrand!]
+  registeredAt: Date
+}
+
+type MerchantLocation {
+  locationId: ID!
+  merchant: Merchant!
+  name: String
+  address: Address!
+  latitude: Decimal
+  longitude: Decimal
+  terminalId: String
+  isOnline: Boolean!
+  openHours: String
+  phone: String
+}
+
+# ─── Service Profile & Consumer Vault ────────────────────────────────────────
+
+type ServiceProfile {
+  profileId: ID!
+  accountId: ID!
+  services: [String!]!
+  tier: String
+  features: JSON
+  enrolledAt: DateTime!
+  updatedAt: DateTime
+}
+
+type ConsumerVault {
+  vaultId: ID!
+  cardholder: Cardholder!
+  storedCards: [Card!]
+  storedAccounts: [AccountInfo!]
+  defaultPaymentMethod: PaymentMethod
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+# ─── Pagination ───────────────────────────────────────────────────────────────
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+# ─── Query ────────────────────────────────────────────────────────────────────
+
+type Query {
+  # Transactions
+  transaction(transactionId: ID!): Transaction
+  transactions(
+    cardId: ID
+    merchantId: ID
+    from: DateTime
+    to: DateTime
+    status: TransactionStatusCode
+    type: TransactionType
+    first: Int
+    after: String
+  ): TransactionConnection!
+  transactionStatus(transactionId: ID!): TransactionStatus
+
+  # Authorization
+  authorization(authorizationId: ID!): Authorization
+
+  # Cards
+  card(cardId: ID!): Card
+  cardAccount(accountId: ID!): CardAccount
+  cardholder(cardholderId: ID!): Cardholder
+
+  # Tokens
+  token(tokenId: ID!): Token
+  paymentToken(tokenId: ID!): PaymentToken
+  processorToken(processorTokenId: ID!): ProcessorToken
+
+  # Payments
+  sendPayment(paymentId: ID!): SendPayment
+  simplifyTransaction(transactionId: ID!): SimplifyTransaction
+  p2p(p2pId: ID!): P2P
+  remittancePayment(remittanceId: ID!): RemittancePayment
+
+  # FX
+  fxQuote(sourceCurrency: ISO4217!, targetCurrency: ISO4217!, amount: Decimal!): FXQuote
+  conversionRate(sourceCurrency: ISO4217!, targetCurrency: ISO4217!, date: Date): ConversionRate
+  currencies: [Currency!]!
+
+  # 3DS
+  threeDS(threeDSId: ID!): ThreeDS
+
+  # Click to Pay
+  clickToPayProfile(profileId: ID!): ClickToPayProfile
+  srcInitiator(srcInitiatorId: ID!): SRCInitiator
+
+  # Risk
+  risk(riskId: ID!): Risk
+  fraudScore(fraudScoreId: ID!): FraudScore
+  decisionIntelligence(diId: ID!): DecisionIntelligence
+
+  # Identity
+  identity(identityId: ID!): Identity
+
+  # Open Banking
+  openBanking(openBankingId: ID!): OpenBanking
+  accountInfo(accountInfoId: ID!): AccountInfo
+  balanceInquiry(accountInfoId: ID!): BalanceInquiry
+  paymentAccountRef(paymentAccountReferenceId: ID!): PaymentAccountRef
+
+  # Merchants
+  merchant(merchantId: ID!): Merchant
+  merchantLocation(locationId: ID!): MerchantLocation
+  merchantsByCategory(mcc: MerchantCategoryCode!, country: ISO3166, first: Int, after: String): [Merchant!]!
+
+  # Consumer Vault
+  consumerVault(vaultId: ID!): ConsumerVault
+  serviceProfile(profileId: ID!): ServiceProfile
+}
+
+# ─── Mutation ─────────────────────────────────────────────────────────────────
+
+input AuthorizeTransactionInput {
+  cardId: ID!
+  merchantId: ID!
+  amount: Decimal!
+  currencyCode: ISO4217!
+  cvv: String
+  pin: String
+  threeDSData: Card3DSDataInput
+}
+
+input Card3DSDataInput {
+  eci: String
+  cavv: String
+  xid: String
+  threeDSVersion: ThreeDSVersion
+  dsTransactionId: String
+}
+
+input SendPaymentInput {
+  senderCardId: ID!
+  receiverCardId: ID!
+  amount: Decimal!
+  currencyCode: ISO4217!
+  message: String
+}
+
+input RemittancePaymentInput {
+  senderCardId: ID!
+  receiverAccountId: ID!
+  sendAmount: Decimal!
+  sendCurrencyCode: ISO4217!
+  targetCurrencyCode: ISO4217!
+  purposeCode: String
+  fxQuoteId: ID
+}
+
+input ProvisionTokenInput {
+  cardId: ID!
+  requestorType: TokenRequestorType!
+  deviceId: String
+  deviceName: String
+}
+
+input InitiateThreeDSInput {
+  cardId: ID!
+  merchantId: ID!
+  amount: Decimal!
+  currencyCode: ISO4217!
+  challengeWindowSize: String
+  browserInfo: JSON
+}
+
+input CreateCardholderInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String
+  dateOfBirth: Date
+  address: AddressInput!
+}
+
+input AddressInput {
+  line1: String!
+  line2: String
+  city: String!
+  state: String
+  postalCode: String!
+  countryCode: ISO3166!
+}
+
+input EnrollConsumerVaultInput {
+  cardholderId: ID!
+  cardIds: [ID!]
+  accountIds: [ID!]
+}
+
+type Mutation {
+  # Authorization
+  authorizeTransaction(input: AuthorizeTransactionInput!): Authorization!
+  reverseAuthorization(authorizationId: ID!): Authorization!
+
+  # Payments
+  sendPayment(input: SendPaymentInput!): SendPayment!
+  initiateRemittance(input: RemittancePaymentInput!): RemittancePayment!
+  cancelPayment(paymentId: ID!): SendPayment!
+
+  # Tokens
+  provisionToken(input: ProvisionTokenInput!): PaymentToken!
+  suspendToken(tokenId: ID!): PaymentToken!
+  resumeToken(tokenId: ID!): PaymentToken!
+  deleteToken(tokenId: ID!): PaymentToken!
+
+  # 3DS
+  initiateThreeDS(input: InitiateThreeDSInput!): ThreeDS!
+  completeThreeDSChallenge(threeDSId: ID!, challengeData: JSON!): ThreeDS!
+
+  # Cardholders
+  createCardholder(input: CreateCardholderInput!): Cardholder!
+  updateCardholder(cardholderId: ID!, input: CreateCardholderInput!): Cardholder!
+
+  # Consumer Vault
+  enrollConsumerVault(input: EnrollConsumerVaultInput!): ConsumerVault!
+  addCardToVault(vaultId: ID!, cardId: ID!): ConsumerVault!
+  removeCardFromVault(vaultId: ID!, cardId: ID!): ConsumerVault!
+  setDefaultPaymentMethod(vaultId: ID!, paymentMethodId: ID!): ConsumerVault!
+}
+
+# ─── Subscription ─────────────────────────────────────────────────────────────
+
+type Subscription {
+  transactionStatusChanged(transactionId: ID!): TransactionStatus!
+  paymentStatusChanged(paymentId: ID!): SendPayment!
+  fraudAlertRaised(cardId: ID!): Risk!
+  tokenStatusChanged(tokenId: ID!): PaymentToken!
+  authorizationReceived(merchantId: ID!): Authorization!
+}
