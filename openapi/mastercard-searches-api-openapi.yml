@@ -1,0 +1,3808 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Searches API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Searches
+paths:
+  /benefits/searches:
+    post:
+      tags:
+      - Searches
+      description: Send cardholder information and a date, get the benefits that the cardholder had for that date. If no date is provided the current one is used.
+      summary: Search benefits
+      operationId: searchBenefits
+      requestBody:
+        $ref: '#/components/requestBodies/BenefitsSearch'
+      responses:
+        '200':
+          $ref: '#/components/responses/SearchBenefits'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /products/searches:
+    post:
+      tags:
+      - Searches
+      description: Returns the product information using the card number provided for the requested date. If no date is provided, then current date will be used.
+      summary: Search products
+      operationId: searchProducts
+      requestBody:
+        $ref: '#/components/requestBodies/ProductSearch'
+      responses:
+        '200':
+          $ref: '#/components/responses/SearchProducts'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /bin-ranges/account-searches:
+    post:
+      tags:
+      - Searches
+      summary: Search by 6 - 8 Digit BINs, or up to the 11th digit of an account range
+      description: Find a specific account range by providing an 8 digit BIN, or up to 11 digits of an account range
+      requestBody:
+        $ref: '#/components/requestBodies/BinResourceSearchByAccountRangeRequest'
+      operationId: search-by-account-range-resources
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountRangeSearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/NotAuthorizedErrorResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundErrorResponse'
+  /donors/{donor_id}/cards/searches:
+    post:
+      tags:
+      - Searches
+      summary: Search Card API
+      description: Search card by pan or user id passed. Entire request body should be encrypted.
+      operationId: searchCardUsingPOST
+      parameters:
+      - $ref: '#/components/parameters/ClientId'
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/ProgramId'
+      - $ref: '#/components/parameters/Donor'
+      requestBody:
+        $ref: '#/components/requestBodies/SearchCard'
+      responses:
+        '200':
+          $ref: '#/components/responses/DonateGetAllCards'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      deprecated: false
+  /user-profiles/identity-searches:
+    post:
+      tags:
+      - Searches
+      responses:
+        '200':
+          $ref: '#/components/responses/IdentitySearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: "Retrieve decrypted identities along with rotated PDS to present the user\nwith the registered identity in the TP app. Does not require a minimum authentication standard.   \n**This API is mandatory.**\n"
+      summary: View an Identity
+      operationId: retrieveIdentities
+      parameters:
+      - $ref: '#/components/parameters/XUserIdentityParameter'
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/IdentitySearchRequest'
+  /user-account-activity-searches:
+    post:
+      tags:
+      - Searches
+      responses:
+        '200':
+          $ref: '#/components/responses/UserAccountActivitySearchesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: 'Retrieve decrypted user activities and present them to the user in the
+
+        TP app. Does not require a minimum authentication standard.
+
+        **This API is mandatory.**
+
+        '
+      summary: View identity lifecycle activities which have occurred in a time period.
+      operationId: retrieveUserActivities
+      parameters:
+      - $ref: '#/components/parameters/XUserIdentityParameter'
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/UserAccountActivitySearchRequest'
+  /rp-activity-searches:
+    post:
+      tags:
+      - Searches
+      responses:
+        '200':
+          $ref: '#/components/responses/RPActivitySearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: 'Retrieve decrypted RP activities and present them to the user in the TP
+
+        app. Does not require a minimum authentication standard.
+
+        **This API is mandatory.**
+
+        '
+      summary: View identity claim sharing activities which have occurred in a time period.
+      operationId: searchRpActivity
+      parameters:
+      - $ref: '#/components/parameters/XUserIdentityParameter'
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/RPActivitySearchRequest'
+  /merchants/searches:
+    post:
+      tags:
+      - Searches
+      summary: Allows registered partners to search merchant participation information.
+      description: 'Allows registered partners to search merchant objects, enabled for Acquirers and Installment Payment Providers (IPP). <br><br> Additionally, customers can search MAID merchant based on maid. <br><br> At least one parameter is required in the request. <br><br> For previously onboarded customers to API both `nonMerchantNegotiatedParticipation` and  `optIn` will be visible. The field `nonMerchantNegotiatedParticipation` will be deprecated. <br><br> For previously onboarded customers to API both `acceptorIds` and  `maids` will be visible. The field `acceptorIds` will be deprecated.
+
+        '
+      operationId: postMerchantSearches
+      parameters:
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/limit'
+      requestBody:
+        $ref: '#/components/requestBodies/MerchantSearchParameters'
+      responses:
+        '200':
+          $ref: '#/components/responses/MerchantSearches'
+        '400':
+          $ref: '#/components/responses/BadRequestError_3'
+        '401':
+          $ref: '#/components/responses/AccountNotRegisteredError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '406':
+          $ref: '#/components/responses/NotAcceptableHeader'
+  /merchants/mids/searches:
+    post:
+      tags:
+      - Searches
+      summary: Allows registered partners (Acquirers only) to search only specific merchant participation information.
+      description: 'Allows registered partners to search mids for a given merchant. A combination of `merchantLegalName`, `countryCode`, and `acquirerICA` is required in the request. <br><br> For previously onboarded customers to API both `nonMerchantNegotiatedParticipation` and  `optIn` will be visible. The field `nonMerchantNegotiatedParticipation` will be deprecated.
+
+        '
+      operationId: postMerchantMidSearches
+      parameters:
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/limit'
+      requestBody:
+        $ref: '#/components/requestBodies/MerchantMidSearchParameters'
+      responses:
+        '200':
+          $ref: '#/components/responses/MidDetailsPage'
+        '400':
+          $ref: '#/components/responses/BadRequestError_3'
+        '401':
+          $ref: '#/components/responses/AccountNotRegisteredError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '406':
+          $ref: '#/components/responses/NotAcceptableHeader'
+  /searches:
+    post:
+      tags:
+      - Searches
+      summary: Mastercard Get a List of Atm Details
+      description: Returns detailed information on ATMs based on the provided query parameters
+      operationId: getAtms
+      parameters:
+      - $ref: '#/components/parameters/LimitParam'
+      - $ref: '#/components/parameters/OffsetParam'
+      - $ref: '#/components/parameters/DistanceParam'
+      - $ref: '#/components/parameters/DistanceUnitParam'
+      requestBody:
+        $ref: '#/components/requestBodies/AtmSearch'
+      responses:
+        '200':
+          $ref: '#/components/responses/Atms'
+        '400':
+          $ref: '#/components/responses/BadRequestError_4'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_3'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_3'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /claim-searches:
+    post:
+      tags:
+      - Searches
+      summary: Mastercard Retrieve the Claim Status.
+      description: Retrieve the status of an insurance claim for the given claim ID and postal code.
+      operationId: retrieveClaimStatus
+      requestBody:
+        $ref: '#/components/requestBodies/ClaimSearchRef'
+      responses:
+        '200':
+          $ref: '#/components/responses/ClaimStatusRef'
+        '400':
+          $ref: '#/components/responses/ClaimsBadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2_2'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  schemas:
+    Benefits:
+      type: object
+      properties:
+        cardNumber:
+          description: Full card number or BIN number
+          type: string
+          example: '5308780000000000'
+          minLength: 6
+          maxLength: 19
+        effectiveDate:
+          description: Date for which products are to be determined. Defaults to the current date if not provided. Date is in YYYY-MM-DD format.
+          type: string
+          example: '2022-12-15'
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        serviceProviderCode:
+          description: Number that represents the Service Provider of a Benefit
+          type: string
+          example: '01'
+          minLength: 1
+          maxLength: 6
+        productCode:
+          description: The product identifier for a benefit, it is mandatory if a BIN is used
+          type: string
+          example: MCC
+          minLength: 3
+          maxLength: 3
+        benefitCode:
+          type: string
+          maxLength: 3
+          minLength: 3
+          example: WTY
+          description: The unique alpha code assigned for the benefit
+      required:
+      - cardNumber
+    Products:
+      type: object
+      properties:
+        effectiveDate:
+          description: Date for which benefits are to be determined. Defaults to the current date if not provided. Date is in YYYY-MM-DD format
+          type: string
+          example: '2022-12-15'
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        cardNumber:
+          description: Full card number or BIN number
+          type: string
+          example: '5308780000000000'
+          minLength: 6
+          maxLength: 19
+      required:
+      - cardNumber
+    SearchBenefits:
+      type: object
+      properties:
+        data:
+          description: Array of Products
+          type: array
+          items:
+            $ref: '#/components/schemas/Benefit'
+    CustomAttribute:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the custom attribute.
+          example: Discount
+        value:
+          type: string
+          description: value of the custom attribute.
+          example: 10%
+    Benefit:
+      type: object
+      description: "The representation of a benefit provided by Mastercard to the cardholders.  \nThe details of the benefit are represented by means of various properties defined by this object.  \nDepending on the type of benefit, only a subset of these properties will have the values.  \nPlease refer to the examples to know more about the details of the attributes that are available for different benefit types.\n"
+      properties:
+        benefitBundleId:
+          type: string
+          example: 2afd75df-a9f6-407f-bdfb-f24d2532a711
+          description: The unique identifier of the Bundle which the benefit is part of
+          minLength: 36
+          maxLength: 36
+        benefitBundleName:
+          type: string
+          example: US OPT Extended Warranty
+          description: Name of the benefit Bundle which the benefit is part of
+          minLength: 1
+          maxLength: 200
+        benefitServicingId:
+          type: string
+          example: 2afd75df-a9f6-407f-bdfb-f24d2532a711
+          description: Servicing identifier of the benefit
+          minLength: 0
+          maxLength: 36
+        benefitServicingOptions:
+          type: string
+          example: All Claims
+          description: Servicing option which benefit is associated to.
+          minLength: 0
+          maxLength: 100
+        benefitID:
+          type: string
+          example: '2495'
+          description: The unique numeric code of the Benefit
+          minLength: 1
+          maxLength: 6
+        benefitCode:
+          type: string
+          example: WTY
+          description: The three character unique code assigned by Mastercard and used to identify the benefit
+          minLength: 3
+          maxLength: 3
+        benefitName:
+          type: string
+          example: Extended Warranty
+          description: Name of the benefit
+          minLength: 1
+          maxLength: 50
+        macBenefitCategory:
+          type: string
+          example: Shopping
+          description: The category code defined by Mastercard to categorize the benefit
+          minLength: 1
+          maxLength: 100
+        serviceProviderCode:
+          type: string
+          example: 58
+          description: The code assigned for the Service Provider
+          minLength: 1
+          maxLength: 6
+        serviceProviderName:
+          type: string
+          example: US Extended Warranty - Information
+          description: The name of the Service Provider
+          minLength: 1
+          maxLength: 100
+        paymentType:
+          type: string
+          example: MasterCard Pays/ All Cards
+          description: MasterCard Pays vs Issuer Pays
+          minLength: 1
+          maxLength: 255
+        occurBeginTime:
+          type: string
+          example: 0
+          description: "Numeric value of the Insurance policy occurrence begin time.  \nThis information along with the _occurTimeUnit_ identifies the time duration for the policy occurrence to begin.\n"
+        occurEndTime:
+          type: string
+          example: 1
+          description: "Numeric value of the Insurance policy occurrence end time.  \nThis information along with the _occurTimeUnit_ identifies the time duration for the policy occurrence to end.\n"
+        occurTimeUnit:
+          type: string
+          example: Year
+          minLength: 0
+          maxLength: 5
+          description: Unit of measurement for the Occurrence begin time and end time
+        occurMinimumAmount:
+          type: string
+          example: 0
+          description: Minimum amount of claim before policy comes into effect.
+        occurMaximumAmount:
+          type: string
+          example: 19999.99
+          description: Maximum amount policy will pay per claim.
+        occurCurrency:
+          type: string
+          minLength: 0
+          maxLength: 3
+          example: USD
+          pattern: ^[A-Z]{3}$
+          description: The ISO 4217 alpha code of the currency of the policy occurrence minimum and maximum amount.
+        minimumClaimValue:
+          type: string
+          example: 1999.99
+          description: The minimum value for submitting the claim.
+        minimumClaimCurrencyType:
+          type: string
+          example: USD
+          description: The ISO 4217 alpha code of the currency of the minimum claim value.
+          minLength: 0
+          maxLength: 3
+          pattern: ^[A-Z]{3}$
+        occurMisc:
+          type: string
+          example: 0
+          description: Covers miscellaneous coverage issues like return policy and electronic & sport equipment coverage.
+        policyTimeLimit:
+          type: string
+          example: 12
+          description: Length of entire policy. This information along with the _policyTimeUnit_ identifies the duration of the policy.
+        policyTimeUnit:
+          type: string
+          example: Month
+          description: The unit of measurement for the policy time limit.  For example, Days, Months, Years.
+        policyMaximumOccurs:
+          type: string
+          example: 0
+          description: The maximum number of claims within policy time frame.
+        policyMaximumAmount:
+          type: string
+          example: 19999.99
+          description: The maximum amount that the policy will pay when the claim is settled.
+        policyCurrency:
+          type: string
+          example: USD
+          minLength: 0
+          maxLength: 3
+          pattern: ^[A-Z]{3}$
+          description: The ISO 4217 alpha code for the currency of the maximum policy amount.
+        policyRegionRestriction:
+          type: string
+          example: All
+          description: Geographical regions where the policy cover is allowed.
+        coverageType:
+          type: string
+          example: Excess
+          description: The type of coverage, for example,  Primary or Excess.
+        appliesTo:
+          type: string
+          example: Family
+          minLength: 1
+          maxLength: 255
+          description: Identifies the members whom the policy is applicable to. For example, Individual or Family.
+        qualifyingRequirement:
+          type: string
+          example: Recurrent bill payment with eligible MC $50 deductible.
+          description: Identifies any additional requirements for qualifying for the policy coverage.
+        additionalCoverage:
+          type: string
+          example: $300 Baggage Delay
+          description: Any additional coverage, apart from the monetary benefit, that the policy provides.
+        quantity:
+          type: string
+          example: 5
+          minLength: 0
+          description: The count for the number of items
+        quantityType:
+          type: string
+          description: The information to supplement the 'quantity' by providing the additional details like 'Bags' or 'Gigabytes' or 'Tickets' etc.
+          example: Tickets
+        duration:
+          type: string
+          description: Numeric value of the duration of the coverage.
+          example: 20
+        durationTimeIncrement:
+          type: string
+          description: The unit of duration time increment. For example, Day, Hour, Minute, Second etc.
+          example: Hour
+        deductibleValue:
+          type: string
+          description: Applicable deductible value
+          example: 100
+        deductibleCurrencyType:
+          type: string
+          pattern: ^[A-Z]{3}$
+          description: The ISO 4217 alphabetic code for the currency of Applicable deductible value.
+          example: USD
+        numberOfMemberEntitlements:
+          type: string
+          description: Number of member Entitlements. Can be a numeric value or the text 'Unlimited'.
+          example: Unlimited
+        memberEntitlementsFundedBy:
+          type: string
+          description: Information about who funds the member entitlements available as part of the benefit.
+          example: Mastercard
+        numberOfGuestEntitlements:
+          type: string
+          description: Number of guest entitlements.  Can be a numeric value or the text 'Unlimited'.
+          example: 2
+        typeOfGuestEntitlements:
+          type: string
+          description: Type of guest entitlements.
+          example: Each Time
+        guestEntitlementsFundedBy:
+          type: string
+          description: Information about who funds the Guest Entitlements.
+          example: Issuer
+        numberOfSharedMemberAndGuestEntitlements:
+          type: string
+          description: Number of shared member and guest entitlements. Can be a numeric value or the text 'Unlimited'.
+          example: 3
+        sharedMemberAndGuestEntitlementsFundedBy:
+          type: string
+          description: Information about who funds the shared member and guest entitlements.
+          example: Mastercard
+        discountValue:
+          type: string
+          description: Number representing the Applicable discount value.
+          example: 10
+        currency:
+          type: string
+          description: The ISO 4217 alpha code for the currency of Discount value.
+          example: USD
+          pattern: ^[A-Z]{3}$
+        discountType:
+          type: string
+          description: Type of discount.
+          example: basic-car-price
+        interchangeableEntitlement:
+          type: string
+          description: Interchangeable entitlement name.
+          example: FastTrack
+        serviceProviderDealId:
+          type: string
+          description: The unique identifier of the agreement between Mastercard and the Benefit Service Provider with regards to providing the required services for the Benefit offered.
+          example: PPMCOWELBGHUAT
+        airportExperienceCoverage:
+          type: string
+          description: Identifies access limitations on where the benefit can be used.
+          example: Global, Domestic
+        airportExperienceExclusions:
+          type: string
+          description: Airport experience exclusions.
+          example: SAMPLEEXCEPTIONREGION
+        airportExperienceAccessMethod:
+          type: string
+          description: The method or way using which the airport experience can be accessed by the card holder.
+          example: Access with Digital Membership Card (DMC)
+        percentageOff:
+          type: string
+          description: The numeric value of Discount rate percentage.
+          example: 10
+        vendorReference:
+          type: string
+          description: The textual value agreed to by Mastercard and the Service Provider to exchange a needed identifier.
+          example: PPMCOWELBGUK23
+        bundleType:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: Region Specific Set
+          description: Category that benefit belong to
+        benefitEffectiveDate:
+          type: string
+          example: '2022-12-15'
+          pattern: ^\d{4}-\d{2}-\d{2}$
+          description: Date from which the benefit becomes active to the associated product. Date is in YYYY-MM-DD format
+        benefitExpirationDate:
+          type: string
+          example: '2022-12-15'
+          pattern: ^\d{4}-\d{2}-\d{2}$
+          description: Date from which the benefit becomes in active to the associated product. Date is in YYYY-MM-DD format
+        customAttributes:
+          description: Array of custom attributes
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomAttribute'
+    SearchProducts:
+      type: object
+      properties:
+        icaBusinessName:
+          description: Name of Issuer
+          type: string
+          example: Bank Group
+          minLength: 0
+          maxLength: 60
+        icaCode:
+          description: ICA code of the issuer
+          type: string
+          example: '7379'
+        icaRegion:
+          description: The geographical region of card issuer
+          type: string
+          example: US
+          minLength: 2
+          maxLength: 40
+          pattern: '[A-Z]+'
+        icaCountry:
+          description: The country of the card issuer
+          type: string
+          example: USA
+          maxLength: 3
+          minLength: 3
+          pattern: '[A-Z]+'
+        icaState:
+          description: The state of the card issuer
+          type: string
+          example: SOUTH DAKOTA
+          minLength: 0
+          maxLength: 300
+        icaLegalName:
+          description: This is the ICAs Legal name for MPI, MasterCard's Licensing database
+          type: string
+          example: Bank Group, N.A.
+          minLength: 0
+          maxLength: 300
+        parentICACode:
+          description: Code for Parent Issuer
+          type: string
+          example: '7379'
+          minLength: 4
+          maxLength: 9
+        data:
+          description: Array of Products
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+    Product:
+      type: object
+      properties:
+        productCode:
+          description: 3 alpha character code of MasterCard Product. This is required if the BIN or card number has multiple Products associated with it.
+          type: string
+          example: MCC
+          minLength: 3
+          maxLength: 3
+          pattern: ^[A-Z]{3}$
+        productName:
+          description: Name that corresponds to the Mastercard product
+          type: string
+          example: Mixed Product
+          minLength: 1
+          maxLength: 100
+    ErrorWrapper:
+      description: A top level object for errors
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Errors:
+      description: Object that contains the list of errors
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorList:
+      description: The list of errors
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    Error:
+      description: A single error
+      type: object
+      properties:
+        Source:
+          type: string
+          minLength: 0
+          maxLength: 200
+          description: Information about where the error happened
+          example: ELIGIBILITY_BENEFITS_API
+        ReasonCode:
+          type: string
+          minLength: 0
+          maxLength: 200
+          description: An error code
+          example: BAD_REQUEST
+        Description:
+          type: string
+          minLength: 0
+          maxLength: 10000
+          description: A description of the error
+          example: We couldn't handle your request
+        Recoverable:
+          type: boolean
+          description: Indicates if the request can be presented again for processing
+          example: false
+        Details:
+          type: string
+          minLength: 0
+          maxLength: 10000
+          description: More details about the error
+          example: Invalid JSON payload
+    Errors_2:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error_2'
+    SearchByAccountRange:
+      type: object
+      required:
+      - accountRange
+      properties:
+        accountRange:
+          type: number
+          description: The first 8 digits of a card number (without spaces), or up to the 11th digit of an account range
+          minimum: 10000000
+          maximum: 99999999999
+          example: 22293261
+    ErrorResponse:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              $ref: '#/components/schemas/Errors_2'
+    BinResourceArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/BinResource'
+    BinResource:
+      type: object
+      properties:
+        lowAccountRange:
+          type: integer
+          description: The lowest possible account number that would be identified within this authorization account range.
+          minimum: 1111111111111111200
+          maximum: 10000000000000000000
+          example: 5132625400000000000
+        highAccountRange:
+          type: integer
+          description: The highest possible account number that would be identified within this authorization account range.
+          minimum: 1111111111111111200
+          maximum: 10000000000000000000
+          example: 5132625500000000000
+        binNum:
+          type: string
+          description: 'The RAW BIN assigned to the issuer. Can be the value UNKNOWN when the BIN of the account range has not been provdied. '
+          minLength: 6
+          maxLength: 11
+          example: '222899'
+        binLength:
+          type: integer
+          description: The length of the BIN, will be either 6 or 8 (or 0 when the binNumber is unknown)
+          minimum: 0
+          maximum: 8
+          example: 6
+        acceptanceBrand:
+          type: string
+          description: 'Mastercard or other proprietary service mark. Valid values: " MCC (Mastercard�) " DMC (Debit Mastercard�) " M (Maestro�) " CIR (Cirrus�) " PVL (Private Label)'
+          minLength: 1
+          maxLength: 3
+          example: MCC
+        ica:
+          type: string
+          description: Mastercard ICA number associated with this authorization account range in right justified, leading zeros format.
+          minLength: 1
+          maxLength: 11
+          example: '1111'
+        customerName:
+          type: string
+          description: The customer name.
+          minLength: 0
+          maxLength: 300
+          example: FISERV SOLUTIONS
+        country:
+          description: Country of origin for the issuer of the account range. Valuable in e-commerce fraud management to help detect inconsistencies between the IP address of the originating purchase and the cardholder billing address that may warrant additional analysis. When used in conjunction with the Local Use flag, a merchant can identify when a card is being used outside of its intended allowed area of use.
+          type: object
+          properties:
+            code:
+              type: string
+              description: Licensed Country Code of the account range in ISO code format
+              example: 280
+              minLength: 3
+              maxLength: 3
+            alpha3:
+              type: string
+              description: Licensed Country Code of the account range in Alpha-3 format
+              example: USA
+              minLength: 3
+              maxLength: 3
+            name:
+              description: Licensed Country name of the account range in a human readable format
+              example: United States of America
+              type: string
+              minLength: 1
+              maxLength: 200
+        localUse:
+          type: boolean
+          description: Indicates whether cards within the authorization account range may be used outside of the country of issuance. true = The range is intended for domestic use only. false = The range is intended for use outside the country of issuance.
+          example: true
+        authorizationOnly:
+          type: boolean
+          description: Indicates account range is only valid for authorization processing. true = Authorization only. false = Authorization and Clearing. Authorization only account ranges are used for promotional contexts in merchants such as branded rewards cards.
+          example: true
+        productCode:
+          type: string
+          description: The Brand Product Code associated with the account range.
+          minLength: 1
+          maxLength: 3
+          example: MPM
+        productDescription:
+          type: string
+          description: The description of the Brand Product Code named above.
+          minLength: 1
+          maxLength: 200
+          example: MASTERCARD PREPAID CONSUMER INCENTIVE
+        governmentRange:
+          type: boolean
+          description: Identifies if an account range product is a government product.
+          example: true
+        nonReloadableIndicator:
+          type: boolean
+          description: 'Indicates whether the account range is registered as a non-reloadable prepaid card program. Valid values: true = non-reloadable prepaid program false = reloadable prepaid program or non-prepaid program'
+          example: false
+        anonymousPrepaidIndicator:
+          type: string
+          description: "Valid values:\n  A = Anonymous prepaid program and not AMLDS compliant\n  E = Anonymous prepaid program and AMLDS compliant\n  N = Not prepaid or non-anonymous prepaid program/default\n  U = Unknown"
+          minLength: 1
+          maxLength: 1
+          pattern: ^[A|E|N|U]{1}$
+          example: A
+        cardholderCurrencyIndicator:
+          type: string
+          description: "Indicates whether a card is eligible for Dynamic Currency Conversion (DCC) at the point of sale or not. This indicator helps address DCC issues for Travel Prepaid Cards, other \"foreign currency cards\" (e.g. a Swiss bank that issues cards in Euros), and Commercial Cards (where the \"cardholder\" is a corporation and has a travel policy against accepting DCC and the resulting fees). Valid values:\n  C = Do not provide POI currency conversion (or DCC)  corporate client opt-out\n  D = POI currency conversion (or DCC) is permissible for account range per Mastercard Rules\n  T = Do not provide POI currency conversion (or DCC) per Mastercard Rules  travel cards or multi-currency accounts\n  U = Not a Mastercard- branded account range"
+          minLength: 1
+          maxLength: 1
+          example: C
+        billingCurrencyDefault:
+          type: string
+          description: The default currency of the cards in this range in ISO 4217 alphabetic format.
+          minLength: 3
+          maxLength: 3
+          example: USD
+        programName:
+          type: string
+          description: The program name of the affiliate using a BIN within the Issuer Sponsor's account range. This will be the name a customer sees on their card but the Account is actually owner by the Issuer, as shared in the customerName value. Data for this element is only available for prepaid BINs within the healthcare sector and will be null for the majority of account ranges.
+          minLength: 1
+          maxLength: 200
+          example: Alegues
+        vertical:
+          type: string
+          description: The vertical of a prepaid cards in the healthcare sector BIN such as CONSUMER, COMMERCIAL, PUBLIC SECTOR, HEALTHCARE. Data for this element is only available for prepaid BINs within the healthcare sector and will be null for the majority of account ranges.
+          minLength: 1
+          maxLength: 70
+          example: HEALTHCARE
+        fundingSource:
+          type: string
+          description: The funding source of the cards in this range. It can be any one of the following three values; CREDIT, DEBIT, PREPAID
+          minLength: 5
+          maxLength: 7
+          example: CREDIT
+        consumerType:
+          type: string
+          description: The type of customer the cards in this range are targeted at, can be either CONSUMER or CORPORATE. Unlike the vertical parameter, this data is available for all ranges.
+          minLength: 1
+          maxLength: 9
+          example: CONSUMER
+        smartDataEnabled:
+          type: boolean
+          description: Indicates if the issuer has enrolled this account range in Mastercard's Smart Data program. Smart Data provides enriched information about transactions provided by issuers and merchants. If true it means you can connect with the Smart Data team to collect additional insights about transactions within this account range.
+          example: false
+        affiliate:
+          type: string
+          description: When populated this is the name of the issuer on the card. In instances where the BIN is a sponsored BIN the affiliate will be the name of the issuing institution. When this has a value you should use this otherwise pull the customerName value.
+          minLength: 1
+          maxLength: 300
+          example: California Community Bank
+    Error_2:
+      type: object
+      required:
+      - Source
+      - ReasonCode
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application that generated this error. Possible values = GATEWAY/BIN_RESOURCE_SERVICE
+          example: BIN_RESOURCE_SERVICE
+          minLength: 1
+          maxLength: 50
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during transaction processing
+          example: resource.not.found
+          minLength: 1
+          maxLength: 100
+        Description:
+          type: string
+          description: Description of the 'ReasonCode' field with additional details
+          example: The requested resource does not exist
+          minLength: 0
+          maxLength: 500
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying with same value could change the outcome. For example, if the request contains an invalid signature, retrying will never result in a success. However, if the error is related to some unexpected timeout with the service, retrying the call could result in a successful response.
+          example: false
+        Details:
+          type: string
+          description: Could be null, present for backwards compatibility or extra information
+          example: The provided search value does not exist
+          minLength: 0
+          maxLength: 500
+    SearchCard:
+      required:
+      - primaryAccountNumber
+      type: object
+      properties:
+        primaryAccountNumber:
+          type: string
+          description: PAN
+          minLength: 16
+          maxLength: 16
+          example: '5450985888403538'
+      title: SearchCardRequest
+    DonateGetAllCards:
+      type: object
+      properties:
+        items:
+          type: array
+          description: Items
+          items:
+            $ref: '#/components/schemas/DonateCardRetrieve'
+      title: DonateGetAllCardsResponse
+    Error-401:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to authorization failure
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: AUTHENTICATION_FAILED
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: OAuth signatures did not match.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error-403:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to forbidden requests
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of forbidden request.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: INVALID_KEY
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The signing certificate is not valid.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    cardExpiry:
+      type: object
+      properties:
+        month:
+          type: string
+          example: 10
+          minLength: 2
+          maxLength: 2
+          description: Month
+        year:
+          type: string
+          example: 2025
+          minLength: 4
+          maxLength: 4
+          description: Year
+      title: Card Expiry Details
+    Error-404:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to resource not found
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an resource not found.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: NOT_FOUND
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The signing certificate is not valid.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    CardBillingAddress:
+      type: object
+      properties:
+        city:
+          type: string
+          example: Brooklyn
+          minLength: 3
+          maxLength: 20
+          description: Billing Address city
+        countryCode:
+          type: string
+          example: USA
+          minLength: 3
+          maxLength: 3
+          description: Billing Address country code
+        line1:
+          type: string
+          example: 83 Mayfair Street
+          minLength: 3
+          maxLength: 20
+          description: Billing Address line1
+        line2:
+          type: string
+          example: Main Road
+          minLength: 3
+          maxLength: 20
+          description: Billing Address line2
+        line3:
+          type: string
+          example: Snake Hill Ave
+          minLength: 3
+          maxLength: 20
+          description: Billing Address line3
+        postalCode:
+          type: string
+          example: 11235
+          minLength: 5
+          maxLength: 20
+          description: Billing Address postal code
+        state:
+          type: string
+          example: NY
+          minLength: 2
+          maxLength: 20
+          description: Billing Address state
+      title: CardBillingAddress
+    DonateCardRetrieve:
+      type: object
+      properties:
+        billingAddress:
+          $ref: '#/components/schemas/CardBillingAddress'
+        cardAlias:
+          type: string
+          example: CardA
+          minLength: 3
+          maxLength: 30
+          description: The card alias
+        cardId:
+          type: string
+          example: ebee3d81-18d4-409a-8330-73db083f2cfc
+          minLength: 36
+          maxLength: 36
+          description: Card Id (UUID)
+        cardholderName:
+          type: string
+          example: John Doe
+          minLength: 3
+          maxLength: 30
+          description: Cardholder Name
+        cardExpiry:
+          $ref: '#/components/schemas/cardExpiry'
+        paymentNetworkName:
+          type: string
+          example: Mastercard
+          minLength: 3
+          maxLength: 20
+          description: Payment Network Name
+        primaryAccountNumber:
+          type: string
+          example: '5450985888403538'
+          minLength: 16
+          maxLength: 16
+          description: PAN
+        primaryAccountNumberSource:
+          type: string
+          example: CARD_ON_FILE
+          minLength: 3
+          maxLength: 20
+          description: PAN Source
+        primaryAccountNumberSuffix:
+          type: string
+          example: '3538'
+          minLength: 4
+          maxLength: 4
+          description: PAN Suffix
+        status:
+          type: string
+          example: ACTIVE
+          minLength: 5
+          maxLength: 20
+          description: Status
+      title: DonateCardRetrieveResponse
+    Error-500:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to server error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an server issue.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: PROGRAM_ID_NOT_FOUND
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Program id is required as this client is mapped to multiple programs.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error_3:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an error condition.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: DONOR_ID_INVALID
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Invalid donorId, it must be a valid UUID.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: Provided donorId is not valid, Please check and provide valid Unique Id.
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    RPActivitySearch:
+      required:
+      - pds
+      - startIndex
+      - endIndex
+      - userConsent
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        startIndex:
+          type: integer
+          description: Start index of the RP activity.
+          format: int32
+          minimum: 1
+          maximum: 999
+          example: 3
+        endIndex:
+          type: integer
+          description: End index of the RP activity.
+          format: int32
+          minimum: 1
+          maximum: 999
+          example: 10
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    AddressData:
+      type: object
+      properties:
+        addressLine1:
+          type: string
+          description: Address line 1.
+          minLength: 1
+          maxLength: 255
+          example: 36271 GrandRiver Ave
+        addressLine2:
+          type: string
+          description: Address line 2.
+          minLength: 1
+          maxLength: 255
+          example: Building no 2
+        addressZipCode:
+          type: string
+          description: Zip code.
+          minLength: 1
+          maxLength: 255
+          example: 48335
+        addressCity:
+          type: string
+          description: City.
+          minLength: 1
+          maxLength: 255
+          example: Farmington
+        addressSubdivision:
+          type: string
+          description: Subdivision of the user address, possible values include county, state, province, and municipality.
+          minLength: 2
+          maxLength: 2
+          example: MO
+        addressCountry:
+          type: string
+          description: Country provided in the address from the scanned document.
+          minLength: 1
+          maxLength: 255
+          example: USA
+    Selfie:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          example: U29tZSBTdHJpbmc=
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    UserAccountActivitySearch:
+      required:
+      - pds
+      - startIndex
+      - endIndex
+      - userConsent
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        startIndex:
+          type: integer
+          description: Start index of the user account activity.
+          format: int32
+          minimum: 1
+          maximum: 999
+          example: 3
+        endIndex:
+          type: integer
+          description: End index of the user account activity.
+          format: int32
+          minimum: 1
+          maximum: 999
+          example: 10
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    GovtIdDetails:
+      oneOf:
+      - $ref: '#/components/schemas/PassportDetails'
+      - $ref: '#/components/schemas/DriverLicenseDetails'
+    RPActivityItems:
+      required:
+      - rpName
+      - consentType
+      - createdDate
+      - attributesConsented
+      type: object
+      properties:
+        rpName:
+          type: string
+          description: Relying Party name.
+          minLength: 1
+          maxLength: 255
+          example: Toys inc
+        consentType:
+          type: string
+          description: User consent type.
+          minLength: 1
+          maxLength: 10
+          example: OneTime
+        createdDate:
+          type: string
+          description: Date of the event.
+          minLength: 1
+          maxLength: 29
+          example: '2020-01-28T13:16:01.714-05:00'
+        attributesConsented:
+          type: object
+          description: This is the same data structure that is returned to Relying Party.
+          additionalProperties: {}
+          example:
+            passport.firstName: John
+            passport.lastName: Doe
+    PDS:
+      type: string
+      description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
+      pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+      minLength: 1
+      example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    UserAccountActivities:
+      required:
+      - userAccountActivities
+      properties:
+        userAccountActivities:
+          type: array
+          description: User account activity items.
+          items:
+            $ref: '#/components/schemas/UserAccountActivityItems'
+        rotatedPds:
+          type: string
+          description: A rotated PDS is created and returned when the encryption key expires and a new one is generated.
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          minLength: 1
+          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    UserAccountActivityItemContents:
+      required:
+      - value
+      properties:
+        attributeName:
+          type: string
+          description: Name of the updated attribute.
+          minLength: 1
+          maxLength: 255
+          example: legalName
+        previousValue:
+          type: string
+          description: Value before the update.
+          minLength: 1
+          maxLength: 255
+          example: John Doe
+        value:
+          type: string
+          description: Value after the update.
+          minLength: 1
+          maxLength: 255
+          example: John Dow
+        source:
+          type: string
+          description: The source document for the update.
+          minLength: 1
+          maxLength: 29
+          example: passport
+    DateOfBirth:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: '1996-07-10T00:00:00.000Z'
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    MothersName:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: Jane Doe
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    Phone:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: 11234567890
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    DriverLicenseCardNumber:
+      type: string
+      description: Document number.
+      minLength: 1
+      maxLength: 255
+      example: 7435675436
+    UserAccountActivityItems:
+      required:
+      - action
+      - createdDate
+      properties:
+        action:
+          type: string
+          description: Type of the activity, possible values - ["ID Created", "Details Updated", "Add Drivers License", "Add Passport", "Add Health Card", "ID Backup", "ID Restore", "Attribute Deleted"].
+          minLength: 1
+          maxLength: 24
+          example: ID Created
+        createdDate:
+          type: string
+          description: Date of the event.
+          minLength: 1
+          maxLength: 29
+          example: '2020-01-28T13:16:01.714-05:00'
+        values:
+          type: array
+          description: Details of the activity.
+          items:
+            $ref: '#/components/schemas/UserAccountActivityItemContents'
+    PassportIdentity:
+      type: object
+      properties:
+        lastName:
+          type: string
+          description: Last name.
+          minLength: 1
+          maxLength: 255
+          example: Doe
+        firstName:
+          type: string
+          description: First name.
+          minLength: 1
+          maxLength: 255
+          example: John
+        dateOfBirth:
+          type: string
+          description: Date of birth.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+    RPActivities:
+      required:
+      - rpActivities
+      properties:
+        rpActivities:
+          type: array
+          description: Relying Party activity items.
+          items:
+            $ref: '#/components/schemas/RPActivityItems'
+        rotatedPds:
+          type: string
+          description: A rotated PDS is created and returned when the encryption key expires and a new key is generated.
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          minLength: 1
+          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    IdentityAttributesByName:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/IdentityAttributesById'
+      description: Identity attributes keyed by IdentitySearch.scopedFields enum.
+      minLength: 1
+      example:
+        dateOfBirth:
+          e95b7c68-ebcb-4a88-9978-c33d78cde128:
+            value: '1980-01-01'
+            lastVerifiedDate: '2022-04-04T02:49:27.915Z'
+    ErrorResponse_2:
+      required:
+      - Errors
+      type: object
+      description: The error response model used by all the API endpoints.
+      properties:
+        Errors:
+          required:
+          - Error
+          type: object
+          description: The error response model used by all the API endpoints.
+          properties:
+            Error:
+              type: array
+              description: A list of Error objects.
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The source of the problem. That is where the error occurred.
+                    example: mids
+                  ReasonCode:
+                    type: string
+                    description: A code defining the error, as defined in documentation.
+                    example: USER_PROFILE_ID_NOT_FOUND
+                  Description:
+                    type: string
+                    description: A description of this specific occurrence of the Reason code.
+                    example: The provided user profile ID does not exist.
+                  Recoverable:
+                    type: boolean
+                    description: Whether or not retrying this request could result in a successful response.
+                    example: false
+                  Details:
+                    type: string
+                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+                    example: User X was not found
+                  redirectUri:
+                    type: string
+                    description: TP will use this URI to redirect to RP.
+                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    IdentitySearch:
+      required:
+      - pds
+      - scopedFields
+      - userConsent
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        scopedFields:
+          type: array
+          description: 'Array of enums representing the identity attributes which the TP is requesting access to.
+
+            The acceptable values are any/all of: ''all'', ''legalName'', ''email'', ''phone'', ''dateOfBirth'', ''driverLicense'', ''passport'', ''address''
+
+            '
+          minItems: 1
+          items:
+            enum:
+            - all - legalName - email - phone - dateOfBirth - selfie - address - ageOver - ageUnder - city - postalCode - subDivision - govtId - govtIdDetails - govtIdImage - passportIdentity - passportDetails - passportImage - driverLicenseIdentity - driverLicenseCardNumber - driverLicenseDetails - driverLicenseImage - driverLicenseIssuingState - visaMatched - cpf - rgNumber - cnh - mothersName - fathersName
+            type: string
+            example: all
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    MobileIdEligibility:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: boolean
+          description: Value of whether user is eligible for mobile id enrollment.
+          example: true
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    Cnh:
+      allOf:
+      - $ref: '#/components/schemas/DriverLicenseCardNumber'
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
+    GovtId:
+      oneOf:
+      - $ref: '#/components/schemas/PassportIdentity'
+      - $ref: '#/components/schemas/DriverLicenseIdentity'
+    UserConsent:
+      enum:
+      - ACCEPT
+      - DECLINE
+      - REVOKE
+      - EXPIRE
+      type: string
+      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
+      pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+      minLength: 6
+      maxLength: 7
+      example: ACCEPT
+    DriverLicenseDetails:
+      properties:
+        expiryDate:
+          type: string
+          description: Expiry date.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        issuingCountry:
+          type: string
+          description: Country code.
+          minLength: 1
+          maxLength: 255
+          example: USA
+        documentNumber:
+          type: string
+          description: Passport number.
+          minLength: 1
+          maxLength: 255
+          example: 1234567890
+    IdentityAttributesById:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/IdentityAttribute'
+      description: Identity attributes are keyed by attribute IDs.
+      minLength: 1
+    VisaMatched:
+      type: boolean
+      description: Flag indicating if the documentDetails are to be checked against a visa for a particular country.
+      example: false
+    Email:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: person@mastercard.com
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    IdentityAttribute:
+      allOf:
+      - {}
+      - oneOf:
+        - $ref: '#/components/schemas/Address'
+        - $ref: '#/components/schemas/DateOfBirth'
+        - $ref: '#/components/schemas/Email'
+        - $ref: '#/components/schemas/FathersName'
+        - $ref: '#/components/schemas/MothersName'
+        - $ref: '#/components/schemas/LegalName'
+        - $ref: '#/components/schemas/Phone'
+        - $ref: '#/components/schemas/Selfie'
+        - $ref: '#/components/schemas/MobileIdEligibility'
+        - $ref: '#/components/schemas/GovtId'
+        - $ref: '#/components/schemas/GovtIdDetails'
+        - $ref: '#/components/schemas/GovtIdImage'
+        - $ref: '#/components/schemas/PassportIdentity'
+        - $ref: '#/components/schemas/PassportDetails'
+        - $ref: '#/components/schemas/PassportImage'
+        - $ref: '#/components/schemas/DriverLicenseIdentity'
+        - $ref: '#/components/schemas/DriverLicenseCardNumber'
+        - $ref: '#/components/schemas/DriverLicenseDetails'
+        - $ref: '#/components/schemas/DriverLicenseImage'
+        - $ref: '#/components/schemas/VisaMatched'
+        - $ref: '#/components/schemas/Cnh'
+        - $ref: '#/components/schemas/Cpf'
+        - $ref: '#/components/schemas/Rg'
+    Cpf:
+      type: string
+      description: CPF Number. This will only be available when the Brazilian DL is scanned.
+      minLength: 1
+      maxLength: 255
+      example: 12345
+    GovtIdImage:
+      oneOf:
+      - $ref: '#/components/schemas/PassportImage'
+      - $ref: '#/components/schemas/DriverLicenseImage'
+    Rg:
+      type: string
+      description: RG Number. This will only be available when the Brazilian DL is scanned.
+      minLength: 1
+      maxLength: 255
+      example: 12345
+    LegalName:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: John Doe
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    ClientIdentities:
+      required:
+      - attributes
+      type: object
+      properties:
+        rotatedPds:
+          type: string
+          description: A rotated PDS is created and returned when the encryption key expires and a new key is generated.
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          minLength: 1
+          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        attributes:
+          $ref: '#/components/schemas/IdentityAttributesByName'
+    Address:
+      required:
+      - lastVerifiedDate
+      allOf:
+      - $ref: '#/components/schemas/AddressData'
+      - type: object
+        properties:
+          value:
+            type: string
+            description: Formatted address.
+            minLength: 1
+            maxLength: 255
+            example: 36271 GrandRiver Ave Building no 2 48335 Farmington MI USA
+          lastVerifiedDate:
+            type: string
+            description: Last verified date and time.
+            format: date-time
+            example: '2021-02-19T10:55:58.165Z'
+    DriverLicenseIdentity:
+      type: object
+      properties:
+        lastName:
+          type: string
+          description: Last name.
+          minLength: 1
+          maxLength: 255
+          example: Doe
+        firstName:
+          type: string
+          description: First name.
+          minLength: 1
+          maxLength: 255
+          example: John
+        dateOfBirth:
+          type: string
+          description: Date of birth.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+    PassportDetails:
+      type: object
+      properties:
+        expiryDate:
+          type: string
+          description: Expiry date.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        issuingCountry:
+          type: string
+          description: Country code.
+          minLength: 1
+          maxLength: 255
+          example: USA
+        passportNumber:
+          type: string
+          description: Passport number.
+          minLength: 1
+          maxLength: 255
+          example: 1234567890
+    DriverLicenseImage:
+      type: object
+      description: Driver License Images.
+      properties:
+        front:
+          type: string
+          description: Value.
+          minLength: 1
+          example: U29tZSBTdHJpbmc=
+        back:
+          type: string
+          description: Value.
+          minLength: 1
+          example: YGS75JHSljhs86K=
+    FathersName:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: Josh Doe
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    PassportImage:
+      type: object
+      description: Passport License Images.
+      properties:
+        front:
+          type: string
+          description: Value.
+          minLength: 1
+          example: JH65ghKHG76KS=
+    acquirerICA:
+      type: string
+      pattern: ^(?:[0-9]{6}|[0-9]{9}|[0-9]{11})$
+      description: ICA of acquirer which will be part of auth transaction. Insert leading zeros to ensure that the acquirerICA is either 6, 9, or 11 characters in length.
+      example: 00689425761
+    duns:
+      type: string
+      minLength: 1
+      maxLength: 9
+      description: A unique identifier assigned by Dun and Bradstreet is used to identify a business.
+      example: '879847426'
+    MidDetails:
+      type: array
+      minItems: 1
+      maxItems: 1000
+      description: API will return a list of wallet name, wallet acceptance, and wallet merchant id.
+      items:
+        $ref: '#/components/schemas/MidDetail'
+    merchantGroup:
+      type: string
+      pattern: ^[A-Z0-9]{1,2}$
+      description: Merchant Group. An identifier used to determine the merchant category type to qualify for the right MAID (MAID is assigned internally by Mastercard). It is imperative for a country such as Australia, For others it is optional.
+      example: A1
+    status:
+      type: string
+      minLength: 1
+      maxLength: 10
+      pattern: ^(?:PENDING|COMPLETED|ERROR)$
+      description: Status of request
+      example: COMPLETED
+    MidDetail:
+      type: object
+      description: Contains mid with status.
+      required:
+      - mid
+      - status
+      properties:
+        mid:
+          $ref: '#/components/schemas/mid'
+        status:
+          $ref: '#/components/schemas/status'
+        errorReason:
+          $ref: '#/components/schemas/errorReason'
+    limit:
+      description: The number of items you asked the list to be limited to.
+      type: integer
+      example: 2
+    wallet:
+      title: wallet
+      type: object
+      description: Contains merchant wallet information.
+      required:
+      - walletId
+      - walletAcceptance
+      properties:
+        walletId:
+          $ref: '#/components/schemas/walletId'
+        walletAcceptance:
+          $ref: '#/components/schemas/walletAcceptance'
+        walletMerchantId:
+          $ref: '#/components/schemas/walletMerchantId'
+    submitterICA:
+      type: string
+      pattern: ^(?!,)(( \| )?(?:[\d]{6}|[\d]{9}|[\d]{11})\b)*$
+      description: ICA(s) of partner(s) institution(s) who submitted this merchant participation.
+      example: '14689425761'
+    errorReason:
+      type: string
+      minLength: 1
+      maxLength: 30
+      pattern: ^(?:INVALID_ACQUIRER_ICA|UNKNOWN)$
+      description: Reason for error.
+      example: INVALID_ACQUIRER_ICA
+    MerchantMidSearchParameters:
+      title: MerchantMidSearchParameters
+      type: object
+      description: Parameters to search mid for a given merchant.
+      required:
+      - merchantLegalName
+      - countryCode
+      - acquirerICA
+      properties:
+        merchantLegalName:
+          $ref: '#/components/schemas/merchantLegalName'
+        countryCode:
+          $ref: '#/components/schemas/countryCode'
+        acquirerICA:
+          $ref: '#/components/schemas/acquirerICA'
+        mid:
+          $ref: '#/components/schemas/mid'
+        status:
+          $ref: '#/components/schemas/status'
+    MerchantSearchParameters:
+      title: MerchantSearchParameters
+      type: object
+      description: Parameters to search merchant objects. At least one parameter is required in the request.
+      properties:
+        merchantLegalName:
+          $ref: '#/components/schemas/merchantLegalName'
+        acquirerICA:
+          $ref: '#/components/schemas/acquirerICA'
+        merchantParticipationStatus:
+          $ref: '#/components/schemas/merchantParticipationStatus'
+        countryCode:
+          $ref: '#/components/schemas/countryCode'
+        maid:
+          $ref: '#/components/schemas/maid'
+    MidDetailsPage:
+      title: MidDetailsPage
+      type: object
+      description: Contains mids of a merchant.
+      required:
+      - merchantLegalName
+      - acquirerICA
+      - countryCode
+      - optIn
+      - mids
+      properties:
+        merchantLegalName:
+          $ref: '#/components/schemas/merchantLegalName'
+        merchantGroup:
+          $ref: '#/components/schemas/merchantGroup'
+        acquirerICA:
+          $ref: '#/components/schemas/acquirerICA'
+        countryCode:
+          $ref: '#/components/schemas/countryCode'
+        nonMerchantNegotiatedParticipation:
+          $ref: '#/components/schemas/nonMerchantNegotiatedParticipation'
+        optIn:
+          $ref: '#/components/schemas/optIn'
+        mids:
+          $ref: '#/components/schemas/MidDetails'
+    countryCode:
+      type: string
+      minLength: 3
+      maxLength: 3
+      pattern: ^[A-Za-z]{3}$
+      description: Legally registered country code of merchant. Refer to (https://www.iso.org/obp/ui/#search) for ISO 3166 alpha 3 code values.
+      example: USA
+    websiteUrl:
+      type: string
+      minLength: 1
+      maxLength: 100
+      pattern: ^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]
+      description: The URL of the merchant website.
+      example: https://www.acme-company.com
+    offset:
+      description: The number of items you asked for at the start of the list to be offset from.
+      type: integer
+      example: 1
+    MerchantSearch:
+      title: Merchant
+      type: object
+      description: Merchant object
+      properties:
+        merchantLegalName:
+          $ref: '#/components/schemas/merchantLegalName'
+        countryCode:
+          $ref: '#/components/schemas/countryCode'
+        acquirerICA:
+          $ref: '#/components/schemas/acquirerICA'
+        submitterICA:
+          $ref: '#/components/schemas/submitterICA'
+        dbaNames:
+          $ref: '#/components/schemas/dbaNames'
+        maids:
+          $ref: '#/components/schemas/maids'
+        maidType:
+          $ref: '#/components/schemas/searchMaidType'
+        nonMerchantNegotiatedParticipation:
+          $ref: '#/components/schemas/nonMerchantNegotiatedParticipation'
+        optIn:
+          $ref: '#/components/schemas/optIn'
+        status:
+          $ref: '#/components/schemas/status'
+        duns:
+          $ref: '#/components/schemas/duns'
+        websiteUrl:
+          $ref: '#/components/schemas/websiteUrl'
+        wallets:
+          $ref: '#/components/schemas/wallets'
+        errorReason:
+          $ref: '#/components/schemas/errorReason'
+        address:
+          $ref: '#/components/schemas/Address_2'
+        merchantGroup:
+          $ref: '#/components/schemas/merchantGroup'
+    maids:
+      type: array
+      minItems: 1
+      maxItems: 2
+      description: Mastercard Assigned ID (MAID). Adding a MAID based merchant object requires the mandatory provision of `maids`, while updating a merchant does not necessitate it.
+      items:
+        $ref: '#/components/schemas/maid'
+    dbaNames:
+      type: array
+      minItems: 1
+      maxItems: 1000
+      items:
+        $ref: '#/components/schemas/dbaName'
+    ErrorWrapper_2:
+      title: ErrorWrapper
+      type: object
+      description: The error response object which gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors_3'
+    mid:
+      type: string
+      pattern: ^[A-Za-z0-9]{1,15}
+      description: Merchant ID assigned by the acquirer.
+      example: '235157567121214'
+    MerchantSearches:
+      type: array
+      minItems: 1
+      maxItems: 100
+      description: List of Merchant objects
+      items:
+        $ref: '#/components/schemas/MerchantSearch'
+    merchantParticipationStatus:
+      type: string
+      minLength: 1
+      maxLength: 10
+      pattern: ^(?:PENDING|COMPLETED|ERROR)$
+      description: Status of request
+      example: COMPLETED
+    walletMerchantId:
+      type: string
+      minLength: 1
+      maxLength: 300
+      description: One or more wallet merchant IDs separated by the pipe symbol.
+      example: 235346356234 | 125346356236 | 125446356237
+    walletId:
+      type: integer
+      minimum: 1
+      maximum: 3
+      description: Indicates the wallet, 1 for ApplePay, 2 for GooglePay, and 3 for SamsungPay.
+      example: 1
+    dbaName:
+      type: string
+      minLength: 1
+      maxLength: 256
+      description: Trade name used by merchant to conduct business and is known to the consumer.
+      example: ACME
+    Errors_3:
+      title: Errors
+      type: object
+      description: Error object which returns the list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList_2'
+    searchMaidType:
+      title: maidType
+      type: string
+      description: Flag to identify provided MAID type. This is mandatory for participation requests with MAID.
+      example: EXT
+    merchantLegalName:
+      type: string
+      minLength: 1
+      maxLength: 300
+      description: Legally registered name of the merchant.
+      pattern: ^.{1,300}
+      example: Wallmart
+    total:
+      description: The total number of items in the collection.
+      type: integer
+      example: 5
+    nonMerchantNegotiatedParticipation:
+      type: string
+      maxLength: 1
+      minLength: 1
+      pattern: ^(?:Y|N)$
+      description: Merchant opt-in or opt-out preference for non-merchant negotiated product codes, such as, SPP, SPS, SBJ, and SBK.
+      example: Y
+      deprecated: true
+    optIn:
+      type: string
+      maxLength: 1
+      minLength: 1
+      pattern: ^(?:Y|N)$
+      description: Merchant opt-in or opt-out preference for non-merchant negotiated product codes, such as, SPP, SPS, SBJ, and SBK or GCS.
+      example: Y
+    ErrorList_2:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error_4'
+    Address_2:
+      title: Address
+      type: object
+      description: The address of the merchant.
+      properties:
+        addressLine1:
+          type: string
+          minLength: 1
+          maxLength: 300
+          description: Legally registered address of the merchant
+          example: 600 WEST
+        addressLine2:
+          type: string
+          minLength: 1
+          maxLength: 300
+          description: Second address for the merchant
+          example: SECTOR 5
+        addressLine3:
+          type: string
+          minLength: 1
+          maxLength: 300
+          description: Third address line
+          example: SUITE 775
+        city:
+          type: string
+          minLength: 1
+          maxLength: 30
+          description: Legally registered address city. The City field is mandatory when adding a merchant but not when updating a merchant.
+          example: St Peters
+        state:
+          type: string
+          minLength: 2
+          maxLength: 3
+          description: Legally registered address state or province. Refer to (https://www.iso.org/obp/ui/#search) for ISO 3166-2 code values.
+          example: QLD
+        postalCode:
+          type: string
+          minLength: 1
+          maxLength: 20
+          description: Legally registered address postal code. Provide a postal code to submit MID-based merchants via API if the country has a postal code.
+          example: 85001
+    count:
+      type: integer
+      description: The number of items in this batch (the size of the item array).
+      example: 2
+    wallets:
+      title: wallets
+      type: array
+      minItems: 1
+      maxItems: 3
+      description: Merchant wallets.
+      items:
+        $ref: '#/components/schemas/wallet'
+    walletAcceptance:
+      type: string
+      maxLength: 1
+      minLength: 1
+      pattern: ^(?:Y|N)$
+      description: States whether the merchant accepts the wallet or not.
+      example: Y
+    maid:
+      type: string
+      pattern: ^[A-Za-z0-9]{1,6}
+      description: Mastercard Assigned ID (MAID) as specified in Customer Interface Specification for ISO data element DE48 SE32.
+      example: '321765'
+    Error_4:
+      title: Error
+      type: object
+      description: Error object which contains details about the Error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error.
+          minLength: 1
+          maxLength: 100
+          example: Mastercard Installments APIs
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: invalid.request.parameter
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with the correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+    Atm:
+      title: ATM
+      description: ATM detail information
+      type: object
+      properties:
+        accessFees:
+          type: string
+          description: This value indicates under what conditions access fees are charged. Options are UNKNOWN, DOMESTIC, INTERNATIONAL, DOMESTIC_AND_INTERNATIONAL, NO_FEE.
+          example: DOMESTIC
+        addressLine1:
+          type: string
+          description: Line 1 of the street address for the ATM location. Usually includes the street number and name.
+          example: 1 Oak Street
+        addressLine2:
+          type: string
+          description: Line 2 of the street address usually an apartment number or suite number.
+          example: Apt 1
+        airportCode:
+          type: string
+          description: The Airport Code
+          example: STL
+        atmTerminalId:
+          type: string
+          description: The ATM Terminal Id
+          example: NH044143
+        availability:
+          type: string
+          description: This value indicates the availability hours of the ATM. Options are UNKNOWN, ALWAYS_AVAILABLE, BUSINESS_HOURS, IRREGULAR_HOURS.
+          example: BUSINESS_HOURS
+        camera:
+          type: string
+          description: This value indicates whether or not a security camera is present or near ATM
+          example: 'NO'
+        countryCode:
+          type: string
+          description: Three digit alpha country code as defined in ISO
+          example: USA
+        countryName:
+          type: string
+          description: Name of the country.
+          example: United States
+        countrySubdivisionCode:
+          type: string
+          description: Code of the state or province for an ATM location.
+          example: MO
+        countrySubdivisionName:
+          type: string
+          description: Name of the state or province for an ATM location.
+          example: Missouri
+        city:
+          type: string
+          description: The name of the city for an ATM location.
+          example: OFallon
+        distance:
+          type: number
+          description: This is the numerical value for the distance from the provided location to the selected ATM.
+          format: double
+          example: 1.75723000000001
+        distanceUnit:
+          type: string
+          description: This is the unit of measure value for the distance from the provided location to the selected ATM. Options are KM and MILE.
+          example: MILE
+        geocodingResult:
+          type: string
+          description: GeocodingResult for the ATM
+          example: G3
+        handicapAccessible:
+          type: string
+          description: This indicates whether the ATM has the ability to read chip cards or not. Options are UNKNOWN, IS_HANDICAP_ACCESSIBLE, NOT_HANDICAP_ACCESSIBLE.
+          example: IS_HANDICAP_ACCESSIBLE
+        hasSharedDeposit:
+          type: string
+          description: This value indicates whether or not the ATM participates in the Mastercard Shared Deposit network. Options are YES or NO.
+          example: 'YES'
+        isSurchargeFreeAlliance:
+          type: string
+          description: This value indicates whether or not the ATM participates in the Mastercard Shared (only) Surcharge Free Alliance network. Options are YES or NO.
+          example: 'YES'
+        latitude:
+          type: string
+          description: The latitude of the ATM
+          example: '38.670337'
+        locationName:
+          type: string
+          description: The name of the ATM location
+          example: That Bank
+        locationType:
+          type: string
+          description: Type of location for the ATM. Options are OTHER, AIRPORT, HOSPITAL, FINANCIAL_INSTITUTION.
+          example: FINANCIAL_INSTITUTION
+        longitude:
+          type: string
+          description: The longitude of the ATM.
+          example: '-90.443727'
+        owner:
+          type: string
+          description: This is the DBA name of the financial institution affiliate or independent service organization.
+          example: That Bank LLC
+        ownerICA:
+          type: string
+          description: This is the ICA of the entity that owns the ATM
+          example: '9386'
+        postalCode:
+          type: string
+          description: The postal code of the ATM location.
+          example: '63366'
+        routeTransactionNumber:
+          type: string
+          description: The routing transaction number
+          example: '840180546'
+        sponsor:
+          type: string
+          description: This is the legal or business name of the entity that sponsors the owner of the ATM into the Mastercard network.
+          example: That Bank LLC
+        sponsorICA:
+          type: string
+          description: This is the ICA of entity that sponsors the owner of the ATM
+          example: '9386'
+        supportsEmv:
+          type: string
+          description: This indicates whether the ATM has the ability to read chip cards or not. Options are UNKNOWN, SUPPORTS_EMV, DOES_NOT_SUPPORT_EMV.
+          example: SUPPORTS_EMV
+        surchargeFreeAllianceNetwork:
+          type: string
+          description: This value indicates whether or not the ATM participates in the Mastercard Shared (only) Surcharge Free Alliance network. Options are DOES_NOT_PARTICIPATE_IN_SFA, ALLPOINT_PREPAID, MONEYPASS_DEBIT, and ALL_SURCHARGE_FREE.
+          example: DOES_NOT_PARTICIPATE_IN_SFA
+    Atms:
+      title: Atms
+      type: object
+      properties:
+        count:
+          type: integer
+          format: int32
+          description: The number of items in the retrieved data set
+          example: 10
+        limit:
+          type: integer
+          format: int32
+          description: The number of items requested to be retrieved
+          example: 10
+        offset:
+          type: integer
+          format: int32
+          description: The page offset used for the query
+          example: 1
+        total:
+          type: integer
+          format: int32
+          description: The total number of ATMs available to be retrieved
+          example: 210
+        atms:
+          type: array
+          description: The list of ATMs retrieved
+          items:
+            $ref: '#/components/schemas/Atm'
+          example: []
+    ErrorItems:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          required:
+          - Error
+          type: object
+          properties:
+            Error:
+              type: array
+              description: Error Details
+              items:
+                $ref: '#/components/schemas/ErrorItem'
+          example: example_value
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          example: Error source
+          description: Source of the error.
+        Description:
+          type: string
+          example: Generic error description
+          description: Short description of the ReasonCode field.
+        ReasonCode:
+          type: string
+          example: REASON_CODE
+          description: A unique constant identifying the error case encountered during API request processing.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          example: Detailed error description
+          description: Where appropriate, indicates detailed information about data received.
+    ClaimSearch:
+      type: object
+      required:
+      - claimId
+      - postalCode
+      properties:
+        claimId:
+          type: string
+          description: Insurance claim identifier, cardholder should be able to retrieve once the claim is submitted on the target website.
+          example: '512346231'
+        postalCode:
+          type: string
+          description: Postal code associated with insurance claim.
+          example: '71000'
+        preferredLanguage:
+          type: string
+          description: User's preferred language in localized ISO 639-1 format such as pt-BR
+          example: en-US
+    ErrorResponse_3:
+      description: Only returned in the event of an error condition
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors_4'
+    ClaimFeature:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the insurance claim.
+          example: Comp/Collision
+        statusCode:
+          type: string
+          description: Status code of the insurance claim.
+          example: PAD
+        status:
+          type: string
+          description: Status of the insurance claim.
+          example: Paid
+        statusDescription:
+          type: string
+          description: Status description of the insurance claim.
+          example: Paid $100 to Cardholder on 02/02/2017 15:05:19
+    RequiredClaimDocuments:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the document required for an insurance claim.
+          example: Purchase Receipt
+        description:
+          type: string
+          description: Description of the document required for an insurance claim.
+          example: Receipt from the merchant on the date of purchase.
+        isReceived:
+          type: boolean
+          description: Received indicator of the insurance claim document.
+          example: false
+        category:
+          type: string
+          description: Category of the document required for an insurance claim.
+          example: Travel
+    AtmSearch:
+      title: AtmSearch
+      description: Atm Search Request Info
+      type: object
+      properties:
+        addressLine1:
+          type: string
+          description: Line 1 of the street address for the ATM location. Usually includes the street number and name. This parameter is ignored if latitude and longitude are provided. If you provide this parameter you must also provide the Country parameter and either City parameter or PostalCode parameter.
+          example: 4033 Veterans Memorial Pkwy
+        addressLine2:
+          type: string
+          description: Line 2 of the street address usually an apartment number or suite number. This parameter is used rarely and is ignored if latitude and longitude are provided. If you provide this parameter you must also provide the Country parameter and either City parameter or PostalCode parameter.
+          example: ''
+        city:
+          type: string
+          description: The name of the city for a ATM location. This parameter is ignored if latitude and longitude are provided. If you provide this parameter you must also provide the Country parameter.
+          example: SAINT PETERS
+        countryCode:
+          type: string
+          description: Any three character country code for an ATM location. Valid values are three digit alpha country codes. This parameter is ignored if latitude and longitude are provided. This parameter is required if any other address information is provided including AddressLine1 AddressLine2 City PostalCode or CountrySubdivision.
+          example: USA
+        countrySubdivisionCode:
+          type: string
+          description: The state or province for an ATM location (only supported for US and Canada locations). This parameter is ignored if latitude and longitude are provided. If you provide this parameter you must also provide the Country parameter.
+          example: MO
+        latitude:
+          type: string
+          description: The latitude of a ATM location. If latitude is provided longitude must also be provided.
+          example: '38.794676'
+        longitude:
+          type: string
+          description: The longitude of a ATM location. If longitude is provided latitude must also be provided.
+          example: '-90.5689'
+        postalCode:
+          type: string
+          description: The zip code or postal code for an ATM location. This parameter is ignored if latitude and longitude are provided. If you provide this parameter you must also provide the Country parameter.
+          example: '63376'
+    Errors_4:
+      description: Only returned in the event of an error condition
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error_5'
+          description: An error object
+          example:
+          - Error:
+              Source: latitude
+              ReasonCode: INVALID_INPUT_VALUE
+              Description: Latitude is missing, invalid, or could not be determined from address fields.
+              Recoverable: false
+              Details: null
+      example:
+        Errors:
+        - Error:
+            Source: latitude
+            ReasonCode: INVALID_INPUT_VALUE
+            Description: Latitude is missing, invalid, or could not be determined from address fields.
+            Recoverable: false
+            Details: null
+    ClaimStatus:
+      type: object
+      properties:
+        features:
+          type: array
+          description: Array of insurance claim features associated with the claim.
+          items:
+            $ref: '#/components/schemas/ClaimFeature'
+          example: []
+        uploadDocumentsUrl:
+          type: string
+          description: URL to web page that facilitates uploading documents.
+          example: http://example.url.com/...
+        requiredDocuments:
+          type: array
+          description: Array of required documents for this claim.
+          items:
+            $ref: '#/components/schemas/RequiredClaimDocuments'
+          example: []
+    Error_5:
+      description: Details of the error condition such as the source of the error, reason code for the error, if the error is recoverable, and details about the error
+      required:
+      - Description
+      - ReasonCode
+      - Recoverable
+      - Source
+      type: object
+      properties:
+        Source:
+          description: The application that generated this error
+          type: string
+          minLength: 0
+          maxLength: 150
+          example: latitude
+        ReasonCode:
+          description: A unique constant identifying the error case encountered during transaction processing
+          type: string
+          minLength: 0
+          maxLength: 150
+          example: INVALID_INPUT_VALUE
+        Description:
+          description: Short description of the ReasonCode field
+          type: string
+          minLength: 0
+          maxLength: 150
+          example: Latitude is missing, invalid, or could not be determined from address fields.
+        Recoverable:
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+          type: boolean
+          example: 'false'
+        Details:
+          description: Description of the issue
+          example: Latitude is missing, invalid, or could not be determined from address fields.
+          type: string
+          minLength: 0
+          maxLength: 150
+          nullable: true
+  responses:
+    UnauthorizedError:
+      description: Unauthorized - Access Not Granted
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    SearchProducts:
+      description: Returns Products that match the search criteria
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SearchProducts'
+    BadRequestError:
+      description: Something was wrong with the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    SearchBenefits:
+      description: Returns Benefits that match the requested details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SearchBenefits'
+          examples:
+            listOfMultipleBenefitTypes:
+              $ref: '#/components/examples/MultipleBenefitTypes'
+    NotAuthorizedErrorResponse:
+      description: Authentication information was missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BINNotFoundExample:
+              $ref: '#/components/examples/UnauthorizedExample_2'
+    ForbiddenErrorResponse:
+      description: Insufficient permissions for interacting with the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BINNotFoundExample:
+              $ref: '#/components/examples/ForbiddenExample'
+    NotFoundErrorResponse:
+      description: The URI didn't match an existing resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BINNotFoundExample:
+              $ref: '#/components/examples/BINNotFoundExample'
+    BadRequestErrorResponse:
+      description: Invalid or insufficient parameters supplied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BINNotFoundExample:
+              $ref: '#/components/examples/BadRequestExample_2'
+    AccountRangeSearchResponse:
+      description: Account Range Search response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BinResourceArray'
+          examples:
+            BINSuccessExample:
+              $ref: '#/components/examples/BINSuccessExample'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-403'
+    Unauthorized:
+      description: Unauthorised
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-401'
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-500'
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-404'
+    DonateGetAllCards:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DonateGetAllCards'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_3'
+    UnauthorizedError_2:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_2'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample_3'
+    UserAccountActivitySearchesResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserAccountActivities'
+          examples:
+            UserAccountActivitySearchesUnencryptedResponse:
+              $ref: '#/components/examples/UserAccountActivitiesExample'
+            UserAccountActivitySearchesEncryptedResponse:
+              $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
+    NotFoundError:
+      description: The request didn't match an existing resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_2'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
+    RPActivitySearchResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RPActivities'
+          examples:
+            UnencryptedResponseExample:
+              $ref: '#/components/examples/RPActivitiesResponseExample'
+            EncryptedResponseExample:
+              $ref: '#/components/examples/EncryptedPayloadNoPDSExample'
+    IdentitySearchResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClientIdentities'
+          examples:
+            ClientIdentitiesSuccessfulExampleUnencrypted:
+              $ref: '#/components/examples/ClientIdentitiesSuccessfulExample'
+            ClientIdentitiesSuccessfulExampleEncrypted:
+              $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_2'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample_2'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    BadRequestError_2:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_2'
+          examples:
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
+    MerchantSearches:
+      description: The response object that contains the list of merchant objects.
+      headers:
+        Count:
+          schema:
+            $ref: '#/components/schemas/count'
+        Offset:
+          schema:
+            $ref: '#/components/schemas/offset'
+        Limit:
+          schema:
+            $ref: '#/components/schemas/limit'
+        Total:
+          schema:
+            $ref: '#/components/schemas/total'
+        Request-Status:
+          schema:
+            $ref: '#/components/schemas/status'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MerchantSearches'
+          examples:
+            MID Merchant Participations:
+              $ref: '#/components/examples/Merchants-Search'
+            MAID Merchant Participations:
+              $ref: '#/components/examples/MaidMerchants-Searches'
+            MID Merchant Participations For Australia:
+              $ref: '#/components/examples/Merchants-Searches-Australia'
+    AccountNotRegisteredError:
+      description: This response code is returned when the server cannot find the account used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            AccountNotRegisteredError:
+              $ref: '#/components/examples/AccountNotRegisteredError'
+    NotAcceptableHeader:
+      description: This response code is returned when a user enters anything except application/json in the Accept header.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            NotAcceptableHeader:
+              $ref: '#/components/examples/NotAcceptableHeader'
+    ForbiddenError_2:
+      description: This response code is returned when API or resource access is not approved for the client.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            ForbiddenError:
+              $ref: '#/components/examples/ForbiddenError'
+    MidDetailsPage:
+      description: The response object that contains the mids of a merchant.
+      headers:
+        Count:
+          schema:
+            $ref: '#/components/schemas/count'
+        Offset:
+          schema:
+            $ref: '#/components/schemas/offset'
+        Limit:
+          schema:
+            $ref: '#/components/schemas/limit'
+        Total:
+          schema:
+            $ref: '#/components/schemas/total'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MidDetailsPage'
+          examples:
+            Mid Details Page:
+              $ref: '#/components/examples/MidDetailsPage'
+            Mid Details for Australia:
+              $ref: '#/components/examples/EncryptedMidDetailsPageForAus'
+    BadRequestError_3:
+      description: This response code is returned when a request is invalid, or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            InvalidCardProductError:
+              $ref: '#/components/examples/InvalidCardProductError'
+            InvalidFieldFormat:
+              $ref: '#/components/examples/InvalidFieldFormat'
+            InvalidFieldLength:
+              $ref: '#/components/examples/InvalidFieldLength'
+            InvalidFieldValue:
+              $ref: '#/components/examples/InvalidFieldValue'
+            MissingRequiredField:
+              $ref: '#/components/examples/MissingRequiredField'
+    UnauthorizedError_3:
+      description: Authentication information was missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_3'
+          example:
+            Errors:
+            - Error:
+                Source: locations-atms-api
+                ReasonCode: UNAUTHORIZED
+                Description: We couldn't recognize you
+                Recoverable: false
+                Details: Full authentication is required to access this resource
+    Atms:
+      description: List of ATM details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Atms'
+    ClaimStatusRef:
+      description: The status of the claim associated with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClaimStatus'
+    ForbiddenError_3:
+      description: Insufficient permissions for interacting with the resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_3'
+          example:
+            Errors:
+            - Error:
+                Source: locations-atms-api
+                ReasonCode: PERMISSION_DENIED
+                Description: You don't seem authorized to do that
+                Recoverable: false
+                Details: Reading ATM information requires read-only permissions
+    ClaimsBadRequestError:
+      description: 'Bad Request
+
+        Reason Codes:
+
+        * MISSING_REQ_FIELD_GW - Missing required field(s)
+
+        * INVALID_FIELD - Invalid field(s)
+
+        * CLAIM_NOT_FOUND - Claim not found
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorItems'
+          examples:
+            ClaimsBadRequestExample:
+              $ref: '#/components/examples/ClaimBadRequestExample'
+            ClaimNotFoundExample:
+              $ref: '#/components/examples/ClaimNotFoundExample'
+    BadRequestError_4:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_3'
+          example:
+            Errors:
+            - Error:
+                Source: latitude
+                ReasonCode: INVALID_INPUT_VALUE
+                Description: Latitude is missing, invalid, or could not be determined from address fields.
+                Recoverable: false
+                Details: null
+    UnauthorizedError_2_2:
+      description: Unauthorized - Access Not Granted
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorItems'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample_4'
+  examples:
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: Gateway
+            ReasonCode: DECLINED
+            Description: Unauthorized - Access Not Granted
+            Recoverable: false
+            Details: null
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: Benefits Eligibility Service
+            ReasonCode: BENEFITINFO_VAL_001
+            Description: Validation Error  BIN Number should be numeric.
+            Recoverable: false
+    MultipleBenefitTypes:
+      summary: Multiple types of Benefits
+      value:
+        data:
+        - benefitBundleId: 5bbf8967-Rce1-ACGC-56ty-18IYUT6ba572
+          benefitBundleName: OPT-PRO 121-IH
+          benefitServicingId: 5890b2e4-4cc7-490c-a85b-715f7e989dc1
+          benefitServicingOptions: Existing Claims
+          benefitID: '2495'
+          benefitCode: WTY
+          benefitName: Airport Lounge Access
+          macBenefitCategory: Travel
+          serviceProviderCode: '58'
+          serviceProviderName: US Extended Warranty - Information
+          paymentType: MasterCard Pays/ All Cards
+          bundleType: Region Specific Set
+          benefitEffectiveDate: '2022-12-15'
+          benefitExpirationDate: '2030-12-15'
+          appliesTo: Family
+          customAttributes:
+          - name: dealId
+            value: PPMCOWELBGHUAT
+          numberOfEntitlements: Unlimited
+          entitlementsFundedBy: Mastercard
+          numberOfGuestEntitlements: '2'
+          typeOfGuestEntitlements: Each Time
+          guestEntitlementsFundedBy: Issuer
+          numberOfSharedAndGuestEntitlements: '3'
+          sharedAndGuestEntitlementsFundedBy: Mastercard
+          discountValue: '10'
+          currency: USD
+          discountType: basic-car-price
+          interchangeableEntitlement: FastTrack
+          serviceProviderDealId: LOUNGEISSUERBANK
+          airportExperienceCoverage: Global, Domestic
+          airportExperienceExceptions: Lounge, Flight Delay Pass
+          airportExperienceAccessMethod: Access with Digital Membership Card (DMC)
+        - benefitBundleId: 2d01bd0d-84e6-46e7-89dc-7bba8797ed8c
+          benefitBundleName: OPT-TRC-211-IA
+          benefitServicingId: d2908f2b-8b41-4377-b5b6-025c223c0d33
+          benefitServicingOptions: New Claims
+          benefitID: '3395'
+          benefitCode: MCW
+          benefitName: Accidental Death and Dismemberment
+          macBenefitCategory: Travel
+          serviceProviderCode: '58'
+          serviceProviderName: US Extended Warranty - Information
+          paymentType: MasterCard Pays/ All Cards
+          bundleType: Region Specific Set
+          benefitEffectiveDate: '2022-12-15'
+          benefitExpirationDate: '2030-12-15'
+          appliesTo: Individual
+          customAttributes: []
+          occurBeginTime: '0'
+          occurEndTime: '1'
+          occurTimeUnit: Year
+          occurMinimumAmount: '0'
+          occurMaximumAmount: '10000'
+          occurCurrency: USD
+          minimumClaimValue: '10'
+          minimumClaimCurrencyType: USD
+          occurMisc: '0'
+          policyTimeLimit: '12'
+          policyTimeUnit: Month
+          policyMaximumOccurs: '0'
+          policyMaximumAmount: '10000'
+          policyCurrency: USD
+          policyRegionRestriction: All
+          coverageType: Excess
+          qualifyingRequirement: Recurrent bill payment with eligible MC $50 deductible.
+          additionalCoverage: If death of the insured is abroad, and family decides not to repatriate the body, then maximum limit for funeral expenses is USD 5,000 / 70 or older max 30 days
+          quantity: '5'
+          duration: '20'
+          durationTimeIncrement: Hour
+          deductibleValue: '10'
+          deductibleCurrencyType: USD
+        - benefitBundleId: 10cc44cf-0151-4597-922b-c42a6cdfb408
+          benefitBundleName: OPT-WTY 66-IA
+          benefitServicingId: c8087ce6-32d6-435f-b700-7df231975800
+          benefitServicingOptions: All Claims
+          benefitID: '3149'
+          benefitCode: MEP
+          benefitName: Amazon Prime Membership
+          macBenefitCategory: Lifestyle
+          serviceProviderCode: '58'
+          serviceProviderName: US Extended Warranty - Information
+          paymentType: MasterCard Pays/ All Cards
+          bundleType: Region Specific Set
+          benefitEffectiveDate: '2022-12-15'
+          benefitExpirationDate: '2030-12-15'
+          appliesTo: Family
+          customAttributes: []
+          percentageOff: '10'
+          quantity: '5'
+          quantityType: ''
+          duration: '20'
+          durationTimeIncrement: Hour
+          vendorReference: DP
+    UnauthorizedExample_2:
+      value:
+        Errors:
+          Error:
+          - Source: BINTABLE_API
+            ReasonCode: UNAUTHORIZED
+            Description: We couldn't recognize you
+            Recoverable: false
+            Details: 'Full authentication is required to access this resource. See also: https://mstr.cd/31YcrTi'
+    BINSuccessExample:
+      description: Individual Mastercard BIN data
+      value:
+      - lowAccountRange: 2229326100000000000
+        highAccountRange: 2229326200000000000
+        binNum: '22292931'
+        binLength: 8
+        acceptanceBrand: MCC
+        ica: '00000023460'
+        customerName: TRIPLINK INTERNATIONAL CO.,LIMITED
+        country:
+          code: '372'
+          alpha3: IRL
+          name: Ireland
+        localUse: false
+        authorizationOnly: false
+        productCode: MCO
+        productDescription: MASTERCARD CORPORATE
+        governmentRange: false
+        nonReloadableIndicator: false
+        anonymousPrepaidIndicator: N
+        programName: null
+        vertical: null
+        fundingSource: DEBIT
+        consumerType: CONSUMER
+        cardholderCurrencyIndicator: C
+        billingCurrencyDefault: USD
+        smartDataEnabled: false
+        affiliate: California Community Bank
+    BINNotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: BINTABLE_API
+            ReasonCode: NOT_FOUND
+            Description: Invalid BIN format, please ensure there are no spaces used
+            Recoverable: false
+            Details: BIN '131 840' doesn't exist
+    BadRequestExample_2:
+      value:
+        Errors:
+          Error:
+          - Source: BINTABLE_API
+            ReasonCode: BAD_REQUEST
+            Description: Not all mandatory parameters are supplied or sent incorrectly.
+            Recoverable: false
+            Details: The value of parameter 'sort' is invalid.
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: BINTABLE_API
+            ReasonCode: PERMISSION_DENIED
+            Description: You don't seem authorized to do that
+            Recoverable: false
+            Details: The resource was processed and can't be updated anymore
+    ClientIdentitiesSuccessfulExample:
+      value:
+        attributes:
+          dateOfBirth:
+            e95b7c68-ebcb-4a88-9978-c33d78cde128:
+              value: '1980-01-01'
+              lastVerifiedDate: '2022-04-04T02:49:27.915Z'
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    UnauthorizedExample_3:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
+            Recoverable: false
+    UserAccountActivitiesExample:
+      value:
+        userAccountActivities:
+        - action: ID Created
+          createdDate: '2020-01-28T13:16:01.714-05:00'
+          values:
+          - attributeName: legalName
+            previousValue: John Doe
+            value: John Dow
+            source: passport
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    EncryptedPayloadWithRotatedPDSExample:
+      value:
+        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IoxNTE2MjM5MDIyf
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+    EncryptedPayloadNoPDSExample:
+      value:
+        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyf
+    UserProfileDeletedErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_DELETED
+            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
+            Recoverable: false
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided user profile ID does not exist.
+            Recoverable: false
+    RPActivitiesResponseExample:
+      value:
+        rpActivities:
+        - rpName: Toys Inc
+          consentType: OneTime
+          createdDate: '2020-01-28T18:16:01.714Z'
+          attributesConsented:
+            passport.firstName: John
+            passport.lastName: Doe
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    ForbiddenExample_2:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+    Merchants-Searches-Australia:
+      value:
+      - merchantLegalName: Example Mart
+        merchantGroup: 1A
+        countryCode: AUS
+        acquirerICA: 00689425761
+        submitterICA: '12689425746'
+        dbaNames:
+        - ACME
+        optIn: Y
+        status: COMPLETED
+        duns: '239847426'
+        websiteUrl: https://www.acmeexample.com
+        address:
+          addressLine1: 600 WEST
+          addressLine2: SECTOR 5
+          addressLine3: SUITE 775
+          city: St Peters
+          state: QLD
+          postalCode: '85001'
+        wallets:
+        - walletId: 1
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 2
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 3
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+      - merchantLegalName: Example Mart 2
+        countryCode: AUS
+        acquirerICA: 00689425761
+        submitterICA: '12689425746'
+        dbaNames:
+        - ACME
+        optIn: Y
+        status: COMPLETED
+        duns: '239847426'
+        websiteUrl: https://www.acmeexample.com
+        address:
+          addressLine1: 600 WEST
+          addressLine2: SECTOR 5
+          addressLine3: SUITE 775
+          city: St Peters
+          state: QLD
+          postalCode: '85001'
+    MaidMerchants-Searches:
+      value:
+      - merchantLegalName: Example Mart
+        countryCode: USA
+        acquirerICA: 00689425761
+        submitterICA: '12689425746'
+        dbaNames:
+        - ACME
+        maids:
+        - '123456'
+        maidType: EXT
+        optIn: Y
+        status: COMPLETED
+        duns: '879847426'
+        websiteUrl: https://www.example.com
+        wallets:
+        - walletId: 1
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 2
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 3
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        address:
+          addressLine1: 600 WEST
+          addressLine2: SECTOR 5
+          addressLine3: SUITE 775
+          city: St Peters
+          state: QLD
+          postalCode: '85001'
+    MerchantMidSearchParameters:
+      value:
+        merchantLegalName: Example Mart
+        countryCode: USA
+        acquirerICA: 00689425761
+    EncryptedMidDetailsPageForAus:
+      value:
+        merchantLegalName: Example Mart
+        acquirerICA: 00689425761
+        merchantGroup: 1A
+        countryCode: AUS
+        optIn: Y
+        mids:
+        - mid: '987123456789124'
+          status: COMPLETED
+        - mid: '123123456789124'
+          status: COMPLETED
+        - mid: '567123456789124'
+          status: COMPLETED
+    MidDetailsPage:
+      value:
+        merchantLegalName: Example Mart
+        acquirerICA: 00689425761
+        countryCode: USA
+        optIn: Y
+        mids:
+        - mid: '987123456789124'
+          status: COMPLETED
+        - mid: '123123456789124'
+          status: COMPLETED
+        - mid: '567123456789124'
+          status: COMPLETED
+    AccountNotRegisteredError:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: account.not.registered
+            Description: We cannot find the account that you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
+            Recoverable: false
+            Details: ''
+    Merchants-Search:
+      value:
+      - merchantLegalName: Example Mart
+        countryCode: USA
+        acquirerICA: 00689425761
+        submitterICA: '12689425746'
+        dbaNames:
+        - ACME
+        optIn: Y
+        status: COMPLETED
+        duns: '879847426'
+        websiteUrl: https://www.example.com
+        address:
+          addressLine1: 600 WEST
+          addressLine2: SECTOR 5
+          addressLine3: SUITE 775
+          city: St Peters
+          state: QLD
+          postalCode: '85001'
+        wallets:
+        - walletId: 1
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 2
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 3
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+      - merchantLegalName: Example Mart 2
+        countryCode: USA
+        acquirerICA: 00689425761
+        submitterICA: '12689425746'
+        dbaNames:
+        - ACME
+        optIn: Y
+        status: PENDING
+        duns: '879847426'
+        websiteUrl: https://www.example.com
+        address:
+          addressLine1: 600 WEST
+          addressLine2: SECTOR 5
+          addressLine3: SUITE 775
+          city: St Peters
+          state: QLD
+          postalCode: '85001'
+    InvalidFieldLength:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.body.parameter
+            Description: Field length is out of bound
+            Recoverable: false
+            Details: ''
+    InvalidFieldFormat:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.body.parameter
+            Description: Field format or type is invalid
+            Recoverable: false
+            Details: ''
+    InvalidCardProductError:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.parameter
+            Description: Product SPP is not available for the IND country
+            Recoverable: false
+            Details: ''
+    NotAcceptableHeader:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: not.acceptable.header
+            Description: Accept header value is not application/json.
+            Recoverable: false
+            Details: ''
+    MissingRequiredField:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.body.parameter
+            Description: One or more of the required fields are missing
+            Recoverable: false
+            Details: ''
+    ForbiddenError:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: forbidden
+            Description: Your account is not approved to access the API or resource, kindly contact your Mastercard associate to get approval.
+            Recoverable: false
+            Details: ''
+    InvalidFieldValue:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.body.parameter
+            Description: Value doesn't exist / doesn't meet specified range
+            Recoverable: false
+            Details: ''
+    MerchantSearchParameters:
+      value:
+        merchantLegalName: Example Mart
+        acquirerICA: 00689425761
+        merchantParticipationStatus: COMPLETED
+        countryCode: USA
+        maid: '123456'
+    UnauthorizedExample_4:
+      value:
+        Errors:
+          Error:
+          - Source: Gateway
+            ReasonCode: DECLINED
+            Description: Unauthorized - Access Not Granted.
+            Recoverable: false
+            Details: null
+    ClaimBadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: Loyalty Service - Insurance
+            ReasonCode: MISSING_REQ_FIELD_GW
+            Description: Missing Required Field(s).
+            Recoverable: false
+            Details: Missing required field(s) - 'claimId'.
+    ClaimNotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: Loyalty Service - Insurance
+            ReasonCode: CLAIM_NOT_FOUND
+            Description: Claim not found.
+            Recoverable: false
+            Details: Claim not found
+  requestBodies:
+    ProductSearch:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Products'
+    BenefitsSearch:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Benefits'
+    BinResourceSearchByAccountRangeRequest:
+      description: BIN Resource Search By account range Request
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SearchByAccountRange'
+    SearchCard:
+      description: searchCardRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SearchCard'
+      required: false
+    IdentitySearchRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentitySearch'
+      required: true
+    RPActivitySearchRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RPActivitySearch'
+      required: true
+    UserAccountActivitySearchRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserAccountActivitySearch'
+      required: true
+    MerchantMidSearchParameters:
+      description: The request object that contains parameters to search mids for a given merchant.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MerchantMidSearchParameters'
+          examples:
+            Merchant Mid Search Parameters:
+              $ref: '#/components/examples/MerchantMidSearchParameters'
+    MerchantSearchParameters:
+      description: The request object that contains parameters to search merchant objects
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MerchantSearchParameters'
+          examples:
+            Merchant Search Parameters:
+              $ref: '#/components/examples/MerchantSearchParameters'
+    ClaimSearchRef:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClaimSearch'
+      description: Claim status payload.
+      required: true
+    AtmSearch:
+      description: A JSON object containing item data
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AtmSearch'
+  parameters:
+    ClientId:
+      name: x-openapi-clientid
+      in: header
+      description: ClientId is a unique and a mandatory ID shared while creating a project on Mastercard Developers Portal.
+      required: true
+      schema:
+        type: string
+        example: 0a7e433a-63fc-4557-8cf4
+    ProgramId:
+      name: ProgramId
+      in: header
+      description: ProgramId is an optional field, but if a client has more than one program associated to it, then this field becomes mandatory.
+      required: false
+      schema:
+        type: string
+        example: 80380ef2-5037-4e57-86bf-1bdd1efb0ae2
+    Donor:
+      name: donor_id
+      in: path
+      description: donor_id
+      required: true
+      schema:
+        type: string
+        example: 652ce9ff-fa5f-4e9f-8151-c73fa20088f7
+    CorrelationId:
+      name: x-correlation-id
+      in: header
+      description: CorrelationId is a unique donation request ID. It is recommended to pass the x-correlation-id by the customer and to use the format "bankname_UUID" (bank name can be indicated using the first 4 digits). Maximum length of this field should be 100 alphanumeric characters. If not passed, Mastercard will generate it.
+      required: false
+      schema:
+        type: string
+        example: 03f8c4e8-8bdc-4a30-a2b4-b6f989e96ca3
+    XEncryptedPayload:
+      in: header
+      name: X-Encrypted-Payload
+      type: boolean
+      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
+
+        '
+      example: true
+      schema: null
+    XUserIdentityParameter:
+      in: header
+      name: X-User-Identity
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      description: 'JWT token for session validation. Returned as response header in previous API calls with key X-User-Identity.
+
+        '
+      schema:
+        type: string
+    offset:
+      in: query
+      name: offset
+      description: Determines the number of items needed in the start of the list, to retrieve the list starting from the offset.
+      required: false
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+      example: 100
+    limit:
+      in: query
+      name: limit
+      description: Controls the maximum number of items in the list.
+      required: false
+      schema:
+        type: integer
+        default: 500
+        minimum: 1
+        maximum: 500
+      example: 100
+    LimitParam:
+      name: limit
+      in: query
+      description: The number of items to be retrieved
+      required: false
+      schema:
+        type: integer
+      example: 25
+    OffsetParam:
+      name: offset
+      in: query
+      description: The page offset used for the query
+      required: false
+      schema:
+        type: integer
+      example: 1
+    DistanceParam:
+      name: distance
+      in: query
+      description: Distance measurement for calculating the radius search. Optional The length of distance from the centroid point. Value string(<25). The default will be 5 units
+      required: false
+      schema:
+        type: integer
+      example: 5
+    DistanceUnitParam:
+      name: distance_unit
+      in: query
+      description: Unit of measurement for calculating the radius search. Optional. Measurement of distance unit in miles or kilometers. Value string (MILE or KM)
+      required: false
+      schema:
+        type: string
+        enum:
+        - MILE
+        - KM
+      example: MILE

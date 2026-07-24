@@ -1,0 +1,339 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Debtor API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Debtor
+paths:
+  /debtor-service-providers:
+    get:
+      tags:
+      - Debtor
+      summary: Mastercard Retrieve Debtor Service Providers
+      description: Enables a CSP to retrieve list of DSPs with details (univeral link, logo url, categoryPurpose and features supported etc).
+      operationId: listDebtorServiceProviders
+      parameters:
+      - $ref: '#/components/parameters/X-Request-ID'
+      - $ref: '#/components/parameters/X-Product-ID'
+      - $ref: '#/components/parameters/X-Participant-ID'
+      - $ref: '#/components/parameters/X-JWS-Signature'
+      - $ref: '#/components/parameters/category_purpose'
+      - $ref: '#/components/parameters/feature'
+      responses:
+        '200':
+          $ref: '#/components/responses/DSPRetrievalsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorisedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  parameters:
+    feature:
+      name: feature
+      in: query
+      required: false
+      description: Feature types  for which the DSP list should filtered. If not provided, all the DSPs will be listed irrespective of features supported. *Refer to Codes and Formats section for more details.
+      schema:
+        type: array
+        minItems: 0
+        items:
+          type: string
+          example: AOF
+    X-JWS-Signature:
+      name: X-JWS-Signature
+      in: header
+      required: true
+      description: JWS detached signature is applied to ensure data integrity.
+      schema:
+        type: string
+        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
+        minLength: 1
+        maxLength: 512
+    X-Participant-ID:
+      name: X-Participant-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        example: '000545'
+        minLength: 1
+        maxLength: 50
+      description: Unique identifier assigned to the participant by Mastercard during onboarding.
+    X-Product-ID:
+      name: X-Product-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        example: PBARFP
+        minLength: 1
+        maxLength: 50
+      description: Unique identifier assigned to the product construct by Mastercard and given to the participant.
+    category_purpose:
+      name: category_purpose
+      in: query
+      required: false
+      description: Category purpose codes for which the DSP list should be filtered. If not provided, all the DSPs will be listed irrespective of categoryPurpose codes supported. *Refer to Codes and Formats section for more details.
+      schema:
+        type: array
+        minItems: 0
+        items:
+          type: string
+          example: MTOM
+    X-Request-ID:
+      name: X-Request-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        example: 7eab4eab35a542e085add0363a49c035
+        minLength: 1
+        maxLength: 50
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and used for tracing, troubleshooting and analysis purposes.
+  responses:
+    DSPRetrievalsResponse:
+      description: DSP listing is successful.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+        X-JWS-Signature:
+          $ref: '#/components/headers/X-JWS-Signature'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DSPRetrievalsAck'
+    BadRequestErrorResponse:
+      description: 'Invalid structure: The header or payload fails syntax or structural validation.'
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestErrorExample:
+              $ref: '#/components/examples/BadRequestErrorExample'
+    UnauthorisedErrorResponse:
+      description: Invalid signature. The service fails signature validation.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/UnauthorisedExample'
+  schemas:
+    DSPList:
+      type: array
+      minItems: 0
+      items:
+        $ref: '#/components/schemas/DSPDetails'
+      description: List of debtor service providers along with details (dsp universal link, dsp logo url, categoryPurposes & , features supported etc). If none of the DSPs match the filter criterias provided in the request, empty list will be returned.
+    Feature:
+      type: object
+      required:
+      - feature
+      properties:
+        feature:
+          type: string
+          example: SIP
+          minLength: 1
+          maxLength: 35
+    DSPDetails:
+      required:
+      - debtorServiceProviderId
+      - debtorServiceProviderName
+      - debtorServiceProviderUniversalLink
+      - categoryPurposeList
+      type: object
+      properties:
+        debtorServiceProviderId:
+          type: string
+          example: b5bf60a3-c351-441f-a0f9-ac84099a6a8c
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the DSP during Mastercard onboarding.
+        debtorServiceProviderName:
+          type: string
+          example: XYZBANK
+          minLength: 1
+          maxLength: 35
+          description: The DSP Short Name captured by Mastercard during onboarding.
+        debtorServiceProviderLogoUrl:
+          type: string
+          example: https://www.cdn.com/dsplogourl
+          minLength: 1
+          maxLength: 512
+          description: DSP's Logo (in URL encoded format).
+        debtorServiceProviderUniversalLink:
+          type: string
+          example: https://xyzbank.com
+          minLength: 1
+          maxLength: 512
+          description: DSP's universal link to where creditor can re-direct the consumer for authorization
+        categoryPurposeList:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/CategoryPurpose'
+          description: List of categoryPurposes supported by the DSP along with features supported for each categoryPurpose.
+          example: []
+    ErrorWrapper:
+      description: A top level object for errors
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    DSPRetrievalsAck:
+      allOf:
+      - $ref: '#/components/schemas/DSPs'
+    Errors:
+      description: Object that contains the list of errors
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    CategoryPurpose:
+      type: object
+      required:
+      - categoryPurpose
+      - featureList
+      properties:
+        categoryPurpose:
+          type: string
+          example: MTOM
+          minLength: 1
+          maxLength: 35
+          description: Use-case (represented via category purpose codes) supported by the DSP.  *Refer to Codes and Formats section for more details.
+        featureList:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/Feature'
+          description: List of features (represented via featureList codes) supported for each categoryPurpose by the DSP.  *Refer to Codes and Formats section for more details.
+          example: []
+    ErrorList:
+      description: The list of errors
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    DSPs:
+      type: object
+      required:
+      - debtorServiceProviders
+      properties:
+        debtorServiceProviders:
+          $ref: '#/components/schemas/DSPList'
+    Error:
+      description: A single error
+      type: object
+      properties:
+        Source:
+          type: string
+          example: ZAPP
+          description: Source of the error
+        ReasonCode:
+          type: string
+          example: STVL-9999
+          description: Error Code
+        Description:
+          type: string
+          example: Invalid structure
+          description: Error Description
+        Recoverable:
+          type: boolean
+          example: false
+          description: Boolean value to specify if error is recoverable or not
+        Details:
+          type: string
+          example: Invalid structure
+          description: Optional details of the error
+  headers:
+    X-Participant-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: '000545'
+      description: Unique identifier assigned to the participant by Mastercard during onboarding.
+    X-JWS-Signature:
+      required: true
+      description: JWS detached signature is applied to ensure data integrity.
+      schema:
+        type: string
+        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
+        minLength: 1
+        maxLength: 512
+    X-Request-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: 7eab4eab35a542e085add0363a49c035
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and used for tracing, troubleshooting and analysis purposes.
+    X-Product-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product construct by Mastercard and given to the participant.
+  examples:
+    BadRequestErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: ZAPP
+            ReasonCode: STVL-9999
+            Description: Invalid structure
+            Recoverable: false
+            Details: Invalid structure
+    UnauthorisedExample:
+      value:
+        Errors:
+          Error:
+          - Source: ZAPP
+            ReasonCode: SECU-9999
+            Description: Invalid signature
+            Recoverable: false
+            Details: Invalid signature

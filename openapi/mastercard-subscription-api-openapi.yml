@@ -1,0 +1,834 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Subscription API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Subscription
+  description: Subscription Operations - Creating, retrieving, updating and deleting subscriptions
+paths:
+  /subscriptions/{id}:
+    get:
+      summary: Retrieving subscription by id
+      description: Retrieve the details of a subscription.
+      tags:
+      - Subscription
+      operationId: getSubscription
+      parameters:
+      - $ref: '#/components/parameters/subscriptionIdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/GetSubscriptionsById'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      summary: Updating subscription
+      description: Update an existing subscription.
+      tags:
+      - Subscription
+      operationId: updateSubscription
+      parameters:
+      - $ref: '#/components/parameters/subscriptionIdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateSubscription'
+      responses:
+        '200':
+          $ref: '#/components/responses/UpdatedSubscription'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Deleting subscription
+      description: Deletes a subscription, with the effect that no further notifications will be generated for that subscription.
+      tags:
+      - Subscription
+      operationId: deleteSubscription
+      parameters:
+      - $ref: '#/components/parameters/subscriptionIdParam'
+      responses:
+        '204':
+          description: No content, indicates that the subscription has been deleted successfully
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  examples:
+    BPSPaymentUpdateUpdatedSubscriptionResponse:
+      value:
+        id: 0CNSee76a6d031ba2166fe83ed7203f74b52134758270d1339c995b3be6c68a918211718964283
+        name: TestSubscription_PaymentUpdateUpdated
+        subjectType: PAYMENT_UPDATE
+        subscriberId: C94BC2953D52DCE1E05368459E0ADF8E
+        active: true
+        specifications: []
+    ICCPAuthorizationSubscriptionResponse:
+      value:
+        id: 0CNSf829c8c968765f86f51418c28d6b0430daa657174c3920a474890e540be5495d1718867617
+        name: TestSubscription_ICCPAuth
+        subjectType: PAYMENT_AUTHORIZATION
+        subscriberId: A49875790BBF5F19E0535B449E0A5014
+        active: true
+        specifications:
+        - id: 0CNSa6d4b038aa40e844f3e521e8062c242de051c72be96cbc206666ea467069e9401718867617
+          type: FIELD
+          operator: WHERE
+          children: []
+          fieldMapping:
+            id: 0CNSa6d4a329d377bb296957df43e9f2f1ab5b35c997f88bcbc34939bc1525990be51556724071
+            name: virtualpaymentcard.number
+            displayName: VirtualPaymentCard Number
+            subjectType: PAYMENT_AUTHORIZATION
+            contentType: TEXT
+          fieldOperator: EQUALS
+          expectedContent:
+            value: '1234567890123456'
+            contentType: TEXT
+    UpdateICMPProvisioningSubscription:
+      value:
+        name: TestSubscription_ICMPTokenProvisioningUpdated
+        subjectType: TOKEN_PROVISIONING_EVENT
+        active: true
+        specifications:
+        - type: FIELD
+          operator: WHERE
+          children: []
+          fieldMappingName: purchaseRequest.rcnAlias
+          fieldOperator: EQUALS
+          expectedContent:
+            value: TEXT
+            contentType: TEXT
+    UpdateICCPAuthorizationSubscription:
+      value:
+        name: TestSubscription_ICCPPaymentAuthorization_Updated
+        subjectType: PAYMENT_AUTHORIZATION
+        active: true
+        specifications:
+        - type: FIELD
+          operator: WHERE
+          children:
+          - type: FIELD
+            operator: AND
+            fieldMappingName: purchaseRequest.rcnAlias
+            fieldOperator: EQUALS
+            expectedContent:
+              value: Travel Expense RCN
+              contentType: TEXT
+            children: []
+          fieldMappingName: purchaseRequest.rcnAlias
+          fieldOperator: EQUALS
+          expectedContent:
+            value: BOC
+            contentType: TEXT
+    ICMPLifecycleUpdatedSubscriptionResponse:
+      value:
+        id: 0CNSa56c4e01133b472a532678ab1e02b394de1886b3692eb42c99287ef10cffa59c1720083461
+        name: TestSubscription_ICMPTokenProvisioningUpdated
+        subjectType: TOKEN_LIFECYCLE_EVENT
+        subscriberId: A49875790BBF5F19E0535B449E0A5014
+        active: true
+        specifications:
+        - id: 0CNS63299c1c2fcd133327b88e12457b67333543ba4be3c1f77880b3fb99e25e31421720087279
+          type: FIELD
+          operator: WHERE
+          children: []
+          fieldMapping:
+            id: 1AD42C3FCAF12726E06368459E0A9487
+            name: purchaseRequest.rcnAlias
+            displayName: Purchase Request RCN Alias
+            subjectType: TOKEN_LIFECYCLE_EVENT
+            contentType: TEXT
+          fieldOperator: EQUALS
+          expectedContent:
+            value: TEXT
+            contentType: TEXT
+    ICCPAuthorizationUpdatedSubscriptionResponse:
+      value:
+        id: 0CNSf829c8c968765f86f51418c28d6b0430daa657174c3920a474890e540be5495d1718867617
+        name: TestSubscription_ICCPAuthUpdated
+        subjectType: PAYMENT_AUTHORIZATION
+        subscriberId: A49875790BBF5F19E0535B449E0A5014
+        active: true
+        specifications:
+        - id: 0CNS9e4f526d9641a7e65247f832e6f98505330cfcdd2e1955fabaa711ad052160971718952594
+          type: FIELD
+          operator: WHERE
+          children: []
+          fieldMapping:
+            id: 0CNSa6d4a329d377bb296957df43e9f2f1ab5b35c997f88bcbc34939bc1525990be51556724071
+            name: messageTypeIndicator
+            displayName: Message type indicator
+            subjectType: PAYMENT_AUTHORIZATION
+            contentType: TEXT
+          fieldOperator: EQUALS
+          expectedContent:
+            value: '12312'
+            contentType: TEXT
+    UpdateICMPLifecycleSubscription:
+      value:
+        name: TestSubscription_ICMPTokenProvisioningUpdated
+        subjectType: TOKEN_LIFECYCLE_EVENT
+        active: true
+        specifications:
+        - type: FIELD
+          operator: WHERE
+          children: []
+          fieldMappingName: purchaseRequest.rcnAlias
+          fieldOperator: EQUALS
+          expectedContent:
+            value: TEXT
+            contentType: TEXT
+    UpdateBPSPaymentUpdateSubscription:
+      value:
+        name: TestSubscription_ICCPPaymentUpdate_Updated
+        subjectType: PAYMENT_UPDATE
+        active: true
+        specifications: []
+    BPCAuthorizationSubscriptionResponse:
+      value:
+        id: 0CNS5f3aee95730c70a70ca85cb66f13ac40eeb79c6bc508cbe58e1c74ae97f18bb01718868027
+        name: TestSubscription_BPCAuth
+        subjectType: BPC_PAYMENT_AUTHORIZATION
+        subscriberId: A49875790BBF5F19E0535B449E0A5014
+        active: true
+        specifications:
+        - id: 0CNSa14d1f4baaadae35a8a83f65bb74914b002fbab44b4abf47039b687d5149fc3b1718868027
+          type: FIELD
+          operator: WHERE
+          children: []
+          fieldMapping:
+            id: 1360ACE9C4D4CBFEE06368459E0ADD50
+            name: virtualPaymentCard.number
+            displayName: VirtualPaymentCard Number
+            subjectType: BPC_PAYMENT_AUTHORIZATION
+            contentType: TEXT
+          fieldOperator: EQUALS
+          expectedContent:
+            value: '1234567890123456'
+            contentType: TEXT
+    UpdateBPCAuthorizationSubscription:
+      value:
+        name: TestSubscription_BPCPaymentAuthorization_Updated
+        subjectType: BPC_PAYMENT_AUTHORIZATION
+        active: true
+        specifications:
+        - type: FIELD
+          operator: WHERE
+          children: []
+          fieldMappingName: messageTypeIndicator
+          fieldOperator: EQUALS
+          expectedContent:
+            value: '12312'
+            contentType: TEXT
+    BPCAuthorizationUpdatedSubscriptionResponse:
+      value:
+        id: 0CNS5f3aee95730c70a70ca85cb66f13ac40eeb79c6bc508cbe58e1c74ae97f18bb01718868027
+        name: TestSubscription_BPCAuthUpdated
+        subjectType: BPC_PAYMENT_AUTHORIZATION
+        subscriberId: A49875790BBF5F19E0535B449E0A5014
+        active: true
+        specifications:
+        - id: 0CNS12fe24ddd5529bbfb317894e15b946ed3e5878b2382163ae9534b1cf38a3875a1718952480
+          type: FIELD
+          operator: WHERE
+          children: []
+          fieldMapping:
+            id: 1360ACE9C4D4CBFEE06368459E0ADD50
+            name: messageTypeIndicator
+            displayName: MessageTypeIndicator
+            subjectType: BPC_PAYMENT_AUTHORIZATION
+            contentType: TEXT
+          fieldOperator: EQUALS
+          expectedContent:
+            value: '12312'
+            contentType: TEXT
+    ICMPProvisioningSubscriptionResponse:
+      value:
+        id: 0CNSa56c4e01133b472a532678ab1e02b394de1886b3692eb42c99287ef10cffa59c1720083461
+        name: TestSubscription_ICMPTokenProvisioning
+        subjectType: TOKEN_PROVISIONING_EVENT
+        subscriberId: A49875790BBF5F19E0535B449E0A5014
+        active: true
+        specifications:
+        - id: 0CNSb12ce4d40ae45a3ff9cb9928f66ded61345e1cd45fc8d4991a0ce200d2b11ee11720083461
+          type: FIELD
+          operator: WHERE
+          children: []
+          fieldMapping:
+            id: 1AD42C3FCAF12726E06368459E0A9487
+            name: purchaseRequest.rcnAlias
+            displayName: Purchase Request RCN Alias
+            subjectType: TOKEN_PROVISIONING_EVENT
+            contentType: TEXT
+          fieldOperator: EQUALS
+          expectedContent:
+            value: TEXT
+            contentType: TEXT
+    BPSPaymentUpdateSubscriptionResponse:
+      value:
+        id: 0CNSee76a6d031ba2166fe83ed7203f74b52134758270d1339c995b3be6c68a918211718964283
+        name: TestSubscription_ICCPPaymentUpdate
+        subjectType: PAYMENT_UPDATE
+        subscriberId: C94BC2953D52DCE1E05368459E0ADF8E
+        active: true
+        specifications: []
+    ICMPProvisioningUpdatedSubscriptionResponse:
+      value:
+        id: 0CNSa56c4e01133b472a532678ab1e02b394de1886b3692eb42c99287ef10cffa59c1720083461
+        name: TestSubscription_ICMPTokenProvisioningUpdated
+        subjectType: TOKEN_PROVISIONING_EVENT
+        subscriberId: A49875790BBF5F19E0535B449E0A5014
+        active: true
+        specifications:
+        - id: 0CNS63299c1c2fcd133327b88e12457b67333543ba4be3c1f77880b3fb99e25e31421720087279
+          type: FIELD
+          operator: WHERE
+          children: []
+          fieldMapping:
+            id: 1AD42C3FCAF12726E06368459E0A9487
+            name: purchaseRequest.rcnAlias
+            displayName: Purchase Request RCN Alias
+            subjectType: TOKEN_PROVISIONING_EVENT
+            contentType: TEXT
+          fieldOperator: EQUALS
+          expectedContent:
+            value: TEXT
+            contentType: TEXT
+    UpdateICCPClearingSubscription:
+      value:
+        name: TestSubscription_ICCPClearing_Updated
+        subjectType: CLEARING
+        active: true
+        specifications:
+        - type: FIELD
+          operator: WHERE
+          children: []
+          fieldMappingName: purchaseRequest.rcnAlias
+          fieldOperator: EQUALS
+          expectedContent:
+            value: test rcn alias
+            contentType: TEXT
+    ICCPClearingUpdatedSubscriptionResponse:
+      value:
+        id: 0CNS0aa3f4e102b6f00976f9556d9af9951951ca3218f5d64d80c91b9057cdcff0a21718868785
+        name: TestSubscription_ICCPClearingUpdated
+        subjectType: CLEARING
+        subscriberId: A49875790BBF5F19E0535B449E0A5014
+        active: true
+        specifications:
+        - id: 0CNS91d2a2d3c9a517aee50830da16e83ed675262ca013fb9f82119867ccf4c5c1231718952258
+          type: FIELD
+          operator: WHERE
+          children: []
+          fieldMapping:
+            id: 135E59332C54BF9AE06368459E0ACEF0
+            name: purchaseRequest.rcnAlias
+            displayName: purchaseRequest rcnAlias
+            subjectType: CLEARING
+            contentType: TEXT
+          fieldOperator: EQUALS
+          expectedContent:
+            value: test rcn alias
+            contentType: TEXT
+    ICMPLifecycleSubscriptionResponse:
+      value:
+        id: 0CNSa56c4e01133b472a532678ab1e02b394de1886b3692eb42c99287ef10cffa59c1720083461
+        name: TestSubscription_ICMPTokenLifecycle
+        subjectType: TOKEN_LIFECYCLE_EVENT
+        subscriberId: A49875790BBF5F19E0535B449E0A5014
+        active: true
+        specifications:
+        - id: 0CNSb12ce4d40ae45a3ff9cb9928f66ded61345e1cd45fc8d4991a0ce200d2b11ee11720083461
+          type: FIELD
+          operator: WHERE
+          children: []
+          fieldMapping:
+            id: 1AD42C3FCAF12726E06368459E0A9487
+            name: purchaseRequest.rcnAlias
+            displayName: Purchase Request RCN Alias
+            subjectType: TOKEN_LIFECYCLE_EVENT
+            contentType: TEXT
+          fieldOperator: EQUALS
+          expectedContent:
+            value: TEXT
+            contentType: TEXT
+    ICCPClearingSubscriptionResponse:
+      value:
+        id: 0CNS0aa3f4e102b6f00976f9556d9af9951951ca3218f5d64d80c91b9057cdcff0a21718868785
+        name: TestSubscription_ICCPClearing
+        subjectType: CLEARING
+        subscriberId: A49875790BBF5F19E0535B449E0A5014
+        active: true
+        specifications:
+        - id: 0CNS4ab8577afb3a04ffa75e1ae75beb4509ac850d259b322b3b8dc3c721ec56777d1718868785
+          type: FIELD
+          operator: WHERE
+          children: []
+          fieldMapping:
+            id: 135E59332C54BF9AE06368459E0ACEF0
+            name: purchaseRequest.rcnAlias
+            displayName: purchaseRequest rcnAlias
+            subjectType: CLEARING
+            contentType: TEXT
+          fieldOperator: EQUALS
+          expectedContent:
+            value: test rcn alias
+            contentType: TEXT
+  schemas:
+    Error-400:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              type: array
+              description: An array of error objects giving information about relevant errors.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The origin of the error
+                    example: Commercial Event Notifications
+                  ReasonCode:
+                    type: string
+                    description: A unique error code representing the error that occurred
+                    example: format.invalid
+                  Description:
+                    type: string
+                    description: A developer-friendly description of the error that occurred
+                    example: One or more fields contain invalid data
+                  Recoverable:
+                    type: boolean
+                    description: Can the error be recovered by retrying the same request later?
+                    example: false
+                  Details:
+                    type: string
+                    description: Additional details regarding the error that occurred
+                    example: Invalid content in request payload
+    SpecificationDetails:
+      description: Specifies criteria to determine whether an event should cause a notification to be generated.
+      type: object
+      properties:
+        id:
+          description: Specification id, auto-generated by the system and read-only for the client
+          type: string
+          minLength: 1
+          maxLength: 255
+          readOnly: true
+          example: CNSa91bf379b48a593fd17f07f431bad8fb296796498f4e9982ea134394c1fa4f071556724072
+        type:
+          description: The type of item to which the criteria refers. Currently the type 'FIELD' is allowed, which refers to matching a field in the notification itself
+          type: string
+          minLength: 1
+          maxLength: 255
+          default: FIELD
+          example: FIELD
+        operator:
+          description: The operator that defines how this specification (criteria) logically relates to other specifications in the list. The first specification in the list will have an operator of 'WHERE' and subsequent specifications will have an 'AND' or 'OR' relationship with their preceding specification
+          type: string
+          minLength: 1
+          maxLength: 255
+          default: WHERE
+          example: WHERE
+        fieldMapping:
+          readOnly: true
+          allOf:
+          - $ref: '#/components/schemas/FieldMapping'
+        fieldOperator:
+          description: The check operation that is to be performed. Currently one of allowed values are 'EQUALS', 'GREATER_THAN', 'LESS_THAN', 'BETWEEN'
+          type: string
+          minLength: 1
+          maxLength: 255
+          default: EQUALS
+          example: EQUALS
+        expectedContent:
+          $ref: '#/components/schemas/FieldContent'
+        children:
+          description: A list of nested child specifications, used where needed to implement complex matching logic
+          type: array
+          items:
+            $ref: '#/components/schemas/SpecificationDetails'
+      required:
+      - type
+      - operator
+      - fieldMappingName
+      - fieldOperator
+      - expectedContent
+    FieldContent:
+      description: The structure used to specify what content in the field should cause a match.
+      type: object
+      required:
+      - contentType
+      - value
+      properties:
+        contentType:
+          description: The type of value that is being checked. Currently one of allowed values are 'INTEGER', 'number', 'TEXT', 'DATE', 'CURRENCY'
+          type: string
+          minLength: 1
+          maxLength: 255
+          default: TEXT
+          example: TEXT
+        value:
+          description: The actual value to be checked
+          type: object
+          example: Travel Expense RCN
+        anotherValue:
+          description: An additional value to be checked, if the match operator takes more than one value (e.g. 'BETWEEN')
+          type: object
+          example: Travel Expense RCN
+    SubscriptionDetails:
+      properties:
+        id:
+          description: Subscription id, auto-generated by the system and read-only for the client
+          type: string
+          minLength: 1
+          maxLength: 255
+          readOnly: true
+          example: CNSa91bf379b48a593fd17f07f431bad8fb296796498f4e9982ea134394c1fa4f071556724070
+        name:
+          description: Subscription name - must be unique for the client and must comprise letters, numbers, dashes and underscores only. To check for uniqueness, you can retrieve the existing collection of subscriptions by performing a GET on the /subscriptions resource
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: TEST_SUBSCRIPTION
+        subjectType:
+          description: The type of event to which this subscription refers. Currently allowed values are 'PAYMENT_AUTHORIZATION', 'PAYMENT_UPDATE', 'CLEARING', 'BPC_PAYMENT_AUTHORIZATION', 'TOKEN_PROVISIONING_EVENT', 'TOKEN_LIFECYCLE_EVENT'
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: PAYMENT_AUTHORIZATION
+        subscriberId:
+          description: The id of the subscriber (client) to which the subscription belongs
+          type: string
+          minLength: 1
+          maxLength: 255
+          readOnly: true
+          example: CNSa91bf379b48a593fd17f07f431bad8fb296796498f4e9982ea134394c1fa4f071556724071
+        active:
+          description: Denotes whether the subscription is active (in which case notifications will be generated for matching events) or not (in which case no notifications will be generated for this subscription)
+          type: boolean
+          example: true
+        specifications:
+          description: A list of criteria specifications that define what events will cause notifications to be generated. If the list of specifications is empty, then notifications will be generated for all events for the specified subject type that the client is entitled to receive.
+          type: array
+          items:
+            $ref: '#/components/schemas/SpecificationDetails'
+      required:
+      - name
+      - active
+      - subjectType
+    Error-403:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              type: array
+              description: An array of error objects giving information about relevant errors.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The origin of the error
+                    example: Commercial Event Notifications
+                  ReasonCode:
+                    type: string
+                    description: A unique error code representing the error that occurred
+                    example: subscriber.notAllowed
+                  Description:
+                    type: string
+                    description: A developer-friendly description of the error that occurred
+                    example: Access not allowed
+                  Recoverable:
+                    type: boolean
+                    description: Can the error be recovered by retrying the same request later?
+                    example: false
+                  Details:
+                    type: string
+                    description: Additional details regarding the error that occurred
+                    example: Subscriber with consumerKey 'INVALID_CONSUMER_KEY' doesn't have permissions to complete the request
+    Specification:
+      description: Specifies criteria to determine whether an event should cause a notification to be generated.
+      type: object
+      properties:
+        id:
+          description: Specification id, auto-generated by the system and read-only for the client
+          type: string
+          minLength: 1
+          maxLength: 255
+          readOnly: true
+          example: CNSa91bf379b48a593fd17f07f431bad8fb296796498f4e9982ea134394c1fa4f071556724072
+        type:
+          description: The type of item to which the criteria refers. Currently the type 'FIELD' is allowed, which refers to matching a field in the notification itself
+          type: string
+          minLength: 1
+          maxLength: 255
+          default: FIELD
+          example: FIELD
+        operator:
+          description: The operator that defines how this specification (criteria) logically relates to other specifications in the list. The first specification in the list will have an operator of 'WHERE' and subsequent specifications will have an 'AND' or 'OR' relationship with their preceding specification
+          type: string
+          minLength: 1
+          maxLength: 255
+          default: WHERE
+          example: WHERE
+        fieldMappingName:
+          description: The name of the field that is to be checked
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: purchaseRequest.rcnAlias
+        fieldOperator:
+          description: The check operation that is to be performed. Currently one of allowed values are 'EQUALS', 'GREATER_THAN', 'LESS_THAN', 'BETWEEN'
+          type: string
+          minLength: 1
+          maxLength: 255
+          default: EQUALS
+          example: EQUALS
+        expectedContent:
+          $ref: '#/components/schemas/FieldContent'
+        children:
+          description: A list of nested child specifications, used where needed to implement complex matching logic
+          type: array
+          items:
+            $ref: '#/components/schemas/Specification'
+      required:
+      - type
+      - operator
+      - fieldMappingName
+      - fieldOperator
+      - expectedContent
+    Error-404:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              type: array
+              description: An array of error objects giving information about relevant errors.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The origin of the error
+                    example: Commercial Event Notifications
+                  ReasonCode:
+                    type: string
+                    description: A unique error code representing the error that occurred
+                    example: resource.not.found
+                  Description:
+                    type: string
+                    description: A developer-friendly description of the error that occurred
+                    example: The resource provided is not found
+                  Recoverable:
+                    type: boolean
+                    description: Can the error be recovered by retrying the same request later?
+                    example: false
+                  Details:
+                    type: string
+                    description: Additional details regarding the error that occurred
+                    example: The specified resource was not found
+    Subscription:
+      properties:
+        id:
+          description: Subscription id, auto-generated by the system and read-only for the client
+          type: string
+          minLength: 1
+          maxLength: 255
+          readOnly: true
+          example: CNSa91bf379b48a593fd17f07f431bad8fb296796498f4e9982ea134394c1fa4f071556724070
+        name:
+          description: Subscription name - must be unique for the client and must comprise letters, numbers, dashes and underscores only. To check for uniqueness, you can retrieve the existing collection of subscriptions by performing a GET on the /subscriptions resource
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: TEST_SUBSCRIPTION
+        subjectType:
+          description: The type of event to which this subscription refers. Currently allowed values are 'PAYMENT_AUTHORIZATION', 'PAYMENT_UPDATE', 'CLEARING', 'BPC_PAYMENT_AUTHORIZATION', 'TOKEN_PROVISIONING_EVENT' and 'TOKEN_LIFECYCLE_EVENT'.
+          type: string
+          minLength: 1
+          maxLength: 50
+          enum:
+          - PAYMENT_AUTHORIZATION
+          - PAYMENT_UPDATE
+          - CLEARING
+          - BPC_PAYMENT_AUTHORIZATION
+          - TOKEN_PROVISIONING_EVENT
+          - TOKEN_LIFECYCLE_EVENT
+          example: PAYMENT_AUTHORIZATION
+        subscriberId:
+          description: The id of the subscriber (client) to which the subscription belongs
+          type: string
+          minLength: 1
+          maxLength: 255
+          readOnly: true
+          example: CNSa91bf379b48a593fd17f07f431bad8fb296796498f4e9982ea134394c1fa4f071556724071
+        active:
+          description: Denotes whether the subscription is active (in which case notifications will be generated for matching events) or not (in which case no notifications will be generated for this subscription)
+          type: boolean
+          example: true
+        specifications:
+          description: A list of criteria specifications that define what events will cause notifications to be generated. If the list of specifications is empty, then notifications will be generated for all events for the specified subject type that the client is entitled to receive.
+          type: array
+          items:
+            $ref: '#/components/schemas/Specification'
+      required:
+      - name
+      - active
+      - subjectType
+    FieldMapping:
+      description: A collection of field definitions any of which can be used to specify matching criteria when creating a subscription.
+      type: object
+      properties:
+        id:
+          description: Field mapping id
+          type: string
+          minLength: 1
+          maxLength: 255
+          readOnly: true
+          example: CNSa91bf379b48a593fd17f07f431bad8fb296796498f4e9982ea134394c1fa4f071556724073
+        name:
+          description: The name used to refer to the field in the specification criteria.
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: purchaseRequest.rcnAlias
+        displayName:
+          description: Descriptive name of the field
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: Purchase request RCN alias
+        subjectType:
+          description: The type of subject to which the field refers. Currently allowed values are 'PAYMENT_AUTHORIZATION', 'PAYMENT_UPDATE', 'CLEARING', 'BPC_PAYMENT_AUTHORIZATION', 'TOKEN_PROVISIONING_EVENT' and 'TOKEN_LIFECYCLE_EVENT'.
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: PAYMENT_AUTHORIZATION
+        contentType:
+          description: What type of information the field (and therefore the matching criteria for that field) will contain. Currently one of allowed values are 'INTEGER', 'number', 'TEXT', 'DATE', 'CURRENCY'.
+          type: string
+          default: TEXT
+          example: TEXT
+  responses:
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-403'
+    UpdatedSubscription:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubscriptionDetails'
+          examples:
+            BPC PAYMENT AUTHORIZATION:
+              $ref: '#/components/examples/BPCAuthorizationUpdatedSubscriptionResponse'
+            ICCP CLEARING:
+              $ref: '#/components/examples/ICCPClearingUpdatedSubscriptionResponse'
+            ICCP PAYMENT AUTHORIZATION:
+              $ref: '#/components/examples/ICCPAuthorizationUpdatedSubscriptionResponse'
+            BPS PAYMENT UPDATE:
+              $ref: '#/components/examples/BPSPaymentUpdateUpdatedSubscriptionResponse'
+            ICMP TOKEN LIFECYCLE:
+              $ref: '#/components/examples/ICMPLifecycleUpdatedSubscriptionResponse'
+            ICMP TOKEN PROVISIONING:
+              $ref: '#/components/examples/ICMPProvisioningUpdatedSubscriptionResponse'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-404'
+    GetSubscriptionsById:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubscriptionDetails'
+          examples:
+            BPC PAYMENT AUTHORIZATION:
+              $ref: '#/components/examples/BPCAuthorizationSubscriptionResponse'
+            ICCP CLEARING:
+              $ref: '#/components/examples/ICCPClearingSubscriptionResponse'
+            ICCP PAYMENT AUTHORIZATION:
+              $ref: '#/components/examples/ICCPAuthorizationSubscriptionResponse'
+            BPS PAYMENT UPDATE:
+              $ref: '#/components/examples/BPSPaymentUpdateSubscriptionResponse'
+            ICMP TOKEN LIFECYCLE:
+              $ref: '#/components/examples/ICMPLifecycleSubscriptionResponse'
+            ICMP TOKEN PROVISIONING:
+              $ref: '#/components/examples/ICMPProvisioningSubscriptionResponse'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-400'
+  requestBodies:
+    UpdateSubscription:
+      description: Subscription
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Subscription'
+          examples:
+            BPC PAYMENT AUTHORIZATION:
+              $ref: '#/components/examples/UpdateBPCAuthorizationSubscription'
+            ICCP CLEARING:
+              $ref: '#/components/examples/UpdateICCPClearingSubscription'
+            ICCP PAYMENT AUTHORIZATION:
+              $ref: '#/components/examples/UpdateICCPAuthorizationSubscription'
+            BPS PAYMENT UPDATE:
+              $ref: '#/components/examples/UpdateBPSPaymentUpdateSubscription'
+            ICMP TOKEN LIFECYCLE:
+              $ref: '#/components/examples/UpdateICMPLifecycleSubscription'
+            ICMP TOKEN PROVISIONING:
+              $ref: '#/components/examples/UpdateICMPProvisioningSubscription'
+  parameters:
+    subscriptionIdParam:
+      in: path
+      name: id
+      description: Subscription ID - Find a Subscription ID by running POST /subscriptions or GET /subscriptions
+      schema:
+        type: string
+      required: true
+      example: 0CNSa91bf379b48a593fd17f07f431bad8fb296796498f4e9982ea134394c1fa4f071556724070

@@ -1,0 +1,1633 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Retrievals API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Retrievals
+paths:
+  /document-verifications/document-data-retrievals:
+    post:
+      tags:
+      - Retrievals
+      responses:
+        '200':
+          $ref: '#/components/responses/DocumentDataRetrievalsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: "Informs if the document verification is still being processed or is\nprocessed already. If `SUCCESS`, the document data is returned.   \n**This API is mandatory.**\n"
+      summary: Retrieve the details of a document.
+      operationId: retrieveDocumentData
+      parameters:
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/DocumentDataRetrievalsRequest'
+    put:
+      tags:
+      - Retrievals
+      responses:
+        '200':
+          $ref: '#/components/responses/DocumentDataRetrievalsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: "Informs if the document verification for the additional document is still being processed (PENDING)\nor is processed already (SUCCESS). If SUCCESS, the document data is\nreturned.   \n**This API is mandatory.**\n"
+      summary: Add and Validate a Document - Retrieve the details of an additional document.
+      operationId: retrieveMultiDocumentData
+      parameters:
+      - $ref: '#/components/parameters/XUserIdentityParameter'
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/MultiDocumentDataRetrievalsRequest'
+  /payment-request-retrievals:
+    post:
+      tags:
+      - Retrievals
+      summary: Mastercard Retrieve Payment Request Details.
+      description: Enables DSP to retrieve request for payment using either paymentRequestLifecycleId or paymentRequestReferenceNumber to present it to the debtor and obtain consent for funds transfer.
+      operationId: retrievePaymentRequest
+      parameters:
+      - $ref: '#/components/parameters/X-Request-ID'
+      - $ref: '#/components/parameters/X-Product-ID'
+      - $ref: '#/components/parameters/X-Participant-ID'
+      - $ref: '#/components/parameters/X-JWS-Signature'
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentRequestDetailRetrievalRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentRequestDetailRetrievalResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorisedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /agreement-retrievals:
+    post:
+      tags:
+      - Retrievals
+      summary: Mastercard Retrieve Agreement Details
+      description: Enables DSP to retrieve agreement details, either agreementId or agreementReferenceNumber must be provided to retrieve agreement details.
+      operationId: retrieveAgreement
+      parameters:
+      - $ref: '#/components/parameters/X-Request-ID'
+      - $ref: '#/components/parameters/X-Product-ID'
+      - $ref: '#/components/parameters/X-Participant-ID'
+      - $ref: '#/components/parameters/X-JWS-Signature'
+      requestBody:
+        $ref: '#/components/requestBodies/RetrieveAgreementRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/RetrieveAgreementResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorisedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /payment-requests/{payment_request_lifecycle_id}/refunds/{refund_request_lifecycle_id}/status-retrievals:
+    post:
+      tags:
+      - Retrievals
+      summary: Mastercard Refund Request Status Retrieval Request
+      description: Enables DSP to enquire about the status of Refund Request.
+      operationId: retrieveRefundStatus
+      parameters:
+      - $ref: '#/components/parameters/X-Request-ID'
+      - $ref: '#/components/parameters/X-Product-ID'
+      - $ref: '#/components/parameters/X-Participant-ID'
+      - $ref: '#/components/parameters/X-JWS-Signature'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      - $ref: '#/components/parameters/refund_request_lifecycle_id'
+      - $ref: '#/components/parameters/payment_request_lifecycle_id'
+      requestBody:
+        $ref: '#/components/requestBodies/RefundRequestStatusRetrievalRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/RefundRequestStatusRetrievalResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorisedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  schemas:
+    TpAuditMetadata:
+      required:
+      - sessionId
+      - transactionGroupId
+      type: object
+      description: Object containing metadata related to the request.
+      properties:
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+    Locale:
+      type: string
+      description: IETF BCP 47 code which identifies the language to be used in any dialogs being shown to the user during the flow.  The default value is "en-US".
+      pattern: ^[a-z]{2}-[a-zA-Z]{2}$
+      example: en-US
+    AddressData:
+      type: object
+      properties:
+        addressLine1:
+          type: string
+          description: Address line 1.
+          minLength: 1
+          maxLength: 255
+          example: 36271 GrandRiver Ave
+        addressLine2:
+          type: string
+          description: Address line 2.
+          minLength: 1
+          maxLength: 255
+          example: Building no 2
+        addressZipCode:
+          type: string
+          description: Zip code.
+          minLength: 1
+          maxLength: 255
+          example: 48335
+        addressCity:
+          type: string
+          description: City.
+          minLength: 1
+          maxLength: 255
+          example: Farmington
+        addressSubdivision:
+          type: string
+          description: Subdivision of the user address, possible values include county, state, province, and municipality.
+          minLength: 2
+          maxLength: 2
+          example: MO
+        addressCountry:
+          type: string
+          description: Country provided in the address from the scanned document.
+          minLength: 1
+          maxLength: 255
+          example: USA
+    DocumentDataStatus:
+      description: Object containing the details of the document whose accuracy has been confirmed by the user.
+      required:
+      - dateOfBirth
+      - documentNumber
+      - documentStatus
+      - documentType
+      - expiryDate
+      - firstName
+      - gender
+      - issuingCountry
+      - issuingDate
+      - lastName
+      allOf:
+      - $ref: '#/components/schemas/DocumentData'
+      - type: object
+        properties:
+          documentStatus:
+            type: string
+            description: Document status.
+            minLength: 1
+            maxLength: 7
+            example: SUCCESS
+    BaseEvidenceData:
+      type: object
+      properties:
+        lastName:
+          type: string
+          description: Last name.
+          minLength: 1
+          maxLength: 255
+          example: Doe
+        firstName:
+          type: string
+          description: First name.
+          minLength: 1
+          maxLength: 255
+          example: John
+        dateOfBirth:
+          type: string
+          description: Date of birth.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        issuingCountry:
+          type: string
+          description: Country code.
+          minLength: 1
+          maxLength: 255
+          example: USA
+        issuingDate:
+          type: string
+          description: Issuing date.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        expiryDate:
+          type: string
+          description: Expiry date.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        gender:
+          type: string
+          description: M/F.
+          example: M
+          minLength: 1
+          maxLength: 1
+        fathersName:
+          type: string
+          description: Father's Name. This will only be available when the Brazilian DL is scanned. scanned.
+          minLength: 1
+          maxLength: 255
+          example: John Smith
+        mothersName:
+          type: string
+          description: Mother's Name. This will only be available when the Brazilian DL is scanned.
+          minLength: 1
+          maxLength: 255
+          example: Paula Smith
+    PDS:
+      type: string
+      description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
+      pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+      minLength: 1
+      example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    DocumentData:
+      description: Object containing the details of the document whose accuracy has been confirmed by the user.
+      required:
+      - dateOfBirth
+      - documentNumber
+      - documentStatus
+      - documentType
+      - expiryDate
+      - firstName
+      - gender
+      - issuingCountry
+      - issuingDate
+      - lastName
+      allOf:
+      - $ref: '#/components/schemas/AddressData'
+      - $ref: '#/components/schemas/BaseEvidenceData'
+      - type: object
+        properties:
+          documentNumber:
+            type: string
+            description: Document number.
+            minLength: 1
+            maxLength: 255
+            example: 1LViI488YkFZh8YjNlLf61BMn29cmQn
+          documentType:
+            type: string
+            description: The type of the document as specified by the user.
+            minLength: 1
+            maxLength: 50
+            example: passport
+          issuingPlace:
+            type: string
+            description: Issuing place.
+            minLength: 1
+            maxLength: 50
+            example: New York
+          issuingAuthority:
+            type: string
+            description: Issuing authority.
+            minLength: 1
+            maxLength: 50
+            example: United States
+          placeOfBirth:
+            type: string
+            description: Place of birth.
+            minLength: 1
+            maxLength: 255
+            example: Boston
+          issuingState:
+            type: string
+            description: State.
+            minLength: 2
+            maxLength: 100
+            example: MO
+          formattedAddress:
+            type: string
+            description: Formatted address.
+            minLength: 1
+            maxLength: 200
+            example: 220 BLVD O FALLON MO
+          rgNumber:
+            type: string
+            description: RG Number. This will only be available when the Brazilian DL is scanned.
+            minLength: 1
+            maxLength: 255
+            example: 12345
+          cpf:
+            type: string
+            description: CPF Number. This will only be available when the Brazilian DL is scanned.
+            minLength: 1
+            maxLength: 255
+            example: 12345
+          cardNumber:
+            type: string
+            description: The Driver's License card number was introduced to the Australian Driver's License as a verifiable field. It is currently only available for six Australian jurisdictions. This field is optional.
+            minLength: 1
+            maxLength: 255
+            example: C876687JK
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      description: The error response model used by all the API endpoints.
+      properties:
+        Errors:
+          required:
+          - Error
+          type: object
+          description: The error response model used by all the API endpoints.
+          properties:
+            Error:
+              type: array
+              description: A list of Error objects.
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The source of the problem. That is where the error occurred.
+                    example: mids
+                  ReasonCode:
+                    type: string
+                    description: A code defining the error, as defined in documentation.
+                    example: USER_PROFILE_ID_NOT_FOUND
+                  Description:
+                    type: string
+                    description: A description of this specific occurrence of the Reason code.
+                    example: The provided user profile ID does not exist.
+                  Recoverable:
+                    type: boolean
+                    description: Whether or not retrying this request could result in a successful response.
+                    example: false
+                  Details:
+                    type: string
+                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+                    example: User X was not found
+                  redirectUri:
+                    type: string
+                    description: TP will use this URI to redirect to RP.
+                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    AuditEventsItem:
+      type: object
+      properties:
+        dateTime:
+          type: string
+          description: Date and time at which the event is created.
+          minLength: 1
+          maxLength: 29
+          example: '2020-01-28T13:16:01.714-05:00'
+        softwareVersion:
+          type: string
+          description: Software version.
+          minLength: 1
+          maxLength: 30
+          example: 1.0.0
+        userProfileId:
+          type: string
+          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 123ae1aa-6744-433e-879d-7da48d631234
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 28eae1aa-6744-433e-879d-7da48d63e89a
+        logRequestFlow:
+          type: string
+          description: Log Request Flow.
+          minLength: 1
+          maxLength: 255
+          example: CoreSDK-TP
+        logEvent:
+          type: string
+          description: Log Event.
+          minLength: 0
+          maxLength: 255
+          example: ID Enrollment
+        logEventType:
+          type: string
+          description: Log Event Type.
+          minLength: 1
+          maxLength: 255
+          example: User Profile Creation
+        osVersion:
+          type: string
+          description: OS version.
+          minLength: 1
+          maxLength: 255
+          example: Android 5.0
+        deviceMake:
+          type: string
+          description: Device make.
+          minLength: 1
+          maxLength: 255
+          example: Samsung S10
+        type:
+          type: string
+          description: Type of the event.
+          minLength: 1
+          maxLength: 255
+          example: audit
+        audit:
+          type: object
+          description: Represents the audit event.
+          properties:
+            privacyPolicy:
+              type: string
+              description: Version user confirmed.
+              minLength: 1
+              maxLength: 20
+              example: 1.0.0
+            userBiometricConsent:
+              type: string
+              description: User consent to capture details.
+              enum:
+              - 'TRUE'
+              - 'FALSE'
+              - NA
+              minLength: 4
+              maxLength: 5
+              example: 'TRUE'
+            event:
+              type: string
+              description: Event.
+              minLength: 1
+              maxLength: 255
+              example: Document Scan
+            eventType:
+              type: string
+              description: EventType.
+              minLength: 1
+              maxLength: 255
+              example: Enrollment
+            result:
+              type: string
+              description: API Call result.
+              enum:
+              - 'TRUE'
+              - 'FALSE'
+              - FAIL
+              minLength: 4
+              maxLength: 5
+              example: 'TRUE'
+            eventGeneratedSource:
+              type: string
+              description: Event generated source.
+              minLength: 1
+              maxLength: 50
+              example: CoreSDK
+            owner:
+              type: string
+              description: Owner.
+              minLength: 2
+              maxLength: 4
+              example: TP
+            requestDetails:
+              type: object
+              description: Request Details.
+              example: Request URL
+            responseDetails:
+              type: object
+              description: Response Details.
+              example: Response Data
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
+    DocumentDataRetrieval:
+      required:
+      - countryCode
+      - workflowId
+      - userConsent
+      - userProfileId
+      - locale
+      - userSelectedCountry
+      - documentType
+      type: object
+      properties:
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        userSelectedCountry:
+          type: string
+          description: An ISO 3166-1 alpha-3 code corresponding to the issuing country of the document as specified by the user.
+          pattern: ^[a-zA-Z]{3}$
+          maxLength: 3
+          example: USA
+        documentType:
+          type: string
+          description: The type of the document as specified by the user.
+          enum:
+          - PASSPORT
+          - DRIVING_LICENSE
+          minLength: 8
+          maxLength: 15
+          example: PASSPORT
+        locale:
+          $ref: '#/components/schemas/Locale'
+        userProfileId:
+          type: string
+          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          maxLength: 36
+          example: df52649e-4096-456a-bca0-751ee470009f
+        workflowId:
+          type: string
+          description: UUID returned to the TP after the initial enrollment / re-authentication is completed, which is used to return the outcome of the associated verification process.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: df52649e-4096-456a-bca0-751ee470009f
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        privacyPolicyVersion:
+          type: string
+          description: The version of the privacy policy which the API call is being conducted under, this can be retrieved from the MIDS Core SDK.
+          minLength: 1
+          maxLength: 20
+          example: 1.0.0
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    UserConsent:
+      enum:
+      - ACCEPT
+      - DECLINE
+      - REVOKE
+      - EXPIRE
+      type: string
+      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
+      pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+      minLength: 6
+      maxLength: 7
+      example: ACCEPT
+    MultiDocumentDataRetrieval:
+      required:
+      - countryCode
+      - workflowId
+      - userConsent
+      - userProfileId
+      - locale
+      - pds
+      allOf:
+      - type: object
+        properties:
+          pds:
+            $ref: '#/components/schemas/PDS'
+      - $ref: '#/components/schemas/DocumentDataRetrieval'
+    DocumentVerificationExtractedData:
+      required:
+      - status
+      - transactionId
+      type: object
+      properties:
+        documentData:
+          $ref: '#/components/schemas/DocumentDataStatus'
+        status:
+          description: The status of the Status API, possible values are SUCCESS and PENDING.
+          type: string
+          minLength: 1
+          maxLength: 10
+          example: SUCCESS
+        transactionId:
+          type: string
+          description: A random 128-bit. UUID represents the MIDS transaction.
+          minLength: 36
+          maxLength: 36
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+    ARID:
+      type: string
+      description: A unique identifier for any activity being executed arising out of a Claim Share request. This value is passed as a parameter in the URL redirecting a User to the TP Flow during a Claim Share.
+      format: uuid
+      pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+      minLength: 36
+      maxLength: 36
+      example: a15fa6de-b199-11eb-8529-0242ac130003
+    CountryCode:
+      type: string
+      description: The country code of the country where the transaction originates from.
+      pattern: ^[a-zA-Z]{2}$
+      example: US
+    NewAgreementDetailRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - debtor
+        - agreement
+        properties:
+          debtor:
+            $ref: '#/components/schemas/Debtor'
+          agreement:
+            $ref: '#/components/schemas/AgreementForAgmtRetrieval'
+    NewRefundRequestStatusRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - refundRequestLifecycleId
+        - paymentRequestLifecycleId
+        - debtor
+        properties:
+          paymentRequestLifecycleId:
+            type: string
+            minLength: 1
+            maxLength: 35
+            example: '923123123123123100'
+            description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+          refundRequestLifecycleId:
+            type: string
+            example: 0123901239100
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the refund request in subsequent transactions or services.
+          debtor:
+            $ref: '#/components/schemas/DebtorForSRR'
+    CreditorAckForPaymentRetrieval:
+      type: object
+      required:
+      - creditorId
+      - creditorServiceProviderId
+      - creditorTradeName
+      - creditorCategoryCode
+      properties:
+        creditorId:
+          type: string
+          example: VerizonoMobile000588
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the Creditor by the CSP.
+        creditorServiceProviderId:
+          type: string
+          example: '000645'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the CSP during Mastercard onboarding.
+        creditorCategoryCode:
+          type: string
+          example: '0742'
+          minLength: 4
+          maxLength: 4
+          description: The category code of the Creditor, also known as Merchant Category Code (MCC). Enables the classification of Creditors into specific categories based on the type of business, trade or services supplied.
+        creditorTradeName:
+          type: string
+          example: VerizonoMobileLtd
+          minLength: 1
+          maxLength: 35
+          description: Name used by the Creditor in dealing with customers, which may not be the same as the one it uses for legal purposes.
+        creditorReturnString:
+          type: string
+          example: https://www.creditor.com/creditorreturnstring
+          minLength: 1
+          maxLength: 512
+          description: Return string (in URL encoded format) that is passed to the DSP to return the Debtor back to the Creditor's page.
+        creditorLogoUrl:
+          type: string
+          example: https://www.cdn.com/creditorlogourl
+          minLength: 1
+          maxLength: 512
+          description: Creditor's Logo (in URL encoded format). Can be used by the Debtor to display the Creditor's Logo.
+        creditorAccount:
+          type: object
+          required:
+          - accountNumber
+          description: Creditor's Account Information. Either the IBAN or account number should be used. This is provided only for Me-to-Me payments.
+          properties:
+            accountNumber:
+              type: string
+              x-guarded-string: 'true'
+              example: '45122351223323'
+              minLength: 1
+              maxLength: 35
+              description: Unique identifier for each account assigned by a financial institution or wallet provider. For example, IBAN. If sort code or routing number is 451223 and account number is 51223323, then after concatenation, the account number will be 45122351223323.
+            clearingSystem:
+              type: string
+              example: FPS
+              minLength: 1
+              maxLength: 35
+              description: Creditor or CSP requested real-time settlement method. * Refer to Codes and Formats section for more details.
+          example: example_value
+        creditorAccounts:
+          type: array
+          deprecated: true
+          description: Creditor's Account Information. Either of the IBAN or Other account should be used. (This "creditorAccounts" block is deprecated, use "creditorAccount" block)
+          items:
+            type: object
+            properties:
+              iban:
+                type: string
+                x-guarded-string: 'true'
+                example: GB54HBUK60161331926819
+                minLength: 1
+                maxLength: 35
+                description: International Bank Account Number to uniquely identify the account.
+              other:
+                type: object
+                description: Unique identification of an account.
+                required:
+                - accountNumber
+                properties:
+                  accountNumber:
+                    type: string
+                    x-guarded-string: 'true'
+                    example: '45122351223323'
+                    minLength: 1
+                    maxLength: 35
+                    description: Unique Identifier for each account assigned by a financial institution. For example, if sort code or routing number is 451223 and account number is 51223323, then after concatenation the account number will be 45122351223323.
+              clearingSystems:
+                type: array
+                items:
+                  type: string
+                example:
+                - FPS
+                description: Creditor or CSP requested real-time settlement method. * Refer to Codes and Formats section for more details.
+          example: []
+    RefundRequestStatusRetrievalAck:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock'
+      - type: object
+        required:
+        - refundRequestStatusRetrievalLifecycleId
+        - retrievalRequestStatus
+        properties:
+          refundRequestStatusRetrievalLifecycleId:
+            type: string
+            example: '111123123123123111'
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the Refund Request Status Retrieval request in subsequent transactions or services.
+          retrievalRequestStatus:
+            type: string
+            example: WFPC
+            minLength: 1
+            maxLength: 35
+            description: Informs the status of the Retrieval Request. * Refer to Codes and Formats section for more details.
+    NewPaymentRequestDetailRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - transaction
+        properties:
+          transaction:
+            $ref: '#/components/schemas/TransactionForPaymentRetrieval'
+    AgreementDetailRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock'
+      - type: object
+        required:
+        - confirmationExpiryTimeInterval
+        - creditor
+        - agreement
+        properties:
+          confirmationExpiryTimeInterval:
+            type: number
+            example: 150
+            description: Time window given in seconds within which the Agreement Confirmation must be received by the Mastercard.
+          categoryPurpose:
+            type: string
+            example: EP2M
+            minLength: 1
+            maxLength: 35
+            description: Set by the Creditor/CSP to offer specific transaction processing. * Refer to Codes and Formats section for more details.
+          creditor:
+            $ref: '#/components/schemas/CreditorAckForAgmtRetrieval'
+          agreement:
+            $ref: '#/components/schemas/AgreementAckForAgmtRetrieval'
+    DebtorAckForPaymentRetrieval:
+      type: object
+      required:
+      - debtorId
+      - debtorServiceProviderId
+      properties:
+        debtorId:
+          type: string
+          example: Fxrsi5345
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the Debtor provided to Mastercard by the DSP.
+        debtorServiceProviderId:
+          type: string
+          example: 000369
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the DSP during Mastercard onboarding.
+    MessageResponseBlock:
+      type: object
+      required:
+      - messageId
+      - creationDateTime
+      - initiatingPartyId
+      - originalMessageId
+      properties:
+        initiatingPartyId:
+          type: string
+          example: ZAPP
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the message sender.
+        messageId:
+          type: string
+          example: 3bef00e542ec4be583b1b5d449799084
+          minLength: 1
+          maxLength: 35
+          description: A point-to-point unique identifier is assigned to every message by the message initiator.
+        creationDateTime:
+          type: string
+          example: '2020-11-20T06:57:24.465Z'
+          format: date-time
+          description: ISO 8601 format date and time in Coordinated Universal Time (UTC) when this message was created.
+        originalMessageId:
+          type: string
+          example: 7eab4eab35a542e085add0363a49c035
+          minLength: 1
+          maxLength: 35
+          description: Original message identifier generated and sent by the initiator of the request message.
+    TransactionAcknowledgement:
+      type: object
+      required:
+      - endToEndId
+      - instructedAmount
+      - paymentRequestLifecycleId
+      - categoryPurpose
+      - confirmationExpiryTimeInterval
+      - paymentRequestType
+      - instructionId
+      - transactionCreationDateTime
+      - purpose
+      properties:
+        paymentRequestLifecycleId:
+          type: string
+          example: '923123123123123100'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+        endToEndId:
+          type: string
+          example: 7jhg5eab35a542e085add0363a4423o6
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Creditor to identify Payment Request in their system.
+        instructionId:
+          type: string
+          example: 98dj4eab35a542e085add0363a40jk564
+          minLength: 1
+          maxLength: 60
+          description: Unique identifier for the transaction assigned by the transaction initiator (CSP).
+        accountServicerReference:
+          type: string
+          example: '12254935976349875'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard, to identify a particular payment (also referred to as settlement identifier) associated with a Payment Request.
+        reconId:
+          type: string
+          example: RECON1201202201
+          minLength: 1
+          maxLength: 15
+          description: Reconciliation identifier assigned by Mastercard to the transaction.
+        confirmationExpiryTimeInterval:
+          type: number
+          example: 150
+          description: Time window given in seconds within which the Payment Confirmation must be received by the Mastercard.
+        paymentRequestType:
+          type: string
+          example: IMDT
+          minLength: 4
+          maxLength: 4
+          description: Set by the Creditor/CSP to define the settlement type of the Payment Request. * Refer to Codes and Formats section for more details.
+        transactionCreationDateTime:
+          type: string
+          format: date-time
+          example: '2020-11-20T06:57:24.465Z'
+          description: ISO 8601 format date and time in Coordinated Universal Time (UTC) the Payment Request was created.
+        instructedAmount:
+          description: The total amount of the payment request, as specified by the Creditor.
+          allOf:
+          - $ref: '#/components/schemas/Amount'
+          example: example_value
+        purpose:
+          type: string
+          example: ONLN
+          minLength: 1
+          maxLength: 35
+          description: Set by Creditor/CSP to indicate the Payment Request type. * Refer to Codes and Formats section for more details.
+        categoryPurpose:
+          type: string
+          example: PYMT
+          minLength: 1
+          maxLength: 35
+          description: Set by the Creditor/CSP to offer specific transaction processing. * Refer to Codes and Formats section for more details.
+        restriction:
+          type: string
+          example: 18PLUS
+          minLength: 1
+          maxLength: 30
+          description: Set by the Creditor/CSP to communicate any restrictions to be verified by DSP before payment authorization. * Refer to Codes and Formats section for more details.
+        creditAccountAllowed:
+          type: boolean
+          example: true
+          description: Indicator to specify Credit account can be used for the payment.
+        strongCustomerAuthentication:
+          type: boolean
+          example: true
+          description: Indicates a request from Creditor to DSP to step-up authentication for the transaction.
+    AgreementAckForAgmtRetrieval:
+      type: object
+      required:
+      - agreementId
+      - agreementType
+      - agreementStatus
+      properties:
+        agreementId:
+          type: string
+          example: a3e2a749088440eab8b40c926efe2931
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard to the agreement.
+        agreementType:
+          type: string
+          example: AOF
+          minLength: 1
+          maxLength: 4
+          description: Creditor requesting DSP to display to Debtor to setup Agreement during payment confirmation. * Refer to Codes and Formats section for more details.
+        agreementStatus:
+          type: string
+          example: INPR
+          minLength: 4
+          maxLength: 4
+          description: Status of the Agreement. * Refer to Codes and Formats section for more details.
+    Debtor:
+      type: object
+      required:
+      - debtorId
+      - debtorServiceProviderId
+      properties:
+        debtorId:
+          type: string
+          example: Fxrsi5345
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the Debtor provided to Mastercard by the DSP.
+        debtorServiceProviderId:
+          type: string
+          example: 000369
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the DSP during Mastercard onboarding.
+    CreditorAckForAgmtRetrieval:
+      type: object
+      required:
+      - creditorServiceProviderId
+      - creditorId
+      - creditorTradeName
+      - creditorCategoryCode
+      properties:
+        creditorId:
+          type: string
+          example: VerizonoMobile000588
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the Creditor by the CSP.
+        creditorServiceProviderId:
+          type: string
+          example: '000645'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the CSP during Mastercard onboarding.
+        creditorTradeName:
+          type: string
+          example: VerizonoMobileLtd
+          minLength: 1
+          maxLength: 35
+          description: Name used by the Creditor in dealing with customers,  which may not be the same as the one it uses for legal purposes.
+        creditorCategoryCode:
+          type: string
+          example: '0742'
+          minLength: 4
+          maxLength: 4
+          description: The category code of the Creditor, also known as Merchant Category Code (MCC). Enables the classification of Creditors into specific categories based on the type of business, trade or services supplied.
+        creditorLogoUrl:
+          type: string
+          example: https://www.cdn.com/creditorlogourl
+          minLength: 1
+          maxLength: 512
+          description: Creditor's Logo (in URL encoded format). Can be used by the Debtor to display the Creditor's Logo.
+        creditorReturnString:
+          type: string
+          example: https://www.creditor.com/creditorreturnstring
+          minLength: 1
+          maxLength: 512
+          description: Return string (in URL encoded format) that is passed to the DSP to return the Debtor back to the Creditor's page.
+    ErrorWrapper:
+      description: A top level object for errors.
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Amount:
+      required:
+      - currency
+      - value
+      type: object
+      properties:
+        currency:
+          type: string
+          example: GBP
+          maxLength: 3
+          minLength: 3
+          description: ISO 4217 code for Currency.
+        value:
+          type: number
+          example: 100.25
+          description: Amount value.
+    AgreementForAgmtRetrieval:
+      type: object
+      properties:
+        agreementId:
+          type: string
+          example: a3e2a749088440eab8b40c926efe2931
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard to the agreement.
+        agreementReferenceNumber:
+          type: string
+          example: '122549'
+          minLength: 6
+          maxLength: 6
+          description: Unique 6 digit reference used by DSP to retrieve the create agreement request.
+    PaymentRequestDetailRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock'
+      - type: object
+        required:
+        - creditor
+        - debtor
+        - transaction
+        properties:
+          debtor:
+            $ref: '#/components/schemas/DebtorAckForPaymentRetrieval'
+          creditor:
+            $ref: '#/components/schemas/CreditorAckForPaymentRetrieval'
+          transaction:
+            $ref: '#/components/schemas/TransactionAcknowledgement'
+          agreementType:
+            type: string
+            example: AOF
+            minLength: 1
+            maxLength: 4
+            description: Creditor requesting DSP to display to Debtor to setup Agreement during payment confirmation. * Refer to Codes and Formats section for more details.
+    Errors:
+      description: Object that contains the list of errors.
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    DebtorForSRR:
+      type: object
+      required:
+      - debtorId
+      - debtorServiceProviderId
+      properties:
+        debtorId:
+          type: string
+          example: Fxrsi5345
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the Debtor provided to Mastercard by the DSP.
+        debtorServiceProviderId:
+          type: string
+          example: 000369
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the DSP during Mastercard onboarding.
+    ErrorList:
+      description: The list of errors.
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    MessageRequestBlock:
+      type: object
+      required:
+      - messageId
+      - creationDateTime
+      - initiatingPartyId
+      - businessType
+      properties:
+        initiatingPartyId:
+          type: string
+          example: '000545'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the message sender.
+        messageId:
+          type: string
+          example: 7eab4eab35a542e085add0363a49c035
+          minLength: 1
+          maxLength: 35
+          description: A point-to-point unique identifier is assigned to every message by the message initiator.
+        creationDateTime:
+          type: string
+          example: '2020-11-20T06:57:24.465Z'
+          format: date-time
+          description: ISO 8601 format date and time in Coordinated Universal Time (UTC) when this message was created.
+        businessType:
+          type: number
+          example: 3
+          minimum: 1
+          maximum: 999
+          description: Unique identifier assigned by Mastercard to define the commercial product construct. * Refer to Codes and Formats section for more details.
+    TransactionForPaymentRetrieval:
+      type: object
+      required:
+      - debtorServiceProviderId
+      - debtorId
+      - retrieveInitMethod
+      properties:
+        paymentRequestLifecycleId:
+          type: string
+          example: '923123123123123100'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+        debtorId:
+          type: string
+          example: Fxrsi5345
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the Debtor provided to Mastercard by the DSP.
+        debtorServiceProviderId:
+          type: string
+          example: 000369
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the DSP during Mastercard onboarding.
+        retrieveInitMethod:
+          type: string
+          example: INTENT
+          minLength: 1
+          maxLength: 30
+          description: Set by DSP to specify Payment Request retrieval initiation method. * Refer to Codes and Formats section for more details.
+        paymentRequestReferenceNumber:
+          type: string
+          example: '789563'
+          minLength: 6
+          maxLength: 6
+          description: Unique 6 character reference provided by Mastercard to the CSP to be conveyed to the Debtor to make a payment.
+    Error:
+      description: A single error.
+      type: object
+      properties:
+        Source:
+          type: string
+          example: ZAPP
+          description: Source of the error.
+        ReasonCode:
+          type: string
+          example: STVL-9999
+          description: Error Code
+        Description:
+          type: string
+          example: Invalid structure
+          description: Error Description.
+        Recoverable:
+          type: boolean
+          example: false
+          description: Boolean value to specify if error is recoverable or not.
+        Details:
+          type: string
+          example: Invalid structure
+          description: Optional details of the error.
+  requestBodies:
+    MultiDocumentDataRetrievalsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MultiDocumentDataRetrieval'
+      required: true
+    DocumentDataRetrievalsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DocumentDataRetrieval'
+      required: true
+    RetrieveAgreementRequest:
+      required: true
+      description: Retrieve Agreement Request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewAgreementDetailRetrieval'
+    PaymentRequestDetailRetrievalRequest:
+      required: true
+      description: Retrieve Payment Request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewPaymentRequestDetailRetrieval'
+    RefundRequestStatusRetrievalRequest:
+      required: true
+      description: Refund Request Status Retrieval Request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewRefundRequestStatusRetrieval'
+  examples:
+    DocumentExtractedDataExample:
+      value:
+        documentData:
+          addressLine1: 36271 GrandRiver Ave
+          addressLine2: Building no 2
+          addressZipCode: '48335'
+          addressCity: Farmington
+          addressSubdivision: MO
+          addressCountry: USA
+          lastName: Doe
+          firstName: John
+          dateOfBirth: '1996-07-10'
+          issuingCountry: USA
+          issuingDate: '1996-07-10'
+          expiryDate: '1996-07-10'
+          gender: M
+          fathersName: John Smith
+          mothersName: Paula Smith
+          documentNumber: 1LViI488YkFZh8YjNlLf61BMn29cmQn
+          documentType: passport
+          issuingPlace: New York
+          issuingAuthority: United States
+          placeOfBirth: Boston
+          issuingState: MO
+          formattedAddress: 220 BLVD O FALLON MO
+          rgNumber: '12345'
+          cpf: '12345'
+          cardNumber: C876687JK
+          documentStatus: SUCCESS
+        status: SUCCESS
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+    EncryptedPayloadNoPDSExample:
+      value:
+        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyf
+    UserProfileDeletedErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_DELETED
+            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
+            Recoverable: false
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided user profile ID does not exist.
+            Recoverable: false
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+    BadRequestErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: ZAPP
+            ReasonCode: STVL-9999
+            Description: Invalid structure.
+            Recoverable: false
+            Details: Invalid structure
+    UnauthorisedExample:
+      value:
+        Errors:
+          Error:
+          - Source: ZAPP
+            ReasonCode: SECU-9999
+            Description: Invalid signature.
+            Recoverable: false
+            Details: Invalid signature
+  responses:
+    NotFoundError:
+      description: The request didn't match an existing resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    DocumentDataRetrievalsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DocumentVerificationExtractedData'
+          examples:
+            DocumentRetrievalUnencryptedResponse:
+              $ref: '#/components/examples/DocumentExtractedDataExample'
+            DocumentRetrievalEncryptedResponse:
+              $ref: '#/components/examples/EncryptedPayloadNoPDSExample'
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
+    PaymentRequestDetailRetrievalResponse:
+      description: Payment Request creation successful.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+        X-JWS-Signature:
+          $ref: '#/components/headers/X-JWS-Signature'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentRequestDetailRetrieval'
+    BadRequestErrorResponse:
+      description: 'Invalid structure: The header or payload fails syntax or structural validation.'
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestErrorExample:
+              $ref: '#/components/examples/BadRequestErrorExample'
+    RefundRequestStatusRetrievalResponse:
+      description: Refund Request Status Retrieval Request was successfully received by Mastercard.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RefundRequestStatusRetrievalAck'
+    RetrieveAgreementResponse:
+      description: Retrieve Agreement Request Successful.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+        X-JWS-Signature:
+          $ref: '#/components/headers/X-JWS-Signature'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AgreementDetailRetrieval'
+    UnauthorisedErrorResponse:
+      description: Invalid signature. The service fails signature validation.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/UnauthorisedExample'
+  parameters:
+    XEncryptedPayload:
+      in: header
+      name: X-Encrypted-Payload
+      type: boolean
+      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
+
+        '
+      example: true
+      schema: null
+    XUserIdentityParameter:
+      in: header
+      name: X-User-Identity
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      description: 'JWT token for session validation. Returned as response header in previous API calls with key X-User-Identity.
+
+        '
+      schema:
+        type: string
+    X-JWS-Signature:
+      name: X-JWS-Signature
+      in: header
+      required: true
+      description: JWS detached signature is applied to ensure data integrity.
+      schema:
+        type: string
+        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
+        minLength: 1
+        maxLength: 512
+    X-Participant-ID:
+      name: X-Participant-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: '000545'
+      description: Unique identifier assigned to the participant by Mastercard during onboarding.
+    X-Product-ID:
+      name: X-Product-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product by Mastercard and given to the participant.
+    Idempotency-Key:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Unique identifier generated by the participant. Mastercard uses this identifier to recognize subsequent retries of the same request and ensure idempotent behaviour by sending the same response without repeating the operation again.
+      schema:
+        type: string
+        format: uuid
+        example: 7da7a728-f910-11e6-942a-68f728c1ba70
+        minLength: 1
+        maxLength: 36
+    refund_request_lifecycle_id:
+      name: refund_request_lifecycle_id
+      in: path
+      required: true
+      description: Unique identifier assigned by Mastercard, to identify the refund request in subsequent transactions or services.
+      schema:
+        type: string
+        example: '245566173931134008'
+        minLength: 1
+        maxLength: 35
+    payment_request_lifecycle_id:
+      name: payment_request_lifecycle_id
+      in: path
+      required: true
+      description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+      schema:
+        type: string
+        example: '128361739311340082'
+        minLength: 1
+        maxLength: 35
+    X-Request-ID:
+      name: X-Request-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: 7eab4eab35a542e085add0363a49c035
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and used for tracing, troubleshooting and analysis purposes.
+  headers:
+    X-Participant-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: '000545'
+      description: Unique identifier assigned to the participant by Mastercard during onboarding.
+    X-JWS-Signature:
+      required: true
+      description: JWS detached signature is applied to ensure data integrity.
+      schema:
+        type: string
+        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
+        minLength: 1
+        maxLength: 512
+    X-Request-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: 7eab4eab35a542e085add0363a49c035
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and for tracing, troubleshooting and analysis purposes.
+    X-Product-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product by Mastercard and given to the participant.

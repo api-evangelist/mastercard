@@ -1,0 +1,818 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Otps API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Otps
+paths:
+  /sms-otps:
+    post:
+      tags:
+      - Otps
+      responses:
+        '200':
+          $ref: '#/components/responses/SmsOtpsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+      description: 'Generate and send via SMS an OTP along with a message body to the
+
+        provided phone number. Does not require a minimum authentication standard.
+
+        **This API is mandatory.**
+
+        '
+      summary: "Add & Validate a Phone Number \tRequest an OTP Code."
+      operationId: createSMSOTP
+      parameters:
+      - $ref: '#/components/parameters/XUserIdentityParameter'
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/SmsOtpsRequest'
+components:
+  schemas:
+    SMSOtp:
+      required:
+      - countryCode
+      - userConsent
+      - pds
+      - phoneNumber
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: The phone number to which to send the OTP. It should be prefixed with the international dialing code, without the '+'.
+          pattern: ^[1-9]\d{2,14}$
+          minLength: 1
+          maxLength: 15
+          example: '553453554563'
+        locale:
+          $ref: '#/components/schemas/Locale'
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        pds:
+          $ref: '#/components/schemas/PDS'
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    TpAuditMetadata:
+      required:
+      - sessionId
+      - transactionGroupId
+      type: object
+      description: Object containing metadata related to the request.
+      properties:
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+    Locale:
+      type: string
+      description: IETF BCP 47 code which identifies the language to be used in any dialogs being shown to the user during the flow.  The default value is "en-US".
+      pattern: ^[a-z]{2}-[a-zA-Z]{2}$
+      example: en-US
+    PDS:
+      type: string
+      description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
+      pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+      minLength: 1
+      example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      description: The error response model used by all the API endpoints.
+      properties:
+        Errors:
+          required:
+          - Error
+          type: object
+          description: The error response model used by all the API endpoints.
+          properties:
+            Error:
+              type: array
+              description: A list of Error objects.
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The source of the problem. That is where the error occurred.
+                    example: mids
+                  ReasonCode:
+                    type: string
+                    description: A code defining the error, as defined in documentation.
+                    example: USER_PROFILE_ID_NOT_FOUND
+                  Description:
+                    type: string
+                    description: A description of this specific occurrence of the Reason code.
+                    example: The provided user profile ID does not exist.
+                  Recoverable:
+                    type: boolean
+                    description: Whether or not retrying this request could result in a successful response.
+                    example: false
+                  Details:
+                    type: string
+                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+                    example: User X was not found
+                  redirectUri:
+                    type: string
+                    description: TP will use this URI to redirect to RP.
+                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    AuditEventsItem:
+      type: object
+      properties:
+        dateTime:
+          type: string
+          description: Date and time at which the event is created.
+          minLength: 1
+          maxLength: 29
+          example: '2020-01-28T13:16:01.714-05:00'
+        softwareVersion:
+          type: string
+          description: Software version.
+          minLength: 1
+          maxLength: 30
+          example: 1.0.0
+        userProfileId:
+          type: string
+          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 123ae1aa-6744-433e-879d-7da48d631234
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 28eae1aa-6744-433e-879d-7da48d63e89a
+        logRequestFlow:
+          type: string
+          description: Log Request Flow.
+          minLength: 1
+          maxLength: 255
+          example: CoreSDK-TP
+        logEvent:
+          type: string
+          description: Log Event.
+          minLength: 0
+          maxLength: 255
+          example: ID Enrollment
+        logEventType:
+          type: string
+          description: Log Event Type.
+          minLength: 1
+          maxLength: 255
+          example: User Profile Creation
+        osVersion:
+          type: string
+          description: OS version.
+          minLength: 1
+          maxLength: 255
+          example: Android 5.0
+        deviceMake:
+          type: string
+          description: Device make.
+          minLength: 1
+          maxLength: 255
+          example: Samsung S10
+        type:
+          type: string
+          description: Type of the event.
+          minLength: 1
+          maxLength: 255
+          example: audit
+        audit:
+          type: object
+          description: Represents the audit event.
+          properties:
+            privacyPolicy:
+              type: string
+              description: Version user confirmed.
+              minLength: 1
+              maxLength: 20
+              example: 1.0.0
+            userBiometricConsent:
+              type: string
+              description: User consent to capture details.
+              enum:
+              - 'TRUE'
+              - 'FALSE'
+              - NA
+              minLength: 4
+              maxLength: 5
+              example: 'TRUE'
+            event:
+              type: string
+              description: Event.
+              minLength: 1
+              maxLength: 255
+              example: Document Scan
+            eventType:
+              type: string
+              description: EventType.
+              minLength: 1
+              maxLength: 255
+              example: Enrollment
+            result:
+              type: string
+              description: API Call result.
+              enum:
+              - 'TRUE'
+              - 'FALSE'
+              - FAIL
+              minLength: 4
+              maxLength: 5
+              example: 'TRUE'
+            eventGeneratedSource:
+              type: string
+              description: Event generated source.
+              minLength: 1
+              maxLength: 50
+              example: CoreSDK
+            owner:
+              type: string
+              description: Owner.
+              minLength: 2
+              maxLength: 4
+              example: TP
+            requestDetails:
+              type: object
+              description: Request Details.
+              example: Request URL
+            responseDetails:
+              type: object
+              description: Response Details.
+              example: Response Data
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
+    UserConsent:
+      enum:
+      - ACCEPT
+      - DECLINE
+      - REVOKE
+      - EXPIRE
+      type: string
+      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
+      pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+      minLength: 6
+      maxLength: 7
+      example: ACCEPT
+    CreatedSMSOtp:
+      allOf:
+      - $ref: '#/components/schemas/Otp'
+    ARID:
+      type: string
+      description: A unique identifier for any activity being executed arising out of a Claim Share request. This value is passed as a parameter in the URL redirecting a User to the TP Flow during a Claim Share.
+      format: uuid
+      pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+      minLength: 36
+      maxLength: 36
+      example: a15fa6de-b199-11eb-8529-0242ac130003
+    Otp:
+      required:
+      - otpId
+      - pds
+      - transactionId
+      type: object
+      properties:
+        otpId:
+          type: string
+          description: A random 128-bit UUID represents an OTP request.
+          minLength: 36
+          maxLength: 36
+          example: 47281d64-9784-400f-9dfe-c098e9a92bc6
+        transactionId:
+          type: string
+          description: A random 128-bit UUID for the transaction.
+          minLength: 36
+          maxLength: 36
+          example: 3a86f4b9-bc2d-4fac-822e-0488aafb8971
+        pds:
+          $ref: '#/components/schemas/PDS'
+    CountryCode:
+      type: string
+      description: The country code of the country where the transaction originates from.
+      pattern: ^[a-zA-Z]{2}$
+      example: US
+    SMSOtp_2:
+      required:
+      - countryCode
+      - phoneNumber
+      type: object
+      properties:
+        countryCode:
+          maxLength: 2
+          description: The ISO 3166-1 alpha2 code which corresponds to the country from where the request to ID is originating from.
+          type: string
+          example: BR
+          pattern: ^[a-zA-Z]{2}$
+        phoneNumber:
+          maxLength: 15
+          description: The phone number in which to send the OTP to. It should be prefixed with the international dialing code, without the '+'.
+          type: string
+          pattern: ^[1-9]\d{2,14}$
+          example: '553453554563'
+        locale:
+          description: The IETF BCP 47 value which determines the language variant to be applied in the OTP messages.
+          type: string
+          example: en-GB
+          default: en-US
+          pattern: ^[a-z]{2}-[a-zA-Z]{2}$
+        userConsent:
+          description: The value which best reflects the input of the User with regard to consent to use their data.
+          enum:
+          - ACCEPT
+          - DECLINE
+          - REVOKE
+          - EXPIRE
+          type: string
+          example: ACCEPT
+    ApiError:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Errors:
+      description: List of Errors.
+      example:
+        $ref: '#/components/examples/NotFoundExample'
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    Otp_2:
+      required:
+      - otpId
+      - transactionId
+      type: object
+      properties:
+        otpId:
+          description: A random 128-bit UUID representing otp request.
+          type: string
+          example: 471dddb6-7204-4ac6-a94a-fdeb7a094a85
+          minLength: 36
+          maxLength: 36
+        transactionId:
+          description: The transaction ID provided in the API response must be logged by the Relying Party. The Relying Party is required to provide the transaction ID when contacting the Mastercard customer support team.
+          type: string
+          example: bd400bde-8ae1-4d7b-a39e-ebebb94e6d08
+          minLength: 36
+          maxLength: 36
+    ErrorList:
+      description: Error Details.
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    Error:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of where the error occured.
+          example: mids
+        ReasonCode:
+          type: string
+          description: Code of the error.
+          example: USER_PROFILE_ID_NOT_FOUND
+        Description:
+          type: string
+          description: The cause of the error
+          example: The provided userProfileId does not exist
+        Recoverable:
+          type: boolean
+          description: Indiciates if the error can be recovered from.
+          example: false
+        Details:
+          type: string
+          description: Contains information about the error.
+          example: IOException Occured
+  responses:
+    UnauthorizedError:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    SmsOtpsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreatedSMSOtp'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
+    UnauthorizedError_2:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    SmsOtpGenerationSuccessResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          $ref: '#/components/headers/X-Transaction-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Otp_2'
+          examples:
+            OtpExample:
+              $ref: '#/components/examples/OtpExample'
+            EncryptedPayloadExample:
+              $ref: '#/components/examples/EncryptedPayloadExample'
+    ForbiddenError_2:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields_2'
+    BadRequestError_2:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            BadRequestExampleUserConsent:
+              $ref: '#/components/examples/BadRequestExampleUserConsent'
+            BadRequestExampleCountryCode:
+              $ref: '#/components/examples/BadRequestExampleCountryCode'
+            BadRequestExamplePhoneNumber:
+              $ref: '#/components/examples/BadRequestExamplePhoneNumber'
+            BadRequestExampleIVPConnectionTimeout:
+              $ref: '#/components/examples/BadRequestExampleIVPConnectionTimeout'
+            BadRequestExampleIVPSystemError:
+              $ref: '#/components/examples/BadRequestExampleIVPSystemError'
+            BadRequestExampleMedicareExpireDate:
+              $ref: '#/components/examples/BadRequestExampleMedicareExpireDate'
+            BadRequestExampleMedicareName:
+              $ref: '#/components/examples/BadRequestExampleMedicareName'
+            BadRequestExampleMedicareIndividualReferenceNo:
+              $ref: '#/components/examples/BadRequestExampleMedicareIndividualReferenceNo'
+            BadRequestExampleMedicareMedicareNumber:
+              $ref: '#/components/examples/BadRequestExampleMedicareMedicareNumber'
+            BadRequestExampleMedicareCountryCode:
+              $ref: '#/components/examples/BadRequestExampleMedicareCountryCode'
+            BadRequestExampleMedicareUserConsent:
+              $ref: '#/components/examples/BadRequestExampleMedicareUserConsent'
+            BadRequestExampleDocumentMismatch:
+              $ref: '#/components/examples/BadRequestExampleDocumentMismatch'
+  examples:
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
+            Recoverable: false
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+    UserProfileDeletedErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_DELETED
+            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
+            Recoverable: false
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    EncryptedPayloadWithPDSExample:
+      value:
+        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyf
+        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    SmsOtpsRequestExample:
+      value:
+        phoneNumber: '553453554563'
+        locale: en-US
+        countryCode: US
+        userConsent: ACCEPT
+        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        sdkAuditEvents:
+        - dateTime: '2020-01-28T13:16:01.714-05:00'
+          softwareVersion: 1.0.0
+          userProfileId: df52649e-4096-456a-bca0-751ee470009f
+          sessionId: 123ae1aa-6744-433e-879d-7da48d631234
+          transactionGroupId: 28eae1aa-6744-433e-879d-7da48d63e89a
+          logRequestFlow: CoreSDK-TP
+          logEvent: ID Enrollment
+          logEventType: User Profile Creation
+          osVersion: Android 5.0
+          deviceMake: Samsung S10
+          type: audit
+          audit:
+            privacyPolicy: 1.0.0
+            userBiometricConsent: 'TRUE'
+            event: Document Scan
+            eventType: Enrollment
+            result: 'TRUE'
+            eventGeneratedSource: CoreSDK
+            owner: TP
+        tpAuditMetadata:
+          sessionId: be3ad617-04ad-43e1-a438-79425b6511b6
+          transactionGroupId: be3ad617-04ad-43e1-a438-79425b6511b6
+        arid: a15fa6de-b199-11eb-8529-0242ac130003
+        sdkVersion: 2.3.0
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+    BadRequestExampleIVPConnectionTimeout:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: IVP_CONNECTION_TIMEOUT
+            Description: Connection timeout when trying to connect with the Identity Verification Provider. Please look at 'details' for additional information.
+            Recoverable: false
+            Details: Received Connection TimeOut Exception
+    BadRequestExampleCountryCode:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value US4 for 'countryCode'.
+            Recoverable: false
+            Details: null
+    SMSOtpExample:
+      value:
+        countryCode: BR
+        phoneNumber: '553453554563'
+        locale: en-GB
+        userConsent: ACCEPT
+    OtpExample:
+      value:
+        otpId: 568def8e-d17b-11ea-87d0-0242ac12343
+        transactionId: 689def8e-d17b-89ea-87d0-0242ac12343
+    BadRequestExampleIVPSystemError:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: IVP_SYSTEM_ERROR
+            Description: Received system error from the Identity Verification Provider. Please look at 'details' for additional information.
+            Recoverable: false
+            Details: System Error Received
+    BadRequestExampleMedicareName:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'nameLine' field OR value exceeds allowed max characters.
+            Recoverable: false
+            Details: null
+    BadRequestExampleUserConsent:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Unexpected value 'Invalid' for enumerate field.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareCountryCode:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'Country code'.
+            Recoverable: false
+            Details: null
+    ForbiddenExampleUnauthorizedScopedFields_2:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+            Details: null
+    BadRequestExampleDocumentMismatch:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: BAD_REQUEST
+            Description: The document uploaded by the User does not comply to the document type/country specified by the client in the originating access-token request.
+            Recoverable: false
+            Details: null
+    EncryptedPayloadExample:
+      value:
+        encryptedData: eyJraWQiOiIwMTQyNmRhY2JlMmRjYzA3NmQ1OWU1NDQ5N2NiNjBiMjdjZmQwMDE0ZjZmMGQyYTJiN2FmNjExNDg2NjYyMj...
+    BadRequestExampleMedicareIndividualReferenceNo:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'INDIVIDUAL_REFERENCE_NO'.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareExpireDate:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'expiry date'.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareUserConsent:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: User consent not given.
+            Recoverable: false
+            Details: null
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided userProfileId does not exist.
+            Recoverable: false
+    BadRequestExampleMedicareMedicareNumber:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'Medicare card number'.
+            Recoverable: false
+            Details: null
+    BadRequestExamplePhoneNumber:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value ASD for 'phoneNumber'.
+            Recoverable: false
+            Details: null
+  requestBodies:
+    SmsOtpsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SMSOtp'
+          examples:
+            SmsOtpsRequestUnencryptedExample:
+              $ref: '#/components/examples/SmsOtpsRequestExample'
+            SmsOtpRequestEncryptedExample:
+              $ref: '#/components/examples/EncryptedPayloadWithPDSExample'
+      required: true
+    SmsOtpGenerationRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SMSOtp_2'
+          examples:
+            SMSOtpExemple:
+              $ref: '#/components/examples/SMSOtpExample'
+            EncryptedPayloadExample:
+              $ref: '#/components/examples/EncryptedPayloadExample'
+      required: true
+  parameters:
+    XEncryptedPayload:
+      in: header
+      name: X-Encrypted-Payload
+      type: boolean
+      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
+
+        '
+      example: true
+      schema: null
+    XUserIdentityParameter:
+      in: header
+      name: X-User-Identity
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      description: 'JWT token for session validation. Returned as response header in previous API calls with key X-User-Identity.
+
+        '
+      schema:
+        type: string
+    EncryptedPayloadParameter:
+      name: X-Encrypted-Payload
+      in: header
+      description: Whether the request payload is encrypted with the Encyption Key generated from the Developer Zone Portal.
+      example: true
+      required: false
+      schema:
+        type: boolean
+  headers:
+    X-Transaction-ID:
+      schema:
+        type: string
+        example: 2d077b9c-3c06-44ac-b00e-d78fe8cce606
+        description: A random 128-bit UUID representing the transaction.

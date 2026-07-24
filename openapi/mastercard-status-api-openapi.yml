@@ -1,0 +1,1786 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Status API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Status
+paths:
+  /payment-requests/{payment_request_lifecycle_id}/status-retrievals:
+    post:
+      tags:
+      - Status
+      summary: Mastercard Payment Request Status Retrieval Request.
+      description: Enables Mastercard to retrieve payment request status from DSP.
+      operationId: retrievePaymentRequestStatus
+      parameters:
+      - $ref: '#/components/parameters/X-Request-ID'
+      - $ref: '#/components/parameters/X-Product-ID'
+      - $ref: '#/components/parameters/X-Participant-ID'
+      - $ref: '#/components/parameters/X-JWS-Signature'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      - $ref: '#/components/parameters/payment_request_lifecycle_id'
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentRequestStatusRetrievalRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentRequestStatusRetrievalResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorisedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /agreements/{agreement_id}/status-retrievals:
+    post:
+      tags:
+      - Status
+      summary: Mastercard Agreement Request Status Retrieval Request.
+      description: Enables CSP to retrieve agreement status from DSP.
+      operationId: retrieveAgreementStatus
+      parameters:
+      - $ref: '#/components/parameters/X-Request-ID'
+      - $ref: '#/components/parameters/X-Product-ID'
+      - $ref: '#/components/parameters/X-Participant-ID'
+      - $ref: '#/components/parameters/X-JWS-Signature'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      - $ref: '#/components/parameters/agreement_id'
+      requestBody:
+        $ref: '#/components/requestBodies/AgreementRequestStatusRetrievalRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/AgreementRequestStatusRetrievalResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorisedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /srci/{src-client-id}/dpas/batch/status/{batch-id}:
+    get:
+      summary: Mastercard Get Status of the Dpa Add/update Async (batch) Job by Batch Id.
+      description: The GET Status API allows the SRC Initiator to retrieve the status of a DPA Registration request submitted earlier.
+      operationId: getDpaBatchStatus
+      parameters:
+      - $ref: '#/components/parameters/srcCorrelationId'
+      - $ref: '#/components/parameters/srcClientId'
+      - $ref: '#/components/parameters/batchId'
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DpaBatchStatus'
+              examples:
+                Getdpabatchstatus200Example:
+                  summary: Default getDpaBatchStatus 200 response
+                  x-microcks-default: true
+                  value:
+                    requestId: '500123'
+                    batchId: '500123'
+                    batchStatus: COMPLETED_SUCCESSFULLY
+                    batchStartTime: example_value
+                    batchEndTime: example_value
+                    errorMessage: example_value
+                    items:
+                    - action: ADD
+                      serviceId: '500123'
+                      trid: '500123'
+                      programName: example_value
+                      status: SUCCESSFUL
+                      dpaResults: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      tags:
+      - Status
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /payment-requests/{payment_request_lifecycle_id}/refunds/{refund_request_lifecycle_id}/status-retrievals:
+    post:
+      tags:
+      - Status
+      summary: Mastercard Refund Request Status Retrieval Request
+      description: Enables DSP to enquire about the status of Refund Request.
+      operationId: retrieveRefundStatus
+      parameters:
+      - $ref: '#/components/parameters/X-Request-ID'
+      - $ref: '#/components/parameters/X-Product-ID_2'
+      - $ref: '#/components/parameters/X-Participant-ID'
+      - $ref: '#/components/parameters/X-JWS-Signature'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      - $ref: '#/components/parameters/refund_request_lifecycle_id'
+      - $ref: '#/components/parameters/payment_request_lifecycle_id'
+      requestBody:
+        $ref: '#/components/requestBodies/RefundRequestStatusRetrievalRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/RefundRequestStatusRetrievalResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorisedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /alerts/merchants/{member_id}/sub-merchants/{sub_merchant_id}/status-changes:
+    put:
+      tags:
+      - Status
+      summary: Mastercard Change Sub-merchant Status.
+      description: Returns sub-merchant details with updated status.
+      operationId: updateAlertsSubMerchantStatus
+      parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MemberIdParam'
+      - $ref: '#/components/parameters/SubMerchantIdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/AlertsSubMerchantStatusUpdateRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsSubMerchantSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest_2'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound_2'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /vendors/{vendor_id}/orders/status:
+    post:
+      tags:
+      - Status
+      summary: API used by external Vendors to provide the orders status
+      description: The Loyalty Rewards Order Management Mastercard API is used by external vendor to provide orders status
+      operationId: updateOrderStatus
+      parameters:
+      - $ref: '#/components/parameters/VendorId'
+      requestBody:
+        $ref: '#/components/requestBodies/OrderStatusRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestOrderErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedOrderErrorResponse'
+components:
+  schemas:
+    Error_2:
+      type: object
+      description: 'An error object is associated with individual DPA failures in a given batch (assuming a COMPLETED_WITH_ERRORS response).
+
+
+        Please note: In the event of a SUCCESSFUL response, this error object may be sent as NULL.
+
+        '
+      required:
+      - status
+      - reason
+      - message
+      properties:
+        status:
+          format: int32
+          description: HTTP status code associated with the Digital Payment Application (DPA) item error.
+          example: 400, 401, 403, 500
+          type: integer
+        reason:
+          description: Reason for receiving an error for the Digital Payment Application (DPA) item.
+          example: INVALID_VALUE
+          type: string
+          enum:
+          - INVALID_ARGUMENT
+          - INVALID_VALUE
+          - NOT_FOUND
+          - DECLINED
+          - INVALID_STATE
+          - AUTHENTICATION_FAILED
+          - INTERNAL_SERVER_ERROR
+        message:
+          description: Additional details on the Digital Payment Application (DPA) item error.
+          example: Bad request, see error object for details
+          type: string
+        errordetail:
+          description: List of errors associated with a failed Digital Payment Application (DPA) item action.
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+          type: array
+          example: []
+    User:
+      description: Username for the user creating or modifying a resource
+      type: string
+      minLength: 0
+      maxLength: 200
+      example: John Doe
+    AlertsSubMerchantResource:
+      description: Response containing a specific sub-merchant with details
+      type: object
+      properties:
+        subMerchantId:
+          $ref: '#/components/schemas/AlertsMerchantMemberId'
+        name:
+          $ref: '#/components/schemas/MerchantName'
+        merchantType:
+          $ref: '#/components/schemas/MerchantType'
+        status:
+          $ref: '#/components/schemas/MerchantStatus'
+        parentMemberId:
+          $ref: '#/components/schemas/AlertsMerchantMemberId'
+        merchantCategoryCode:
+          $ref: '#/components/schemas/MerchantCategoryCode'
+        createdBy:
+          $ref: '#/components/schemas/CreatedOrModifiedBy'
+        modifiedBy:
+          $ref: '#/components/schemas/CreatedOrModifiedBy'
+        statusUpdateTs:
+          $ref: '#/components/schemas/Timestamp'
+    MerchantStatus:
+      title: Merchant's Status
+      type: string
+      description: Merchant Status must be one of - ACTIVATED, DEACTIVATED
+      minLength: 1
+      maxLength: 50
+      example: ACTIVATED
+    ErrorList:
+      description: The list of errors
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    LastName:
+      title: Last Name
+      maxLength: 30
+      minLength: 1
+      type: string
+      description: The individual's last name
+      example: Fox
+      nullable: true
+    DpaResults:
+      type: object
+      description: Object for individual Digital Payment Application (DPA) item status data.
+      properties:
+        srcDpaId:
+          type: string
+          description: 'The registered identifier for the Digital Payment Application (DPA) accessing the service.
+
+
+            Conditional: Required if you are a Merchant directly integrating with Mastercard Checkout Solutions (MCS) APIs, a Payment Service Provider (PSP) integrating On-Behalf-Of (OBO) a Merchant, a Payment Facilitator, or if you are enrolling in the Secure Card on File (SCOF) QR program.
+
+            '
+          example: 58aed7fe-07d9-11ea-8d71-362b9e155667
+        status:
+          type: string
+          description: 'Status of the individual Digital Payment Application (DPA) item. Potential statuses include:
+
+
+            * SUCCESSFUL - The DPA is eligible to process transactions.
+
+
+            * FAILED - The DPA is NOT eligible to process transactions. Please see the error object for more details."
+
+            '
+          example: SUCCESSFUL
+          enum:
+          - SUCCESSFUL
+          - FAILED
+        dpaName:
+          type: string
+          description: Legal name of Merchant (which may differ from dpaPresentationName).
+          example: Ecom Holdings Online Inc
+        error:
+          $ref: '#/components/schemas/Error_2'
+      example:
+        srcDpaId: 58aed7fe-07d9-11ea-8d71-362b9e155667
+        status: SUCCESSFUL
+        dpaName: TEST_DPA
+        error: null
+    AgreementRequestStatusRetrievalAck:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock'
+      - type: object
+        required:
+        - agreementRequestStatusRetrievalLifecycleId
+        - retrievalRequestStatus
+        properties:
+          agreementRequestStatusRetrievalLifecycleId:
+            type: string
+            example: '111123123123123111'
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the Agreement Request Status Retrieval request in subsequent transactions or services.
+          retrievalRequestStatus:
+            type: string
+            example: WFAC
+            minLength: 1
+            maxLength: 35
+            description: Informs the status of the Retrieval Request. * Refer to Codes and Formats section for more details.
+    NewRefundRequestStatusRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - refundRequestLifecycleId
+        - paymentRequestLifecycleId
+        - debtor
+        properties:
+          paymentRequestLifecycleId:
+            type: string
+            minLength: 1
+            maxLength: 35
+            example: '923123123123123100'
+            description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+          refundRequestLifecycleId:
+            type: string
+            example: 0123901239100
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the refund request in subsequent transactions or services.
+          debtor:
+            $ref: '#/components/schemas/DebtorForSRR'
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors_3'
+      description: Error Response object
+    Errors:
+      description: Object that contains the list of errors
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    DebtorForSRR:
+      type: object
+      required:
+      - debtorId
+      - debtorServiceProviderId
+      properties:
+        debtorId:
+          type: string
+          example: Fxrsi5345
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the Debtor provided to Mastercard by the DSP.
+        debtorServiceProviderId:
+          type: string
+          example: 000369
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the DSP during Mastercard onboarding.
+    MessageRequestBlock:
+      type: object
+      required:
+      - messageId
+      - creationDateTime
+      - initiatingPartyId
+      - businessType
+      properties:
+        initiatingPartyId:
+          type: string
+          example: '000545'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the message sender.
+        messageId:
+          type: string
+          example: 7eab4eab35a542e085add0363a49c035
+          minLength: 1
+          maxLength: 35
+          description: A point-to-point unique identifier is assigned to every message by the message initiator.
+        creationDateTime:
+          type: string
+          format: date-time
+          example: '2020-11-20T06:57:24.465Z'
+          description: ISO 8601 format date and time in Coordinated Universal Time (UTC) when this message was created.
+        businessType:
+          type: number
+          example: 3
+          minimum: 1
+          maximum: 999
+          description: Unique identifier assigned by Mastercard to define the commercial product construct. * Refer to Codes and Formats section for more details.
+    BatchStatusItems:
+      type: object
+      properties:
+        action:
+          example: ADD
+          description: 'The action to be performed on the Digital Payment Application (DPA). The selected action will be applied to all DPAs provided in the items list.
+
+
+            __ADD__ - Add DPA
+
+
+            __UPDATE__ - Update DPA
+
+
+            __DELETE__ - Delete DPA
+
+
+            Note: A limited number of DPA fields can be changed using the ''UPDATE'' action. These are dpaPresentationName, dpaLogoUri, debitTokenRequested,  merchantCategoryCode, and threeDSDefaultData. Please refer to the example for a minimal use case.
+
+            '
+          enum:
+          - ADD
+          - UPDATE
+          - DELETE
+          type: string
+        serviceId:
+          type: string
+          description: A unique identifier assigned by Mastercard for which tokens are created uniquely for the entity onboarded.
+          example: SECURE_COF_MERCHANT_OBO#SRC4M-OBO-ALL4PETS#01
+        trid:
+          description: 'Token Requestors receive a unique identifier, TRID, which represents the consumer-facing entity name to the Issuer
+
+            during the tokenization process. This identifier has a one-to-one relationship with the serviceId.
+
+            <br>
+
+            <br> Note: Reach out to your Mastercard representative to begin receiving trid in API responses.
+
+            '
+          example: '50132184090'
+          type: string
+          minLength: 11
+          maxLength: 11
+        programName:
+          type: string
+          description: 'The Cardholder facing name of the Merchant.
+
+
+            Conditional: Must be supplied when adding Merchants to a Payment Facilitator (PF) program."
+
+            '
+          example: myShop*pay
+        status:
+          type: string
+          description: Indicates the status of an individual Digital Payment Application (DPA) item in a batch.
+          example: SUCCESSFUL
+          enum:
+          - SUCCESSFUL
+          - FAILED
+        error:
+          $ref: '#/components/schemas/Error_2'
+        dpaResults:
+          items:
+            $ref: '#/components/schemas/DpaResults'
+          type: array
+          example: []
+    CreatedOrModifiedBy:
+      description: Timestamp and user responsible for creation or modification of the resource
+      type: object
+      properties:
+        timestamp:
+          $ref: '#/components/schemas/Timestamp'
+        user:
+          $ref: '#/components/schemas/User'
+    ErrorDetail:
+      type: object
+      description: Error associated with a failed Digital Payment Application (DPA) item action.
+      required:
+      - reason
+      properties:
+        reason:
+          description: Reason for receiving an error for the Digital Payment Application (DPA) item.
+          example: INVALID_VALUE
+          type: string
+          enum:
+          - INVALID_ARGUMENT
+          - INVALID_VALUE
+          - NOT_FOUND
+          - DECLINED
+          - INVALID_STATE
+          - AUTHENTICATION_FAILED
+          - INTERNAL_SERVER_ERROR
+        sourceType:
+          description: Indicates the source type of the Digital Payment Application (DPA) item error.
+          example: Request, Response
+          type: string
+        message:
+          description: Additional details on the Digital Payment Application (DPA) item error.
+          example: Invalid data
+          type: string
+        source:
+          description: Indicates the field name for the cause of the Digital Payment Application (DPA) item error.
+          example: dpas
+          type: string
+    UserId:
+      title: User Id
+      maxLength: 300
+      minLength: 1
+      type: string
+      description: The user id of the submitter/technical contact.
+      example: princess.diana
+    AlertsMerchantMemberId:
+      title: Unique identifier for merchants
+      description: Internal Universally Unique Identifier (UUID) which uniquely identifies the merchants
+      type: string
+      format: uuid
+      example: 99ca4b15-72a6-41dd-8127-573d4b07669c
+    AlertsSubMerchantStatusUpdate:
+      description: Request used to update sub-merchant status
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/MerchantStatus'
+      required:
+      - status
+    FirstName:
+      title: First Name
+      maxLength: 30
+      minLength: 1
+      type: string
+      description: The individual's first name
+      example: Michael
+      nullable: true
+    CreditorForSRR:
+      type: object
+      required:
+      - creditorId
+      - creditorServiceProviderId
+      properties:
+        creditorId:
+          type: string
+          example: VerizonoMobile000588
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the Creditor by the CSP.
+        creditorServiceProviderId:
+          type: string
+          example: '000645'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the CSP during Mastercard onboarding.
+    MerchantCategoryCode:
+      title: Merchant Category Code
+      description: A four-digit number listed in ISO 18245 for retail financial services. MCC is used to classify the business by the type of goods or services it provides.
+      type: string
+      maxLength: 4
+      minLength: 0
+      pattern: ^[0-9]*$
+      example: '3002'
+    PaymentRequestStatusRetrievalAck:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock'
+      - type: object
+        required:
+        - paymentRequestStatusRetrievalLifecycleId
+        - retrievalRequestStatus
+        properties:
+          paymentRequestStatusRetrievalLifecycleId:
+            type: string
+            example: '111123123123123111'
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the Payment Request Status Retrieval request in subsequent transactions or services.
+          retrievalRequestStatus:
+            type: string
+            example: WFPC
+            minLength: 1
+            maxLength: 35
+            description: Informs the status of the Retrieval Request. * Refer to Codes and Formats section for more details.
+    Errors_3:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: List of error objects
+          items:
+            $ref: '#/components/schemas/Error_4'
+          example: []
+      description: Errors object
+    MerchantType:
+      title: Merchant's Type
+      description: Merchant Type must be one of - PARTNER, ACQUIRER, SUBMERCHANT
+      type: string
+      minLength: 1
+      maxLength: 50
+      example: SUBMERCHANT
+    DpaBatchStatus:
+      type: object
+      description: The DpaBatchStatus response contains information related to the status of a submitted Digital Payment Application (DPA) batch.
+      properties:
+        requestId:
+          type: string
+          description: This field allows the Integrator to assign an internal reference to a batch request so that it can be used for internal tracking purposes.
+          example: '48192'
+        batchId:
+          type: string
+          description: A unique identifier associated with the submitted Digital Payment Application (DPA) batch. The Batch ID can be used to retrieve the status of the batch by calling GET DPA status endpoint.
+          example: f1f225ed-99c6-4a5e-823d-440c09c7e0a6
+        batchStatus:
+          example: COMPLETED_SUCCESSFULLY
+          description: 'Describes the outcome of the submitted Digital Payment Application (DPA) batch. Possible outcomes include:
+
+
+            * COMPLETED_SUCCESSFULLY - Batch was completed successfully and all DPAs included in the batch are ready to transact.
+
+
+            * COMPLETED_WITH_ERRORS - Batch was completed successfully, but some DPAs included in the batch aren''t ready to transact.
+
+
+            * FAILED -  Batch failed to load.
+
+
+            * IN_PROGRESS - Batch processing in progress.
+
+
+            For a full breakdown of all DPA outcomes in a batch, refer to the items.
+
+            '
+          enum:
+          - COMPLETED_SUCCESSFULLY
+          - COMPLETED_WITH_ERRORS
+          - FAILED
+          - IN_PROGRESS
+          type: string
+        batchStartTime:
+          type: string
+          description: Start time of batch request
+          example: '2023-02-08 07:10:28.0'
+        batchEndTime:
+          type: string
+          description: End time of batch request
+          example: '2023-02-08 07:10:30.0'
+        errorMessage:
+          type: string
+          description: Provides additional information when batchStatus yields a FAILED status.
+          example: Merchant not registered under requested program type
+        items:
+          items:
+            $ref: '#/components/schemas/BatchStatusItems'
+          type: array
+          description: 'An array of status objects that describes the outcome of each Digital Payment Application (DPA) item in a batch request.
+
+
+            Note: DPA item order may differ from original submission."
+
+            '
+          example: []
+      example:
+        requestId: '48192'
+        batchId: f1f225ed-99c6-4a5e-823d-440c09c7e0a6
+        batchStatus: COMPLETED_SUCCESSFULLY
+        batchStartTime: '2023-02-08 07:10:28.0'
+        batchEndTime: '2023-02-08 07:10:30.0'
+        errorMessage: null
+        items:
+        - action: ADD
+          serviceId: SRC
+          trid: '50132184090'
+          programName: Test_Dpa
+          status: SUCCESSFUL
+          error: null
+          dpaResults:
+          - srcDpaId: 58aed7fe-07d9-11ea-8d71-362b9e155667
+            status: SUCCESSFUL
+            dpaName: TEST_DPA
+            error: null
+    NewPaymentRequestStatusRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - paymentRequestLifecycleId
+        - creditor
+        properties:
+          paymentRequestLifecycleId:
+            type: string
+            example: '923123123123123100'
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+          creditor:
+            $ref: '#/components/schemas/CreditorForSRR'
+    Timestamp:
+      description: Timestamp of the creation or modification of the resource
+      type: string
+      minLength: 0
+      maxLength: 50
+      format: date-time
+      example: '2023-04-28T10:30:00.000Z'
+    NewAgreementRequestStatusRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - agreementId
+        - creditor
+        properties:
+          agreementId:
+            type: string
+            example: a3e2a749088440eab8b40c926efe2931
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard to the agreement.
+          creditor:
+            $ref: '#/components/schemas/CreditorForSRR'
+    MerchantName:
+      title: Merchant's Name
+      maxLength: 200
+      minLength: 3
+      type: string
+      description: Merchant's partial or full name.
+      example: Merchant 1
+    Error_4:
+      type: object
+      properties:
+        Source:
+          maxLength: 100
+          minLength: 0
+          type: string
+          description: Source of the error
+          example: Service
+          nullable: true
+        ReasonCode:
+          maxLength: 100
+          minLength: 0
+          type: string
+          description: A unique constant identifying the error
+          example: format.invalid
+          nullable: true
+        Description:
+          maxLength: 1000
+          minLength: 0
+          type: string
+          description: Short description of the error
+          example: Short description of the error
+          nullable: true
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+          example: false
+          default: false
+          nullable: true
+        Details:
+          maxLength: 1000
+          minLength: 0
+          type: string
+          description: Optional detailed description of the issue
+          example: Detailed description of the error
+          nullable: true
+      description: Error object
+    RefundRequestStatusRetrievalAck:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock_2'
+      - type: object
+        required:
+        - refundRequestStatusRetrievalLifecycleId
+        - retrievalRequestStatus
+        properties:
+          refundRequestStatusRetrievalLifecycleId:
+            type: string
+            example: '111123123123123111'
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the Refund Request Status Retrieval request in subsequent transactions or services.
+          retrievalRequestStatus:
+            type: string
+            example: WFPC
+            minLength: 1
+            maxLength: 35
+            description: Informs the status of the Retrieval Request. * Refer to Codes and Formats section for more details.
+    MessageResponseBlock:
+      type: object
+      required:
+      - messageId
+      - creationDateTime
+      - initiatingPartyId
+      - originalMessageId
+      properties:
+        initiatingPartyId:
+          type: string
+          example: ZAPP
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the message sender.
+        messageId:
+          type: string
+          example: 3bef00e542ec4be583b1b5d449799084
+          minLength: 1
+          maxLength: 35
+          description: A point-to-point unique identifier is assigned to every message by the message initiator.
+        creationDateTime:
+          type: string
+          example: '2020-11-20T06:57:24.465Z'
+          format: date-time
+          description: ISO 8601 format date and time in Coordinated Universal Time (UTC) when this message was created.
+        originalMessageId:
+          type: string
+          example: 7eab4eab35a542e085add0363a49c035
+          minLength: 1
+          maxLength: 35
+          description: "Original message identifier generated and sent by the initiator of\n the request message."
+    ErrorWrapper:
+      description: A top level object for errors
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    MessageResponseBlock_2:
+      type: object
+      required:
+      - messageId
+      - creationDateTime
+      - initiatingPartyId
+      - originalMessageId
+      properties:
+        initiatingPartyId:
+          type: string
+          example: ZAPP
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the message sender.
+        messageId:
+          type: string
+          example: 3bef00e542ec4be583b1b5d449799084
+          minLength: 1
+          maxLength: 35
+          description: A point-to-point unique identifier is assigned to every message by the message initiator.
+        creationDateTime:
+          type: string
+          example: '2020-11-20T06:57:24.465Z'
+          format: date-time
+          description: ISO 8601 format date and time in Coordinated Universal Time (UTC) when this message was created.
+        originalMessageId:
+          type: string
+          example: 7eab4eab35a542e085add0363a49c035
+          minLength: 1
+          maxLength: 35
+          description: Original message identifier generated and sent by the initiator of the request message.
+    Error:
+      description: A single error
+      type: object
+      properties:
+        Source:
+          type: string
+          example: ZAPP
+          description: Source of the error
+        ReasonCode:
+          type: string
+          example: STVL-9999
+          description: Error Code
+        Description:
+          type: string
+          example: Invalid structure
+          description: Error Description
+        Recoverable:
+          type: boolean
+          example: false
+          description: Boolean value to specify if error is recoverable or not
+        Details:
+          type: string
+          example: Invalid structure
+          description: Optional details of the error
+    OrderItemStatus:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Order Item Id of Vendor
+          example: order-item-1
+        mcId:
+          type: string
+          description: Order Item Id of Mastercard
+          example: efa03f08-b9c0-11ed-afa1-0242ac120002
+        status:
+          type: string
+          description: Item status
+          example: Pending
+        trackingNumber:
+          type: string
+          description: Order tracking number
+          example: Track123
+        trackingUrl:
+          type: string
+          description: Order tracking url
+          example: https://tracking-url.com/order/123
+        errors:
+          type: array
+          description: order items error list
+          items:
+            $ref: '#/components/schemas/OrderItemError'
+        histories:
+          type: array
+          description: history detail of order item
+          items:
+            $ref: '#/components/schemas/History'
+    Errors_2:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    History:
+      type: object
+      properties:
+        orderItemNumber:
+          type: string
+          description: order_item_number
+          example: order-item-1
+        eventType:
+          type: string
+          description: event_type
+          example: note
+        eventDate:
+          type: string
+          description: event_date
+          example: '2023-10-03T21:05:10Z'
+        note:
+          type: string
+          description: note
+          example: 'GRS order item created for partner system order number: SL_OCT-03-2023-16-431 Status is pending.'
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of the error
+          example: mrs-catalog-api
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during API request processing.
+          example: INVALID_INPUT
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Invalid Reward Catalog HierarchyId.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about the data received.
+          example: Invalid Details
+      description: Error Details
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors_2'
+    OrderStatus:
+      type: object
+      properties:
+        orderId:
+          type: string
+          description: Order Id of Vendor
+          example: 656afd7-2396-54345-34545
+        mcOrderId:
+          type: string
+          description: Order Id of Mastercard
+          example: afd72396-b9c0-11ed-afa1-0242ac120002
+        orderItems:
+          type: array
+          description: order items list
+          items:
+            $ref: '#/components/schemas/OrderItemStatus'
+        status:
+          type: string
+          description: Order Status
+          example: Pending
+    OrderItemError:
+      type: object
+      properties:
+        fieldName:
+          type: string
+          description: field name
+          example: address1
+        code:
+          type: string
+          description: errorcode
+          example: GRS_1001
+        message:
+          type: string
+          description: error message
+          example: address1 is required
+    OrderStatusArray:
+      type: array
+      description: order status array list
+      items:
+        $ref: '#/components/schemas/OrderStatus'
+  examples:
+    MissingRequiredHeader:
+      summary: Missing Required Header Error Response
+      description: If a required request header is missing or null, then MissingRequiredHeader error response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: missing required header
+            Description: Submitter-First-Name
+            Recoverable: false
+            Details: ''
+    UnAuthorized:
+      value:
+        error:
+          status: 401
+          reason: DECLINED
+          message: Unauthorized - Access Not Granted
+          errordetail:
+          - reason: DECLINED
+            sourceType: Gateway
+            message: Unauthorized - Access Not Granted
+            source: Gateway
+    FormatInvalid:
+      summary: Format Invalid Error Response For Consumer Clarity
+      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: format.invalid
+            Description: orderHistoryMonths
+            Recoverable: false
+            Details: ''
+    EntityNotFound:
+      summary: Entity Not Found Error Response For Consumer Clarity
+      description: If a requested entity(e.g. Merchant or Logo) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: GUID'
+            Description: Merchant 1E37M8VSX1D28QYX not found
+            Recoverable: false
+            Details: ''
+    AlertsSubMerchantActivated:
+      summary: Alerts Merchant - Activated
+      value:
+        subMerchantId: 99ca4b15-72a6-41dd-8127-573d4b07669c
+        name: Merchant 1
+        merchantType: SUBMERCHANT
+        status: ACTIVATED
+        parentMemberId: 99ca4b15-72a6-41dd-8127-573d4b07669c
+        merchantCategoryCode: '3002'
+        createdBy:
+          timestamp: '2023-04-28T10:30:00.000Z'
+          user: princess.diana
+        modifiedBy:
+          timestamp: '2023-04-28T10:30:00.000Z'
+          user: princess.diana
+        statusUpdateTs: '2023-04-28T10:30:00.000Z'
+    AlertsInvalidData:
+      summary: Invalid Data Field Error Response For Alerts
+      description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: name'
+            Description: size must be between 3 and 200
+            Recoverable: false
+            Details: ''
+    AlertsEntityNotFound:
+      summary: Entity Not Found Error Response For Alerts
+      description: If a requested entity(e.g. Sub-Merchant or Card Acceptor ID or Card Acceptor Name) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: subMerchantId'
+            Description: Sub-Merchant 99ca4b15-72a6-41dd-8127-573d4b07669c not found
+            Recoverable: false
+            Details: ''
+    ResourceNotFound:
+      summary: Resource Not Found Error Response
+      description: If request URI doesn't match with any available endpoints, then ResourceNotFound error response is returned the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: resource.not.found
+            Description: Not Found
+            Recoverable: false
+            Details: /merchant-self-services/sub-merchantTs/
+    ServerError:
+      value:
+        error:
+          status: 500
+          reason: INVALID_STATE
+          message: Internal server error. Typically a server bug. The client should report this error to the Mastercard support team
+    ServerError_2:
+      summary: Server Error Response
+      description: If an unexpected internal server error occurs, then ServerError response is returned to the caller with HTTP Status code 500.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: server.error
+            Description: Internal Server Error
+            Recoverable: false
+            Details: ''
+    PermissionDenied:
+      summary: Permission Denied Error Response
+      description: If the client id in the request doesn't correspond to any member in the system, then PermissionDenied error response is returned to the caller with HTTP Status code 401.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: permission.denied
+            Description: Member does not have permission to perform any operation
+            Recoverable: false
+            Details: ''
+    ForbiddenOperation:
+      summary: Member does not have permission to add/update/delete a resource
+      description: If the merchant tries operate on a resource that is not related to them or if they are not allowed perform a specific operation on their resource, then ForbiddenOperation error response is returned to the caller with HTTP Status code 403.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: operation.not.allowed
+            Description: Member is not allowed to perform a specific operation on a particular resource
+            Recoverable: false
+            Details: ''
+    AlertsSubMerchantDeactivated:
+      summary: Alerts Merchant - Deactivated
+      value:
+        subMerchantId: 99ca4b15-72a6-41dd-8127-573d4b07669c
+        name: Merchant 1
+        merchantType: SUBMERCHANT
+        status: DEACTIVATED
+        parentMemberId: 99ca4b15-72a6-41dd-8127-573d4b07669c
+        merchantCategoryCode: '3002'
+        createdBy:
+          timestamp: '2023-04-28T10:30:00.000Z'
+          user: princess.diana
+        modifiedBy:
+          timestamp: '2023-04-30T10:30:00.000Z'
+          user: princess.diana
+        statusUpdateTs: '2023-04-30T10:30:00.000Z'
+    BadRequestErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: ZAPP
+            ReasonCode: STVL-9999
+            Description: Invalid structure
+            Recoverable: false
+            Details: Invalid structure
+    NotFound:
+      value:
+        error:
+          status: 404
+          reason: NOT_FOUND
+          message: Org client id did not match for Srci id
+          errordetail:
+          - reason: INVALID_VALUE
+            sourceType: BODY
+            message: Org client id did not match for Srci id
+            source: Application
+    ValidationFailed:
+      summary: Validation of the request failed
+      description: If the fields in the request did not pass the validation, a ValidationFailed error response is returned to the caller with HTTP Status code 422.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: validation.failed
+            Description: Validation of the request fields failed
+            Recoverable: false
+            Details: ''
+    UnauthorisedExample:
+      value:
+        Errors:
+          Error:
+          - Source: ZAPP
+            ReasonCode: SECU-9999
+            Description: Invalid signature
+            Recoverable: false
+            Details: Invalid signature
+    Forbidden:
+      value:
+        error:
+          status: 403
+          reason: AUTHENTICATION_FAILED
+          message: null
+          errordetail:
+          - reason: AUTHENTICATION_FAILED
+            sourceType: Gateway
+            message: OAuth Signature parameter failed verification.
+            source: Gateway
+    InvalidArgument:
+      value:
+        error:
+          status: 400
+          reason: INVALID_VALUE
+          message: Invalid Srci-Client Id
+          errordetail:
+          - reason: INVALID_VALUE
+            sourceType: DOWNSTREAM
+            message: Invalid Srci-Client Id
+            source: Application
+    AlertsSubMerchantStatusUpdate:
+      summary: Alert Merchant Status Update
+      value:
+        status: DEACTIVATED
+    AlertsFormatInvalid:
+      summary: Format Invalid Error Response For Alerts
+      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: merchantCategoryCode'
+            Description: must match \"^[0-9]*$\"
+            Recoverable: false
+            Details: ''
+    InvalidParameterSet:
+      summary: Invalid Parameter Set Error Response
+      description: If request body is malformed or missing, then InvalidParameterSet error response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: invalid.parameter.set
+            Description: request body is malformed
+            Recoverable: false
+            Details: ''
+    InvalidData:
+      summary: Invalid Data Error Response For Consumer Clarity
+      description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: merchantType'
+            Description: must not be blank
+            Recoverable: false
+            Details: ''
+    BadOrderRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: rewards-order-management
+            ReasonCode: MISSING_REQUIRED_FIELD_VENDORS_UPDATE_ORDER_REQUEST_LIST[0].MC_ORDER_ID
+            Description: McOrderId is blank or null.
+            Recoverable: false
+    UnauthorizedOrderExample:
+      value:
+        Errors:
+          Error:
+          - Source: rewards-order-management
+            ReasonCode: INVALID_CLIENT_ID
+            Description: ClientId doesn't have access to the requested service.
+            Recoverable: false
+    OrderStatusExample:
+      value:
+      - orderId: 656afd7-2396-54345-34545
+        mcOrderId: afd72396-b9c0-11ed-afa1-0242ac120002
+        status: FAILED
+        errorCode: 1001
+        description: '[Combination of ExternalOrderId: (656afd7-2396-54345-34545) and OrderId: (afd72396-b9c0-11ed-afa1-0242ac120002) invalid.]'
+  parameters:
+    agreement_id:
+      name: agreement_id
+      in: path
+      required: true
+      description: Unique identifier assigned by Mastercard, to the agreement, to be used in Payment Requests for routing them to the destined participant.
+      schema:
+        type: string
+        example: '923123123123123100'
+        minLength: 1
+        maxLength: 35
+    X-Product-ID_2:
+      name: X-Product-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product by Mastercard and given to the participant.
+    X-Participant-ID:
+      name: X-Participant-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        example: '000545'
+        minLength: 1
+        maxLength: 50
+      description: Unique identifier assigned to the participant by Mastercard during onboarding.
+    MemberIdParam:
+      name: member_id
+      in: path
+      required: true
+      description: Merchant member ID (parent of the sub-merchant)
+      example: 99ca4b15-72a6-41dd-8127-573d4b07669c
+      schema:
+        $ref: '#/components/schemas/AlertsMerchantMemberId'
+    X-Product-ID:
+      name: X-Product-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        example: PBARFP
+        minLength: 1
+        maxLength: 50
+      description: Unique identifier assigned to the product construct by Mastercard and given to the participant.
+    UserIdParam:
+      name: User-Id
+      in: header
+      required: true
+      example: princess.diana
+      description: The user id of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/UserId'
+    payment_request_lifecycle_id:
+      name: payment_request_lifecycle_id
+      in: path
+      required: true
+      description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+      schema:
+        type: string
+        example: '128361739311340082'
+        minLength: 1
+        maxLength: 35
+    X-Request-ID:
+      name: X-Request-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        example: 7eab4eab35a542e085add0363a49c035
+        minLength: 1
+        maxLength: 50
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and used for tracing, troubleshooting and analysis purposes.
+    SubmitterFirstNameParam:
+      name: Submitter-First-Name
+      in: header
+      required: true
+      example: Diana
+      description: The first name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/FirstName'
+    SubmitterLastNameParam:
+      name: Submitter-Last-Name
+      in: header
+      required: true
+      example: Princess
+      description: The last name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/LastName'
+    Idempotency-Key:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Unique identifier generated by the participant. Mastercard uses this identifier to recognize subsequent retries of the same request and ensure idempotent behaviour by sending the same response without repeating the operation again.
+      schema:
+        type: string
+        format: uuid
+        example: 7da7a728-f910-11e6-942a-68f728c1ba70
+        minLength: 1
+        maxLength: 36
+    SubMerchantIdParam:
+      name: sub_merchant_id
+      in: path
+      required: true
+      description: Sub-merchant member ID
+      example: cc2cac41-d127-4c06-9646-c0f2ad76c444
+      schema:
+        $ref: '#/components/schemas/AlertsMerchantMemberId'
+    srcClientId:
+      in: path
+      name: src-client-id
+      description: A unique identifier assigned by Mastercard during onboarding which signifies the responsible party Integrating to Mastercard Checkout Solutions (MCS).
+      example: 5e0d4b84-189d-4c86-822d-590602f62062
+      required: true
+      schema:
+        type: string
+    X-JWS-Signature:
+      name: X-JWS-Signature
+      in: header
+      required: true
+      description: JWS detached signature is applied to ensure data integrity.
+      schema:
+        type: string
+        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
+        minLength: 1
+        maxLength: 512
+    batchId:
+      in: path
+      name: batch-id
+      description: A unique identifier associated with the submitted Digital Payment Application (DPA) batch. The Batch ID can be used to retrieve the status of the batch by calling GET DPA status endpoint.
+      example: 1c9d3e43-f232-44a1-9552-7da22aaf5590
+      required: true
+      schema:
+        type: string
+    srcCorrelationId:
+      in: header
+      name: correlation-id
+      description: A unique identifier that correlates a series of two or more requests to a single session of activity. Mastercard Checkout Solutions (MCS) will return a new srcCorrelationId in each response by default, but Integrators may choose to populate previously used srcCorrelationIds in subsequent requests to correlate their activity under a single ID. This can be done by providing a Mastercard generated srcCorrelationId in the request, or by generating your own ID in the same format. SrcCorrelationId is used for tracking and troubleshooting purposes within Mastercard's ecosystem.
+      example: 0000016e0364631b-e4cefc
+      required: true
+      schema:
+        type: string
+    refund_request_lifecycle_id:
+      name: refund_request_lifecycle_id
+      in: path
+      required: true
+      description: Unique identifier assigned by Mastercard, to identify the refund request in subsequent transactions or services.
+      schema:
+        type: string
+        example: '245566173931134008'
+        minLength: 1
+        maxLength: 35
+    VendorId:
+      name: vendor_id
+      in: path
+      description: The internal Mastercard vendor Id for order fulfilment.
+      required: true
+      schema:
+        type: string
+      example: carltonone
+  headers:
+    X-Product-ID_2:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product by Mastercard and given to the participant.
+    X-Participant-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: '000545'
+      description: Unique identifier assigned to the participant by Mastercard during onboarding.
+    X-Request-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: 7eab4eab35a542e085add0363a49c035
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and used for tracing, troubleshooting and analysis purposes.
+    X-Product-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product construct by Mastercard and given to the participant.
+    X-Request-ID_2:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: 7eab4eab35a542e085add0363a49c035
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and for tracing, troubleshooting and analysis purposes.
+  requestBodies:
+    AgreementRequestStatusRetrievalRequest:
+      required: true
+      description: Agreement request status retrieval request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewAgreementRequestStatusRetrieval'
+    AlertsSubMerchantStatusUpdateRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsSubMerchantStatusUpdate'
+          examples:
+            AlertsSubMerchantStatusUpdateRequestBody:
+              $ref: '#/components/examples/AlertsSubMerchantStatusUpdate'
+    RefundRequestStatusRetrievalRequest:
+      required: true
+      description: Refund Request Status Retrieval Request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewRefundRequestStatusRetrieval'
+    PaymentRequestStatusRetrievalRequest:
+      required: true
+      description: Payment request status retrieval request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewPaymentRequestStatusRetrieval'
+    OrderStatusRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrderStatusArray'
+  responses:
+    ForbiddenOperation:
+      description: Forbidden Operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ForbiddenOperation:
+              $ref: '#/components/examples/ForbiddenOperation'
+    RefundRequestStatusRetrievalResponse:
+      description: Refund Request Status Retrieval Request was successfully received by Mastercard.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID_2'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID_2'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RefundRequestStatusRetrievalAck'
+    BadRequestErrorResponse:
+      description: 'Invalid structure: The header or payload fails syntax or structural validation.'
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestErrorExample:
+              $ref: '#/components/examples/BadRequestErrorExample'
+    ValidationFailed:
+      description: Validation Failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ValidationFailed:
+              $ref: '#/components/examples/ValidationFailed'
+    NotFound_2:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ResourceNotFound:
+              $ref: '#/components/examples/ResourceNotFound'
+            EntityNotFound:
+              $ref: '#/components/examples/EntityNotFound'
+            AlertsEntityNotFound:
+              $ref: '#/components/examples/AlertsEntityNotFound'
+    Unauthorized:
+      description: Unauthorized, see error object for details, e.g. authorization token validation failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_2'
+          examples:
+            UNAUTHORIZED:
+              $ref: '#/components/examples/UnAuthorized'
+    PaymentRequestStatusRetrievalResponse:
+      description: Payment request Status Retrieval Request was successfully received by Mastercard.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentRequestStatusRetrievalAck'
+    AgreementRequestStatusRetrievalResponse:
+      description: Agreement request status retrieval Request was successfully received by Mastercard.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AgreementRequestStatusRetrievalAck'
+    Forbidden:
+      description: Forbidden, see error object for details, e.g. client identity (origin) not validated
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_2'
+          examples:
+            FORBIDDEN:
+              $ref: '#/components/examples/Forbidden'
+    InternalServerError:
+      description: 'Internal server error, see error object for details
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_2'
+          examples:
+            SERVER_ERROR:
+              $ref: '#/components/examples/ServerError'
+    PermissionDenied:
+      description: Permission Denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            PermissionDenied:
+              $ref: '#/components/examples/PermissionDenied'
+    Default:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ServerError:
+              $ref: '#/components/examples/ServerError_2'
+    BadRequest_2:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            InvalidData:
+              $ref: '#/components/examples/InvalidData'
+            AlertsInvalidData:
+              $ref: '#/components/examples/AlertsInvalidData'
+            InvalidParameterSet:
+              $ref: '#/components/examples/InvalidParameterSet'
+            FormatInvalid:
+              $ref: '#/components/examples/FormatInvalid'
+            AlertsFormatInvalid:
+              $ref: '#/components/examples/AlertsFormatInvalid'
+            MissingRequiredHeader:
+              $ref: '#/components/examples/MissingRequiredHeader'
+    NotFound:
+      description: 'Not found, see error object for details.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_2'
+          examples:
+            NOT_FOUND:
+              $ref: '#/components/examples/NotFound'
+    BadRequest:
+      description: Bad request, see error object for details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_2'
+          examples:
+            INVALID_ARGUMENT:
+              $ref: '#/components/examples/InvalidArgument'
+    AlertsSubMerchantSuccess:
+      description: Sub-merchant with all details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsSubMerchantResource'
+          examples:
+            AlertsSubMerchantActivated:
+              $ref: '#/components/examples/AlertsSubMerchantActivated'
+            AlertsSubMerchantDeactivated:
+              $ref: '#/components/examples/AlertsSubMerchantDeactivated'
+    UnauthorisedErrorResponse:
+      description: Invalid signature. The service fails signature validation.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/UnauthorisedExample'
+    BadRequestOrderErrorResponse:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadOrderRequestExample'
+    UnauthorizedOrderErrorResponse:
+      description: User does not have access to the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedOrderExample'
+    SuccessResponse:
+      description: Status updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrderStatusArray'
+          examples:
+            SuccessRequestExample:
+              $ref: '#/components/examples/OrderStatusExample'

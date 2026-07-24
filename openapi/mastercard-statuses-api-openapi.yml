@@ -1,0 +1,562 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Statuses API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Statuses
+paths:
+  /rate-statuses:
+    get:
+      tags:
+      - Statuses
+      summary: isEcbMcRateIssued
+      operationId: isEcbMcRateIssuedUsingGET
+      description: Helps determine if the present days Mastercard and ECB conversion rates are available. Refer the Support section for more information on the Mastercard and ECB rate publication schedule.
+      parameters:
+      - name: request_date
+        in: query
+        description: Rate issued date (YYYY-mm-dd)
+        required: false
+        schema:
+          type: string
+        example: '2023-02-27'
+      responses:
+        '200':
+          description: Rates status is successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnhancedSettlementRateIssuedWrapper'
+        '400':
+          description: Date format is invalid (Expected date format yyyy-MM-DD).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                BadRequestResponse:
+                  $ref: '#/components/examples/BadRequestResponse'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                UnauthorizedResponse:
+                  $ref: '#/components/examples/UnauthorizedResponse'
+        '403':
+          description: 'Mastercard and ECB rates are not accessible for selected date '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                RateIssuedForbiddenResponse:
+                  $ref: '#/components/examples/RateIssuedForbiddenResponse'
+        '404':
+          description: Rates are not available for selected date
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                RateIssuedNotFoundResponse:
+                  $ref: '#/components/examples/RateIssuedNotFoundResponse'
+  /fraud-statuses/icas/{ica}:
+    get:
+      tags:
+      - Statuses
+      operationId: fraudRequestStatus
+      description: This endpoint allows the initiator to get the status of an existing fraud record using combination of ICA, Ref ID & ACN, for both Mastercard and Issuer built transactions. The initiator can get status of fraud transaction submitted via any channel GFT, File upload, Online & API.
+      summary: Get Status of an Existing Fraud Record for Both Mastercard and Issuer Built Transactions.
+      parameters:
+      - $ref: '#/components/parameters/ICA'
+      - $ref: '#/components/parameters/Ref_Id'
+      - $ref: '#/components/parameters/ACN'
+      responses:
+        '200':
+          $ref: '#/components/responses/FraudStatusResponse'
+        '400':
+          $ref: '#/components/responses/FraudStatusBadRequestError'
+        '429':
+          $ref: '#/components/responses/RateLimitExceededError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  schemas:
+    Errors:
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          type: array
+          description: if an errorhas occurred
+          items:
+            $ref: '#/components/schemas/EcbError'
+    EnhancedSettlementRateIssuedWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the service being requested
+          example: mastercard-and-ecb-rate-status-service
+        description:
+          type: string
+          description: The description of the API being called
+          example: Determine if mastercard and ecb conversion rates are issued for the given date
+        requestDate:
+          type: string
+          description: The date and time the API is being called in GMT
+          example: '2019-11-17T00:00:00.000Z'
+        data:
+          $ref: '#/components/schemas/EnhancedSettlementRateIssued'
+    EnhancedSettlementRateIssued:
+      type: object
+      properties:
+        rateDate:
+          type: string
+          description: The date of the requested rates
+          example: '2021-02-16T00:00:00.000Z'
+        mastercardRateIssued:
+          $ref: '#/components/schemas/EcbMcRateIssued'
+        ecbRateIssued:
+          $ref: '#/components/schemas/EcbMcRateIssued'
+    EcbMcRateIssued:
+      type: object
+      properties:
+        message:
+          type: string
+          description: User friendly message (if applicable)
+          example: Rate issuance for requested date not supported.  Resubmit for a non-weekend or non-holiday date.
+        reasonCode:
+          type: string
+          description: User friendly reason code (if applicable)
+          example: NOT_AVAILABLE
+        status:
+          type: string
+          description: Provides rate status as yes/No
+          example: 'yes'
+    EcbError:
+      type: object
+      properties:
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Not Found
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about data received and calculated during request processing, to help the user with diagnosing errors.
+          example: Mastercard and ECB rates are not available for this date. Resubmit for a date within the last 365 days inclusive of current day.
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during transaction processing. For example, INVALID_SIGNATURE is used when the request signature does not match the expected one.
+          example: NOT_FOUND
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome. For example, if the request contains an invalid   signature, retrying will never result in a success. However, if the error is related to some unexpected timeout with the service, retrying the call could result in a successful response.
+          example: false
+        Source:
+          type: string
+          description: The name of the application that generated this error
+          example: Gateway
+    ErrorResponse:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    FraudBase:
+      type: object
+      properties:
+        refId:
+          description: Unique identification generated by the transaction originator using UUID logic to unambiguously link a request and response message.
+          example: ecb2d942-eabd-42b6-87fd-69c19692bdc6
+          maxLength: 36
+          minLength: 36
+          type: string
+        timestamp:
+          description: Timestamp of the request initiation by the originator in the format 'YYYY-MM-DDThh:mm:ss:mmm+hh:mm'. The value of '+hh:mm' portion should always be '-05:00' or '-06:00' reflecting CST time.
+          example: '2022-05-24T20:34:37+6:00'
+          maxLength: 25
+          minLength: 25
+          type: string
+        icaNumber:
+          description: ICA number of the Issuer or Acquirer or Provider initiating the fraud submission request.
+          example: '1076'
+          maxLength: 7
+          minLength: 3
+          type: string
+    ErrorWrapper:
+      description: Object containing the list of combination of error reason codes and their corresponding description (can provide up to 5 errors for a record). It will be absent if the request is processed by FLD application successfully.
+      title: Error Response
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors_2'
+    Errors_2:
+      title: Errors
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Errors array wrapped in an error object
+          items:
+            $ref: '#/components/schemas/Error'
+          example: []
+    Fraud:
+      allOf:
+      - $ref: '#/components/schemas/FraudBase'
+      - type: object
+        required:
+        - responseCode
+        - responseMessage
+        properties:
+          responseCode:
+            description: Response code indicating success or failure of the transaction at an API level. Errors at a record level will be handled through 'errorDetails' element associated with each record.
+            type: string
+            minLength: 3
+            maxLength: 3
+            example: '000'
+          responseMessage:
+            description: Transaction response description corresponding to the response code.
+            type: string
+            minLength: 1
+            maxLength: 100
+            example: Success
+          icaNumber:
+            description: ICA number of the originator provided in the request API which is echoed back. This attribute will be absent if the request is not processed by FLD application.
+            type: string
+            minLength: 3
+            maxLength: 7
+            example: '1076'
+          auditControlNumber:
+            description: Unique number generated by FLD application and provided in the response message for a successful fraud record submission ('FDA' event). This is used as a reference in the request API to subsequently modify, delete or convert a suspended to a confirmed fraud record and is echoed back. This attribute will be absent if the request is not processed by FLD application.
+            type: string
+            minLength: 15
+            maxLength: 15
+            example: '418142102142002'
+          duplicateAuditControlNumbers:
+            description: List of existing Audit Control Number which matches the request submitted for Mastercard-built or Issuer-built. This attribute will appear in case of the records already present while trying to submit or update the existing record.
+            type: array
+            items:
+              type: string
+            minItems: 1
+            maxItems: 5
+            uniqueItems: true
+          matchLevelIndicator:
+            description: Indicates if it is a Mastercard-built or Issuer-built record. Possible values are 'M' for Mastercard built record and 'I' for Issuer built record. This attribute will be absent if the request is not processed by FLD application.
+            type: string
+            minLength: 1
+            maxLength: 1
+            example: M
+          financialTransactionIndicator:
+            description: Indicates if the fraud record is being submitted against a financial transaction (having a clearing record) or a declined auth transaction (without a clearing record). Possible values are 'APPROVED' for financial transactions (having a clearing record) and 'DECLINED' for declined auth transactions (without a clearing record). This attribute will be absent if the request is not processed by FLD application.
+            type: string
+            minLength: 1
+            maxLength: 20
+            example: DECLINED
+          authorizationResponse:
+            description: Provides the 'Auth Response Code' and 'Auth Response Code Description' combination if 'Financial Transaction Indicator' value is 'DECLINED'. This attribute will be absent for all other scenarios.
+            type: string
+            minLength: 1
+            maxLength: 200
+            example: 05 - Do not honor
+          previousStatus:
+            description: Previous status of the transaction in terms of an FDC, FDD and FDE event.
+            type: string
+            minLength: 1
+            maxLength: 50
+            example: CONFIRMED-REJECTED
+          currentStatus:
+            description: Current status of the transaction in terms of an FDA, FDC, FDD and FDE event.
+            type: string
+            minLength: 1
+            maxLength: 50
+            example: CONFIRMED-SUCCESS
+          channel:
+            description: Fraud request submission fld channel name.
+            type: string
+            minLength: 1
+            maxLength: 50
+            example: Online
+          errorDetails:
+            $ref: '#/components/schemas/ErrorWrapper'
+    Error:
+      title: ErrorMessage
+      required:
+      - Description
+      - ReasonCode
+      type: object
+      properties:
+        Source:
+          type: string
+          description: The application or component that generated this error.
+          minLength: 3
+          maxLength: 50
+          example: FLD
+        ReasonCode:
+          type: string
+          description: Reason code is a unique constant identifying the error case encountered during request processing.
+          minLength: 5
+          maxLength: 100
+          example: VALIDATION_ERROR
+        Description:
+          type: string
+          description: Human-readable short description of the reasonCode
+          minLength: 10
+          maxLength: 250
+          example: Reference Id is not provided
+        Details:
+          type: string
+          description: Optional detailed description provides information about data received and calculated during request processing.  This helps the user to diagnose errors.
+          minLength: 0
+          maxLength: 1000
+          example: This is mandatory field while requesting for fraud submission.
+        Recoverable:
+          type: boolean
+          description: Recoverable flag indicates whether this error is always returned for this request, or retrying could change the outcome.  For example, 'true' or 'false'.
+          example: false
+  examples:
+    RateIssuedForbiddenResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: FORBIDDEN
+            Description: Data is not accesssible
+            Recoverable: false
+            Details: Rate issuance for requested date not supported - Please use a date within the last 365 days inclusive of current day.
+    RateIssuedNotFoundResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: NOT_FOUND
+            Description: Data not available
+            Recoverable: false
+            Details: Rate issuance for future date not supported.
+    BadRequestResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: BAD_REQUEST
+            Description: Invalid input
+            Recoverable: false
+            Details: Date format is invalid (Expected date format yyyy-MM-dd)
+    UnauthorizedResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: UNAUTHORIZED
+            Description: Invalid Client ID
+            Recoverable: false
+            Details: You do not have access to this service. Please visit the Enhanced Currency Conversion Calculator page for details.
+    RateLimitExceededExample:
+      value:
+        Errors:
+          Error:
+          - Source: fld
+            ReasonCode: RATE_LIMIT_EXCEEDED
+            Description: You have exceeded the service rate limit. Maximum allowed 10 TPS.
+            Recoverable: true
+            details: null
+    FraudStatusNoParamRefIdAcnExample:
+      value:
+        ica: '1076'
+        responseCode: '100'
+        responseMessage: Failure
+        errorDetails:
+          Errors:
+            Error:
+            - ReasonCode: '60002'
+              Description: ref_id or acn (Audit Control Number) attribute or attribute value is missing or incorrect.
+    BadRequestInvalidRefId:
+      value:
+        Errors:
+          Error:
+          - Source: fld
+            ReasonCode: VALIDATION_ERROR
+            Description: ref_id incorrect datatype of attribute value.
+            Recoverable: false
+    BadRequestInvalidIca:
+      value:
+        Errors:
+          Error:
+          - Source: fld
+            ReasonCode: VALIDATION_ERROR
+            Description: ica incorrect datatype of attribute value.
+            Recoverable: false
+    BadRequestInvalidACN:
+      value:
+        Errors:
+          Error:
+          - Source: fld
+            ReasonCode: VALIDATION_ERROR
+            Description: acn (Audit Control Number) incorrect datatype of attribute value.
+            Recoverable: false
+    FraudStatusConfirmed:
+      value:
+        refId: ecb2d942-eabd-42b6-87fd-69c19692bdc6
+        timestamp: '2021-03-16T20:34:40-06:00'
+        icaNumber: '1076'
+        responseCode: '000'
+        responseMessage: Success
+        auditControlNumber: '123111111000025'
+        channel: EXT_API
+        currentStatus: CONFIRMED-SUCCESS
+        matchLevelIndicator: M
+        financialTransactionIndicator: DECLINED
+        authorizationResponse: 05 - Do not honor
+    FraudStatusNoRecordExample:
+      value:
+        refId: ecb2d942-eabd-42b6-87fd-69c19692bdc6
+        timestamp: '2021-03-16T20:34:40-06:00'
+        responseCode: '200'
+        responseMessage: Failure
+        auditControlNumber: '123111111000025'
+        errorDetails:
+          Errors:
+            Error:
+            - ReasonCode: '60127'
+              Description: Record searched could not be found. Correct the input parameter and resubmit.
+    FraudStatusSuspended:
+      value:
+        refId: ecb2d942-eabd-42b6-87fd-69c19692bdc6
+        timestamp: '2021-03-16T20:34:40-06:00'
+        icaNumber: '1076'
+        responseCode: '000'
+        responseMessage: Success
+        auditControlNumber: '123111111000025'
+        channel: EXT_API
+        currentStatus: CONFIRMED-SUSPENDED
+        errorDetails:
+          Errors:
+            Error:
+            - ReasonCode: '30100'
+              Description: Potential Duplicate Data Found, Record is suspended.
+    FraudStatusDeleted:
+      value:
+        refId: ecb2d942-eabd-42b6-87fd-69c19692bdc6
+        timestamp: '2021-03-16T20:34:40-06:00'
+        icaNumber: '1076'
+        responseCode: '000'
+        responseMessage: Success
+        auditControlNumber: '123111111000025'
+        channel: EXT_API
+        currentStatus: CONFIRMED-DELETED
+    FraudStatusRejected:
+      value:
+        timestamp: '2021-03-16T20:34:40-06:00'
+        icaNumber: '1076'
+        responseCode: '000'
+        responseMessage: Success
+        auditControlNumber: '123111111000025'
+        channel: Online
+        currentStatus: CONFIRMED-REJECTED
+        errorDetails:
+          Errors:
+            Error:
+            - ReasonCode: '20806'
+              Description: Required field [Fraud Posted Date] is missing. Record is rejected.
+            - ReasonCode: '20828'
+              Description: Required field [Fraud Type Code] is missing. Record is rejected.
+            - ReasonCode: '20903'
+              Description: Audit control number (ACN) is not unique. Record is rejected.
+            - ReasonCode: '21006'
+              Description: Invalid Fraud Posted Date, format should be YYYYMMDD. Record is rejected.
+            - ReasonCode: '41200'
+              Description: Unable to match transaction in data warehouse. Record is rejected.
+  parameters:
+    ACN:
+      name: acn
+      in: query
+      schema:
+        type: string
+        minLength: 15
+        maxLength: 15
+        example: '418142102142002'
+      description: Refers to the ACN of the fraud record whose status is to be fetched. This is optional parameter for record submitted through APIs.
+    ICA:
+      name: ica
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 3
+        maxLength: 7
+      example: '1076'
+      description: Refers to the ICA of the fraud record which needs to be searched for its status. It is mandatory parameter along with Ref ID or ACN..
+    Ref_Id:
+      name: ref_id
+      in: query
+      schema:
+        type: string
+        minLength: 36
+        maxLength: 36
+        example: ecb2d942-eabd-42b6-87fd-69c19692bdc6
+      description: Refers to the reference ID of the API call which was used to submit fraud record. This is optional parameter if ACN is present in the request.
+  responses:
+    RateLimitExceededError:
+      description: Too Many Requests.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            RateLimitExceededExample:
+              $ref: '#/components/examples/RateLimitExceededExample'
+    FraudStatusBadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestInvalidIca:
+              $ref: '#/components/examples/BadRequestInvalidIca'
+            BadRequestInvalidRefId:
+              $ref: '#/components/examples/BadRequestInvalidRefId'
+            BadRequestInvalidACN:
+              $ref: '#/components/examples/BadRequestInvalidACN'
+    FraudStatusResponse:
+      description: Fraud request status in the system.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Fraud'
+          examples:
+            FraudStatusConfirmed:
+              $ref: '#/components/examples/FraudStatusConfirmed'
+            FraudStatusSuspended:
+              $ref: '#/components/examples/FraudStatusSuspended'
+            FraudStatusDeleted:
+              $ref: '#/components/examples/FraudStatusDeleted'
+            FraudStatusRejected:
+              $ref: '#/components/examples/FraudStatusRejected'
+            FraudStatusNoRecordExample:
+              $ref: '#/components/examples/FraudStatusNoRecordExample'
+            FraudStatusNoParamRefIdAcnExample:
+              $ref: '#/components/examples/FraudStatusNoParamRefIdAcnExample'

@@ -1,0 +1,286 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Items API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Items
+paths:
+  /catalogs/{catalog_id}/items:
+    get:
+      tags:
+      - Items
+      summary: Returns a list of all reward items for a given catalog.
+      description: Returns a list of all reward items for a given catalog and search criteria.
+      operationId: getItems
+      parameters:
+      - $ref: '#/components/parameters/ProgramId'
+      - $ref: '#/components/parameters/CatalogId'
+      - $ref: '#/components/parameters/Language'
+      - $ref: '#/components/parameters/MinPoints'
+      - $ref: '#/components/parameters/MaxPoints'
+      - $ref: '#/components/parameters/Keyword'
+      - $ref: '#/components/parameters/ProductCode'
+      responses:
+        '200':
+          $ref: '#/components/responses/RewardItems'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedErrorResponse'
+components:
+  schemas:
+    RedemptionFees:
+      type: object
+      properties:
+        description:
+          type: string
+          description: Description of the fee associated with this reward item.
+          example: Point purchase
+          maxLength: 50
+        amount:
+          type: number
+          description: The fee associated with this reward item.
+          example: 50
+        quantityLevel:
+          type: boolean
+          description: Indicates if the redemption fee amount will be multiplied by the quantity on the redemption.
+          example: true
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    RewardItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The internal Mastercard ID assigned to the program matrix (Reward) item.
+          example: 74568
+        shortDescription:
+          type: string
+          description: The short description of the reward item.
+          example: $25 Olive Garden
+          maxLength: 150
+        longDescription:
+          type: string
+          description: The long description of the reward item.
+          example: $25 Olive Garden Gift Card
+          maxLength: 150
+        imageURL:
+          type: string
+          description: The URL that links to the image used by the reward item.
+          example: https://www.loyaltygateway.com/rewards/ImageDisplayServlet? file=/apps_01/mcrewards_content/Catalog/en_US/items/OliveGC25.jpg
+          maxLength: 150
+        pointValue:
+          type: number
+          description: The point value of the reward item.
+          example: 25.23
+        shippingAddressRequired:
+          type: boolean
+          description: Indicates whether a Shipping Address (Physical or PO Box Address) is required.
+          example: true
+        isRecurringType:
+          type: boolean
+          description: Reward Matrix Item is allowed for recurring redemptions only if the program is configured for recurring redemptions.
+          example: true
+        isRedeemable:
+          type: boolean
+          description: Indicates if the reward item can be redeemed.
+          example: true
+        physicalAddressRequired:
+          type: boolean
+          description: Indicates whether the reward item will be shipped to a physical address (not a PO Box address).
+          example: true
+        isSingleQuantityType:
+          type: boolean
+          description: Indicates whether the reward item can only be redeemed with a quantity of one. This is configured at the reward category level, in MRS.
+          example: false
+        emailAddressRequired:
+          type: boolean
+          description: Indicates if an email address is required for the reward Item when redeemed. This is typical for eCerts that must be delivered via email.
+          example: false
+        orderInformation:
+          type: string
+          description: The shipping message associated with the reward matrix items reward category in the requested language.
+          example: Please allow 7-10 days for gift cards to arrive
+          maxLength: 150
+        personalizationInformation:
+          type: object
+          required:
+          - personalizationInformation
+          properties:
+            isRequired:
+              type: boolean
+              description: Indicates if it is required to enter personalized information for the reward item.
+              example: false
+            length:
+              type: integer
+              format: int64
+              description: The number of allowable characters in the personalization message.
+              example: 2000
+            label:
+              type: string
+              description: The label displayed on the personalization information field in the requested language.
+              example: No Translation Available
+              maxLength: 4000
+        redemptionFees:
+          type: array
+          description: redemptionFees
+          items:
+            $ref: '#/components/schemas/RedemptionFees'
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of the error
+          example: mrs-catalog-api
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during API request processing.
+          example: INVALID_INPUT
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Invalid Reward Catalog HierarchyId.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about the data received.
+          example: Invalid Details
+      description: Error Details
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    RewardItems:
+      type: object
+      properties:
+        rewardItems:
+          type: array
+          description: rewardItems
+          items:
+            $ref: '#/components/schemas/RewardItem'
+  responses:
+    UnauthorizedErrorResponse:
+      description: User is not found in the reward programs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    BadRequestErrorResponse:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    RewardItems:
+      description: Reward Matrix Item details result for a given set of items that are associated with a catalog hierarchy.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RewardItems'
+  examples:
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mrs-catalog-api
+            ReasonCode: INVALID_CLIENT_ID
+            Description: ClientId doesn't have access to the requested service.
+            Recoverable: false
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: mrs-catalog-api
+            ReasonCode: MISSING_REQUIRED_FIELD
+            Description: program_id parameter cannot be null.
+            Recoverable: false
+  parameters:
+    Language:
+      name: language
+      in: query
+      description: Language for the requested information. Customer preferred language code. This must be a valid language code that is configured for Mastercard program. This field is optional and will return English (en_US), if not specified.
+      schema:
+        type: string
+      example: en_US
+    ProgramId:
+      name: program_id
+      in: query
+      description: Unique identifier of a rewards program.
+      required: true
+      schema:
+        type: integer
+        format: int64
+      example: 49631
+    Keyword:
+      name: keyword
+      in: query
+      description: Filters reward items based on the keywords provided.
+      schema:
+        type: string
+      example: catalog
+    MinPoints:
+      name: min_points
+      in: query
+      description: Minimum point value for a reward item.
+      schema:
+        type: integer
+      example: 0
+    CatalogId:
+      name: catalog_id
+      in: path
+      description: The internal Mastercard Catalog Hierarchy ID for the rewards program.
+      required: true
+      schema:
+        type: integer
+        format: int64
+      example: 1234
+    ProductCode:
+      name: product_code
+      in: query
+      schema:
+        type: string
+      description: The reward product identifier for the associated account, as defined by the client and configured during the implementation of the program.
+      example: FIDOCASHBACK
+      required: false
+    MaxPoints:
+      name: max_points
+      in: query
+      description: Maximum point value for a reward item.
+      schema:
+        type: integer
+      example: 9999

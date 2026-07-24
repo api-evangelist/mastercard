@@ -1,0 +1,1069 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Insights API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Insights
+paths:
+  /insights:
+    put:
+      operationId: updateUserInsights
+      description: The Insights service delivers insights and other suggestions that can inform you about what you can do to reduce your footprint.
+      summary: Get insights based on the contents of your climate profile.
+      tags:
+      - Insights
+      parameters:
+      - $ref: '#/components/parameters/Branding'
+      - $ref: '#/components/parameters/Heading'
+      - $ref: '#/components/parameters/PageSize'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/Version'
+      - $ref: '#/components/parameters/Language'
+      requestBody:
+        $ref: '#/components/requestBodies/InsightsRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/Insights'
+        '400':
+          $ref: '#/components/responses/MissingInsightAttributesBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+  /insights/{id}:
+    put:
+      operationId: getInsightsById
+      description: Fetches a given Insight and marks it as viewed in your profile. Issuer has to save the profile locally and send it in future communication with Engagement Services
+      summary: Fetches an Insight details based on provided Insight id
+      tags:
+      - Insights
+      parameters:
+      - $ref: '#/components/parameters/Branding'
+      - $ref: '#/components/parameters/Language'
+      - $ref: '#/components/parameters/Version'
+      - $ref: '#/components/parameters/InsightsId'
+      requestBody:
+        $ref: '#/components/requestBodies/InsightsByIdRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/InsightsByIdResponse'
+        '400':
+          $ref: '#/components/responses/MissingInsightAttributesBadRequestError'
+        '404':
+          $ref: '#/components/responses/InsightNotFoundError'
+  /claim-share-insights/{arid}:
+    post:
+      summary: To send user interaction data to MIDs so MIDs and RPs have insight into the usage of the Claim Share API.
+      parameters:
+      - $ref: '#/components/parameters/AridParameter'
+      tags:
+      - Insights
+      responses:
+        '201':
+          $ref: '#/components/responses/IDPClaimShareInsightsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+      operationId: processClaimShareInsights
+      description: To give insights on user interaction with the Claim Share API to MIDs and RPs.
+      requestBody:
+        $ref: '#/components/requestBodies/IDPClaimShareInsightsRequest'
+components:
+  responses:
+    InsightsByIdResponse:
+      description: ''
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InsightsResponseById'
+          examples:
+            InsightsByIdResponse:
+              $ref: '#/components/examples/InsightsByIdResponse'
+    MissingInsightAttributesBadRequestError:
+      description: This response code is returned when one or more request parameters is either missing or is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestError:
+              $ref: '#/components/examples/MissingInsightAttributesBadRequestError'
+    Insights:
+      description: ''
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InsightsData'
+          examples:
+            InsightsResponseData:
+              $ref: '#/components/examples/InsightsResponseData'
+    InsightNotFoundError:
+      description: This response code is returned when one or more request parameters is either missing or is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+            InsightItemNotFoundError:
+              $ref: '#/components/examples/InsightItemNotFoundError'
+            InsightItemNotFoundInVersionError:
+              $ref: '#/components/examples/InsightItemNotFoundInVersionError'
+            UnsupportedLanguageError:
+              $ref: '#/components/examples/UnsupportedLanguageError'
+    ServiceProviderNotFoundError:
+      description: This response code is returned when the server cannot find the account which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+    UnauthorizedError:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    IDPClaimShareInsightsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          $ref: '#/components/headers/X-Transaction-ID'
+    BadRequestError:
+      description: The server cannot process the request due to bad request. client should consider correcting the request before retrying again.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorWrapper'
+          examples:
+            BadRequestClaimsEmptyExample:
+              $ref: '#/components/examples/BadRequestClaimsEmptyExample'
+            BadRequestInvalidFormatExample:
+              $ref: '#/components/examples/BadRequestInvalidFormatExample'
+            BadRequestInvalidClaimsExample:
+              $ref: '#/components/examples/BadRequestInvalidClaimsExample'
+  examples:
+    InsightsResponseData:
+      value:
+        insightPayload:
+          language: en
+          insights:
+          - id: T13
+            version: '1.1'
+            mainCategory: shopping
+            subCategory: clothes
+            seen: false
+            spendingAreaId: '30'
+          - id: T14
+            version: '1.1'
+            mainCategory: shopping
+            subCategory: clothes
+            seen: false
+            spendingAreaId: '30'
+          - id: T2
+            version: '1.1'
+            mainCategory: shopping
+            subCategory: clothes
+            seen: false
+            spendingAreaId: '30'
+          - id: T23
+            version: '1.1'
+            mainCategory: shopping
+            subCategory: clothes
+            seen: false
+            spendingAreaId: '30'
+          - id: T24
+            version: '1.1'
+            mainCategory: shopping
+            subCategory: clothes
+            seen: false
+            spendingAreaId: '30'
+          - id: T6
+            version: '1.1'
+            mainCategory: shopping
+            subCategory: clothes
+            seen: false
+            spendingAreaId: '30'
+          - id: T78
+            version: '1.1'
+            mainCategory: shopping
+            subCategory: clothes
+            seen: false
+            spendingAreaId: '30'
+          - id: T79
+            version: '1.1'
+            mainCategory: shopping
+            subCategory: clothes
+            seen: false
+            spendingAreaId: '30'
+          - id: T92
+            version: '1.1'
+            mainCategory: shopping
+            subCategory: clothes
+            seen: false
+            spendingAreaId: '30'
+          - id: T20
+            version: '1.1'
+            mainCategory: shopping
+            subCategory: clothes
+            seen: false
+            spendingAreaId: '30'
+          - id: T21
+            version: '1.1'
+            mainCategory: shopping
+            subCategory: clothes
+            seen: false
+            spendingAreaId: '30'
+          - id: T75
+            version: '1.1'
+            mainCategory: shopping
+            subCategory: clothes
+            seen: false
+            spendingAreaId: '30'
+          - id: T76
+            version: '1.1'
+            mainCategory: shopping
+            subCategory: clothes
+            seen: false
+            spendingAreaId: '30'
+          - id: T77
+            version: '1.1'
+            mainCategory: shopping
+            subCategory: clothes
+            seen: false
+            spendingAreaId: '30'
+          - id: T9
+            version: '1.1'
+            mainCategory: shopping
+            subCategory: clothes
+            seen: false
+            spendingAreaId: '30'
+          page: 1
+          totalItemCount: 15
+          totalPageCount: 1
+        profile:
+          traits:
+            knowledge: 0.65
+            lifestyle: 0.445
+            motivated: 0.683
+          userAttributes:
+            demo: 66
+            diet: 256
+            lifestyle: 4
+            energy: 12288
+            transport: 36933
+            country: AX
+          created: '2024-01-31T10:57:36.161Z'
+          surveys:
+            key1:
+              key2: 1
+              key3: 2
+          persona: '3'
+          benchmarks:
+            key1:
+              key2: 1
+              key3: 2
+          comparisons:
+            key1:
+              key2: 1
+              key3: 2
+          insights:
+            key1:
+              key2: 1
+              key3: 2
+          version: '1.0'
+    MissingInsightAttributesBadRequestError:
+      value:
+        Errors:
+          Error:
+          - Source: Carbon-Calculator
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: profile.userAttributes must not be null
+          - Source: Carbon-Calculator
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request
+            Recoverable: false
+            Details: profile.traits must not be null
+    InsightsRequest:
+      value:
+        insightsPayload:
+          mainCategory: shopping
+          main: shopping
+          docc: ''
+          spendingAreaId: '30'
+          subCategory: clothes
+        profile:
+          traits:
+            knowledge: 0.65
+            lifestyle: 0.445
+            motivated: 0.683
+          userAttributes:
+            demo: 66
+            diet: 256
+            lifestyle: 4
+            energy: 12288
+            transport: 36933
+            country: AX
+          created: '2024-01-31T10:57:36.161Z'
+          surveys:
+            key1:
+              key2: 1
+              key3: 2
+          persona: '3'
+          benchmarks:
+            key1:
+              key2: 1
+              key3: 2
+          comparisons:
+            key1:
+              key2: 1
+              key3: 2
+          insights:
+            key1:
+              key2: 1
+              key3: 2
+          version: '1.0'
+    InsightsByIdResponse:
+      value:
+        insightsByIdPayload:
+          id: T101
+          version: 1.1
+          language: en
+          heading: Recycle your e-waste
+          content: 'Voluptate eiusmod culpa incididunt excepteur anim ipsum et ex elit laboris esse. Nostrud proident culpa exercitation eu dolore consectetur sit amet cillum veniam enim duis ut. Qui mollit fugiat tempor deserunt occaecat fugiat adipisicing ex cupidatat duis commodo id ea. Dolor laboris eu commodo ea reprehenderit in nisi proident. Fugiat cupidatat excepteur et ullamco anim. Cillum fugiat commodo ipsum consequat irure proident tempor nisi tempor ad.
+
+            Occaecat est pariatur cillum commodo incididunt exercitation laboris consectetur eu mollit incididunt. Adipisicing quis incididunt mollit esse officia dolore fugiat reprehenderit nisi do velit ea. Id cillum consectetur mollit eu laborum nostrud nulla sint Lorem voluptate elit id.'
+          notification: ''
+          mainCategory: home
+          subCategory: electronics
+          spendingAreaId: '10'
+          source: The Global E-waste Monitor 2020
+          sourceDescription: The Global E-waste Monitor 2020
+          sourceLink: https://ewastemonitor.info/wp-content/uploads/2020/11/GEM_2020_def_july1_low.pdf
+          sourceDate: '2020-07-01'
+        profile:
+          traits:
+            knowledge: 0.65
+            lifestyle: 0.445
+            motivated: 0.683
+          userAttributes:
+            demo: 66
+            diet: 256
+            lifestyle: 4
+            energy: 12288
+            transport: 36933
+            country: AX
+          created: '2024-01-31T10:57:36.161Z'
+          surveys:
+            viewed:
+              onboardingVersion: 1
+          persona: '3'
+          benchmarks:
+            key1:
+              key2: 1
+              key3: 2
+          comparisons:
+            key1:
+              key2: 1
+              key3: 2
+          insights:
+            key1:
+              key2: 1
+              key3: 2
+          version: '1.0'
+    ServiceProviderNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: ACCOUNT_NOT_FOUND
+            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
+            Recoverable: false
+            Details: ''
+    InsightItemNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Carbon-Calculator
+            ReasonCode: ITEM_NOT_FOUND
+            Description: Insight Item not found for the provided id
+            Recoverable: false
+            Details: ''
+    InsightsByIdRequest:
+      value:
+        profile:
+          traits:
+            knowledge: 0.65
+            lifestyle: 0.445
+            motivated: 0.683
+          userAttributes:
+            demo: 66
+            diet: 256
+            lifestyle: 4
+            energy: 12288
+            transport: 36933
+            country: US
+          created: '2024-01-31T10:57:36.161Z'
+          surveys:
+            viewed:
+              onboardingVersion: 1
+          persona: '3'
+          benchmarks:
+            key1:
+              key2: 1
+              key3: 2
+          comparisons:
+            key1:
+              key2: 1
+              key3: 2
+          insights:
+            key1:
+              key2: 1
+              key3: 2
+          version: '1.0'
+    InsightItemNotFoundInVersionError:
+      value:
+        Errors:
+          Error:
+          - Source: Carbon-Calculator
+            ReasonCode: VERSION_NOT_FOUND
+            Description: 'Insight T101 unavailable in 3.1 (use: 1.1)'
+            Recoverable: false
+            Details: ''
+    UnsupportedLanguageError:
+      value:
+        Errors:
+          Error:
+          - Source: Carbon-Calculator
+            ReasonCode: LANGUAGE_NOT_FOUND
+            Description: Unsupported language
+            Recoverable: false
+            Details: ''
+    BadRequestInvalidFormatExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: BAD_REQUEST
+            Description: Claims in the request are empty.
+            Recoverable: false
+            Details: Invalid Date format. Valid format expected is 'YYYY-MM-DD'
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
+            Recoverable: false
+    BadRequestInvalidClaimsExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: INVALID_CLAIMS
+            Description: Provided claims are invalid.
+            Recoverable: false
+            Details: Claims are invalid. System defined claims for a mandatory scope 'ageOver' can't be empty
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CLAIM_SHARING_ARID_DOES_NOT_EXIST
+            Description: ARID does not exist.
+            Recoverable: false
+    BadRequestClaimsEmptyExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: BAD_REQUEST
+            Description: Claims in the request are empty.
+            Recoverable: false
+  parameters:
+    Branding:
+      name: branding
+      in: query
+      description: If you have a branded content version, please supply it here
+      required: false
+      example: branding
+      schema:
+        type: string
+    Heading:
+      name: heading
+      in: query
+      description: If you want to display heading of the insights content
+      required: false
+      example: false
+      schema:
+        type: boolean
+    PageSize:
+      name: page_size
+      in: query
+      description: size of page upto which data should be present
+      required: false
+      example: 20
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+    Page:
+      name: page
+      in: query
+      description: Page number of the page whose data should be present in response
+      required: false
+      example: 2
+      schema:
+        type: integer
+        minimum: 1
+    Version:
+      name: version
+      in: query
+      description: version of insights
+      required: false
+      example: 1.1
+      schema:
+        type: string
+        minimum: 1
+    Language:
+      name: language
+      in: query
+      description: language in which user wants to see insights to their climate profile
+      required: false
+      example: en
+      schema:
+        $ref: '#/components/schemas/LanguageCode'
+    InsightsId:
+      name: id
+      in: path
+      description: for specific insight Id user wants to see insight to their climate profile
+      required: true
+      example: T101
+      schema:
+        type: string
+    AridParameter:
+      name: arid
+      in: path
+      description: UUID represents the ARID.
+      example: df52649e-4096-456a-bca0-751ee470009f
+      required: true
+      schema:
+        maxLength: 36
+        minLength: 36
+        type: string
+        pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+  schemas:
+    InsightItem:
+      properties:
+        heading:
+          description: Heading of the item
+          type: string
+          example: insight
+        id:
+          description: Id of the item
+          type: string
+          example: T1
+        mainCategory:
+          description: Main Category of the item
+          type: string
+          example: Shopping
+        seen:
+          description: whether or not item has been seen
+          type: boolean
+          example: false
+        spendingAreaId:
+          description: Spending Area Id
+          type: string
+          example: '678'
+        subCategory:
+          description: Sub Category of the item
+          type: string
+          example: hardware
+        version:
+          description: Version of the item
+          type: string
+          example: '1.1'
+      required:
+      - id
+      - mainCategory
+      - seen
+      - spendingAreaId
+      - subCategory
+      - version
+      type: object
+    InsightsRequestPayload:
+      title: InsightsRequestPayload
+      type: object
+      description: The request object which contains climate Profile and payload
+      properties:
+        insightsPayload:
+          properties:
+            docc:
+              type: string
+              description: document of insights
+              example: Eat more greens - for the planet
+            main:
+              type: string
+              description: description of main category
+              example: shopping
+            mainCategory:
+              type: string
+              description: details of main category
+              example: shopping
+            spendingAreaId:
+              type: string
+              description: area of category in which expenditure was made
+              example: '30'
+            subCategory:
+              type: string
+              description: details of sub category
+              example: clothes
+          type: object
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
+    LanguageCode:
+      description: ISO 639-1 format language code
+      example: es
+      pattern: ^[a-z]{2}$
+      type: string
+    ClimateProfile:
+      description: Represents a Climate Profile for a User. Always use updated profile present in the response, which might include benchmarks, comparisons, insights and surveys.
+      properties:
+        userAttributes:
+          description: Attributes defining this profile
+          properties:
+            country:
+              type: string
+              description: country of issuer
+              example: IN
+              minLength: 2
+              maxLength: 3
+            demo:
+              type: number
+              description: demo of user / score for user demo
+              example: 65
+            diet:
+              type: number
+              description: diet type of user
+              example: 512
+            energy:
+              type: number
+              description: energy consumption type of user
+              example: 12288
+            lifestyle:
+              type: number
+              description: lifestyle type of user
+              example: 1
+            transport:
+              type: number
+              description: transport type of user
+              example: 12357
+          required:
+          - country
+          - demo
+          - diet
+          - energy
+          - lifestyle
+          - transport
+          type: object
+        benchmarks:
+          description: Tracks benchmarks data. This value is sourced from benchmarks API.
+          type: object
+          additionalProperties: true
+          example:
+            key1:
+              key2: 1
+              key3: 2
+        comparisons:
+          description: Tracks comparison data. This value is sourced from comparisons by id API.
+          type: object
+          additionalProperties: true
+          example:
+            key1:
+              key2: 1
+              key3: 2
+        insights:
+          description: Tracks which insights have been displayed. This value is sourced from insights by id API.
+          type: object
+          additionalProperties: true
+          example:
+            key1:
+              key2: 1
+              key3: 2
+        created:
+          description: represents creation date of user profile
+          type: string
+          format: date-time
+          example: '2023-08-07T12:39:35.087Z'
+        persona:
+          description: Representation of user persona type
+          type: string
+          example: '5'
+          minLength: 1
+          maxLength: 1
+        surveys:
+          description: Tracks surveys data. This value is sourced from /surveys API.
+          type: object
+          additionalProperties: true
+          example:
+            key1:
+              key2: 1
+              key3: 2
+        traits:
+          description: Scores for knowledge, lifestyle, and motivation
+          properties:
+            knowledge:
+              type: number
+              example: 0.575
+              description: score for user knowledge
+              minLength: 1
+            lifestyle:
+              type: number
+              example: 0.324
+              description: score for user lifestyle
+              minLength: 1
+            motivated:
+              type: number
+              example: 0.617
+              description: score for user motivation
+              minLength: 1
+          required:
+          - knowledge
+          - lifestyle
+          - motivated
+          type: object
+        version:
+          description: Version for this profile
+          type: string
+          example: 1
+      required:
+      - userAttributes
+      - created
+      - persona
+      - traits
+      - version
+      type: object
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    InsightsResponseById:
+      properties:
+        insightsByIdPayload:
+          properties:
+            content:
+              description: The details of the insight
+              type: string
+              example: Voluptate eiusmod culpa incididunt excepteur anim ipsum et ex elit laboris esse. Nostrud proident culpa exercitation eu dolore consectetur sit amet cillum veniam enim duis ut. Qui mollit fugiat tempor deserunt occaecat fugiat adipisicing ex cupidatat duis commodo id ea. Dolor laboris eu commodo ea reprehenderit in nisi proident. Fugiat cupidatat excepteur et ullamco anim. Cillum fugiat commodo ipsum consequat irure proident tempor nisi tempor ad.\nOccaecat est pariatur cillum commodo incididunt exercitation laboris consectetur eu mollit incididunt. Adipisicing quis incididunt mollit esse officia dolore fugiat reprehenderit nisi do velit ea. Id cillum consectetur mollit eu laborum nostrud nulla sint Lorem voluptate elit id.
+            heading:
+              description: Title of insight
+              type: string
+              example: Recycle your e-waste
+            id:
+              description: The Insight Id
+              type: string
+              example: T101
+            mainCategory:
+              description: Main category of this insight
+              type: string
+              example: home
+            notification:
+              description: Summary user for tool tips or similar
+              type: string
+              example: A balanced diet is good for your health and that of the planet.
+            source:
+              description: Entity used as source for this insight
+              type: string
+              example: The Global E-waste Monitor 2020
+            sourceDate:
+              description: Date of source
+              type: string
+              example: '2020-07-01T00:00:00.000Z'
+            sourceDescription:
+              description: The source description
+              type: string
+              example: The Global E-waste Monitor 2020
+            sourceLink:
+              description: Link to source (if available)
+              type: string
+              example: https://ewastemonitor.info/wp-content/uploads/2020/11/GEM_2020_def_july1_low.pdf
+            spendingAreaId:
+              description: Spending Area Id
+              type: string
+              example: 10
+            subCategory:
+              description: The sub category
+              type: string
+              example: electronics
+            version:
+              description: Version for this profile
+              type: string
+              example: 1.1
+          required:
+          - content
+          - heading
+          - id
+          - mainCategory
+          - spendingAreaId
+          - subCategory
+          - version
+          type: object
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
+      required:
+      - insightPayload
+      type: object
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns a list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    InsightsByIdRequestPayload:
+      title: InsightsByIdRequestPayload
+      type: object
+      description: The request object which contains climate Profile
+      properties:
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    InsightsData:
+      properties:
+        insightPayload:
+          properties:
+            insights:
+              items:
+                $ref: '#/components/schemas/InsightItem'
+              type: array
+              description: details of items
+            language:
+              type: string
+              description: language of insights
+              example: en
+            nextPage:
+              type: string
+              description: next present or not
+              example: 'yes'
+            page:
+              type: number
+              description: number of page
+              example: 1
+            previousPage:
+              type: string
+              description: previous Page present or not
+              example: 'yes'
+            totalItemCount:
+              type: number
+              description: total item count number
+              example: 96
+            totalPageCount:
+              type: number
+              description: total page count
+              example: 20
+          required:
+          - insights
+          - page
+          - totalItemCount
+          - totalPageCount
+          type: object
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
+      required:
+      - insightPayload
+      type: object
+    Error:
+      title: Error
+      type: object
+      description: Error object which contains details about the error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error. Every error message that is generated and returned by the gateway will have this field equal to Gateway. Other possible values are 'Carbon-Calculator' and 'Service-Provider'.
+          minLength: 1
+          maxLength: 100
+          example: Service-Provider-Mgmt
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: INVALID_REQUEST_PARAMETER
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+    ApiError:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of where the error occurred.
+          minLength: 3
+          maxLength: 50
+          example: mids
+        ReasonCode:
+          type: string
+          description: Code of the error.
+          minLength: 5
+          maxLength: 100
+          example: BAD_REQUEST
+        Description:
+          type: string
+          description: The cause of the error.
+          minLength: 10
+          maxLength: 250
+          example: Claims in the request are empty
+        Recoverable:
+          type: boolean
+          description: Indicates if the error can be recovered from.
+          example: false
+        Details:
+          type: string
+          description: Contains information about the error.
+          minLength: 10
+          maxLength: 1000
+          example: IOException Occurred
+    ApiErrors:
+      description: List of errors.
+      example:
+        $ref: '#/components/examples/NotFoundExample'
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          $ref: '#/components/schemas/ApiErrorList'
+    IDPClaimShareInsights:
+      type: object
+      required:
+      - claimShareDuration
+      - deviceMake
+      - userActivity
+      - userActivityOutcome
+      properties:
+        claimShareDuration:
+          description: The length of the claim sharing journey in seconds.
+          type: integer
+          maximum: 900
+          example: 30
+        deviceMake:
+          description: Device type descriptor.
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: SGH-N045
+        userActivity:
+          description: The type of the user activity.
+          type: string
+          example: NEW_ID_ENROLLED
+          pattern: ^NEW_ID_ENROLLED|NEW_ID_ENROLLED_AND_ADDITIONAL_ATTRIBUTES_ADDED|EXISTING_ID_REUSED|EXISTING_ID_REUSED_AND_ATTRIBUTES_ADDED|EXISTING_ID_REUSED_AND_ATTRIBUTES_ADDED$
+        userActivityOutcome:
+          description: A description of the results of the user activity.
+          type: object
+          required:
+          - outcome
+          properties:
+            outcome:
+              description: The result of the user activity.
+              type: string
+              example: ABANDONED_BY_USER
+              pattern: ^SUCCESSFUL|DECLINED_BY_USER|ABANDONED_BY_USER|TERMINATED_DUE_TO_ERROR|DECLINED_BY_SYSTEM_OTHER|DECLINED_BY_SYSTEM_FRAUD$
+            reason:
+              description: A description of the outcome field.
+              type: string
+              example: SUSPICIOUS_DATA
+              pattern: ^SUSPICIOUS_DEVICE|SUSPICIOUS_NETWORK|SUSPICIOUS_DATA|SUSPICIOUS_USER|UNDETERMINED_LIVENESS|BIOMETRIC_MATCH_FAILURE|OTHER$
+    ApiErrorWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/ApiErrors'
+    ApiErrorList:
+      description: Error Details.
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/ApiError'
+  requestBodies:
+    InsightsRequest:
+      description: Insights for climate profile.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InsightsRequestPayload'
+          examples:
+            InsightsRequest:
+              $ref: '#/components/examples/InsightsRequest'
+      required: true
+    InsightsByIdRequest:
+      description: Represents a Climate Profile for a User.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InsightsByIdRequestPayload'
+          examples:
+            InsightsByIdRequest:
+              $ref: '#/components/examples/InsightsByIdRequest'
+      required: true
+    IDPClaimShareInsightsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IDPClaimShareInsights'
+  headers:
+    X-Transaction-ID:
+      schema:
+        type: string
+      description: A random 128-bit UUID represents the transaction.

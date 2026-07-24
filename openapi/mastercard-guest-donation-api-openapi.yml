@@ -1,0 +1,605 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Guest  Donation API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Guest  Donation
+paths:
+  /payments/guests:
+    post:
+      tags:
+      - Guest  Donation
+      summary: Guest Donation
+      description: This API is used to process One Time Donation for a Guest Donor. Entire request body should be encrypted.
+      operationId: guestDonationUsingPOST
+      parameters:
+      - $ref: '#/components/parameters/ClientId'
+      - name: x-correlation-id
+        in: header
+        description: CorrelationId is a unique donation request ID. It is recommended to pass the x-correlation-id by the customer and to use the format "bankname_UUID" (bank name can be indicated using the first 4 digits). Maximum length of this field should be 100 alphanumeric characters. If not passed, Mastercard will generate it. ***Note:*** If there is a timeout when doing the guest api call, it is important to redo the same api call with same x-correlation-id to get the status of the previous api call
+        required: false
+        schema:
+          type: string
+          example: 03f8c4e8-8bdc-4a30-a2b4-b6f989e96ca3
+      - $ref: '#/components/parameters/ProgramId'
+      requestBody:
+        $ref: '#/components/requestBodies/GuestDonate'
+      responses:
+        '200':
+          $ref: '#/components/responses/GuestDonation'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/Unsupported'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      deprecated: false
+components:
+  schemas:
+    CardCvcGuest:
+      type: object
+      properties:
+        cvc:
+          type: string
+          example: 100
+          minLength: 3
+          maxLength: 4
+          description: CVC
+        expiryInfo:
+          $ref: '#/components/schemas/cardExpiry'
+        primaryAccountNumber:
+          type: string
+          example: 5450985888403538
+          minLength: 12
+          maxLength: 19
+          description: The Primary Account Number (PAN).
+      title: Card
+    Error-415:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: UNSUPPORTED_CONTENT_TYPE
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The request Content-Type (<request content-type value>) is not supported for this service
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    3ds2:
+      type: object
+      required:
+      - transactionStatus
+      properties:
+        transactionStatus:
+          type: string
+          example: Y
+          minLength: 1
+          maxLength: 1
+          description: Status of Transaction (recommended - Y)
+        protocolVersion:
+          type: string
+          example: 2.2.2
+          minLength: 5
+          maxLength: 20
+          description: Protocol Version
+      description: Required If authPayerResponse object is passed, only for MPGS.
+    User:
+      type: object
+      required:
+      - email
+      - firstName
+      properties:
+        email:
+          type: string
+          example: John.Doe@mail.com
+          minLength: 8
+          maxLength: 30
+          description: Email
+        firstName:
+          type: string
+          example: John
+          minLength: 3
+          maxLength: 30
+          description: First Name
+        lastName:
+          type: string
+          example: Doe
+          minLength: 3
+          maxLength: 30
+          description: Last Name
+      title: User
+    Error-401:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to authorization failure
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: AUTHENTICATION_FAILED
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: OAuth signatures did not match.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Authentication:
+      type: object
+      properties:
+        3ds:
+          $ref: '#/components/schemas/3ds'
+        3ds2:
+          $ref: '#/components/schemas/3ds2'
+    Error-403:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to forbidden requests
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of forbidden request.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: INVALID_KEY
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The signing certificate is not valid.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error-201:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: CREATED
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: OAuth signatures did not match.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    GuestDonate:
+      type: object
+      required:
+      - card
+      - donation
+      - user
+      properties:
+        card:
+          $ref: '#/components/schemas/CardCvcGuest'
+        donation:
+          $ref: '#/components/schemas/Donation'
+        user:
+          $ref: '#/components/schemas/User'
+        sessionDetails:
+          $ref: '#/components/schemas/SessionDetails'
+        authPayerResponse:
+          $ref: '#/components/schemas/AuthPayerResponse'
+      title: GuestDonateRequest
+    AuthPayerResponse:
+      type: object
+      properties:
+        authentication:
+          $ref: '#/components/schemas/Authentication'
+    cardExpiry:
+      type: object
+      properties:
+        month:
+          type: string
+          example: 10
+          minLength: 2
+          maxLength: 2
+          description: Month
+        year:
+          type: string
+          example: 2025
+          minLength: 4
+          maxLength: 4
+          description: Year
+      title: Card Expiry Details
+    SessionDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          example: SESSION0002692172456I23783337L2
+          minLength: 31
+          maxLength: 35
+          description: Id
+      title: SessionDetails
+    Donation:
+      type: object
+      required:
+      - amount
+      - charityId
+      - donationType
+      properties:
+        amount:
+          type: string
+          example: '11'
+          minLength: 1
+          maxLength: 20
+          description: Amount
+        charityId:
+          type: string
+          example: ae3c5f35-084a-4df9-a2af-7e0efd512fc0
+          minLength: 36
+          maxLength: 36
+          description: Charity Id (UUID)
+        donationType:
+          type: string
+          example: ONE-TIME
+          minLength: 5
+          maxLength: 20
+          description: Donation Type
+      title: Donation
+    GuestDonation:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          minLength: 13
+          maxLength: 36
+          description: Transaction Id
+        transactionMessage:
+          type: string
+          minLength: 3
+          maxLength: 30
+          description: Transaction Message
+        transactionStatus:
+          type: string
+          minLength: 5
+          maxLength: 20
+          description: Transaction Status
+      title: GuestDonationResponse
+    Error-404:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to resource not found
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an resource not found.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: NOT_FOUND
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The signing certificate is not valid.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    3ds:
+      type: object
+      required:
+      - authenticationToken
+      - transactionId
+      - version
+      properties:
+        acsEci:
+          type: string
+          example: 2
+          minLength: 1
+          maxLength: 2
+          description: ascEci
+        authenticationToken:
+          type: string
+          example: kHyn+7YFi1EUAREAAAAvNUe6Hv8=
+          minLength: 28
+          maxLength: 32
+          description: Authentication Token
+        transactionId:
+          type: string
+          example: 9f343e5d-fc28-4818-88d4-17a35fb7dea9
+          minLength: 36
+          maxLength: 36
+          description: transaction ID (UUID)
+        version:
+          type: string
+          example: 1.0.2
+          minLength: 5
+          maxLength: 20
+          description: version
+      description: Required If authPayerResponse object is passed.
+    Error-500:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to server error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an server issue.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: PROGRAM_ID_NOT_FOUND
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Program id is required as this client is mapped to multiple programs.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an error condition.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: DONOR_ID_INVALID
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Invalid donorId, it must be a valid UUID.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: Provided donorId is not valid, Please check and provide valid Unique Id.
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+  responses:
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-403'
+    Created:
+      description: The specified resource was created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-201'
+    Unauthorized:
+      description: Unauthorised
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-401'
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-500'
+    Unsupported:
+      description: Unsupported Content Type
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-415'
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-404'
+    GuestDonation:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GuestDonation'
+          examples:
+            SUCCESS:
+              $ref: '#/components/examples/oneTimePaymentSuccess'
+            FAILURE:
+              $ref: '#/components/examples/oneTimePaymentFail'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    ClientId:
+      name: x-openapi-clientid
+      in: header
+      description: ClientId is a unique and a mandatory ID shared while creating a project on Mastercard Developers Portal.
+      required: true
+      schema:
+        type: string
+        example: 0a7e433a-63fc-4557-8cf4
+    ProgramId:
+      name: ProgramId
+      in: header
+      description: ProgramId is an optional field, but if a client has more than one program associated to it, then this field becomes mandatory.
+      required: false
+      schema:
+        type: string
+        example: 80380ef2-5037-4e57-86bf-1bdd1efb0ae2
+  examples:
+    oneTimePaymentSuccess:
+      summary: Payment success
+      value:
+        transactionId: OTBVMrlAQa6Ecl7PlKSDyw
+        transactionStatus: SUCCESS
+        transactionMessage: Transaction APPROVED
+    oneTimePaymentFail:
+      summary: Payment failure
+      value:
+        transactionId: OTbB0kCkRxC7tu1itsIN8Q
+        transactionStatus: FAILURE
+        transactionMessage: Transaction declined
+        reasonCode: DECLINE
+        reasonMessage: Your payment was declined.  Please use a different card or contact your issuer for more information.
+  requestBodies:
+    GuestDonate:
+      description: guestDonateRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GuestDonate'
+      required: false

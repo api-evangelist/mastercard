@@ -1,0 +1,3778 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Card API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Card
+paths:
+  /service-providers/payment-cards/{payment_card_id}:
+    delete:
+      tags:
+      - Card
+      summary: Delete a Payment Card
+      description: 'Allows a registered Service Provider to delete single Payment Card at a time from its profile. Any data associated with a requested paymentCardId will also be deleted permanently.
+
+
+        On the successful response from the server, a Service Provider should remove all the requested paymentCardIds from the system.
+
+
+        Once a request has been received from a Service Provider, data deletion will happen immediately.'
+      operationId: PaymentCardDeletion
+      parameters:
+      - $ref: '#/components/parameters/PaymentCardId'
+      responses:
+        '202':
+          $ref: '#/components/responses/Accepted'
+        '400':
+          $ref: '#/components/responses/PaymentCardDeletionsBadRequestError'
+        '404':
+          $ref: '#/components/responses/PaymentCardByIdNotFoundError'
+  /payment-cards/{payment_card_id}/transaction-footprints:
+    get:
+      tags:
+      - Card
+      summary: Fetches Historical Transactions and its Transaction Footprints
+      description: Allows a Service Provider to fetch historical transactions for a payment card. Note that a maximum of one year of transactions can be retrieved using this API. Also, the payment card has to be registered first using /payment-cards service.
+      operationId: GetPaymentCardTransactionHistory
+      parameters:
+      - $ref: '#/components/parameters/PaymentCardId'
+      - $ref: '#/components/parameters/FromDate'
+      - $ref: '#/components/parameters/ToDate'
+      - $ref: '#/components/parameters/Offset'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          $ref: '#/components/responses/HistoricalTransactionFootprints'
+        '400':
+          $ref: '#/components/responses/TransactionHistoryBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+  /payment-card-enrolments:
+    post:
+      tags:
+      - Card
+      summary: Batch Registration of Payment Cards (to be deprecated)
+      description: Allows a registered Service Provider to add a list of new Payment Cards **(at most maximum of 100 payment cards)** to its profile. This endpoint uses [Mastercard payload encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/#mastercard-encryption). Refer to the [Payload Encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/) section for implementation details.
+      operationId: BatchRegisterPaymentCards
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentCards'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentCardEnrolments'
+        '400':
+          $ref: '#/components/responses/PaymentCardEnrolmentsBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+        '415':
+          $ref: '#/components/responses/ServiceProviderUnsupportedMediaTypeError'
+  /payment-card-deletions:
+    post:
+      tags:
+      - Card
+      summary: Delete one or more Payment Cards (to be deprecated)
+      description: 'Allows a registered Service Provider to delete one or more Payment Cards from its profile. Any data associated with a requested paymentCardId will also be deleted permanently.
+
+
+        On the successful response from the server, a Service Provider should remove all the requested paymentCardIds from the system.
+
+
+        Once a request has been received from a Service Provider, data deletion will happen immediately.
+
+        '
+      operationId: PaymentCardDeletions
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentCardIds'
+      responses:
+        '202':
+          $ref: '#/components/responses/Accepted'
+        '400':
+          $ref: '#/components/responses/PaymentCardDeletionsBadRequestError'
+        '404':
+          $ref: '#/components/responses/PaymentCardDeletionsNotFoundError'
+        '415':
+          $ref: '#/components/responses/ServiceProviderUnsupportedMediaTypeError'
+  /alerts/merchants/{member_id}/sub-merchants/{sub_merchant_id}/card-acceptor-ids:
+    post:
+      tags:
+      - Card
+      summary: Mastercard Create Sub-merchant Card Acceptor Id Config.
+      description: Returns created sub-merchant card acceptor id config details.
+      operationId: createAlertsCardAcceptorIdConfig
+      parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MemberIdParam'
+      - $ref: '#/components/parameters/SubMerchantIdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/AlertsCardAcceptorIdConfigRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsMerchantIdentifierSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    get:
+      tags:
+      - Card
+      summary: Mastercard Get Sub-merchant Card Acceptor Id Configs.
+      description: Returns sub-merchant card acceptor id config details.
+      operationId: getAlertsCardAcceptorIdConfigs
+      parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MemberIdParam'
+      - $ref: '#/components/parameters/SubMerchantIdParam'
+      - $ref: '#/components/parameters/AcquirerReferenceIdParam'
+      - $ref: '#/components/parameters/CardAcceptorIdParam'
+      - $ref: '#/components/parameters/OffsetParam'
+      - $ref: '#/components/parameters/PageNumberParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsCardAcceptorIdConfigs'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    delete:
+      tags:
+      - Card
+      summary: Mastercard Delete Sub-merchant Card Acceptor Id Config.
+      description: Returns 200 if sub-merchant card acceptor id configs gets deleted.
+      operationId: deleteAlertsCardAcceptorIdConfig
+      parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MemberIdParam'
+      - $ref: '#/components/parameters/SubMerchantIdParam'
+      - $ref: '#/components/parameters/MerchantIdentifierConfigIdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessWithoutBody'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /alerts/merchants/{member_id}/sub-merchants/{sub_merchant_id}/card-acceptor-names:
+    post:
+      tags:
+      - Card
+      summary: Mastercard Create Sub-merchant Card Acceptor Name Config.
+      description: Returns created sub-merchant card acceptor name config details.
+      operationId: createAlertsCardAcceptorNameConfig
+      parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MemberIdParam'
+      - $ref: '#/components/parameters/SubMerchantIdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/AlertsCardAcceptorNameConfigRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsMerchantIdentifierSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    get:
+      tags:
+      - Card
+      summary: Mastercard Get Sub-merchant Card Acceptor Name Configs.
+      description: Returns sub-merchant card acceptor name config details.
+      operationId: getAlertsCardAcceptorNameConfigs
+      parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MemberIdParam'
+      - $ref: '#/components/parameters/SubMerchantIdParam'
+      - $ref: '#/components/parameters/CardAcceptorNameParam'
+      - $ref: '#/components/parameters/OffsetParam'
+      - $ref: '#/components/parameters/PageNumberParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsCardAcceptorNameConfigs'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    delete:
+      tags:
+      - Card
+      summary: Mastercard Delete Sub-merchant Card Acceptor Name Config.
+      description: Returns 200 if sub-merchant card acceptor name configs gets deleted.
+      operationId: deleteAlertsCardAcceptorNameConfig
+      parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MemberIdParam'
+      - $ref: '#/components/parameters/SubMerchantIdParam'
+      - $ref: '#/components/parameters/MerchantIdentifierConfigIdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessWithoutBody'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '403':
+          $ref: '#/components/responses/ForbiddenOperation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /sub-merchants/{guid}/locations/{location_id}/card-acceptor-names:
+    parameters:
+    - $ref: '#/components/parameters/UserIdParam'
+    - $ref: '#/components/parameters/SubmitterFirstNameParam'
+    - $ref: '#/components/parameters/SubmitterLastNameParam'
+    - $ref: '#/components/parameters/MerchantGuidParam'
+    - $ref: '#/components/parameters/LocationIdParam'
+    post:
+      summary: Mastercard Add Card Acceptor Names
+      description: Creates card acceptor names under a location of an existing sub-merchant
+      operationId: addCardAcceptorNames
+      tags:
+      - Card
+      requestBody:
+        $ref: '#/components/requestBodies/CardAcceptorNamesBulkRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/CardAcceptorNamesBulkSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    get:
+      parameters:
+      - $ref: '#/components/parameters/ClarityOffsetParam'
+      - $ref: '#/components/parameters/ClarityPageNumberParam'
+      - $ref: '#/components/parameters/ClaritySortDirectionParam'
+      - $ref: '#/components/parameters/ClaritySortFieldParam'
+      - $ref: '#/components/parameters/CardAcceptorNameSearchTextParam'
+      summary: Mastercard Get Card Acceptor Names
+      description: Returns Card Acceptor Names with pagination metadata
+      operationId: getCardAcceptorNames
+      tags:
+      - Card
+      responses:
+        '200':
+          $ref: '#/components/responses/PageableCardAcceptorNamesSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /sub-merchants/{guid}/locations/{location_id}/card-acceptor-names/{id}:
+    get:
+      summary: Mastercard Get Card Acceptor Name by Id
+      description: Returns card acceptor name object
+      operationId: getCardAcceptorNameById
+      tags:
+      - Card
+      parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MerchantGuidParam'
+      - $ref: '#/components/parameters/LocationIdParam'
+      - $ref: '#/components/parameters/CardAcceptorNameIdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/CardAcceptorSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    put:
+      summary: Mastercard Update Card Acceptor Name by Id
+      description: Updates card acceptor name object
+      operationId: updateCardAcceptorNameById
+      tags:
+      - Card
+      parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MerchantGuidParam'
+      - $ref: '#/components/parameters/LocationIdParam'
+      - $ref: '#/components/parameters/CardAcceptorNameIdParam'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        $ref: '#/components/requestBodies/CardAcceptorNamesBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/CardAcceptorSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    delete:
+      summary: Mastercard Delete Existing Card Acceptor Name
+      description: Returns 204 status code if Card Acceptor Name deleted successfully
+      operationId: deleteCardAcceptorById
+      tags:
+      - Card
+      parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MerchantGuidParam'
+      - $ref: '#/components/parameters/LocationIdParam'
+      - $ref: '#/components/parameters/CardAcceptorNameIdParam'
+      responses:
+        '204':
+          $ref: '#/components/responses/SuccessWithoutBody'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /donors/{donor_id}/cards/{card_id}:
+    get:
+      tags:
+      - Card
+      summary: Retrieve Card API
+      description: Retrieves card by card id passed. Entire response body is encrypted and it should be decrypted to view the actual response.
+      operationId: retrieveCardUsingGET
+      parameters:
+      - $ref: '#/components/parameters/ClientId'
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/ProgramId'
+      - $ref: '#/components/parameters/Card'
+      - $ref: '#/components/parameters/Donor'
+      responses:
+        '200':
+          $ref: '#/components/responses/DonateCardRetrieve'
+        '400':
+          $ref: '#/components/responses/BadRequest_2'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      deprecated: false
+    put:
+      tags:
+      - Card
+      summary: Update Card API
+      description: Donor can update his/her already added card by providing new card informatin along with cardId. Entire request body should be encrypted.
+      operationId: updateCardUsingPUT
+      parameters:
+      - $ref: '#/components/parameters/ClientId'
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/ProgramId'
+      - $ref: '#/components/parameters/Card'
+      - $ref: '#/components/parameters/Donor'
+      responses:
+        '200':
+          $ref: '#/components/responses/DonateCardUpdate'
+        '400':
+          $ref: '#/components/responses/BadRequest_2'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      deprecated: false
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateCard'
+    delete:
+      tags:
+      - Card
+      summary: Delete Card API
+      description: Donor can delete his/her saved card from Donation platform.
+      operationId: deleteCardUsingDELETE
+      parameters:
+      - $ref: '#/components/parameters/ClientId'
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/ProgramId'
+      - $ref: '#/components/parameters/Card'
+      - $ref: '#/components/parameters/Donor'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '400':
+          $ref: '#/components/responses/BadRequest_2'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound_2'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      deprecated: false
+  /users/{user_guid}/virtual-card-accounts:
+    get:
+      tags:
+      - Card
+      summary: Retrieve a list of all virtual cards linked to a user
+      description: This endpoint allows users to retrieve a list of all virtual cards linked to a user
+      operationId: findVcnCardsByUser
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      responses:
+        '200':
+          $ref: '#/components/responses/VirtualCards'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    post:
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      tags:
+      - Card
+      summary: Register a virtual card linked to a user
+      description: This endpoint allows users to register a virtual card linked to a user
+      operationId: createVirtualCardWithControls
+      requestBody:
+        $ref: '#/components/requestBodies/NewVirtualCard'
+      responses:
+        '201':
+          $ref: '#/components/responses/ResourceCreated'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /users/{user_guid}/virtual-card-accounts/{account_guid}:
+    get:
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      tags:
+      - Card
+      summary: Retrieve virtual card account details linked to a user
+      description: This endpoint allows users to retrieve virtual card account details linked to a user
+      operationId: findVcnCardByUser
+      responses:
+        '200':
+          $ref: '#/components/responses/VirtualCard'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    put:
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      tags:
+      - Card
+      summary: Update virtual card account details linked to a user
+      description: This endpoint allows users to update virtual card account details linked to a user
+      operationId: updateUserCardAndControls
+      requestBody:
+        $ref: '#/components/requestBodies/UpdatedVirtualCard'
+      responses:
+        '200':
+          $ref: '#/components/responses/OKResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    delete:
+      tags:
+      - Card
+      summary: Delete a virtual card account linked to a user
+      description: This endpoint allows users to delete a virtual card account linked to a user
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      operationId: deleteUserVirtualCard
+      responses:
+        '204':
+          $ref: '#/components/responses/NOContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /real-card-accounts/{account_guid}:
+    delete:
+      tags:
+      - Card
+      summary: Delete all virtual cards linked to a real card
+      description: This endpoint allows users to delete all virtual cards linked to a real card account_guid
+      parameters:
+      - $ref: '#/components/parameters/accountGUID'
+      operationId: DeleteVcnsByRealCardAccountGuid
+      responses:
+        '204':
+          $ref: '#/components/responses/NOContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /users/{user_guid}/virtual-card-accounts/{account_guid}/tokens:
+    post:
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      tags:
+      - Card
+      summary: Register a token linked to a user and a virtual card
+      description: This endpoint allows users to register a token linked to a user and a virtual card
+      operationId: TokenCreate
+      requestBody:
+        $ref: '#/components/requestBodies/NewToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/ResourceCreated'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /users/{user_guid}/virtual-card-accounts/{account_guid}/tokens/{token_guid}:
+    get:
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      - $ref: '#/components/parameters/tokenGUID'
+      tags:
+      - Card
+      summary: Retrieve token details linked to a user and a virtual card
+      description: This endpoint allows users to retrieve token details linked to a user and a virtual card
+      operationId: getTokenById
+      responses:
+        '200':
+          $ref: '#/components/responses/Token'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    put:
+      tags:
+      - Card
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      - $ref: '#/components/parameters/tokenGUID'
+      summary: Update a token linked to a user and a virtual card
+      description: This endpoint allows users to update a token linked to a user and a virtual card
+      operationId: updateTokenById
+      requestBody:
+        $ref: '#/components/requestBodies/UpdatedToken'
+      responses:
+        '200':
+          $ref: '#/components/responses/OKResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    delete:
+      tags:
+      - Card
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      - $ref: '#/components/parameters/tokenGUID'
+      summary: Delete a token linked to a user and a virtual card
+      description: This endpoint allows users to delete a token linked to a user and a virtual card
+      operationId: deleteTokenById
+      responses:
+        '204':
+          $ref: '#/components/responses/NOContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+components:
+  responses:
+    TransactionHistoryBadRequestError:
+      description: This response code is returned when a request is invalid or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            TransactionHistoryPaymentCardNotFoundError:
+              $ref: '#/components/examples/TransactionHistoryPaymentCardNotFoundError'
+            TransactionHistoryInvalidDateRangeError:
+              $ref: '#/components/examples/TransactionHistoryInvalidDateRangeError'
+            TransactionHistoryInvalidDateFormatError:
+              $ref: '#/components/examples/TransactionHistoryInvalidDateFormatError'
+    Accepted:
+      description: Accepted
+      headers:
+        Location:
+          $ref: '#/components/headers/Location'
+    PaymentCardByIdNotFoundError:
+      description: This response code is returned when the server cannot find the paymentcard which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            PaymentCardByIdNotFoundError:
+              $ref: '#/components/examples/PaymentCardByIdNotFoundError'
+    PaymentCardDeletionsBadRequestError:
+      description: This response code is returned when either a request is invalid or one or more paymentCardIds are invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            PaymentCardDeletionsRequestValidationError:
+              $ref: '#/components/examples/PaymentCardDeletionsRequestValidationError'
+            PaymentCardDeletionsInvalidCardIdError:
+              $ref: '#/components/examples/PaymentCardDeletionsInvalidCardIdError'
+    PaymentCardEnrolmentsBadRequestError:
+      description: This response code is returned when a request is invalid, or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            PaymentCardEnrolmentsRequestValidationError:
+              $ref: '#/components/examples/RegisterPaymentCardRequestValidationError'
+            PaymentCardEnrolmentsRequestDecryptionError:
+              $ref: '#/components/examples/RegisterPaymentCardRequestDecryptionError'
+    HistoricalTransactionFootprints:
+      description: This response code is returned when a request is accepted and successfully processed. A corresponding response will be returned for the API caller.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HistoricalTransactionFootprints'
+          examples:
+            HistoricalTransactionFootprints:
+              $ref: '#/components/examples/HistoricalTransactionFootprints'
+    PaymentCardDeletionsNotFoundError:
+      description: This response code is returned when the server cannot find the account or one or more paymentcards which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+            PaymentCardNotFoundError:
+              $ref: '#/components/examples/PaymentCardNotFoundError'
+    PaymentCardEnrolments:
+      description: The response object that contains the list of payment cards information after batch registration.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentCardEnrolments'
+          examples:
+            PaymentCardEnrolments:
+              $ref: '#/components/examples/PaymentCardEnrolments'
+    ServiceProviderUnsupportedMediaTypeError:
+      description: This response code is returned when the value of provided Content-Type parameter is other than expected.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderUnsupportedMediaTypeError:
+              $ref: '#/components/examples/ServiceProviderUnsupportedMediaTypeError'
+    ServiceProviderNotFoundError:
+      description: This response code is returned when the server cannot find the account which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+    ForbiddenOperation:
+      description: Forbidden Operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ForbiddenOperation:
+              $ref: '#/components/examples/ForbiddenOperation'
+    CardAcceptorNamesBulkSuccess:
+      description: Card Acceptor Names response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CardAcceptorNamesBulkResource'
+    AlertsMerchantIdentifierSuccess:
+      description: Sub-merchant identifiers for either card acceptor id or card acceptor name configuration
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsMerchantIdentifierConfigIdOnly'
+          examples:
+            AlertsMerchantIdentifierConfigIdOnly:
+              $ref: '#/components/examples/AlertsMerchantIdentifierConfigIdOnly'
+    ValidationFailed:
+      description: Validation Failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ValidationFailed:
+              $ref: '#/components/examples/ValidationFailed'
+    CardAcceptorSuccess:
+      description: Card Acceptor response
+      headers:
+        Etag:
+          required: true
+          schema:
+            $ref: '#/components/schemas/Etag'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CardAcceptorDataResource'
+    SuccessWithoutBody:
+      description: Successful Operation
+    PermissionDenied:
+      description: Permission Denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            PermissionDenied:
+              $ref: '#/components/examples/PermissionDenied'
+    AlertsCardAcceptorNameConfigs:
+      description: Sub-merchant card acceptor name configurations
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsCardAcceptorNameConfigs'
+          examples:
+            AlertsCardAcceptorNameConfigs:
+              $ref: '#/components/examples/AlertsCardAcceptorNameConfigs'
+    Default:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ServerError:
+              $ref: '#/components/examples/ServerError'
+    PageableCardAcceptorNamesSuccess:
+      description: Pageable card acceptor names resource with pagination metadata
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PageableCardAcceptorNamesResource'
+    AlertsCardAcceptorIdConfigs:
+      description: Sub-merchant card acceptor id configurations
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsCardAcceptorIdConfigs'
+          examples:
+            AlertsCardAcceptorIdConfigs:
+              $ref: '#/components/examples/AlertsCardAcceptorIdConfigs'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ResourceNotFound:
+              $ref: '#/components/examples/ResourceNotFound'
+            EntityNotFound:
+              $ref: '#/components/examples/EntityNotFound'
+            AlertsEntityNotFound:
+              $ref: '#/components/examples/AlertsEntityNotFound'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            InvalidData:
+              $ref: '#/components/examples/InvalidData'
+            AlertsInvalidData:
+              $ref: '#/components/examples/AlertsInvalidData'
+            InvalidParameterSet:
+              $ref: '#/components/examples/InvalidParameterSet'
+            FormatInvalid:
+              $ref: '#/components/examples/FormatInvalid'
+            AlertsFormatInvalid:
+              $ref: '#/components/examples/AlertsFormatInvalid'
+            MissingRequiredHeader:
+              $ref: '#/components/examples/MissingRequiredHeader'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-403'
+    DonateCardRetrieve:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DonateCardRetrieve'
+    Unauthorized:
+      description: Unauthorised
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-401'
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-500'
+    NotFound_2:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-404'
+    DonateCardUpdate:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DonateCardUpdate'
+    BadRequest_2:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_3'
+    NoContent:
+      description: The Setup is successfully deleted.
+    UnauthorizedError:
+      description: Authentication Required
+      headers:
+        WWW-Authenticate:
+          description: Method of authentication
+          schema:
+            type: string
+      content:
+        application/json:
+          examples:
+            Unauthorized:
+              $ref: '#/components/examples/AuthorizationError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+    OKResponse:
+      description: OK
+    ResourceNotFoundError:
+      description: Resource Not Found
+      content:
+        application/json:
+          examples:
+            ResourceNotFound:
+              $ref: '#/components/examples/NotFoundError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+    Token:
+      description: Token detail
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Token'
+          examples:
+            Token:
+              $ref: '#/components/examples/Token'
+    NOContentResponse:
+      description: No Content
+    ResourceCreated:
+      description: Resource Created
+      headers:
+        Location:
+          description: location of the resource
+          schema:
+            type: string
+    ForbiddenError:
+      description: Not Authorized
+      content:
+        application/json:
+          examples:
+            Forbidden:
+              $ref: '#/components/examples/ForbiddenError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+    VirtualCard:
+      description: Virtual card details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VirtualCardAccount'
+          examples:
+            VirtualCardAccount:
+              $ref: '#/components/examples/CardDetails'
+    VirtualCards:
+      description: List of virtual cards
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/VirtualCardAccount'
+          examples:
+            UserCardsDetails:
+              $ref: '#/components/examples/CardDetails'
+    BadRequestError:
+      description: Invalid Request
+      content:
+        application/json:
+          examples:
+            BadRequest:
+              $ref: '#/components/examples/BadRequestError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+  examples:
+    TransactionHistoryInvalidDateRangeError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_DATE_RANGE
+            Description: Requested date range is either invalid or exceeds one year limits. Try again with a valid date range.
+            Recoverable: false
+            Details: ''
+    ServiceProviderUnsupportedMediaTypeError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: UNSUPPORTED_MEDIA_TYPE
+            Description: Requested media type is not supported, try again with the supported media type.
+            Recoverable: false
+            Details: ''
+    RegisterPaymentCardRequestDecryptionError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: CRYPTO_ERROR
+            Description: We are unable to decipher your request, kindly verify your request before trying again. If the problem persists then reach out to your Mastercard associate.
+            Recoverable: false
+            Details: ''
+    PaymentCardNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: PAYMENT_CARD_NOT_FOUND
+            Description: Paymentcards not found for the given payment card ids.
+            Recoverable: false
+            Details: ''
+    PaymentCardDeletionsRequestValidationError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with the correct request.
+            Recoverable: false
+            Details: ''
+    PaymentCardDeletionsInvalidCardIdError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One or more payment card IDs in the request are invalid, try again by sending valid Ids.
+            Recoverable: false
+            Details: paymentCardId must match "^[0-9A-Fa-f\-]{36}"
+    ServiceProviderNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: ACCOUNT_NOT_FOUND
+            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
+            Recoverable: false
+            Details: ''
+    PaymentCardByIdNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider
+            ReasonCode: PAYMENT_CARD_NOT_FOUND
+            Description: Paymentcard Not Found for the given payment card id in the path.
+            Recoverable: false
+            Details: ''
+    HistoricalTransactionFootprints:
+      value:
+        count: 2
+        offset: 1
+        limit: 5
+        total: 5
+        items:
+        - transactionMetadata:
+            id: ee421c25-f928-4bf6-b884-3600b76b860d
+            traceId: 9f52386ce297173ecfeb9120aabb0805bbeeb1350ce1de640864852e800bd206
+            banknetReferenceNumber: MPL0R6B2R
+            banknetDate: '0525'
+            retrievalRefNumber: MCC000100
+            processingCode: '00'
+            authCode: 52717Z
+            dateAndTime: 2018-07-02T00:00+00:00
+            merchantName: ABC Store
+            acquiringInstitutionCountryCode: USA
+            acquiringInstitutionCode: '12312312312'
+            amount: '25.50'
+            currencyCode: USD
+            indicator: CL
+          transactionFootPrint:
+            mcc: 3997
+            carbonEmissionInGrams: 48.52
+            carbonEmissionInOunces: 1.71
+            category:
+              mainCategory: Leisure & Entertainment
+              subCategory: Hotels & Vacation
+              sector: Hotels, Motels & Resorts
+              sectorCode: '604'
+            scoreReference: MCC
+        - transactionMetadata:
+            id: fdc4626c-f51e-4ba6-9728-c79ac1d9aec8
+            traceId: gf55386ce297173ecfeb9120aabb0805bbeeb1350ce1de640864852e8002343
+            banknetReferenceNumber: MPL0B6B23
+            banknetDate: '0725'
+            retrievalRefNumber: MCC000480
+            processingCode: '01'
+            authCode: K3C161
+            dateAndTime: 2019-12-25T00:00+00:00
+            merchantName: ABC Store
+            acquiringInstitutionCountryCode: USA
+            acquiringInstitutionCode: '23423423423'
+            amount: '30.00'
+            currencyCode: USD
+            indicator: CL
+          transactionFootPrint:
+            mcc: 5962
+            carbonEmissionInGrams: 27.98
+            carbonEmissionInOunces: 0.99
+            category:
+              mainCategory: Shopping
+              subCategory: Department Store
+              sector: Specialty Retail & Services
+              sectorCode: '302'
+            scoreReference: MCC
+        - transactionMetadata:
+            id: '9000010131662'
+            traceId: af55386ce297173ecfeb9120aabb0805bbeeb1350ce1de640864852e800bd854
+            banknetReferenceNumber: MPL0R8C2A
+            banknetDate: '0624'
+            retrievalRefNumber: '801220'
+            processingCode: '00'
+            authCode: '16'
+            dateAndTime: 2022-01-26T00:00+00:00
+            merchantName: Test Sandbox Merchant
+            acquiringInstitutionCountryCode: USA
+            acquiringInstitutionCode: '12311878333'
+            amount: 20
+            currencyCode: GBP
+            indicator: RFT
+          transactionFootprint:
+            carbonEmissionInGrams: -3398.54
+            carbonEmissionInOunces: -119.88
+            transactionId: '9000010131662'
+            mcc: '9311'
+            category:
+              mainCategory: Government Services
+              subCategory: Public Services
+              sector: Government Services
+              sectorCode: '801'
+            scoreReference: MCC
+    TransactionHistoryInvalidDateFormatError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: 'getPaymentCardTransactionHistory.fromDate: must match "^((?:19|20)[0-9][0-9])-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$"'
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request..
+            Recoverable: false
+            Details: 'getPaymentCardTransactionHistory.fromDate: size must be between 10 and 10'
+    TransactionHistoryPaymentCardNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: Payment card id - c2c76ec0-4056-44ba-b14f-6654c9ba5722 is/are invalid or not found. Please try again with valid payment card id.
+            Recoverable: false
+            Details: ''
+    PaymentCardEnrolments:
+      value:
+      - bin: '545502'
+        last4fpan: '8351'
+        status: ACTIVE
+        paymentCardId: 9f12f385-0b47-4cca-9e9d-baced21bca63
+      - bin: '545502'
+        last4fpan: '0762'
+        status: ACTIVE
+        paymentCardId: f506521c-38c6-4e87-bf1a-14023ce10d4e
+      - bin: '545502'
+        last4fpan: '2834'
+        status: PENDING
+        paymentCardId: 2da9571f-0cf2-458d-bc4b-9218578ce50d
+      - bin: '520402'
+        last4fpan: '2824'
+        errorCode: INVALID_FPAN
+    RegisterPaymentCardRequestValidationError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with the correct request.
+            Recoverable: false
+            Details: ''
+    MissingRequiredHeader:
+      summary: Missing Required Header Error Response
+      description: If a required request header is missing or null, then MissingRequiredHeader error response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: missing required header
+            Description: Submitter-First-Name
+            Recoverable: false
+            Details: ''
+    FormatInvalid:
+      summary: Format Invalid Error Response For Consumer Clarity
+      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: format.invalid
+            Description: orderHistoryMonths
+            Recoverable: false
+            Details: ''
+    AlertsCardAcceptorIdConfigs:
+      summary: Alerts Card Acceptor ID Configurations
+      value:
+        responseHeader:
+          totalRecords: 500
+          totalPages: 10
+          currentPage: 2
+          responseTime: 300 ms
+        configs:
+        - merchantIdentifierConfigId: 11ca4b15-72a6-41dd-8127-573d4b07511c
+          acquirerReferenceId: '123456'
+          cardAcceptorId: card_acceptorA
+        - merchantIdentifierConfigId: 22ca4b15-72a6-41dd-8127-573d4b07522c
+          acquirerReferenceId: '876543'
+          cardAcceptorId: card_acceptorB
+    EntityNotFound:
+      summary: Entity Not Found Error Response For Consumer Clarity
+      description: If a requested entity(e.g. Merchant or Logo) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: GUID'
+            Description: Merchant 1E37M8VSX1D28QYX not found
+            Recoverable: false
+            Details: ''
+    AlertsInvalidData:
+      summary: Invalid Data Field Error Response For Alerts
+      description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: name'
+            Description: size must be between 3 and 200
+            Recoverable: false
+            Details: ''
+    AlertsCardAcceptorIdConfig:
+      summary: Alerts Card Acceptor ID Configuration
+      value:
+        acquirerReferenceId: '123456'
+        cardAcceptorId: card_acceptorA
+    AlertsEntityNotFound:
+      summary: Entity Not Found Error Response For Alerts
+      description: If a requested entity(e.g. Sub-Merchant or Card Acceptor ID or Card Acceptor Name) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: subMerchantId'
+            Description: Sub-Merchant 99ca4b15-72a6-41dd-8127-573d4b07669c not found
+            Recoverable: false
+            Details: ''
+    ResourceNotFound:
+      summary: Resource Not Found Error Response
+      description: If request URI doesn't match with any available endpoints, then ResourceNotFound error response is returned the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: resource.not.found
+            Description: Not Found
+            Recoverable: false
+            Details: /merchant-self-services/sub-merchantTs/
+    AlertsCardAcceptorNameConfig:
+      summary: Alerts Card Acceptor Name Configuration
+      value:
+        cardAcceptorName: card_acceptor1
+        cardAcceptorCity: Toronto
+        cardAcceptorRegion: 019
+        cardAcceptorCountry: CAN
+    ServerError:
+      summary: Server Error Response
+      description: If an unexpected internal server error occurs, then ServerError response is returned to the caller with HTTP Status code 500.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: server.error
+            Description: Internal Server Error
+            Recoverable: false
+            Details: ''
+    PermissionDenied:
+      summary: Permission Denied Error Response
+      description: If the client id in the request doesn't correspond to any member in the system, then PermissionDenied error response is returned to the caller with HTTP Status code 401.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: permission.denied
+            Description: Member does not have permission to perform any operation
+            Recoverable: false
+            Details: ''
+    ForbiddenOperation:
+      summary: Member does not have permission to add/update/delete a resource
+      description: If the merchant tries operate on a resource that is not related to them or if they are not allowed perform a specific operation on their resource, then ForbiddenOperation error response is returned to the caller with HTTP Status code 403.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: operation.not.allowed
+            Description: Member is not allowed to perform a specific operation on a particular resource
+            Recoverable: false
+            Details: ''
+    ValidationFailed:
+      summary: Validation of the request failed
+      description: If the fields in the request did not pass the validation, a ValidationFailed error response is returned to the caller with HTTP Status code 422.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: validation.failed
+            Description: Validation of the request fields failed
+            Recoverable: false
+            Details: ''
+    AlertsMerchantIdentifierConfigIdOnly:
+      summary: Alerts Merchant Identifier Configuration ID
+      value:
+        merchantIdentifierConfigId: 88ca4b15-72a6-41dd-8127-573d4b07875c
+    AlertsCardAcceptorNameConfigs:
+      summary: Alerts Card Acceptor Name Configurations
+      value:
+        responseHeader:
+          totalRecords: 500
+          totalPages: 10
+          currentPage: 2
+          responseTime: 300 ms
+        configs:
+        - merchantIdentifierConfigId: 33ca4b15-72a6-41dd-8127-573d4b07533c
+          cardAcceptorName: card_acceptor1
+          cardAcceptorCity: Toronto
+          cardAcceptorRegion: 019
+          cardAcceptorCountry: CAN
+        - merchantIdentifierConfigId: 44ca4b15-72a6-41dd-8127-573d4b07544c
+          cardAcceptorName: card_acceptor2
+          cardAcceptorCity: Ottawa
+          cardAcceptorRegion: 019
+          cardAcceptorCountry: CAN
+    AlertsFormatInvalid:
+      summary: Format Invalid Error Response For Alerts
+      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: merchantCategoryCode'
+            Description: must match \"^[0-9]*$\"
+            Recoverable: false
+            Details: ''
+    InvalidParameterSet:
+      summary: Invalid Parameter Set Error Response
+      description: If request body is malformed or missing, then InvalidParameterSet error response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: invalid.parameter.set
+            Description: request body is malformed
+            Recoverable: false
+            Details: ''
+    InvalidData:
+      summary: Invalid Data Error Response For Consumer Clarity
+      description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: merchantType'
+            Description: must not be blank
+            Recoverable: false
+            Details: ''
+    Token:
+      value:
+        accountNumber: '1234567891234567'
+        expiry: 2021-11
+        accountGuid: 123e4567-e89b-12d3-a456-426614174000
+        tokenUniqueRef: DE9JOVYK6FVSO8I32DLDPHGTC9NZ7SLKPVLMDQ0RRGK3WYD2
+        paymentAppInstanceId: '128652974320250630'
+        status: ACTIVE
+    AuthorizationError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: authorization.missing
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    NotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: not.found
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    ForbiddenError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: authorization.forbidden
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    UpdateUserCardAndControl:
+      value:
+        firstName: Emerson
+        lastName: Bloggs
+        phone: '+353871123456'
+        expiry: 2021-11
+        description: This is the description of what the VCN will be used for
+        realCardBillingCurrencyCode: '840'
+        rules:
+        - action: A
+          alias: DAILY LIMIT
+          transactionLimits:
+          - amount: 12
+            negate: true
+          geographies:
+          - countryCodes:
+            - USA
+            negate: true
+          velocities:
+          - maxTrans: 12
+            cumulativeLimit: 1200
+            period: DAILY
+            availableBalance: 1200
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          validityPeriods:
+          - from: '2020-10-06T11:09:42.10Z'
+            to: '2020-11-06T11:09:42.10Z'
+            strictPreAuthCheck: true
+            negate: true
+          amountRanges:
+          - minAmount: 1000
+            maxAmount: 10000
+            strictPreAuthCheck: true
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          merchantIds:
+          - acceptorId: '123456789012345'
+            acquirerId: '123456'
+            negate: true
+          ageingVelocities:
+          - authorizationHoldDays: 1234
+            cumulativeLimit: 1000
+            timeZone: UTC-06:00
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          curfews:
+          - fromTime: 08:20
+            toTime: '11:00'
+            timeZone: UTC
+            days:
+            - SUNDAY
+            negate: true
+          timeOfDays:
+          - times:
+            - day: SUNDAY
+              fromTime: 08:21
+              toTime: '12:40'
+            timeZone: UTC
+            negate: true
+          merchantCategories:
+          - negate: true
+            mccs:
+            - 1234
+            - 5678
+    CardDetails:
+      value:
+      - firstName: Emerson
+        lastName: Bloggs
+        phone: '+353871123456'
+        realCardAccountGuid: 123e4567-e89b-12d3-a456-426614174000
+        accountNumber: '1234567891234567'
+        expiry: 2021-11
+        accountGuid: 123e4567-e89b-12d3-a456-426614174000
+        description: This is the description of what the VCN will be used for
+        realCardBillingCurrencyCode: '840'
+        rules:
+        - action: A
+          alias: DAILY LIMIT
+          transactionLimits:
+          - amount: 12
+            negate: true
+          geographies:
+          - countryCodes:
+            - USA
+            negate: true
+          velocities:
+          - maxTrans: 12
+            cumulativeLimit: 1200
+            period: DAILY
+            availableBalance: 1200
+            currencyType: MERCHANT
+            currencyCode: '825'
+            endDate: '2020-10-06T11:09:42.10Z'
+            negate: true
+          validityPeriods:
+          - from: '2020-10-06T11:09:42.10Z'
+            to: '2020-11-06T11:09:42.10Z'
+            strictPreAuthCheck: true
+            negate: true
+          amountRanges:
+          - minAmount: 1000
+            maxAmount: 10000
+            strictPreAuthCheck: true
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          merchantIds:
+          - acceptorId: '123456789012345'
+            acquirerId: '123456'
+            negate: true
+          ageingVelocities:
+          - authorizationHoldDays: 1234
+            cumulativeLimit: 1000
+            timeZone: UTC-06:00
+            availableBalance: 1000
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          curfews:
+          - fromTime: 08:20
+            toTime: '11:00'
+            timeZone: UTC
+            days:
+            - SUNDAY
+            negate: true
+          timeOfDays:
+          - times:
+            - day: SUNDAY
+              fromTime: 08:21
+              toTime: '12:40'
+            timeZone: UTC
+            negate: true
+          merchantCategories:
+          - negate: true
+            mccs:
+            - 1234
+            - 5678
+    BadRequestError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: invalid.parameter
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    TokenUpdate:
+      value:
+        accountNumber: '1234567891234567'
+        expiry: 2021-11
+        status: ACTIVE
+  schemas:
+    TransactionId:
+      type: string
+      description: A unique ID associated with a payment transaction, For example, original payment transaction ID. The same ID will be returned in the response corresponding to its payment transaction.
+      minLength: 1
+      maxLength: 100
+      pattern: ^[\w\-\_]{1,100}
+    X-MC-Correlation-ID:
+      type: string
+      example: X-MC-Correlation-ID:5e4b7f904d2820f688c67ef9fc0035
+    PaymentCard:
+      title: PaymentCard
+      type: object
+      description: The request object for registering a new Payment Card. This object will be encrypted before sending it to the server.
+      required:
+      - fpan
+      - cardBaseCurrency
+      properties:
+        fpan:
+          type: string
+          minLength: 16
+          maxLength: 16
+          pattern: ^\d{16}
+          description: Original payment card number in full.
+          example: '5344035171229750'
+        cardBaseCurrency:
+          $ref: '#/components/schemas/CurrencyCode'
+      example:
+        fpan: '5344035171229750'
+        cardBaseCurrency: EUR
+    PaymentCardEnrolment:
+      title: PaymentCardEnrolment
+      type: object
+      description: The response object which contains Payment Card information.
+      properties:
+        paymentCardId:
+          $ref: '#/components/schemas/PaymentCardId'
+        bin:
+          type: string
+          minLength: 4
+          maxLength: 8
+          pattern: ^\d{4,8}
+          description: First 4 to 8 digits of BIN will be present in response only in case of success already exists card and if valid supported FPAN bin range.
+          example: '545502'
+        last4fpan:
+          type: string
+          minLength: 4
+          maxLength: 4
+          pattern: ^\d{4}
+          description: Last 4 digits of a payment card number will be present only if the card number in the request is valid.
+          example: '8351'
+        status:
+          type: string
+          minLength: 6
+          maxLength: 7
+          description: Status of a Payment Card on the server. Possible values are ACTIVE & PENDING. The cards that are in PENDING state will move to ACTIVE state in background as soon as their enrolment is complete. The paymentCardId will remain same.
+          example: ACTIVE
+        errorCode:
+          title: errorCode
+          type: string
+          minLength: 10
+          maxLength: 30
+          example: INVALID_FPAN
+          description: 'Error code in case of registration failed. Possible values are,
+
+            * INVALID_FPAN = The card number in the request is either invalid or does not match with your currently supported account range. Try again with a valid card number or update the supported account range.
+
+            * INVALID_CARD_BASE_CURRENCY = The card base currency in the request is either invalid or does not match with your currently supported card base currency range. Try again with a valid card base currency.
+
+            * UNSUPPORTED_CURRENCY = The currency in the request is not supported, try again with a different one.'
+    TransactionMetadata:
+      title: TransactionMetadata
+      type: object
+      description: Metadata about a transaction.
+      required:
+      - id
+      - retrievalRefNumber
+      - processingCode
+      - dateAndTime
+      - merchantName
+      - acquiringInstitutionCountryCode
+      - acquiringInstitutionCode
+      - amount
+      - currencyCode
+      - indicator
+      properties:
+        id:
+          title: id
+          type: string
+          description: A unique ID associated with a transaction.
+          maxLength: 100
+          minLength: 1
+          pattern: ^[\w\-\_]{1,100}
+          example: ee421c25-f928-4bf6-b884-3600b76b860d
+        traceId:
+          title: traceId
+          type: string
+          description: A unique ID associated with a transaction.
+          maxLength: 100
+          minLength: 65
+          pattern: ([A-Za-z0-9]{10,100})
+          example: 9A52386ce297173Ecfeb9120aabb0805bbeeb1350ce1de640864852e800bd2067
+        banknetReferenceNumber:
+          title: banknetReferenceNumber
+          type: string
+          description: DE 63, subfield 2 (Banknet Reference Number) is generated by the Authorization Platform for each originating message it routes. The reference number is guaranteed to be a unique value for any transaction within the specified financial network on any processing day.
+          maxLength: 13
+          minLength: 6
+          pattern: ([A-Za-z0-9]{6,13})
+          example: MPL0R6B2R
+        banknetDate:
+          title: banknetDate
+          type: string
+          description: DE 7 subelement 1 (POS_BANKNET_DATE) is a date when transaction message enters into Mastercard network.
+          maxLength: 4
+          minLength: 4
+          pattern: ([0-9]{4})
+          example: '0525'
+        retrievalRefNumber:
+          title: retrievalRefNumber
+          type: string
+          description: DE 37 (Retrieval Reference Number) is a document reference number supplied by the system retaining the original source document of the transaction and assists in locating that source document or a copy thereof. DE 37 is made available for use by automated merchant POS systems that may be interconnected into the interchange system. Merchant POS systems may assign a unique receipt or sales document ID to be used to satisfy regulatory or legal requirements when the merchant performs source document capture and truncation. DE 37 may be used to relay source document reference numbers to the issuer at the time each transaction is processed. Number assigned by the acquirer. When present, DE 37 must contain a value other than all zeros or all spaces. DE 37 can have trailing spaces if the transaction is not a Visa or EMV chip transaction.
+          maxLength: 12
+          minLength: 12
+          example: MCC000100120
+        processingCode:
+          title: processingCode
+          type: string
+          description: DE 3, subfield 1 (Cardholder Transaction Type Code) describes the specific transaction type.
+          maxLength: 2
+          minLength: 2
+          example: '00'
+        authCode:
+          title: authCode
+          type: string
+          description: DE 38 (Authorization ID Response) is a transaction response ID code that the authorizing institution assigns. DE 38 is used to transmit a card issuers authorization code for Authorization transactions.
+          maxLength: 6
+          minLength: 1
+          example: 01423Z
+        dateAndTime:
+          title: dateAndTime
+          type: string
+          description: This is the date and time when transaction acquire at the Merchant. (For example, YYYY-MM-DDThh:mmTZD).
+          maxLength: 25
+          minLength: 22
+          example: 2018-07-02T00:00+00:00
+        merchantName:
+          title: merchantName
+          type: string
+          description: DE 43 (Card Acceptor Name/Location for All Transactions), subfield 1 (Card Acceptor Name) is the merchant doing business as name.
+          maxLength: 25
+          minLength: 1
+          example: ABC Store
+        acquiringInstitutionCountryCode:
+          title: acquiringInstitutionCountryCode
+          type: string
+          description: DE 19 (Acquiring Institution Country Code) is the code of the country where the acquiring institution is located. Refer to the ISO 3166 specification for more information.
+          maxLength: 3
+          minLength: 3
+          example: USA
+        acquiringInstitutionCode:
+          title: acquiringInstitutionCode
+          type: string
+          description: DE 32 (Acquiring Institution ID Code) identifies the acquiring institution (for example, merchant bank) or its agent.
+          maxLength: 11
+          minLength: 11
+          example: '12312312312'
+        amount:
+          title: amount
+          type: number
+          description: Transaction amount for the given transaction.
+          maxLength: 10
+          minLength: 1
+          example: 25.5
+        currencyCode:
+          $ref: '#/components/schemas/CurrencyCode'
+        indicator:
+          title: indicator
+          type: string
+          description: Transaction type (CLEAR = CL or REFUND = RFT).
+          maxLength: 8
+          minLength: 2
+          example: CL
+    PaymentCardId:
+      type: string
+      minLength: 36
+      maxLength: 36
+      pattern: ^[0-9A-Fa-f\-]{36}
+      description: Unique ID provided in the response while registering a payment card.
+      example: c5d88571-ac15-465a-a0d8-1ad1327b9a06
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    HistoricalTransactionFootprint:
+      title: HistoricalTransactionFootprint
+      type: object
+      description: A single transaction footprint along with transaction info for a corresponding payment transaction.
+      required:
+      - transactionMetadata
+      - transactionFootprint
+      properties:
+        transactionMetadata:
+          $ref: '#/components/schemas/TransactionMetadata'
+        transactionFootprint:
+          $ref: '#/components/schemas/TransactionFootprint'
+    TransactionFootprint:
+      title: TransactionFootprint
+      type: object
+      description: A single transaction footprint calculated for a corresponding payment transaction.
+      required:
+      - transactionId
+      - mcc
+      allOf:
+      - $ref: '#/components/schemas/CarbonUsage'
+      - type: object
+        properties:
+          transactionId:
+            $ref: '#/components/schemas/TransactionId'
+          mcc:
+            type: string
+            description: Merchant category code of a payment transaction that uniquely defines a merchant business (same as in request).
+            minLength: 1
+            maxLength: 4
+            pattern: ^\d{1,4}
+          category:
+            $ref: '#/components/schemas/Category'
+          scoreReference:
+            type: string
+            description: Score Reference defines transaction scoring type, based on which score has been generated. Possible values are MCC or AIIA.
+            minLength: 3
+            maxLength: 4
+    Category:
+      title: Category
+      type: object
+      description: User understandable information about an MCC categorization.
+      properties:
+        mainCategory:
+          title: mainCategory
+          type: string
+          description: Main category to which an MCC belongs.
+          minLength: 5
+          maxLength: 100
+          pattern: ^[\w\-\_\&\,]+[\w\-\_\&\,\ ]{5,100}
+          example: Shopping
+        subCategory:
+          title: subCategory
+          type: string
+          description: Sub-category of a category to which an MCC belongs.
+          minLength: 5
+          maxLength: 100
+          pattern: ^[\w\-\_\&\,]+[\w\-\_\&\,\ ]{5,100}
+          example: Department Store
+        sector:
+          title: sector
+          type: string
+          description: Sector of a category to which an MCC belongs.
+          minLength: 5
+          maxLength: 100
+          pattern: ^[\w\-\_\&\,]+[\w\-\_\&\,\ ]{5,100}
+          example: Specialty Retail & Services
+        sectorCode:
+          title: sectorCode
+          type: string
+          description: Unique code assigned to each sector.
+          minLength: 3
+          maxLength: 3
+          pattern: ^\d{3}
+          example: '302'
+    HistoricalTransactionFootprints:
+      title: HistoricalTransactionFootprints
+      description: Response object which holds all the transaction footprints for historical transactions.
+      properties:
+        count:
+          description: The number of items in this batch (the size of the item array).
+          type: integer
+          example: 2
+        offset:
+          description: The number of items you asked the start of the list to be offset from.
+          type: integer
+          minimum: 0
+          example: 1
+        limit:
+          description: The number of items you asked the list to be limited to.
+          type: integer
+          minimum: 5
+          maximum: 50
+          example: 5
+        total:
+          description: The total number of items in the collection.
+          type: integer
+          example: 5
+        items:
+          description: 'List of `HistoricalTransactionFootprint` objects.
+
+            '
+          type: array
+          minItems: 1
+          maxItems: 5000
+          items:
+            $ref: '#/components/schemas/HistoricalTransactionFootprint'
+    CarbonUsage:
+      title: CarbonUsage
+      type: object
+      description: Object to hold carbon usage data.
+      properties:
+        carbonEmissionInGrams:
+          title: carbonEmissionInGrams
+          type: number
+          description: The transaction's CO2 emission in grams.
+          example: 48.52
+        carbonEmissionInOunces:
+          title: carbonEmissionInOunces
+          type: number
+          description: The transaction's CO2 emission in ounces.
+          example: 1.71
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns a list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    Day:
+      type: string
+      minLength: 10
+      maxLength: 10
+      pattern: ^((?:19|20)[0-9][0-9])-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$
+      example: '2020-09-19'
+    PaymentCardEnrolments:
+      title: PaymentCardEnrolments
+      type: array
+      minItems: 1
+      maxItems: 500
+      description: List of payment card enrolments corresponding to each of the payment cards. This information should be used to identify the success and failure enrolments and take appropriate next steps.
+      items:
+        $ref: '#/components/schemas/PaymentCardEnrolment'
+    CurrencyCode:
+      type: string
+      description: Currency code as per ISO 4217
+      minLength: 3
+      maxLength: 3
+      pattern: ^[A-Za-z]{3}$
+    Error:
+      title: Error
+      type: object
+      description: Error object which contains details about the error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error. Every error message that is generated and returned by the gateway will have this field equal to Gateway. Other possible values are 'Carbon-Calculator' and 'Service-Provider'.
+          minLength: 1
+          maxLength: 100
+          example: Service-Provider-Mgmt
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: INVALID_REQUEST_PARAMETER
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+    AlertsCardAcceptorNameConfig:
+      description: Card acceptor name configuration
+      type: object
+      properties:
+        merchantIdentifierConfigId:
+          $ref: '#/components/schemas/AlertsMerchantConfigId'
+        cardAcceptorName:
+          $ref: '#/components/schemas/CardAcceptorName'
+        cardAcceptorCity:
+          $ref: '#/components/schemas/CardAcceptorCity'
+        cardAcceptorRegion:
+          $ref: '#/components/schemas/CardAcceptorRegion'
+        cardAcceptorCountry:
+          $ref: '#/components/schemas/CardAcceptorCountry'
+      required:
+      - cardAcceptorName
+    AcquirerReferenceId:
+      title: Acquirer Reference ID (ARID)
+      description: The acquirer BINs that a partner currently services under their portfolio. This is represented by Mastercard DE 31 - Subfield 2 (Clearing), DE 32 (Authorization), or Visa Field 32.
+      type: string
+      minLength: 6
+      maxLength: 6
+      pattern: ^[\d]+$
+      example: '123456'
+    ResourceId:
+      type: string
+      minLength: 1
+      maxLength: 40
+      description: Unique identifier of resource
+      nullable: true
+      example: Mxyz123
+    CardAcceptor:
+      title: Merchant Card Acceptor
+      maxLength: 50
+      minLength: 1
+      type: string
+      description: Merchant Card Acceptor
+      example: ETHOCA NINJA GAMES
+    CardAcceptorDataResource:
+      title: Merchant Card Acceptor Names
+      type: object
+      required:
+      - matchType
+      - cardAcceptorName
+      - id
+      - status
+      properties:
+        matchType:
+          title: Card Acceptor Match Type
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: The card acceptor match type
+          example: EXACT
+        cardAcceptorName:
+          $ref: '#/components/schemas/CardAcceptor'
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        status:
+          title: Response Status
+          type: string
+          description: The status of Card Acceptor Name - PENDING, PASS, FAILED
+          example: PENDING
+    CardAcceptorData:
+      title: Merchant Card Acceptor Names
+      type: object
+      required:
+      - matchType
+      - cardAcceptorName
+      properties:
+        matchType:
+          title: Card Acceptor Match Type
+          type: string
+          description: Types of card acceptor match type
+          example: EXACT
+          enum:
+          - EXACT
+          - STARTS_WITH
+          - STRICT_CONTAINS
+          - CONTAINS
+        cardAcceptorName:
+          $ref: '#/components/schemas/CardAcceptor'
+    PageableCardAcceptorNamesResource:
+      title: Pageable card acceptor names resource
+      description: Pageable card acceptor names resource with pagination metadata
+      properties:
+        data:
+          type: array
+          description: List of card acceptor resources
+          items:
+            $ref: '#/components/schemas/CardAcceptorDataResource'
+          example: []
+        metadata:
+          $ref: '#/components/schemas/ClarityResponseHeader'
+    CardAcceptorRegion:
+      title: Card Acceptor's Region
+      description: A sub-element of the merchant descriptor indicating either the state, province, or region of the merchant as it appears on the cardholder's statement. Value is not case-sensitive and can accept 2 or 3 character ISO state and province code.
+      type: string
+      minLength: 1
+      maxLength: 3
+      example: 019
+    AlertsCardAcceptorIdConfig:
+      description: Map of acquirer reference id and the corresponding card acceptor id
+      type: object
+      properties:
+        merchantIdentifierConfigId:
+          $ref: '#/components/schemas/AlertsMerchantConfigId'
+        acquirerReferenceId:
+          $ref: '#/components/schemas/AcquirerReferenceId'
+        cardAcceptorId:
+          $ref: '#/components/schemas/CardAcceptorId'
+      required:
+      - acquirerReferenceId
+      - cardAcceptorId
+    LastName:
+      title: Last Name
+      maxLength: 30
+      minLength: 1
+      type: string
+      description: The individual's last name
+      example: Fox
+      nullable: true
+    ResponseTime:
+      type: string
+      description: Total response time in ms
+      minLength: 0
+      maxLength: 10
+      example: 300 ms
+    AlertsMerchantConfigId:
+      title: Unique identifier for merchants identifier (such as acquirer reference id, card acceptor id or name) configuration
+      description: Internal Universally Unique Identifier (UUID) which uniquely identifies the merchants configuration
+      type: string
+      format: uuid
+      example: 88ca4b15-72a6-41dd-8127-573d4b07558c
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors_2'
+      description: Error Response object
+    Etag:
+      title: Entity Tag
+      maxLength: 100
+      minLength: 1
+      type: string
+      description: Etag is a response header which is an identifier for a specific version of a resource.
+      example: '"842DFBC17F921E7716642B9164F3B22B"'
+    AlertsMerchantIdentifierConfigIdOnly:
+      description: Merchant identifier configuration Id (referring to card acceptor id or name configuration)
+      type: object
+      properties:
+        merchantIdentifierConfigId:
+          $ref: '#/components/schemas/AlertsMerchantConfigId'
+    MerchantGuid:
+      title: Merchant GUID
+      maxLength: 16
+      minLength: 11
+      type: string
+      description: Consumer Clarity internal merchant's GUID
+      example: jK2dA5aybhQQBq6C
+    BulkOperationResource:
+      title: Bulk post resource
+      description: Resource with responseCode and details
+      type: object
+      required:
+      - status
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        errors:
+          type: array
+          description: List of error objects
+          nullable: true
+          items:
+            $ref: '#/components/schemas/Error_2'
+          example: []
+        status:
+          title: Response Status
+          type: string
+          description: The status of resource - PENDING, PASS, FAILED
+          example: PENDING
+    Errors_2:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: List of error objects
+          items:
+            $ref: '#/components/schemas/Error_2'
+          example: []
+      description: Errors object
+    CardAcceptorCountry:
+      title: Card Acceptor's Country
+      description: A sub-element of the merchant descriptor indicating the country of the merchant as it appears on the cardholder's statement. Value is not case-sensitive and can accept 2 or 3 character ISO country code.
+      type: string
+      minLength: 1
+      maxLength: 3
+      example: CAN
+    UserId:
+      title: User Id
+      maxLength: 300
+      minLength: 1
+      type: string
+      description: The user id of the submitter/technical contact.
+      example: princess.diana
+    ClarityResponseHeader:
+      allOf:
+      - $ref: '#/components/schemas/ResponseHeader'
+      - type: object
+        properties:
+          currentPage:
+            type: integer
+            description: Current page
+            minimum: 0
+            maximum: 999999999
+            example: 2
+    AlertsMerchantMemberId:
+      title: Unique identifier for merchants
+      description: Internal Universally Unique Identifier (UUID) which uniquely identifies the merchants
+      type: string
+      format: uuid
+      example: 99ca4b15-72a6-41dd-8127-573d4b07669c
+    CardAcceptorName:
+      title: Card Acceptor's Name
+      description: A sub-element of the merchant descriptor that contains the merchant's name or doing business as name as it appears on the cardholder's billing statement.
+      type: string
+      minLength: 1
+      maxLength: 200
+      example: Acceptor 1
+    FirstName:
+      title: First Name
+      maxLength: 30
+      minLength: 1
+      type: string
+      description: The individual's first name
+      example: Michael
+      nullable: true
+    AlertsCardAcceptorNameConfigs:
+      description: Card acceptor name configurations for a merchant
+      type: object
+      properties:
+        responseHeader:
+          $ref: '#/components/schemas/ResponseHeader'
+        configs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertsCardAcceptorNameConfig'
+          example: []
+    CardAcceptorCity:
+      title: Card Acceptor's City
+      description: A sub-element of the merchant descriptor indicating the merchant city/location as it appears on the cardholder's billing statement.
+      type: string
+      minLength: 1
+      maxLength: 80
+      example: Toronto
+    CardAcceptorNamesBulkResource:
+      title: Card Acceptor Names resource
+      description: Set of Card Acceptor Names resource
+      type: object
+      properties:
+        cardAcceptorNames:
+          type: array
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/BulkOperationResource'
+          example: []
+    CardAcceptorId:
+      title: Card Acceptor's ID (CAID)
+      description: Identifies the card acceptor ID assigned by the acquirer. This ID must represent a unique identifier for each merchant name/location within the acquirer BIN. This is represented by Mastercard DE 42 and Visa Field 42.
+      type: string
+      minLength: 1
+      maxLength: 15
+      example: card_acceptor1
+    ResponseHeader:
+      type: object
+      properties:
+        totalRecords:
+          type: integer
+          format: int64
+          description: Total number of records found
+          minimum: 0
+          maximum: 999999999
+          example: 500
+        totalPages:
+          type: integer
+          description: Total number of pages based on limit
+          minimum: 0
+          maximum: 999999999
+          example: 10
+        currentPage:
+          type: integer
+          description: The current page number
+          minimum: 1
+          maximum: 999999999
+          example: 2
+        responseTime:
+          $ref: '#/components/schemas/ResponseTime'
+    AlertsCardAcceptorIdConfigs:
+      description: Card acceptor id configurations for a merchant
+      type: object
+      properties:
+        responseHeader:
+          $ref: '#/components/schemas/ResponseHeader'
+        configs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertsCardAcceptorIdConfig'
+          example: []
+    CardAcceptorNamesBulk:
+      title: Merchant Card Acceptor Names
+      type: object
+      required:
+      - cardAcceptorNames
+      properties:
+        cardAcceptorNames:
+          minItems: 1
+          maxItems: 250
+          type: array
+          description: List of merchant card acceptors
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/CardAcceptorData'
+          example: []
+    Error_2:
+      type: object
+      properties:
+        Source:
+          maxLength: 100
+          minLength: 0
+          type: string
+          description: Source of the error
+          example: Service
+          nullable: true
+        ReasonCode:
+          maxLength: 100
+          minLength: 0
+          type: string
+          description: A unique constant identifying the error
+          example: format.invalid
+          nullable: true
+        Description:
+          maxLength: 1000
+          minLength: 0
+          type: string
+          description: Short description of the error
+          example: Short description of the error
+          nullable: true
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+          example: false
+          default: false
+          nullable: true
+        Details:
+          maxLength: 1000
+          minLength: 0
+          type: string
+          description: Optional detailed description of the issue
+          example: Detailed description of the error
+          nullable: true
+      description: Error object
+    UpdateCard:
+      type: object
+      required:
+      - cardholderName
+      - expiryInfo
+      - primaryAccountNumberSource
+      - primaryAccountNumber
+      properties:
+        billingAddress:
+          $ref: '#/components/schemas/CardBillingAddress'
+        cardAlias:
+          type: string
+          example: CardB
+          minLength: 3
+          maxLength: 20
+          description: Card Alias
+        cardholderName:
+          type: string
+          example: John Doe
+          minLength: 3
+          maxLength: 20
+          description: Card Holder Name
+        CardExpiry:
+          $ref: '#/components/schemas/cardExpiry'
+        primaryAccountNumberSource:
+          type: string
+          example: CARD_ON_FILE
+          description: PAN
+          minLength: 3
+          maxLength: 20
+        primaryAccountNumber:
+          type: string
+          example: '5450985888403538'
+          minLength: 16
+          maxLength: 16
+          description: PAN number
+      title: UpdateCardRequest
+    DonateCardUpdate:
+      type: object
+      properties:
+        cardId:
+          type: string
+          example: ebee3d81-18d4-409a-8330-73db083f2cfc
+          minLength: 36
+          maxLength: 36
+          description: Card Id (UUID)
+        primaryAccountNumberSuffix:
+          type: string
+          example: '3538'
+          minLength: 4
+          maxLength: 4
+          description: PAN Suffix
+      title: DonateCardUpdateResponse
+    Error-401:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to authorization failure
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: AUTHENTICATION_FAILED
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: OAuth signatures did not match.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error-403:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to forbidden requests
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of forbidden request.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: INVALID_KEY
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The signing certificate is not valid.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    cardExpiry:
+      type: object
+      properties:
+        month:
+          type: string
+          example: 10
+          minLength: 2
+          maxLength: 2
+          description: Month
+        year:
+          type: string
+          example: 2025
+          minLength: 4
+          maxLength: 4
+          description: Year
+      title: Card Expiry Details
+    Error-404:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to resource not found
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an resource not found.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: NOT_FOUND
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The signing certificate is not valid.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    CardBillingAddress:
+      type: object
+      properties:
+        city:
+          type: string
+          example: Brooklyn
+          minLength: 3
+          maxLength: 20
+          description: Billing Address city
+        countryCode:
+          type: string
+          example: USA
+          minLength: 3
+          maxLength: 3
+          description: Billing Address country code
+        line1:
+          type: string
+          example: 83 Mayfair Street
+          minLength: 3
+          maxLength: 20
+          description: Billing Address line1
+        line2:
+          type: string
+          example: Main Road
+          minLength: 3
+          maxLength: 20
+          description: Billing Address line2
+        line3:
+          type: string
+          example: Snake Hill Ave
+          minLength: 3
+          maxLength: 20
+          description: Billing Address line3
+        postalCode:
+          type: string
+          example: 11235
+          minLength: 5
+          maxLength: 20
+          description: Billing Address postal code
+        state:
+          type: string
+          example: NY
+          minLength: 2
+          maxLength: 20
+          description: Billing Address state
+      title: CardBillingAddress
+    DonateCardRetrieve:
+      type: object
+      properties:
+        billingAddress:
+          $ref: '#/components/schemas/CardBillingAddress'
+        cardAlias:
+          type: string
+          example: CardA
+          minLength: 3
+          maxLength: 30
+          description: The card alias
+        cardId:
+          type: string
+          example: ebee3d81-18d4-409a-8330-73db083f2cfc
+          minLength: 36
+          maxLength: 36
+          description: Card Id (UUID)
+        cardholderName:
+          type: string
+          example: John Doe
+          minLength: 3
+          maxLength: 30
+          description: Cardholder Name
+        cardExpiry:
+          $ref: '#/components/schemas/cardExpiry'
+        paymentNetworkName:
+          type: string
+          example: Mastercard
+          minLength: 3
+          maxLength: 20
+          description: Payment Network Name
+        primaryAccountNumber:
+          type: string
+          example: '5450985888403538'
+          minLength: 16
+          maxLength: 16
+          description: PAN
+        primaryAccountNumberSource:
+          type: string
+          example: CARD_ON_FILE
+          minLength: 3
+          maxLength: 20
+          description: PAN Source
+        primaryAccountNumberSuffix:
+          type: string
+          example: '3538'
+          minLength: 4
+          maxLength: 4
+          description: PAN Suffix
+        status:
+          type: string
+          example: ACTIVE
+          minLength: 5
+          maxLength: 20
+          description: Status
+      title: DonateCardRetrieveResponse
+    Error-500:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to server error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an server issue.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: PROGRAM_ID_NOT_FOUND
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Program id is required as this client is mapped to multiple programs.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error_3:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an error condition.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: DONOR_ID_INVALID
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Invalid donorId, it must be a valid UUID.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: Provided donorId is not valid, Please check and provide valid Unique Id.
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    VelocityControl:
+      required:
+      - period
+      - negate
+      type: object
+      properties:
+        maxTrans:
+          minimum: 1
+          type: integer
+          description: Maximum number of transactions allowed
+          format: int32
+          example: 12
+        cumulativeLimit:
+          minimum: 0
+          type: number
+          description: Maximum allowed cumulative amount
+          example: 1200
+          format: float
+        period:
+          minLength: 5
+          maxLength: 10
+          type: string
+          description: Velocity period. Valid values are DAILY, WEEKLY, QUARTERLY, CONTINUOUS, MONTHLY, and YEARLY
+          example: DAILY
+          pattern: ^(DAILY|WEEKLY|QUARTERLY|CONTINUOUS|MONTHLY|YEARLY)
+        availableBalance:
+          minimum: 0
+          type: number
+          description: The cumulative spend available for the velocity control for the specified period
+          example: 1200
+          format: float
+        currencyType:
+          minLength: 4
+          maxLength: 8
+          type: string
+          description: Type of the currency being used. Valid values are BASE and MERCHANT
+          pattern: ^(BASE|MERCHANT)
+          example: MERCHANT
+        currencyCode:
+          minLength: 3
+          maxLength: 3
+          pattern: ^[0-9]{3}$
+          type: string
+          description: Mastercard supported International Organization for Standardization (ISO) 4217 currency codes
+          example: '825'
+        endDate:
+          type: string
+          format: date-time
+          description: End date until which the control is valid, in ISO 8601 extended format "YYYY-MM-DDThh:mm:ss[.sss]Z", where [.sss] is optional and can be 1 to 3 digits
+          example: '2020-10-06T11:09:42.10Z'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The VelocityControl can limit the frequency, and the total cumulative amount of authorizations performed on the cardholders account within a specified time period
+    CurfewControl:
+      required:
+      - days
+      - fromTime
+      - negate
+      - toTime
+      type: object
+      properties:
+        fromTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The start time from which authorizations will be allowed
+          example: 08:20
+        toTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The end time at which authorizations will be allowed
+          example: '11:00'
+        timeZone:
+          type: string
+          description: Time zone of the from and to times
+          example: UTC
+        days:
+          maxItems: 7
+          minItems: 1
+          type: array
+          description: Days of week. Valid values are SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, and SATURDAY
+          example: SUNDAY
+          pattern: ^(SUNDAY|MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY)$
+          items:
+            type: string
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: Curfew Control
+    Vcn:
+      allOf:
+      - $ref: '#/components/schemas/Card'
+      - properties:
+          accountGuid:
+            type: string
+            format: uuid
+            description: The globally unique identifier of the virtual card account
+            example: 123e4567-e89b-12d3-a456-426614174000
+          description:
+            type: string
+            example: This is the description of what the VCN will be used for
+            description: The description of what the VCN will be used for
+    Token:
+      allOf:
+      - $ref: '#/components/schemas/Card'
+      properties:
+        accountGuid:
+          type: string
+          format: uuid
+          description: The globally unique identifier of the token
+          example: 123e4567-e89b-12d3-a456-426614174000
+        tokenUniqueRef:
+          type: string
+          maxLength: 64
+          description: The unique reference identifier of the token
+          example: DE9JOVYK6FVSO8I32DLDPHGTC9NZ7SLKPVLMDQ0RRGK3WYD2
+        paymentAppInstanceId:
+          type: string
+          maxLength: 64
+          description: The unique app device identifier
+          example: '128652974320250630'
+        status:
+          type: string
+          pattern: ^(ACTIVE|SUSPENDED)$
+          description: Token Status. Valid values are ACTIVE and SUSPENDED
+          example: ACTIVE
+    TransactionLimitControl:
+      required:
+      - amount
+      - negate
+      type: object
+      properties:
+        amount:
+          minimum: 0
+          type: number
+          description: The limit that will apply on a per transaction basis
+          example: 12
+          format: float
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The TransactionLimit control provides the ability to limit individual transaction authorizations to a maximum amount
+    VirtualCardAccount:
+      type: object
+      required:
+      - realCardAccountGuid
+      - accountGuid
+      allOf:
+      - $ref: '#/components/schemas/VcnUserDetail'
+      - $ref: '#/components/schemas/Vcn'
+      - properties:
+          realCardAccountGuid:
+            type: string
+            format: uuid
+            description: The globally unique identifier of the real card account
+            example: 123e4567-e89b-12d3-a456-426614174000
+          realCardBillingCurrencyCode:
+            pattern: ^[0-9]{3}$
+            type: string
+            description: Currency code of the RCN
+            example: '825'
+          rules:
+            $ref: '#/components/schemas/Controls'
+    UpdateVirtualCardAccount:
+      type: object
+      required:
+      - expiry
+      allOf:
+      - $ref: '#/components/schemas/VcnUserDetail'
+      - $ref: '#/components/schemas/UpdateVCN'
+      - properties:
+          realCardBillingCurrencyCode:
+            pattern: ^[0-9]{3}$
+            type: string
+            description: Currency code of the RCN
+            example: '825'
+          rules:
+            $ref: '#/components/schemas/Controls'
+    MerchantIdControl:
+      required:
+      - acquirerId
+      - acceptorId
+      - negate
+      type: object
+      properties:
+        acceptorId:
+          minLength: 15
+          maxLength: 15
+          type: string
+          description: The Merchant Id
+          example: '123456789012345'
+        acquirerId:
+          minLength: 1
+          maxLength: 10
+          pattern: .*\S.*
+          type: string
+          description: The Acquiring Institution ID Code which identifies the acquiring institution (for example, merchant bank) or its agent
+          example: '123456'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The Merchant ID control provides the ability to limit authorizations to particular merchants
+    ResourceIdentifier:
+      description: A UUID which uniquely identifies a resource
+      type: string
+      format: uuid
+      example: c63de020-a446-11eb-bcbc-0242ac130002
+    ValidityPeriodControl:
+      required:
+      - from
+      - negate
+      - to
+      type: object
+      properties:
+        from:
+          type: string
+          format: date-time
+          description: The start date from which the control is valid, in ISO 8601 extended format "YYYY-MM-DDThh:mm:ss[.sss]Z", where [.sss] is optional and can be 1 to 3 digits
+          example: '2020-10-26T00:00:00Z'
+        to:
+          type: string
+          format: date-time
+          description: The end date till which the control is valid, in ISO 8601 extended format "YYYY-MM-DDThh:mm:ss[.sss]Z", where [.sss] is optional and can be 1 to 3 digits
+          example: '2020-11-06T23:59:59Z'
+        strictPreAuthCheck:
+          type: boolean
+          description: Defines if strict pre-auth check needs to be applied
+          default: false
+          example: true
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The ValidityPeriod control provides the ability to limit authorization activity to a defined time period
+    MccControl:
+      required:
+      - mccs
+      - negate
+      type: object
+      properties:
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+        mccs:
+          minItems: 1
+          type: array
+          description: List of merchant category codes
+          example:
+          - '1234'
+          - '5678'
+          items:
+            type: string
+            example: '1234'
+          uniqueItems: true
+      description: The Card Acceptor Business Codes (MCC) control can control the type of purchases for which a card is used
+    Controls:
+      type: array
+      description: In Control Card Controls
+      items:
+        $ref: '#/components/schemas/Control'
+    Card:
+      type: object
+      required:
+      - accountNumber
+      - expiry
+      properties:
+        accountNumber:
+          type: string
+          minLength: 12
+          maxLength: 19
+          pattern: ^[0-9]+
+          example: '1234567891234567'
+          description: Card Account Number
+        expiry:
+          minLength: 7
+          maxLength: 7
+          type: string
+          pattern: ^20[2-9][0-9]-(0[1-9]|1[012])$
+          description: Card expiry date in yyyy-MM format
+          example: 2021-11
+    ErrorWrapper_2:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors_3'
+    AgeingVelocityControl:
+      required:
+      - authorizationHoldDays
+      - cumulativeLimit
+      - timeZone
+      - negate
+      type: object
+      properties:
+        authorizationHoldDays:
+          type: integer
+          minimum: 0
+          maximum: 9999
+          description: Number of days an authorization holds before ageing off
+          format: int32
+          example: 1234
+        cumulativeLimit:
+          minimum: 0
+          type: number
+          description: Maximum allowed cumulative amount
+          example: 1000
+          format: float
+        timeZone:
+          type: string
+          description: Time zone that is used for age-off calculations
+          example: UTC-06:00
+        availableBalance:
+          minimum: 0
+          type: number
+          description: The cumulative spend available for the velocity control for the specified period
+          example: 1000
+          format: float
+        currencyType:
+          minLength: 4
+          maxLength: 8
+          type: string
+          description: Type of the currency being used. Valid values are BASE and MERCHANT
+          example: MERCHANT
+          pattern: ^(BASE|MERCHANT)
+        currencyCode:
+          minLength: 3
+          maxLength: 3
+          pattern: ^[0-9]{3}$
+          type: string
+          description: Mastercard supported International Organization for Standardization (ISO) 4217 currency codes
+          example: '825'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The AgingVelocityControl provides the requester with the ability to set a notional credit line through the CumulativeControl. This control keeps track of the current remaining available credit and approves a transaction only if the requested amount is less than or equal to the remaining available credit
+    AmountRangeControl:
+      required:
+      - currencyType
+      - maxAmount
+      - minAmount
+      - negate
+      type: object
+      properties:
+        minAmount:
+          minimum: 0
+          type: number
+          description: Minimum allowed amount
+          format: float
+          example: 1000
+        maxAmount:
+          minimum: 0
+          type: number
+          description: Maximum allowed amount
+          format: float
+          example: 10000
+        strictPreAuthCheck:
+          type: boolean
+          description: Defines if strict pre-auth check needs to be applied
+          default: false
+          example: true
+        currencyType:
+          minLength: 4
+          maxLength: 8
+          type: string
+          description: Type of the currency being used. Valid values are BASE and MERCHANT
+          example: MERCHANT
+          pattern: ^(BASE|MERCHANT)
+        currencyCode:
+          minLength: 3
+          maxLength: 3
+          pattern: ^[0-9]{3}$
+          type: string
+          description: Mastercard supported International Organization for Standardization (ISO) 4217 currency codes
+          example: '825'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The exact amount range control will approve a transaction only if the requested amount is equal or greater than MinAmount and less than or equal to MaxAmount. In other words, if Min Amount <= Amount <= Max Amount
+    VcnUserDetail:
+      type: object
+      required:
+      - firstName
+      - lastName
+      - phone
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: First Name of User
+          example: Emerson
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Last Name of User
+          example: Bloggs
+        phone:
+          type: string
+          minLength: 4
+          maxLength: 16
+          description: Phone number of User
+          example: '+13556434378'
+    UpdateVCN:
+      type: object
+      properties:
+        expiry:
+          minLength: 7
+          maxLength: 7
+          type: string
+          pattern: ^20[2-9][0-9]-(0[1-9]|1[012])$
+          description: Expiry date in yyyy-MM format
+          example: 2021-11
+        description:
+          type: string
+          example: This is the description of what the VCN will be used for
+          description: The description of what the VCN will be used for
+    TokenUpdate:
+      allOf:
+      - $ref: '#/components/schemas/Card'
+      properties:
+        status:
+          type: string
+          pattern: ^(ACTIVE|SUSPENDED)$
+          description: Token Status. Valid values are ACTIVE and SUSPENDED
+          example: ACTIVE
+    TimeOfDayControl:
+      required:
+      - negate
+      - timeZone
+      - times
+      type: object
+      properties:
+        times:
+          maxItems: 7
+          minItems: 1
+          type: array
+          description: Times of day
+          items:
+            $ref: '#/components/schemas/TimeOfDay'
+        timeZone:
+          type: string
+          description: Time zone of the from and to times
+          example: UTC
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The TimeOfDayControl provides the ability to limit authorization activity to defined time periods for each day
+    Errors_3:
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    Control:
+      type: object
+      required:
+      - action
+      - alias
+      description: In Control Rule
+      properties:
+        action:
+          minLength: 1
+          maxLength: 1
+          type: string
+          description: control rule actions. Valid values are A (Approve), D (Decline), W (Warn), P (Promo) and F (Forced)
+          example: A
+        alias:
+          type: string
+          description: control rule alias name. alias should be unique
+          maxLength: 100
+          minLength: 1
+          pattern: .*\S.*
+          example: DAILY LIMIT
+        transactionLimits:
+          type: array
+          description: transaction limit controls provides the ability to limit individual transaction authorizations to a maximum amount
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/TransactionLimitControl'
+        geographies:
+          type: array
+          description: geography controls provides the ability to control where a card is physically used
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/GeographyControl'
+        velocities:
+          type: array
+          description: velocity controls can limit the frequency, and the total cumulative amount of authorizations performed on the cardholders account within a specified time period
+          items:
+            $ref: '#/components/schemas/VelocityControl'
+        validityPeriods:
+          type: array
+          description: validity period controls
+          items:
+            $ref: '#/components/schemas/ValidityPeriodControl'
+        amountRanges:
+          type: array
+          description: amount range controls
+          items:
+            $ref: '#/components/schemas/AmountRangeControl'
+        merchantIds:
+          type: array
+          description: merchant id controls
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/MerchantIdControl'
+        ageingVelocities:
+          type: array
+          description: ageing velocity controls
+          items:
+            $ref: '#/components/schemas/AgeingVelocityControl'
+        curfews:
+          type: array
+          description: curfew controls allows you to limit authorization activity on a card to a certain time period during set days. You can also set the time zone for this control
+          items:
+            $ref: '#/components/schemas/CurfewControl'
+        timeOfDays:
+          type: array
+          description: time of day controls provides the ability to limit authorization activity to defined time periods for each day
+          items:
+            $ref: '#/components/schemas/TimeOfDayControl'
+        merchantCategories:
+          type: array
+          description: merchant category controls
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/MccControl'
+    GeographyControl:
+      required:
+      - countryCodes
+      - negate
+      type: object
+      properties:
+        countryCodes:
+          minItems: 1
+          type: array
+          description: Country codes to be included in the rule
+          items:
+            type: string
+          example:
+          - '840'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The GeographicControl provides the ability to control where a card is physically used
+    TimeOfDay:
+      required:
+      - day
+      - fromTime
+      - toTime
+      type: object
+      properties:
+        day:
+          minLength: 6
+          maxLength: 9
+          type: string
+          example: SUNDAY
+          description: Days of week. Valid values are SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, and SATURDAY
+          pattern: ^(SUNDAY|MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY)
+        fromTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The start time from which authorizations will be allowed
+          example: 08:21
+        toTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The end time from which authorizations will be allowed
+          example: '12:00'
+    Error_4:
+      type: object
+      properties:
+        Source:
+          type: string
+          example: source
+          description: Source of error
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error
+          example: '123'
+        Description:
+          type: string
+          example: Error desc
+          description: Short description of the error
+        Recoverable:
+          type: boolean
+          example: true
+          description: Is recoverable error
+        Details:
+          type: string
+          example: Detail information
+          description: Optional detailed description of the issue
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      description: The number of items you asked the list to be limited to.
+      required: false
+      example: 50
+      schema:
+        type: integer
+        default: 50
+        minimum: 5
+        maximum: 50
+    PaymentCardId:
+      name: payment_card_id
+      in: path
+      description: Unique ID provided in the response while registering a payment card.
+      required: true
+      example: 83c0711e-1851-4771-950a-055dded7f168
+      schema:
+        $ref: '#/components/schemas/PaymentCardId'
+    Offset:
+      name: offset
+      in: query
+      description: The number of items you need the start of the list to be offset from.
+      required: false
+      example: 50
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+    ToDate:
+      name: to_date
+      in: query
+      description: End date for searching transaction (Format- YYYY-MM-DD).
+      required: true
+      example: '2021-05-07'
+      schema:
+        $ref: '#/components/schemas/Day'
+    FromDate:
+      name: from_date
+      in: query
+      description: Start date for searching transaction (Format- YYYY-MM-DD).
+      required: true
+      example: '2018-05-07'
+      schema:
+        $ref: '#/components/schemas/Day'
+    OffsetParam:
+      name: offset
+      in: query
+      required: false
+      description: Number of items per page
+      schema:
+        type: integer
+        default: 25
+        maximum: 25
+      example: 25
+    CardAcceptorNameSearchTextParam:
+      name: search_text
+      in: query
+      required: false
+      description: "Input field used as wild search against Card Acceptor. \nThe service searches for substring, following the %search_text% pattern.\n"
+      schema:
+        type: string
+        maxLength: 100
+      example: Test
+    MemberIdParam:
+      name: member_id
+      in: path
+      required: true
+      description: Merchant member ID (parent of the sub-merchant)
+      example: 99ca4b15-72a6-41dd-8127-573d4b07669c
+      schema:
+        $ref: '#/components/schemas/AlertsMerchantMemberId'
+    ClarityPageNumberParam:
+      name: page_number
+      in: query
+      required: false
+      description: current page number
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+      example: 2
+    UserIdParam:
+      name: User-Id
+      in: header
+      required: true
+      example: princess.diana
+      description: The user id of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/UserId'
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      example: '"842DFBC17F921E7716642B9164F3B22B"'
+      description: If-Match is a request header which makes the request conditional. Client must send the corresponding value from the latest Etag response header received for this merchant.
+      schema:
+        $ref: '#/components/schemas/Etag'
+    CardAcceptorIdParam:
+      name: card_acceptor_id
+      in: query
+      required: false
+      description: Identifies the card acceptor ID assigned by the acquirer. This ID must represent a unique identifier for each merchant name/location within the acquirer BIN.
+      schema:
+        $ref: '#/components/schemas/CardAcceptorId'
+      example: card_acceptor1
+    LocationIdParam:
+      name: location_id
+      in: path
+      required: true
+      example: Mxyz123
+      description: Unique identifier of location
+      schema:
+        $ref: '#/components/schemas/ResourceId'
+    MerchantIdentifierConfigIdParam:
+      name: merchant_identifier_config_id
+      in: query
+      required: true
+      description: The Configuration ID for acquirer reference ID or card acceptor ID or card acceptor name configurations.
+      schema:
+        $ref: '#/components/schemas/AlertsMerchantConfigId'
+      example: 88ca4b15-72a6-41dd-8127-573d4b07875c
+    SubmitterFirstNameParam:
+      name: Submitter-First-Name
+      in: header
+      required: true
+      example: Diana
+      description: The first name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/FirstName'
+    MerchantGuidParam:
+      name: guid
+      in: path
+      required: true
+      description: Consumer Clarity internal merchant's GUID
+      example: jK2dA5aybhQQBq6C
+      schema:
+        $ref: '#/components/schemas/MerchantGuid'
+    SubmitterLastNameParam:
+      name: Submitter-Last-Name
+      in: header
+      required: true
+      example: Princess
+      description: The last name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/LastName'
+    SubMerchantIdParam:
+      name: sub_merchant_id
+      in: path
+      required: true
+      description: Sub-merchant member ID
+      example: cc2cac41-d127-4c06-9646-c0f2ad76c444
+      schema:
+        $ref: '#/components/schemas/AlertsMerchantMemberId'
+    ClaritySortDirectionParam:
+      name: sort_direction
+      in: query
+      required: false
+      description: Direction to sort the data using sort_field in response
+      schema:
+        type: string
+        default: DESC
+        enum:
+        - ASC
+        - DESC
+        example: ASC
+    CardAcceptorNameParam:
+      name: card_acceptor_name
+      in: query
+      required: false
+      description: A sub-element of the merchant descriptor that contains the merchant's name or doing business as name as it appears on the cardholder's billing statement.
+      schema:
+        $ref: '#/components/schemas/CardAcceptorName'
+      example: Acceptor 1
+    ClaritySortFieldParam:
+      name: sort_field
+      in: query
+      required: false
+      description: Field to Sort data in response
+      schema:
+        type: string
+        default: modifiedDateTime
+        maxLength: 100
+      example: modifiedDateTime
+    ClarityOffsetParam:
+      name: offset
+      in: query
+      required: false
+      description: The number of items to skip before starting to collect the result set
+      schema:
+        type: integer
+        default: 50
+        minimum: 0
+        example: 0
+    AcquirerReferenceIdParam:
+      name: acquirer_reference_id
+      in: query
+      required: false
+      description: BIN that a partner currently services under their portfolio.
+      schema:
+        $ref: '#/components/schemas/AcquirerReferenceId'
+      example: '123456'
+    PageNumberParam:
+      name: page_number
+      in: query
+      required: false
+      description: Current page number
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+      example: 1
+    CardAcceptorNameIdParam:
+      name: id
+      in: path
+      required: true
+      example: Mxyz123
+      description: Unique identifier of the card acceptor name.
+      schema:
+        $ref: '#/components/schemas/ResourceId'
+    ClientId:
+      name: x-openapi-clientid
+      in: header
+      description: ClientId is a unique and a mandatory ID shared while creating a project on Mastercard Developers Portal.
+      required: true
+      schema:
+        type: string
+        example: 0a7e433a-63fc-4557-8cf4
+    ProgramId:
+      name: ProgramId
+      in: header
+      description: ProgramId is an optional field, but if a client has more than one program associated to it, then this field becomes mandatory.
+      required: false
+      schema:
+        type: string
+        example: 80380ef2-5037-4e57-86bf-1bdd1efb0ae2
+    Donor:
+      name: donor_id
+      in: path
+      description: donor_id
+      required: true
+      schema:
+        type: string
+        example: 652ce9ff-fa5f-4e9f-8151-c73fa20088f7
+    CorrelationId:
+      name: x-correlation-id
+      in: header
+      description: CorrelationId is a unique donation request ID. It is recommended to pass the x-correlation-id by the customer and to use the format "bankname_UUID" (bank name can be indicated using the first 4 digits). Maximum length of this field should be 100 alphanumeric characters. If not passed, Mastercard will generate it.
+      required: false
+      schema:
+        type: string
+        example: 03f8c4e8-8bdc-4a30-a2b4-b6f989e96ca3
+    Card:
+      name: card_id
+      in: path
+      description: card_id
+      required: true
+      schema:
+        type: string
+        example: ebee3d81-18d4-409a-8330-73db083f2cfc
+    tokenGUID:
+      name: token_guid
+      in: path
+      description: The globally unique identifier of the token being queried
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceIdentifier'
+      example: 8f242496-b71a-11eb-8529-0242ac130003
+    accountGUID:
+      name: account_guid
+      in: path
+      description: The globally unique identifier of the card being queried
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceIdentifier'
+      example: 8f242496-b71a-11eb-8529-0242ac130003
+    userGUID:
+      name: user_guid
+      in: path
+      description: The globally unique identifier of the user being queried
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceIdentifier'
+      example: 8f242496-b71a-11eb-8529-0242ac130003
+  headers:
+    Location:
+      description: The URL to check on status of resource
+      schema:
+        type: string
+    X-MC-Correlation-ID:
+      description: This id is unique per request and is used to co-relate a request to its response. Customers must share this id while raising any incident for this API.
+      schema:
+        $ref: '#/components/schemas/X-MC-Correlation-ID'
+  requestBodies:
+    PaymentCards:
+      required: true
+      description: List of payment cards to be enroled.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PaymentCard'
+            minItems: 1
+            maxItems: 100
+            example:
+            - fpan: '5455029300268351'
+              cardBaseCurrency: EUR
+            - fpan: '5455023979760762'
+              cardBaseCurrency: USD
+            - fpan: '5455023979762834'
+              cardBaseCurrency: USD
+            - fpan: '5455023979762824'
+              cardBaseCurrency: USD
+    PaymentCardIds:
+      description: List of paymentCardIds for which all associated data needs to be deleted.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PaymentCardId'
+            minItems: 1
+            maxItems: 100
+          example:
+          - c5d88571-ac15-465a-a0d8-1ad1327b9a06
+          - 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+          - 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+          - b86fd2ba-c095-4acb-b9df-f3805655ba24
+    AlertsCardAcceptorNameConfigRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsCardAcceptorNameConfig'
+          examples:
+            AlertsCardAcceptorNameConfig:
+              $ref: '#/components/examples/AlertsCardAcceptorNameConfig'
+    AlertsCardAcceptorIdConfigRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsCardAcceptorIdConfig'
+          examples:
+            AlertsCardAcceptorIdConfig:
+              $ref: '#/components/examples/AlertsCardAcceptorIdConfig'
+    CardAcceptorNamesBulkRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CardAcceptorNamesBulk'
+    CardAcceptorNamesBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CardAcceptorData'
+    UpdateCard:
+      description: updateCardRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateCard'
+      required: false
+    NewToken:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Token'
+          examples:
+            Token:
+              $ref: '#/components/examples/Token'
+    UpdatedToken:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TokenUpdate'
+          examples:
+            TokenUpdate:
+              $ref: '#/components/examples/TokenUpdate'
+    NewVirtualCard:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VirtualCardAccount'
+          examples:
+            VirtualCardAccount:
+              $ref: '#/components/examples/CardDetails'
+    UpdatedVirtualCard:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateVirtualCardAccount'
+          examples:
+            UpdateVirtualCardAccount:
+              $ref: '#/components/examples/UpdateUserCardAndControl'

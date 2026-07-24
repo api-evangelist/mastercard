@@ -1,0 +1,1017 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Offers API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Offers
+paths:
+  /offers:
+    post:
+      tags:
+      - Offers
+      summary: Performs installments eligibility and returns a list of eligible offers.
+      x-mastercard-api-encrypted: true
+      description: 'This endpoint allows customers to find eligible installment offers. It takes Primary Account Number (PAN), merchant information, and transaction information as input, performs installment eligibility, and returns a list of matching offers in response. If eligible offers are found, the API returns the details of each offer including tenure, interest rates, fees, terms and conditions, and a detailed loan repayment schedule etc., which can be presented to cardholders. If no eligible offers match the request criteria, the API response wont include any offers.
+
+        - This endpoint requires partial request payload encryption to encrypt sensitive data ''consumers primary account number'' as part of sensitiveData field. Please refer to request specification for more details. The encryption needs to be performed using [JWE payload encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/#jwe-encryption). Please refer to the [Securing Sensitive Data Using Payload Encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/) sections for implementation details.'
+      operationId: approvedOffers
+      parameters:
+      - $ref: '#/components/parameters/CorrelationIdParameter'
+      - $ref: '#/components/parameters/AcceptLanguage'
+      requestBody:
+        $ref: '#/components/requestBodies/OfferParameters'
+      responses:
+        '200':
+          $ref: '#/components/responses/OfferPresentmentsSuccess'
+        '400':
+          $ref: '#/components/responses/OfferPresentmentsInvalidInput'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '415':
+          $ref: '#/components/responses/InvalidContentType'
+components:
+  schemas:
+    Offer:
+      description: Offer response model with Repayment Schedule.
+      type: object
+      required:
+      - priority
+      - offerId
+      - offerType
+      - currencySymbol
+      - tenure
+      - frequency
+      - totalAmount
+      - otherInstallmentAmount
+      - feeType
+      - provider
+      - offerBeginDatetime
+      - offerEndDatetime
+      properties:
+        priority:
+          description: Offer priority is set based on lowest other repayment amount, lowest will come on top
+          type: number
+          example: 1
+        objectType:
+          description: Response type discriminator.
+          type: string
+          minLength: 5
+          maxLength: 25
+          example: Offer
+        offerId:
+          description: Unique identifier for installment offers.
+          type: string
+          format: string
+          minLength: 8
+          maxLength: 64
+          example: '24092019'
+        offerType:
+          description: For 'Carded Installments', Offer Type will CARDED_OFFER and for external Issuer carded/realtime offer it will be 'CARDED_EXTERNAL_REALTIME'
+          type: string
+          minLength: 3
+          maxLength: 50
+          example: CARDED_OFFER
+        offerDisplayText:
+          description: Display text of the offer.
+          type: string
+          minLength: 3
+          maxLength: 500
+          example: 24 monthly payments of $17.13
+        currencySymbol:
+          description: Symbol of currency for all amounts within offer response.
+          type: string
+          minLength: 1
+          maxLength: 1
+          example: $
+        productCode:
+          description: Mastercard Installment Product Code. One of the [SPP, SPS, ETA, ETB, ETC, ETD, ETE, ETF, ETG] for BNPL. For 'Carded Installments' and 'Carded External Offer', it will be optional parameter.
+          type: string
+          minLength: 3
+          maxLength: 5
+          example: spp
+        apr:
+          description: Annual Percentage Rate (APR) for an offer. For Carded External Offer, it will be optional parameter.
+          type: number
+          format: double
+          example: 10.1
+        tenure:
+          description: Total number of installments for an offer. Offer tenure.
+          type: integer
+          minimum: 2
+          example: 6
+        frequency:
+          description: Frequency of installment (Single installment time duration). It will be one of the [WEEKLY, BIWEEKLY, MONTHLY, 15DAYS].
+          type: string
+          minLength: 5
+          maxLength: 20
+          example: WEEKLY
+        interestRate:
+          description: Interest rate for the offer. For Carded External Offer, it will be optional parameter.
+          type: number
+          format: double
+          example: 2
+        firstInstallmentSchedule:
+          description: This defines when customer Installments starts, possible value transaction date or after one cycle. For Carded External Offer, it will be optional parameter.
+          type: string
+          pattern: ^(?:TRANSACTION_DATE|DELAY_REPAYMENT)$
+          example: TRANSACTION_DATE
+        totalAmount:
+          description: Total offer amount including fee and interest with major unit according to ISO 4217.
+          type: number
+          format: double
+          example: 400
+        firstInstallmentAmount:
+          description: Amount to be paid in as a first installment. For Carded External Offer, it will be optional parameter.
+          type: number
+          format: double
+          example: 200
+        otherInstallmentAmount:
+          description: Single Installment amount with major unit according to ISO 4217.
+          type: number
+          format: double
+          example: 100
+        feeType:
+          description: Type of the fee for the offer. It will be one of the [NO_FEES, FIXED_AMT, PRCENTG (Percentage of transaction amount)].
+          type: string
+          minLength: 5
+          maxLength: 20
+          example: FIXED_AMT
+        feeValue:
+          description: Fees values based on type it can be either Fixed amount or Percentage to applied in transaction amount. It will be optional if feeType is NO_FEES.
+          type: number
+          format: double
+          example: 10.1
+        feeDistribution:
+          description: 'Fee distribution type denotes how fee will be collected for the offer. It will be one of [FIRST_INSTALLMENT, SPREAD_ALL_INSTALLMENT].
+
+            - (1) FIRST_INSTALLMENT- Means entire fees will be collected on first installment.
+
+            - (2) SPREAD_ALL_INSTALLMENT- Mean fees will be applied equally among all installments.
+
+
+            It will be optional if feeType is NO_FEES. For Carded External Offer, it will be optional parameter.'
+          type: string
+          minLength: 5
+          maxLength: 25
+          example: FIRST_INSTALLMENT
+        offerBeginDatetime:
+          description: Start date for provider's offer for a consumer. For Carded External Offer, it will be optional parameter. [Date and Time RFC](https://datatracker.ietf.org/doc/html/rfc3339).
+          type: string
+          example: '2012-01-01T00:00:00-05:00'
+        offerEndDatetime:
+          description: End date for provider's offer for a consumer. For Carded External Offer, it will be optional parameter. [Date and Time RFC](https://datatracker.ietf.org/doc/html/rfc3339).
+          type: string
+          example: '2022-07-31T23:59:59-04:00'
+        selectable:
+          description: Indicate that offer is selectable or non selectable for 'new loan'. It will be optional for 'Carded Installments' and 'Carded External Offer'.
+          type: boolean
+          example: false
+        provider:
+          $ref: '#/components/schemas/Provider'
+        schedulePayments:
+          description: List of installment as per repayment schedule. This is optional object for offer presentment 'Offer Details'.
+          type: array
+          items:
+            $ref: '#/components/schemas/SchedulePayments'
+    OffersGroup:
+      type: object
+      description: Base object for offer presentments response.
+      required:
+      - total
+      - offerTransactionId
+      properties:
+        total:
+          description: The total number of eligible installments offers in response.
+          type: integer
+          example: 10
+        offerTransactionId:
+          description: Unique identifier for installment offers presentment transaction. It will be snowflake identifier format.
+          type: string
+          format: string
+          minLength: 8
+          maxLength: 40
+          example: '1763137029152964608'
+        offers:
+          description: List of Offers.
+          type: array
+          items:
+            $ref: '#/components/schemas/OfferGroupAndPriority'
+        eligibilityMessages:
+          description: List of eligibility messages. This only applies to Installments on card.
+          type: array
+          items:
+            $ref: '#/components/schemas/EligibilityMessage'
+    OfferGroupAndPriority:
+      description: Offer object with cardinal priority.
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Offer'
+    OfferParametersEncryptedPayload:
+      description: Offer Presentment request parameter compromise of transaction, merchant and consumer parameters. Based on requested parameter different Installments flow will get trigger, if Primary Account number is passed in request than Carded flow will be triggered or else BNPL UC3 (realtime offer) flow. Highly sensitive parameter (PAN) needs to be encrypted and wrapped under encryptedValue refer example for more detail.
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/OfferParameters'
+    OfferParameters:
+      description: Offer Presentment request parameters.
+      required:
+      - transaction
+      properties:
+        transaction:
+          $ref: '#/components/schemas/TransactionParameters'
+        merchant:
+          $ref: '#/components/schemas/MerchantParameters'
+        sensitiveData:
+          $ref: '#/components/schemas/SensitiveDataField'
+    SensitiveDataField:
+      type: object
+      description: "Mandatory for Carded Installments\n     - Plain payload which contains Consumer Primary Account Number in encrypted format, refer example 'Carded Installments Offers Request Plain' to see payload (sensitiveData object) in plain format.\n     - Represented as the concatenation of the Base64 encoded JWE Protected Header, JWE Encrypted Key, JWE Initialization Vector, JWE Ciphertext, and JWE Authentication Tag separated by '.'"
+      properties:
+        consumer:
+          properties:
+            primaryAccountNumber:
+              type: number
+              description: Consumer Credit or Debit card number (PAN) to offer Installments (ISO-DE2). This field can contain both funding and tokenized PAN. For 'Carded Installments', this will be mandatory parameter.
+              maxLength: 19
+              minLength: 11
+              example: 5110921032063789
+          required:
+          - primaryAccountNumber
+    Provider:
+      description: Provider details object.
+      type: object
+      required:
+      - providerId
+      - providerName
+      - providerLogoUrl
+      properties:
+        providerId:
+          description: Unique identifier for installment offer provider. Provider can be issuer or Installment Program Provider.
+          type: string
+          format: uuid
+          example: b5cc59e6-7a89-11ec-90d6-0242ac120003
+        cid:
+          description: Company ID for installment offer.
+          type: string
+          example: '123456'
+        providerName:
+          description: Installment offer Provider name.
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Partner Bank
+        providerLogoUrl:
+          description: Installment offer Provider logo url.
+          type: string
+          minLength: 10
+          maxLength: 2000
+          format: url
+          pattern: https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)
+          example: https://content.partnerbank.com/logo.png
+        disclosure:
+          description: Installment offer provider disclosure/T&C applies for given installment offer.
+          type: string
+          minLength: 0
+          maxLength: 500
+          example: Your repayment terms will depend on your APR and loan term for which you qualify. You may qualify for a payment as low as $97.82 up to $437.00 depending on your creditworthiness, loan term, and enrollment in AutoPay at origination.
+    EligibilityMessage:
+      description: Eligibility message when no offer found. This will be only available in response in case of Installment on card offers.
+      type: object
+      properties:
+        reasonCode:
+          description: Reason code when no offer found
+          type: string
+          example: consumer.not.eligible
+        message:
+          description: Eligibility message for no offer found
+          type: string
+          example: Consumer is not eligible for Installments
+    MerchantParameters:
+      description: Merchant parameters contains Merchant details which is required to identify Bilateral or Merchant Funded Offer. Certain parameters need to be passed together to make it identifiable and below is possible parameter sets - Merchant Id, Acquirer Id and Country - Name and Country - URL and Country UC3 supported field are Country, MCC and Acceptor
+      type: object
+      properties:
+        name:
+          description: Merchant Legal name or doing business as name
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Globex Decor
+        country:
+          description: Alpha 3 country code according to ISO 3166. For Mastercard Installments Payment Services, this will be optional parameter.
+          type: string
+          minLength: 3
+          maxLength: 3
+          example: USA
+        mcc:
+          description: Merchant Category Code.
+          type: string
+          minLength: 4
+          maxLength: 4
+          example: '1711'
+        url:
+          description: URL for the Merchant.
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: www.globexdecor.com
+        acquirerId:
+          description: Acquiring Institution ID to identify the acquiring institution. This is mandatory if 'merchantId' field is provided. (ISO DE-32)
+          type: string
+          minLength: 1
+          maxLength: 6
+          example: '456789'
+        merchantId:
+          description: Merchant ID assigned by Acquirer. This is mandatory if 'acquirerId' field is provided. (ISO DE-42)
+          type: string
+          minLength: 1
+          maxLength: 15
+          example: '456789'
+    TransactionParameters:
+      description: Transaction parameters contains transaction related details including date time information.
+      type: object
+      required:
+      - amount
+      - currency
+      - localDateTime
+      properties:
+        amount:
+          description: Amount with major unit according to ISO 4217. Amount is inclusive of shipping and taxes cost for the transaction.
+          type: number
+          format: double
+          example: 100.52
+        currency:
+          description: Alpha numeric currency code as per ISO 4217.
+          type: string
+          minLength: 3
+          maxLength: 3
+          example: USD
+        localDateTime:
+          description: Local Transaction date and time. [Date and Time RFC](https://datatracker.ietf.org/doc/html/rfc3339).
+          type: string
+          example: '2012-01-01T00:00:00Z'
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object which gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    SchedulePayments:
+      description: Installment loan repayment details
+      type: object
+      required:
+      - installmentNumber
+      - installmentAmount
+      - dueDate
+      properties:
+        installmentNumber:
+          description: Number of an installment.
+          type: integer
+          minimum: 1
+          example: 1
+        installmentAmount:
+          description: Amount to be paid in a installment with major unit according to ISO 4217.
+          type: number
+          format: double
+          example: 100
+        dueDate:
+          description: Due date for a installment.
+          type: string
+          format: date
+          example: '2022-05-01'
+          minLength: 10
+          maxLength: 50
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns the list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    Error:
+      title: Error
+      type: object
+      description: Error object which contains details about the Error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error.
+          minLength: 1
+          maxLength: 100
+          example: Mastercard Installments APIs
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: invalid.request.parameter
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with the correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+  responses:
+    Forbidden:
+      description: Forbidden to access the resource.
+      headers:
+        Correlation-Id:
+          $ref: '#/components/headers/Correlation-Id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            Forbidden:
+              $ref: '#/components/examples/Forbidden'
+    NotAcceptable:
+      description: Accept header is invalid.
+      headers:
+        Correlation-Id:
+          $ref: '#/components/headers/Correlation-Id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            NotAcceptable:
+              $ref: '#/components/examples/NotAcceptable'
+    OfferPresentmentsInvalidInput:
+      description: Invalid input.
+      headers:
+        Correlation-Id:
+          $ref: '#/components/headers/Correlation-Id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidAcceptLanguage:
+              $ref: '#/components/examples/InvalidAcceptLanguage'
+            InvalidIsdCode:
+              $ref: '#/components/examples/InvalidIsdCode'
+            TransactionAmountInvalid:
+              $ref: '#/components/examples/TransactionAmountInvalid'
+            TransactionLocalDateTimeInvalid:
+              $ref: '#/components/examples/TransactionLocalDateTimeInvalid'
+            InvalidPrimaryAccountNumber:
+              $ref: '#/components/examples/InvalidPrimaryAccountNumber'
+            InvalidPrimaryAccountNumberSize:
+              $ref: '#/components/examples/InvalidPrimaryAccountNumberSize'
+            InvalidCurrencyCode:
+              $ref: '#/components/examples/InvalidCurrencyCode'
+            TransactionCurrencyInvalid:
+              $ref: '#/components/examples/TransactionCurrencyInvalid'
+            InvalidMerchantId:
+              $ref: '#/components/examples/InvalidMerchantId'
+            InvalidAcquirerId:
+              $ref: '#/components/examples/InvalidAcquirerId'
+            InvalidMerchantURL:
+              $ref: '#/components/examples/InvalidMerchantURL'
+            InvalidMerchantName:
+              $ref: '#/components/examples/InvalidMerchantName'
+            InvalidMcc:
+              $ref: '#/components/examples/InvalidMcc'
+            MissingCountryCode:
+              $ref: '#/components/examples/MissingCountryCode'
+            InvalidCountryCode:
+              $ref: '#/components/examples/InvalidCountryCode'
+            InvalidCountryCurrencyCodePair:
+              $ref: '#/components/examples/InvalidCountryCurrencyCodePair'
+            InvalidPublicKeyFingerprint:
+              $ref: '#/components/examples/InvalidPublicKeyFingerprint'
+            MissingMerchantParameters:
+              $ref: '#/components/examples/MissingMerchantParameters'
+            InvalidMerchantParameters:
+              $ref: '#/components/examples/InvalidMerchantParameters'
+            MissingCountyCodeInMerchantParameters:
+              $ref: '#/components/examples/MissingCountyCodeInMerchantParameters'
+            InvalidMerchantParameterCombinations:
+              $ref: '#/components/examples/InvalidMerchantParameterCombinations'
+    Unauthorized:
+      description: Unauthorized to access the resource.
+      headers:
+        Correlation-Id:
+          $ref: '#/components/headers/Correlation-Id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            Unauthorized:
+              $ref: '#/components/examples/Unauthorized'
+    NotFound:
+      description: Not Found.
+      headers:
+        Correlation-Id:
+          $ref: '#/components/headers/Correlation-Id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            NotFound:
+              $ref: '#/components/examples/NotFound'
+    InvalidContentType:
+      description: Content Type header is invalid.
+      headers:
+        Correlation-Id:
+          $ref: '#/components/headers/Correlation-Id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidContentType:
+              $ref: '#/components/examples/InvalidContentType'
+    OfferPresentmentsSuccess:
+      description: Successful response for Offer presentment.
+      headers:
+        Correlation-Id:
+          $ref: '#/components/headers/Correlation-Id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OffersGroup'
+          examples:
+            CardedInstallmentsOffers:
+              $ref: '#/components/examples/CardedInstallmentsOffers'
+            CardedInstallmentsOfferNotFound:
+              $ref: '#/components/examples/CardedInstallmentsOffersNotFound'
+  examples:
+    InvalidMerchantName:
+      description: Merchant Name in request is invalid.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: merchant.name
+            Description: size must be between 1 and 100
+            Recoverable: false
+            Details: ''
+    InvalidMerchantParameters:
+      description: Merchant Parameters with combination of AcquirerId, MerchantId and Country code in request is invalid.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: invalid.request.parameter
+            Description: AcquirerId, MerchantId and CountryCode must be present
+            Recoverable: false
+            Details: ''
+    CardedInstallmentsOffers:
+      description: API response for 'Mastercard Installments Payment Services' showing details of two eligible standard offers found.
+      value:
+        total: 2
+        offerTransactionId: '1763137029152964608'
+        offers:
+        - priority: 1
+          offerId: '21345693'
+          offerType: CARDED_OFFER
+          offerDisplayText: 6 biweekly payments of $66.67
+          currencySymbol: $
+          apr: 0
+          tenure: 6
+          frequency: BIWEEKLY
+          interestRate: 0
+          firstInstallmentSchedule: TRANSACTION_DATE
+          totalAmount: 400
+          firstInstallmentAmount: 66.67
+          otherInstallmentAmount: 66.67
+          feeType: NO_FEES
+          feeValue: 0
+          feeDistribution: FRST_INSTL
+          offerBeginDatetime: '2021-12-31T19:00:00-05:00'
+          offerEndDatetime: '2024-08-30T19:59:59-04:00'
+          provider:
+            providerId: 29694e7a-b4a8-11ec-b909-0242ac120002
+            cid: 244426
+            providerName: Mastercard - Operations & Technology - BizOps
+            providerLogoUrl: https://mtf.installments.mastercard.com/mtf/Mast_2d5f306e-78d3-483a-a5c9-8343171e75de.png
+            disclosure: Offer only qualify for a payment as low as $50.00 up to $600.00.
+          schedulePayments:
+          - installmentNumber: 1
+            installmentAmount: 66.67
+            dueDate: '2023-10-26'
+          - installmentNumber: 2
+            installmentAmount: 66.67
+            dueDate: '2023-11-09'
+          - installmentNumber: 3
+            installmentAmount: 66.67
+            dueDate: '2023-11-23'
+          - installmentNumber: 4
+            installmentAmount: 66.67
+            dueDate: '2023-12-07'
+          - installmentNumber: 5
+            installmentAmount: 66.67
+            dueDate: '2023-12-21'
+          - installmentNumber: 6
+            installmentAmount: 66.67
+            dueDate: '2024-01-04'
+        - priority: 2
+          offerId: '21351677'
+          offerType: CARDED_OFFER
+          offerDisplayText: 4 weekly payments of $100.32
+          currencySymbol: $
+          apr: 101.52
+          tenure: 4
+          frequency: WEEKLY
+          interestRate: 11.2
+          firstInstallmentSchedule: TRANSACTION_DATE
+          totalAmount: 411.38
+          firstInstallmentAmount: 110.42
+          otherInstallmentAmount: 100.32
+          feeType: FIXED_AMT
+          feeValue: 10.1
+          feeDistribution: FRST_INSTL
+          offerBeginDatetime: '2023-01-01T00:00:00-05:00'
+          offerEndDatetime: '2025-12-31T23:59:59-05:00'
+          provider:
+            providerId: 29694e7a-b4a8-11ec-b909-0242ac120002
+            cid: 244425
+            providerName: Mastercard - Operations & Technology - BizOps
+            providerLogoUrl: https://mtf.installments.mastercard.com/mtf/Mast_2d5f306e-78d3-483a-a5c9-8343171e75de.png
+            disclosure: Offer only qualify for a payment as low as $50.00 up to $600.00.
+          schedulePayments:
+          - installmentNumber: 1
+            installmentAmount: 110.42
+            dueDate: '2023-10-26'
+          - installmentNumber: 2
+            installmentAmount: 100.32
+            dueDate: '2023-11-02'
+          - installmentNumber: 3
+            installmentAmount: 100.32
+            dueDate: '2023-11-09'
+          - installmentNumber: 4
+            installmentAmount: 100.32
+            dueDate: '2023-11-16'
+    Forbidden:
+      description: Forbidden to access the resource.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: forbidden
+            Description: Forbidden to access the resource.
+            Recoverable: false
+            Details: ''
+    CardedInstallmentsOffersRequestPlain:
+      description: Typical Offer request for 'Mastercard Installments Payment Services with plain payload. Please note that the client needs to encrypt sensitiveData field using Mastercard provided JWE encryption libraries before calling the API. Refer to the example, Carded Installments Offers Request Encrypted (only for Reference), to understand how the resulting payload should look like after performing encryption.
+      value:
+        transaction:
+          amount: 400
+          currency: USD
+          localDateTime: '2023-10-26T00:00:00Z'
+        merchant:
+          name: Globex Decor
+          country: USA
+          mcc: '1711'
+          url: www.globexdecor.com
+          acquirerId: '234353'
+          merchantId: '121234'
+        sensitiveData:
+          consumer:
+            primaryAccountNumber: '5110921032063789'
+    InvalidMerchantId:
+      description: Merchant Id in request is invalid.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: merchant.merchantId
+            Description: size must be between 1 and 15
+            Recoverable: false
+            Details: ''
+    InvalidMerchantURL:
+      description: Merchant URL in request is invalid.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: merchant.url
+            Description: size must be between 1 and 50
+            Recoverable: false
+            Details: ''
+    InvalidContentType:
+      description: Content-Type header is null or invalid.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: invalid.content.type
+            Description: Content-Type header should be application/json.
+            Recoverable: false
+            Details: ''
+    InvalidPublicKeyFingerprint:
+      description: Provided public key fingerprint in request is invalid.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: invalid.request.parameter
+            Description: Provided public key fingerprint in request is invalid.
+            Recoverable: false
+            Details: ''
+    TransactionAmountInvalid:
+      description: Transaction amount in request is not a valid value.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: transaction.amount
+            Description: must not be null
+            Recoverable: false
+            Details: ''
+    Unauthorized:
+      description: Unauthorized to access the resource.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: unauthorized
+            Description: Unauthorized to access the resource.
+            Recoverable: false
+            Details: ''
+    InvalidMcc:
+      description: Merchant Category Code in request is invalid.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: merchant.mcc
+            Description: size must be between 4 and 4
+            Recoverable: false
+            Details: ''
+    InvalidPrimaryAccountNumberSize:
+      description: Provided PrimaryAccountNumber digit size in requests not matching.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: consumer.primaryAccountNumber
+            Description: size must be between 13 and 24
+            Recoverable: false
+            Details: ''
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: consumer.primaryAccountNumber
+            Description: must match \"^\\d{13,24}$\"
+            Recoverable: false
+            Details: ''
+    CardedInstallmentsOffersRequestEncrypted:
+      description: Typical Offer request for 'Mastercard Installments Payment Services showing indicative payload after performing JWE encryption on sensitiveData field.
+      value:
+        transaction:
+          amount: 400
+          currency: USD
+          localDateTime: '2023-10-26T00:00:00Z'
+        merchant:
+          name: Globex Decor
+          country: USA
+          mcc: '1711'
+          url: www.globexdecor.com
+          acquirerId: '234353'
+          merchantId: '121234'
+        encryptedValue: eyJraWQiOiI3NjFiMDAzYzFlYWRlM(...)==.Y+oPYKZEMTKyYcSIVEgtQw==
+    NotFound:
+      description: URI/Resource not found.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: not.found
+            Description: URI/Resource not found.
+            Recoverable: false
+            Details: ''
+    InvalidAcceptLanguage:
+      description: Accept-Language header is not matching format [LANGUAGE]-[COUNTRY]. Language is not as per ISO 639 and country is not as per ISO 31661.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: invalid.accept.language
+            Description: Accept Language header is invalid.
+            Recoverable: false
+            Details: ''
+    InvalidAcquirerId:
+      description: Acquirer Id in request is invalid.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: merchant.acquirerId
+            Description: size must be between 1 and 6
+            Recoverable: false
+            Details: ''
+    NotAcceptable:
+      description: Accept header is null or invalid.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: invalid.accept.header
+            Description: Accept header should be application/json.
+            Recoverable: false
+            Details: ''
+    TransactionCurrencyInvalid:
+      description: Transaction currency in request is not a valid value.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: transaction.currency
+            Description: must not be null
+            Recoverable: false
+            Details: ''
+    MissingMerchantParameters:
+      description: Merchant Parameters with combination of AcquirerId, MerchantId and Country code in request is invalid.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: invalid.request.parameter
+            Description: Merchant object is empty. Country code and MCC must exist
+            Recoverable: false
+            Details: ''
+    InvalidMerchantParameterCombinations:
+      description: Merchant Parameters with combination of AcquirerId and MerchantId and Country code Or Merchant URL and Country code Or Merchant Name and Country code must be present in the request.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: invalid.request.parameter
+            Description: One of the below combination of data must be present 1. If requester pass either of acquirer Id or merchant Id than country, acquirer Id and merchant Id is mandatory 2. In case of merchant name - country code is mandatory 3. In case of URL - country code is mandatory
+            Recoverable: false
+            Details: ''
+    MissingCountyCodeInMerchantParameters:
+      description: For Merchant parameters any combinations of (AcquirerId and MerchantId) Or (Merchant URL) Or (Merchant Name) Country code must be present in the request.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: invalid.request.parameter
+            Description: Country code must be present
+            Recoverable: false
+            Details: ''
+    InvalidIsdCode:
+      description: Provided ISD code in request is invalid.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: invalid.request.parameter
+            Description: ISD code is invalid. It must be according to ISD code standard.
+            Recoverable: false
+            Details: ''
+    MissingCountryCode:
+      description: Country Code merchant parameter is not provided in request.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: invalid.request.parameter
+            Description: Country code must be present
+            Recoverable: false
+            Details: ''
+    TransactionLocalDateTimeInvalid:
+      description: Transaction localDateTime in request is not a valid value.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: invalid.request.parameter
+            Description: Local Transaction date and time must be present
+            Recoverable: false
+            Details: ''
+    InvalidCountryCurrencyCodePair:
+      description: Provided Country and Currency Code pair in request is invalid
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: invalid.request.parameter
+            Description: Invalid Country and Currency Pair
+            Recoverable: false
+            Details: ''
+    InvalidPrimaryAccountNumber:
+      description: Provided PAN in request failed to pass Luhn algorithm check.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: invalid.request.parameter
+            Description: PAN provided is invalid
+            Recoverable: false
+            Details: ''
+    CardedInstallmentsOffersNotFound:
+      description: API response for 'Mastercard Installments Payment Services' when no eligible offers are found.
+      value:
+        total: 0
+        offerTransactionId: '1763137029152964608'
+        offers: []
+        eligibilityMessages:
+        - reasonCode: consumer.not.eligible
+          message: Consumer is not eligible for Installments
+        - reasonCode: amount.not.qualify
+          message: Purchase Amount does not qualify for Installments
+        - reasonCode: mcc.not.eligible
+          message: Merchant Category Code is not eligible for Installments
+    InvalidCountryCode:
+      description: Provided Country Code in request is invalid
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: invalid.request.parameter
+            Description: Country Code Not Supported
+            Recoverable: false
+            Details: ''
+    InvalidCurrencyCode:
+      description: Provided Currency Code in request is invalid
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: invalid.request.parameter
+            Description: Currency Code Not Supported
+            Recoverable: false
+            Details: ''
+  requestBodies:
+    OfferParameters:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OfferParametersEncryptedPayload'
+          examples:
+            Carded Installments Offers Request Plain:
+              $ref: '#/components/examples/CardedInstallmentsOffersRequestPlain'
+            Carded Installments Offers Request Encrypted (only for reference):
+              $ref: '#/components/examples/CardedInstallmentsOffersRequestEncrypted'
+  parameters:
+    CorrelationIdParameter:
+      in: header
+      description: Client correlation id for request tracing. Optional parameter. if not provided, the API will create new one and propagate to all down-stream systems for tracing.
+      name: Correlation-Id
+      schema:
+        type: string
+        format: string
+      required: false
+      example: 9110be3b-d729-44e4-848c-c1844174cfbf
+    AcceptLanguage:
+      in: header
+      description: Accept-Language header only accepts 'en' as the input language. Other languages are not supported at this time.
+      name: Accept-Language
+      schema:
+        type: string
+        format: string
+      required: false
+      example: en
+  headers:
+    Correlation-Id:
+      description: Correlation-Id response header to trace the request.
+      schema:
+        type: string
+      required: true
+      example: 44dc28d6-cf59-11ec-9d64-0242ac120002

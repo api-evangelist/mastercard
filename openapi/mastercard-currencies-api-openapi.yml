@@ -1,0 +1,393 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Currencies API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Currencies
+paths:
+  /supported-currencies:
+    get:
+      tags:
+      - Currencies
+      summary: Provide Supported Currencies
+      description: Provides the list of currencies supported by the application. While sending a transaction amount in the Amount object, 'currencyCode' should be from one of the supported currencies. It is recommended to cache this list and use it for checking before sending transactions for footprint calculation. Generally this list doesn't change that often, but it is recommended to refresh this data every 24-hours.
+      operationId: GetSupportedCurrencies
+      responses:
+        '200':
+          $ref: '#/components/responses/SupportedCurrencies'
+  /settlement-currencies:
+    get:
+      tags:
+      - Currencies
+      summary: Mastercard Getcurrencyratedata
+      description: Provides a list of currencies for which Mastercard publishes currency conversion rates.
+      operationId: getCurrencyRateDataUsingGET
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettlementCurrencyWrapper'
+              examples:
+                Getcurrencyratedatausingget200Example:
+                  summary: Default getCurrencyRateDataUsingGET 200 response
+                  x-microcks-default: true
+                  value:
+                    name: Example Title
+                    description: A sample description.
+                    date: example_value
+                    data:
+                      currencies:
+                      - {}
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /mc-currencies:
+    get:
+      tags:
+      - Currencies
+      summary: getEnhancedMCCurrencyData
+      operationId: getEnhancedMCCurrencyDataUsingGET
+      description: Provides a list of Mastercard currencies for which Mastercard publishes a rate.
+      responses:
+        '200':
+          description: List of Mastercard currencies successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnhancedMastercardCurrencyWrapper'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                UnauthorizedResponse:
+                  $ref: '#/components/examples/UnauthorizedResponse'
+        '404':
+          description: Data not available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                CurrenciesNotFoundResponse:
+                  $ref: '#/components/examples/CurrenciesNotFoundResponse'
+  /ecb-currencies:
+    get:
+      tags:
+      - Currencies
+      summary: getEcbCurrenciesList
+      operationId: getEcbCurrenciesListUsingGET
+      description: Provides the list of currencies for which the ECB publishes an euro foreign exchange reference rate.
+      responses:
+        '200':
+          description: List of ECB currencies successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnhancedEcbCurrencyWrapper'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                UnauthorizedResponse:
+                  $ref: '#/components/examples/UnauthorizedResponse'
+        '404':
+          description: Data not available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                CurrenciesNotFoundResponse:
+                  $ref: '#/components/examples/CurrenciesNotFoundResponse'
+components:
+  responses:
+    SupportedCurrencies:
+      description: This response code is returned when a request is accepted and successfully processed. A corresponding response will be returned for the API caller.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SupportedCurrencies'
+          examples:
+            SupportedCurrencies:
+              $ref: '#/components/examples/SupportedCurrencies'
+    MCSupportedCurrencies:
+      description: This response code is returned when a request is accepted and successfuly processed. A corresponding response will be returned for the API caller.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MCSupportedCurrencies'
+          examples:
+            MCSupportedCurrencies:
+              $ref: '#/components/examples/MCSupportedCurrencies'
+  schemas:
+    CurrencyCode:
+      type: string
+      description: Currency code as per ISO 4217
+      minLength: 3
+      maxLength: 3
+      pattern: ^[A-Za-z]{3}$
+    X-MC-Correlation-ID:
+      type: string
+      example: X-MC-Correlation-ID:5e4b7f904d2820f688c67ef9fc0035
+    Currency:
+      title: Currency
+      type: object
+      description: Information for a supported currency.
+      required:
+      - currencyCode
+      properties:
+        currencyCode:
+          $ref: '#/components/schemas/CurrencyCode'
+    SupportedCurrencies:
+      title: SupportedCurrencies
+      type: array
+      description: List of supported currencies.
+      minItems: 1
+      maxItems: 1000
+      items:
+        $ref: '#/components/schemas/Currency'
+    MCSupportedCurrencies:
+      title: SupportedCurrencies
+      type: object
+      description: The response object that contains a list of supported curencies.
+      required:
+      - currencies
+      properties:
+        currencies:
+          minItems: 1
+          maxItems: 1000
+          type: array
+          items:
+            $ref: '#/components/schemas/MCCurrency'
+          example: []
+    SettlementCurrency:
+      type: object
+      properties:
+        currencies:
+          type: array
+          description: A list of settlement currencies
+          items:
+            $ref: '#/components/schemas/Currency_2'
+          example: []
+    SettlementCurrencyWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          example: settlement-currency
+          description: The name of the service being requested.
+        description:
+          type: string
+          example: A list of settlement active currencies
+          description: The description of the API being called.
+        date:
+          type: string
+          example: '2019-08-08 16:22:31'
+          description: The date and time the API is being called in GMT.
+        data:
+          $ref: '#/components/schemas/SettlementCurrency'
+    MCCurrency:
+      title: Currency
+      type: object
+      description: This object represents one currency code information.
+      required:
+      - currencyCode
+      properties:
+        currencyCode:
+          $ref: '#/components/schemas/CurrencyCode_2'
+    Currency_2:
+      type: object
+      properties:
+        alphaCd:
+          type: string
+          example: AOA
+          description: The Alpha code for the currency.
+        currNam:
+          type: string
+          example: ANGOLAN KWANZA
+          description: The full name of the currency.
+    CurrencyCode_2:
+      type: string
+      description: Currency code as per ISO 4217
+      minLength: 3
+      maxLength: 3
+      pattern: ^[A-Za-z]{3}$
+      example: USD
+    EnhancedEcbCurrencies:
+      type: object
+      properties:
+        currencyCount:
+          type: integer
+          format: int32
+          description: Number of ECB Currencies
+          example: 33
+        currencies:
+          type: array
+          description: List of ECB Currencies
+          items:
+            $ref: '#/components/schemas/EnhancedCurrency'
+    Errors:
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          type: array
+          description: if an errorhas occurred
+          items:
+            $ref: '#/components/schemas/EcbError'
+    EnhancedMastercardCurrencyWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the service being requested
+          example: mastercard-currencies
+        description:
+          type: string
+          description: The description of the API being called
+          example: List of Mastercard currencies
+        requestDate:
+          type: string
+          description: The date and time the API is being called in GMT
+          example: '2020-01-21T17:39:41.000Z'
+        data:
+          $ref: '#/components/schemas/EnhancedMastercardCurrencies'
+    EnhancedMastercardCurrencies:
+      type: object
+      properties:
+        currencyCount:
+          type: integer
+          format: int32
+          description: Number of Mastercard Currencies
+          example: 153
+        currencies:
+          type: array
+          description: List of Mastercard Currencies
+          items:
+            $ref: '#/components/schemas/EnhancedCurrency'
+    EcbError:
+      type: object
+      properties:
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Not Found
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about data received and calculated during request processing, to help the user with diagnosing errors.
+          example: Mastercard and ECB rates are not available for this date. Resubmit for a date within the last 365 days inclusive of current day.
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during transaction processing. For example, INVALID_SIGNATURE is used when the request signature does not match the expected one.
+          example: NOT_FOUND
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome. For example, if the request contains an invalid   signature, retrying will never result in a success. However, if the error is related to some unexpected timeout with the service, retrying the call could result in a successful response.
+          example: false
+        Source:
+          type: string
+          description: The name of the application that generated this error
+          example: Gateway
+    ErrorResponse:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    EnhancedCurrency:
+      type: object
+      properties:
+        alphaCd:
+          type: string
+          description: The currency code for the currency
+          example: EUR
+        currName:
+          type: string
+          description: The full name of the currency
+          example: Euro
+    EnhancedEcbCurrencyWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the service being requested
+          example: ecb-currencies
+        description:
+          type: string
+          description: The description of the API being called
+          example: List of EEA currencies for which the ECB publishes an euro foreign exchange reference rate
+        requestDate:
+          type: string
+          description: The date and time the API is being called in GMT
+          example: '2020-01-21T17:43:37.000Z'
+        data:
+          $ref: '#/components/schemas/EnhancedEcbCurrencies'
+  examples:
+    SupportedCurrencies:
+      value:
+      - currencyCode: SEK
+      - currencyCode: USD
+      - currencyCode: EUR
+      - currencyCode: GBP
+    MCSupportedCurrencies:
+      value:
+        currencies:
+        - currencyCode: SEK
+        - currencyCode: USD
+        - currencyCode: EUR
+        - currencyCode: GBP
+    CurrenciesNotFoundResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: NOT_FOUND
+            Description: Data not available
+            Recoverable: true
+            Details: No active currency available
+    UnauthorizedResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: UNAUTHORIZED
+            Description: Invalid Client ID
+            Recoverable: false
+            Details: You do not have access to this service. Please visit the Enhanced Currency Conversion Calculator page for details.
+  headers:
+    X-MC-Correlation-ID:
+      description: This id is unique per request and is used to co-relate a request to its response. Customers must share this id while raising any incident for this API.
+      schema:
+        $ref: '#/components/schemas/X-MC-Correlation-ID'

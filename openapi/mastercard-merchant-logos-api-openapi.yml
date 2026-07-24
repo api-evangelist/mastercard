@@ -1,0 +1,446 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Merchant  Logos API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Merchant  Logos
+paths:
+  /merchants/{guid}/logos:
+    parameters:
+    - $ref: '#/components/parameters/UserIdParam'
+    - $ref: '#/components/parameters/SubmitterFirstNameParam'
+    - $ref: '#/components/parameters/SubmitterLastNameParam'
+    - $ref: '#/components/parameters/MerchantGuidParam'
+    put:
+      tags:
+      - Merchant  Logos
+      summary: Mastercard Update a Logo for an Existing Merchant.
+      description: Returns status and messages (if any validation failures) related to the logo of a sub-merchant.
+      operationId: updateMerchantLogoByGuid
+      requestBody:
+        $ref: '#/components/requestBodies/MerchantLogoBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/LogoSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    post:
+      tags:
+      - Merchant  Logos
+      summary: Mastercard Create a Logo for an Existing Merchant.
+      description: Returns status and messages (if any validation failures) related to the logo of a sub-merchant.
+      operationId: createMerchantLogo
+      requestBody:
+        $ref: '#/components/requestBodies/MerchantLogoBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/LogoSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    delete:
+      tags:
+      - Merchant  Logos
+      summary: Mastercard Delete a Logo for an Existing Merchant.
+      description: Returns 204 status code if logo deleted successfully.
+      operationId: deleteLogoByMerchantGuid
+      responses:
+        '204':
+          $ref: '#/components/responses/SuccessWithoutBody'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    get:
+      tags:
+      - Merchant  Logos
+      summary: Mastercard Get the Logo for an Existing Merchant.
+      description: Returns base64 encoded image, status and messages (if any validation failures) related to the logo of a sub-merchant.
+      operationId: getLogoByMerchantGuid
+      responses:
+        '200':
+          $ref: '#/components/responses/LogoSuccessWithImage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  responses:
+    LogoSuccessWithImage:
+      description: Successful Operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LogoImageResource'
+    Default:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ServerError:
+              $ref: '#/components/examples/ServerError'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ResourceNotFound:
+              $ref: '#/components/examples/ResourceNotFound'
+            EntityNotFound:
+              $ref: '#/components/examples/EntityNotFound'
+            AlertsEntityNotFound:
+              $ref: '#/components/examples/AlertsEntityNotFound'
+    SuccessWithoutBody:
+      description: Successful Operation
+    LogoSuccess:
+      description: Successful Operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LogoResource'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            InvalidData:
+              $ref: '#/components/examples/InvalidData'
+            AlertsInvalidData:
+              $ref: '#/components/examples/AlertsInvalidData'
+            InvalidParameterSet:
+              $ref: '#/components/examples/InvalidParameterSet'
+            FormatInvalid:
+              $ref: '#/components/examples/FormatInvalid'
+            AlertsFormatInvalid:
+              $ref: '#/components/examples/AlertsFormatInvalid'
+            MissingRequiredHeader:
+              $ref: '#/components/examples/MissingRequiredHeader'
+  examples:
+    AlertsEntityNotFound:
+      summary: Entity Not Found Error Response For Alerts
+      description: If a requested entity(e.g. Sub-Merchant or Card Acceptor ID or Card Acceptor Name) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: subMerchantId'
+            Description: Sub-Merchant 99ca4b15-72a6-41dd-8127-573d4b07669c not found
+            Recoverable: false
+            Details: ''
+    MissingRequiredHeader:
+      summary: Missing Required Header Error Response
+      description: If a required request header is missing or null, then MissingRequiredHeader error response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: missing required header
+            Description: Submitter-First-Name
+            Recoverable: false
+            Details: ''
+    ResourceNotFound:
+      summary: Resource Not Found Error Response
+      description: If request URI doesn't match with any available endpoints, then ResourceNotFound error response is returned the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: resource.not.found
+            Description: Not Found
+            Recoverable: false
+            Details: /merchant-self-services/sub-merchantTs/
+    ServerError:
+      summary: Server Error Response
+      description: If an unexpected internal server error occurs, then ServerError response is returned to the caller with HTTP Status code 500.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: server.error
+            Description: Internal Server Error
+            Recoverable: false
+            Details: ''
+    FormatInvalid:
+      summary: Format Invalid Error Response For Consumer Clarity
+      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: format.invalid
+            Description: orderHistoryMonths
+            Recoverable: false
+            Details: ''
+    AlertsFormatInvalid:
+      summary: Format Invalid Error Response For Alerts
+      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: merchantCategoryCode'
+            Description: must match \"^[0-9]*$\"
+            Recoverable: false
+            Details: ''
+    EntityNotFound:
+      summary: Entity Not Found Error Response For Consumer Clarity
+      description: If a requested entity(e.g. Merchant or Logo) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: GUID'
+            Description: Merchant 1E37M8VSX1D28QYX not found
+            Recoverable: false
+            Details: ''
+    InvalidParameterSet:
+      summary: Invalid Parameter Set Error Response
+      description: If request body is malformed or missing, then InvalidParameterSet error response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: invalid.parameter.set
+            Description: request body is malformed
+            Recoverable: false
+            Details: ''
+    InvalidData:
+      summary: Invalid Data Error Response For Consumer Clarity
+      description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: merchantType'
+            Description: must not be blank
+            Recoverable: false
+            Details: ''
+    AlertsInvalidData:
+      summary: Invalid Data Field Error Response For Alerts
+      description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: name'
+            Description: size must be between 3 and 200
+            Recoverable: false
+            Details: ''
+  schemas:
+    MerchantLogo:
+      required:
+      - imageBase64Encoded
+      type: object
+      properties:
+        imageBase64Encoded:
+          $ref: '#/components/schemas/ImageBase64Encoded'
+      description: logo request schema for merchants
+    ImageBase64Encoded:
+      title: Image Base 64 Encoded
+      type: string
+      description: Base 64 encoded image (JPG or PNG)
+      minLength: 0
+      maxLength: 999999999
+      example: /9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAIBAQIBAQICAgICAgICAwUDAwMDAwYEBAMFBwYHBwcGBwcICQsJCAgKCAcHCg0KCgsMDAwMBwkODw0MDgsMDAz/2wBDAQICAgMDAwYDAwYMCAcIDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAz/wAARCAAQABADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD638d/8HA2uah8em0jwP4L0W+8JxXZt459QmlW6vo1PMoKnbGCASAVY4xn0r6L+F//AAUzn8XatY3Op6HZ22h37AFoXYzWoJxkk8NjvgCvmXx1/wAG/wD4s0X4+HU/A3izw7D4RkuzPEuoiUXVjExOYtqqVkwCQDuXPGcV9JfCz/gmbf8AhTVrGz1TWbCbQ7BgWMAbzroA5IwQAue/JxnvX4TxVPjz63R/slO3Nr8HL/29fXltb8etj+puKKfhUsBR/spxvya6z59vtX0579vP7Nj/2Q==
+    UserId:
+      title: User Id
+      maxLength: 300
+      minLength: 1
+      type: string
+      description: The user id of the submitter/technical contact.
+      example: princess.diana
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+      description: Error Response object
+    FirstName:
+      title: First Name
+      maxLength: 30
+      minLength: 1
+      type: string
+      description: The individual's first name
+      example: Michael
+      nullable: true
+    MerchantGuid:
+      title: Merchant GUID
+      maxLength: 16
+      minLength: 11
+      type: string
+      description: Consumer Clarity internal merchant's GUID
+      example: jK2dA5aybhQQBq6C
+    LogoResource:
+      type: object
+      required:
+      - status
+      properties:
+        status:
+          title: Status
+          maxLength: 100
+          minLength: 1
+          type: string
+          description: Status of the logo
+          example: ACTIVE
+        messages:
+          title: Messages
+          type: array
+          description: List of validation messages for a logo.
+          nullable: true
+          items:
+            maxLength: 200
+            minLength: 1
+            type: string
+            example: Logo under review
+          example: []
+      description: Schema for a sub-merchant logo status
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: List of error objects
+          items:
+            $ref: '#/components/schemas/Error'
+          example: []
+      description: Errors object
+    LastName:
+      title: Last Name
+      maxLength: 30
+      minLength: 1
+      type: string
+      description: The individual's last name
+      example: Fox
+      nullable: true
+    LogoImageResource:
+      allOf:
+      - $ref: '#/components/schemas/LogoResource'
+      - type: object
+        properties:
+          imageBase64Encoded:
+            $ref: '#/components/schemas/ImageBase64Encoded'
+      description: Schema for a sub-merchant logo including image binary
+    Error:
+      type: object
+      properties:
+        Source:
+          maxLength: 100
+          minLength: 0
+          type: string
+          description: Source of the error
+          example: Service
+          nullable: true
+        ReasonCode:
+          maxLength: 100
+          minLength: 0
+          type: string
+          description: A unique constant identifying the error
+          example: format.invalid
+          nullable: true
+        Description:
+          maxLength: 1000
+          minLength: 0
+          type: string
+          description: Short description of the error
+          example: Short description of the error
+          nullable: true
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+          example: false
+          default: false
+          nullable: true
+        Details:
+          maxLength: 1000
+          minLength: 0
+          type: string
+          description: Optional detailed description of the issue
+          example: Detailed description of the error
+          nullable: true
+      description: Error object
+  parameters:
+    SubmitterFirstNameParam:
+      name: Submitter-First-Name
+      in: header
+      required: true
+      example: Diana
+      description: The first name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/FirstName'
+    MerchantGuidParam:
+      name: guid
+      in: path
+      required: true
+      description: Consumer Clarity internal merchant's GUID
+      example: jK2dA5aybhQQBq6C
+      schema:
+        $ref: '#/components/schemas/MerchantGuid'
+    SubmitterLastNameParam:
+      name: Submitter-Last-Name
+      in: header
+      required: true
+      example: Princess
+      description: The last name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/LastName'
+    UserIdParam:
+      name: User-Id
+      in: header
+      required: true
+      example: princess.diana
+      description: The user id of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/UserId'
+  requestBodies:
+    MerchantLogoBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MerchantLogo'

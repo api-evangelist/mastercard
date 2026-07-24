@@ -1,0 +1,1059 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Identity API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Identity
+paths:
+  /user-profiles/identity-searches:
+    post:
+      tags:
+      - Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/IdentitySearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: "Retrieve decrypted identities along with rotated PDS to present the user\nwith the registered identity in the TP app. Does not require a minimum authentication standard.   \n**This API is mandatory.**\n"
+      summary: View an Identity
+      operationId: retrieveIdentities
+      parameters:
+      - $ref: '#/components/parameters/XUserIdentityParameter'
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/IdentitySearchRequest'
+  /user-profiles/identity-attribute-deletions:
+    post:
+      tags:
+      - Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/IdentityAttributeDeletionsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: "Delete an identity attribute from a PDS and update the affected assurance levels. Requires GPA authentication.   \n**This API is mandatory.**\n"
+      summary: Delete Document.
+      operationId: deleteIdentityAttribute
+      parameters:
+      - $ref: '#/components/parameters/XUserIdentityParameter'
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/IdentityAttributeDeletionsRequest'
+  /document-verifications/identity-attributes:
+    put:
+      tags:
+      - Identity
+      responses:
+        '200':
+          $ref: '#/components/responses/DocumentDataConfirmationsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: "After the user verifies and confirms the conflict attribute, the user\nsends data back to MIDS to confirm the details. This API will\nperform verifications with IVPs and store the data into the PDS.   \n**This API is mandatory.**\n"
+      summary: Add and Validate a Document - Resolve a conflict between identity attributes.
+      operationId: updateIdentityAttribute
+      parameters:
+      - $ref: '#/components/parameters/XUserIdentityParameter'
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateIdentityAttributesRequest'
+components:
+  schemas:
+    TpAuditMetadata:
+      required:
+      - sessionId
+      - transactionGroupId
+      type: object
+      description: Object containing metadata related to the request.
+      properties:
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+    ConfirmedPDS:
+      required:
+      - pds
+      - transactionId
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: 'UUID represents the MIDS transaction.
+
+            '
+          minLength: 36
+          maxLength: 36
+          example: 021fea3c-d17c-11ea-87d0-0242ac130003
+        pds:
+          $ref: '#/components/schemas/PDS'
+        fraudDetectionMeta:
+          $ref: '#/components/schemas/FraudDetectionMeta'
+        eligibleForMobileID:
+          type: boolean
+          description: Indicates whether user is eligible to enroll with Mobile ID.
+          example: false
+    AddressData:
+      type: object
+      properties:
+        addressLine1:
+          type: string
+          description: Address line 1.
+          minLength: 1
+          maxLength: 255
+          example: 36271 GrandRiver Ave
+        addressLine2:
+          type: string
+          description: Address line 2.
+          minLength: 1
+          maxLength: 255
+          example: Building no 2
+        addressZipCode:
+          type: string
+          description: Zip code.
+          minLength: 1
+          maxLength: 255
+          example: 48335
+        addressCity:
+          type: string
+          description: City.
+          minLength: 1
+          maxLength: 255
+          example: Farmington
+        addressSubdivision:
+          type: string
+          description: Subdivision of the user address, possible values include county, state, province, and municipality.
+          minLength: 2
+          maxLength: 2
+          example: MO
+        addressCountry:
+          type: string
+          description: Country provided in the address from the scanned document.
+          minLength: 1
+          maxLength: 255
+          example: USA
+    Selfie:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          example: U29tZSBTdHJpbmc=
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    IdentityAttributes:
+      type: array
+      description: Array of attribute name-value pairs, which indicate the users preferred values for the attributes listed.
+      items:
+        $ref: '#/components/schemas/IdentityAttributeItem'
+    GovtIdDetails:
+      oneOf:
+      - $ref: '#/components/schemas/PassportDetails'
+      - $ref: '#/components/schemas/DriverLicenseDetails'
+    PDS:
+      type: string
+      description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
+      pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+      minLength: 1
+      example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    DateOfBirth:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: '1996-07-10T00:00:00.000Z'
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    MothersName:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: Jane Doe
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    UpdateIdentityAttributesData:
+      required:
+      - pds
+      - userConsent
+      - identityAttributes
+      type: object
+      properties:
+        identityAttributes:
+          description: Array of attribute name-value pairs, which indicate the users preferred values for the attributes listed.
+          $ref: '#/components/schemas/IdentityAttributes'
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    Phone:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: 11234567890
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    DriverLicenseCardNumber:
+      type: string
+      description: Document number.
+      minLength: 1
+      maxLength: 255
+      example: 7435675436
+    PassportIdentity:
+      type: object
+      properties:
+        lastName:
+          type: string
+          description: Last name.
+          minLength: 1
+          maxLength: 255
+          example: Doe
+        firstName:
+          type: string
+          description: First name.
+          minLength: 1
+          maxLength: 255
+          example: John
+        dateOfBirth:
+          type: string
+          description: Date of birth.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+    IdentityAttributesByName:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/IdentityAttributesById'
+      description: Identity attributes keyed by IdentitySearch.scopedFields enum.
+      minLength: 1
+      example:
+        dateOfBirth:
+          e95b7c68-ebcb-4a88-9978-c33d78cde128:
+            value: '1980-01-01'
+            lastVerifiedDate: '2022-04-04T02:49:27.915Z'
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      description: The error response model used by all the API endpoints.
+      properties:
+        Errors:
+          required:
+          - Error
+          type: object
+          description: The error response model used by all the API endpoints.
+          properties:
+            Error:
+              type: array
+              description: A list of Error objects.
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The source of the problem. That is where the error occurred.
+                    example: mids
+                  ReasonCode:
+                    type: string
+                    description: A code defining the error, as defined in documentation.
+                    example: USER_PROFILE_ID_NOT_FOUND
+                  Description:
+                    type: string
+                    description: A description of this specific occurrence of the Reason code.
+                    example: The provided user profile ID does not exist.
+                  Recoverable:
+                    type: boolean
+                    description: Whether or not retrying this request could result in a successful response.
+                    example: false
+                  Details:
+                    type: string
+                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+                    example: User X was not found
+                  redirectUri:
+                    type: string
+                    description: TP will use this URI to redirect to RP.
+                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    IdentitySearch:
+      required:
+      - pds
+      - scopedFields
+      - userConsent
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        scopedFields:
+          type: array
+          description: 'Array of enums representing the identity attributes which the TP is requesting access to.
+
+            The acceptable values are any/all of: ''all'', ''legalName'', ''email'', ''phone'', ''dateOfBirth'', ''driverLicense'', ''passport'', ''address''
+
+            '
+          minItems: 1
+          items:
+            enum:
+            - all - legalName - email - phone - dateOfBirth - selfie - address - ageOver - ageUnder - city - postalCode - subDivision - govtId - govtIdDetails - govtIdImage - passportIdentity - passportDetails - passportImage - driverLicenseIdentity - driverLicenseCardNumber - driverLicenseDetails - driverLicenseImage - driverLicenseIssuingState - visaMatched - cpf - rgNumber - cnh - mothersName - fathersName
+            type: string
+            example: all
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    IdentityAttributeDeletions:
+      required:
+      - pds
+      - attributeName
+      - userConsent
+      - attributeId
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        attributeName:
+          type: string
+          description: The name of the attribute to be deleted.
+          enum:
+          - PASSPORT
+          - DRIVER_LICENSE
+          example: PASSPORT
+        attributeId:
+          type: string
+          description: The identifier of the attribute being queried. This can be retrieved from a call to either the authentication-decisions API, or the user-profiles/identity-searches API.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 1
+          example: cf11bb8d-b1b1-49c7-90ed-c63134cd1008
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    AuditEventsItem:
+      type: object
+      properties:
+        dateTime:
+          type: string
+          description: Date and time at which the event is created.
+          minLength: 1
+          maxLength: 29
+          example: '2020-01-28T13:16:01.714-05:00'
+        softwareVersion:
+          type: string
+          description: Software version.
+          minLength: 1
+          maxLength: 30
+          example: 1.0.0
+        userProfileId:
+          type: string
+          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 123ae1aa-6744-433e-879d-7da48d631234
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 28eae1aa-6744-433e-879d-7da48d63e89a
+        logRequestFlow:
+          type: string
+          description: Log Request Flow.
+          minLength: 1
+          maxLength: 255
+          example: CoreSDK-TP
+        logEvent:
+          type: string
+          description: Log Event.
+          minLength: 0
+          maxLength: 255
+          example: ID Enrollment
+        logEventType:
+          type: string
+          description: Log Event Type.
+          minLength: 1
+          maxLength: 255
+          example: User Profile Creation
+        osVersion:
+          type: string
+          description: OS version.
+          minLength: 1
+          maxLength: 255
+          example: Android 5.0
+        deviceMake:
+          type: string
+          description: Device make.
+          minLength: 1
+          maxLength: 255
+          example: Samsung S10
+        type:
+          type: string
+          description: Type of the event.
+          minLength: 1
+          maxLength: 255
+          example: audit
+        audit:
+          type: object
+          description: Represents the audit event.
+          properties:
+            privacyPolicy:
+              type: string
+              description: Version user confirmed.
+              minLength: 1
+              maxLength: 20
+              example: 1.0.0
+            userBiometricConsent:
+              type: string
+              description: User consent to capture details.
+              enum:
+              - 'TRUE'
+              - 'FALSE'
+              - NA
+              minLength: 4
+              maxLength: 5
+              example: 'TRUE'
+            event:
+              type: string
+              description: Event.
+              minLength: 1
+              maxLength: 255
+              example: Document Scan
+            eventType:
+              type: string
+              description: EventType.
+              minLength: 1
+              maxLength: 255
+              example: Enrollment
+            result:
+              type: string
+              description: API Call result.
+              enum:
+              - 'TRUE'
+              - 'FALSE'
+              - FAIL
+              minLength: 4
+              maxLength: 5
+              example: 'TRUE'
+            eventGeneratedSource:
+              type: string
+              description: Event generated source.
+              minLength: 1
+              maxLength: 50
+              example: CoreSDK
+            owner:
+              type: string
+              description: Owner.
+              minLength: 2
+              maxLength: 4
+              example: TP
+            requestDetails:
+              type: object
+              description: Request Details.
+              example: Request URL
+            responseDetails:
+              type: object
+              description: Response Details.
+              example: Response Data
+    Cnh:
+      allOf:
+      - $ref: '#/components/schemas/DriverLicenseCardNumber'
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
+    GovtId:
+      oneOf:
+      - $ref: '#/components/schemas/PassportIdentity'
+      - $ref: '#/components/schemas/DriverLicenseIdentity'
+    MobileIdEligibility:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: boolean
+          description: Value of whether user is eligible for mobile id enrollment.
+          example: true
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    UserConsent:
+      enum:
+      - ACCEPT
+      - DECLINE
+      - REVOKE
+      - EXPIRE
+      type: string
+      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
+      pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+      minLength: 6
+      maxLength: 7
+      example: ACCEPT
+    DriverLicenseDetails:
+      properties:
+        expiryDate:
+          type: string
+          description: Expiry date.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        issuingCountry:
+          type: string
+          description: Country code.
+          minLength: 1
+          maxLength: 255
+          example: USA
+        documentNumber:
+          type: string
+          description: Passport number.
+          minLength: 1
+          maxLength: 255
+          example: 1234567890
+    IdentityAttributeDeleted:
+      required:
+      - pds
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+    IdentityAttributesById:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/IdentityAttribute'
+      description: Identity attributes are keyed by attribute IDs.
+      minLength: 1
+    VisaMatched:
+      type: boolean
+      description: Flag indicating if the documentDetails are to be checked against a visa for a particular country.
+      example: false
+    Email:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: person@mastercard.com
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    FraudDetectionMetaRequiredItem:
+      description: An item that is required from fraud detection meta.
+      type: object
+      properties:
+        field:
+          type: string
+          description: The property which is required.
+          minLength: 1
+          maxLength: 255
+          example: email
+        assuranceLevel:
+          type: integer
+          description: The assurance level required for the property.
+          minimum: 0
+          example: 1
+    IdentityAttribute:
+      allOf:
+      - {}
+      - oneOf:
+        - $ref: '#/components/schemas/Address'
+        - $ref: '#/components/schemas/DateOfBirth'
+        - $ref: '#/components/schemas/Email'
+        - $ref: '#/components/schemas/FathersName'
+        - $ref: '#/components/schemas/MothersName'
+        - $ref: '#/components/schemas/LegalName'
+        - $ref: '#/components/schemas/Phone'
+        - $ref: '#/components/schemas/Selfie'
+        - $ref: '#/components/schemas/MobileIdEligibility'
+        - $ref: '#/components/schemas/GovtId'
+        - $ref: '#/components/schemas/GovtIdDetails'
+        - $ref: '#/components/schemas/GovtIdImage'
+        - $ref: '#/components/schemas/PassportIdentity'
+        - $ref: '#/components/schemas/PassportDetails'
+        - $ref: '#/components/schemas/PassportImage'
+        - $ref: '#/components/schemas/DriverLicenseIdentity'
+        - $ref: '#/components/schemas/DriverLicenseCardNumber'
+        - $ref: '#/components/schemas/DriverLicenseDetails'
+        - $ref: '#/components/schemas/DriverLicenseImage'
+        - $ref: '#/components/schemas/VisaMatched'
+        - $ref: '#/components/schemas/Cnh'
+        - $ref: '#/components/schemas/Cpf'
+        - $ref: '#/components/schemas/Rg'
+    Cpf:
+      type: string
+      description: CPF Number. This will only be available when the Brazilian DL is scanned.
+      minLength: 1
+      maxLength: 255
+      example: 12345
+    IdentityAttributeItem:
+      type: object
+      description: Identity attributes array item.
+      properties:
+        attributeName:
+          type: string
+          description: The name of the attribute to update.
+          enum:
+          - LEGAL_NAME
+          - FATHERS_NAME
+          - MOTHERS_NAME
+          minLength: 1
+          maxLength: 50
+          example: LEGAL_NAME
+        attributeValue:
+          type: string
+          description: A value that the user picked to represent the default value of this attribute. The value needs to match with one of the scanned documents.
+          minLength: 1
+          maxLength: 255
+          example: BALL,ELLA
+    GovtIdImage:
+      oneOf:
+      - $ref: '#/components/schemas/PassportImage'
+      - $ref: '#/components/schemas/DriverLicenseImage'
+    FraudDetectionMeta:
+      description: Fraud detection meta-data.
+      type: object
+      properties:
+        requiredAttributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/FraudDetectionMetaRequiredItem'
+    Rg:
+      type: string
+      description: RG Number. This will only be available when the Brazilian DL is scanned.
+      minLength: 1
+      maxLength: 255
+      example: 12345
+    LegalName:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: John Doe
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    ClientIdentities:
+      required:
+      - attributes
+      type: object
+      properties:
+        rotatedPds:
+          type: string
+          description: A rotated PDS is created and returned when the encryption key expires and a new key is generated.
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          minLength: 1
+          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        attributes:
+          $ref: '#/components/schemas/IdentityAttributesByName'
+    Address:
+      required:
+      - lastVerifiedDate
+      allOf:
+      - $ref: '#/components/schemas/AddressData'
+      - type: object
+        properties:
+          value:
+            type: string
+            description: Formatted address.
+            minLength: 1
+            maxLength: 255
+            example: 36271 GrandRiver Ave Building no 2 48335 Farmington MI USA
+          lastVerifiedDate:
+            type: string
+            description: Last verified date and time.
+            format: date-time
+            example: '2021-02-19T10:55:58.165Z'
+    DriverLicenseIdentity:
+      type: object
+      properties:
+        lastName:
+          type: string
+          description: Last name.
+          minLength: 1
+          maxLength: 255
+          example: Doe
+        firstName:
+          type: string
+          description: First name.
+          minLength: 1
+          maxLength: 255
+          example: John
+        dateOfBirth:
+          type: string
+          description: Date of birth.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+    PassportDetails:
+      type: object
+      properties:
+        expiryDate:
+          type: string
+          description: Expiry date.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        issuingCountry:
+          type: string
+          description: Country code.
+          minLength: 1
+          maxLength: 255
+          example: USA
+        passportNumber:
+          type: string
+          description: Passport number.
+          minLength: 1
+          maxLength: 255
+          example: 1234567890
+    DriverLicenseImage:
+      type: object
+      description: Driver License Images.
+      properties:
+        front:
+          type: string
+          description: Value.
+          minLength: 1
+          example: U29tZSBTdHJpbmc=
+        back:
+          type: string
+          description: Value.
+          minLength: 1
+          example: YGS75JHSljhs86K=
+    FathersName:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: Josh Doe
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    PassportImage:
+      type: object
+      description: Passport License Images.
+      properties:
+        front:
+          type: string
+          description: Value.
+          minLength: 1
+          example: JH65ghKHG76KS=
+  examples:
+    ClientIdentitiesSuccessfulExample:
+      value:
+        attributes:
+          dateOfBirth:
+            e95b7c68-ebcb-4a88-9978-c33d78cde128:
+              value: '1980-01-01'
+              lastVerifiedDate: '2022-04-04T02:49:27.915Z'
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
+            Recoverable: false
+    UpdateIdentityAttributesExample:
+      value:
+        identityAttributes:
+        - attributeName: LEGAL_NAME
+          attributeValue: BALL,ELLA
+        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        userConsent: ACCEPT
+        tpAuditMetadata:
+          sessionId: be3ad617-04ad-43e1-a438-79425b6511b6
+          transactionGroupId: be3ad617-04ad-43e1-a438-79425b6511b6
+        sdkVersion: 2.3.0
+    EncryptedPayloadWithRotatedPDSExample:
+      value:
+        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IoxNTE2MjM5MDIyf
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+    UserProfileDeletedErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_DELETED
+            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
+            Recoverable: false
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided user profile ID does not exist.
+            Recoverable: false
+    EncryptedPayloadWithPDSExample:
+      value:
+        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyf
+        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+  responses:
+    UnauthorizedError:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    NotFoundError:
+      description: The request didn't match an existing resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
+    IdentitySearchResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClientIdentities'
+          examples:
+            ClientIdentitiesSuccessfulExampleUnencrypted:
+              $ref: '#/components/examples/ClientIdentitiesSuccessfulExample'
+            ClientIdentitiesSuccessfulExampleEncrypted:
+              $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
+    DocumentDataConfirmationsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConfirmedPDS'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    IdentityAttributeDeletionsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentityAttributeDeleted'
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
+  requestBodies:
+    UpdateIdentityAttributesRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateIdentityAttributesData'
+          examples:
+            UpdateIdentityAttributesUnencryptedRequest:
+              $ref: '#/components/examples/UpdateIdentityAttributesExample'
+            UpdateIdentityAttributesEncryptedRequest:
+              $ref: '#/components/examples/EncryptedPayloadWithPDSExample'
+      required: true
+    IdentitySearchRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentitySearch'
+      required: true
+    IdentityAttributeDeletionsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentityAttributeDeletions'
+      required: true
+  parameters:
+    XEncryptedPayload:
+      in: header
+      name: X-Encrypted-Payload
+      type: boolean
+      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
+
+        '
+      example: true
+      schema: null
+    XUserIdentityParameter:
+      in: header
+      name: X-User-Identity
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      description: 'JWT token for session validation. Returned as response header in previous API calls with key X-User-Identity.
+
+        '
+      schema:
+        type: string

@@ -1,0 +1,93 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Settlements API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Settlements
+paths:
+  /settlement-currencies:
+    get:
+      tags:
+      - Settlements
+      summary: Mastercard Getcurrencyratedata
+      description: Provides a list of currencies for which Mastercard publishes currency conversion rates.
+      operationId: getCurrencyRateDataUsingGET
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettlementCurrencyWrapper'
+              examples:
+                Getcurrencyratedatausingget200Example:
+                  summary: Default getCurrencyRateDataUsingGET 200 response
+                  x-microcks-default: true
+                  value:
+                    name: Example Title
+                    description: A sample description.
+                    date: example_value
+                    data:
+                      currencies:
+                      - {}
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  schemas:
+    SettlementCurrency:
+      type: object
+      properties:
+        currencies:
+          type: array
+          description: A list of settlement currencies
+          items:
+            $ref: '#/components/schemas/Currency'
+          example: []
+    SettlementCurrencyWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          example: settlement-currency
+          description: The name of the service being requested.
+        description:
+          type: string
+          example: A list of settlement active currencies
+          description: The description of the API being called.
+        date:
+          type: string
+          example: '2019-08-08 16:22:31'
+          description: The date and time the API is being called in GMT.
+        data:
+          $ref: '#/components/schemas/SettlementCurrency'
+    Currency:
+      type: object
+      properties:
+        alphaCd:
+          type: string
+          example: AOA
+          description: The Alpha code for the currency.
+        currNam:
+          type: string
+          example: ANGOLAN KWANZA
+          description: The full name of the currency.

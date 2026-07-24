@@ -1,0 +1,297 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Validations API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Validations
+  description: This API is to be used to validate customer information present within relevant Mastercard Applications.
+paths:
+  /validations:
+    post:
+      tags:
+      - Validations
+      summary: Mastercard Validations Api
+      description: This API is to be used to validate customer information present within relevant Mastercard Applications.
+      operationId: Validation
+      requestBody:
+        $ref: '#/components/requestBodies/ValidationRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentValidationStatus'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/InvalidAuthHeaderError'
+        '403':
+          $ref: '#/components/responses/InvalidKeyError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  schemas:
+    AdditionalInfo:
+      type: object
+      properties:
+        balance:
+          type: string
+          minLength: 0
+          maxLength: 50
+          example: 1500
+          description: Balance of requested account
+        currency:
+          type: string
+          example: USA
+          minLength: 3
+          maxLength: 10
+          description: Currency
+      title: AdditionalInfo
+      description: AdditionalInfo Response
+      example:
+        $ref: '#/components/examples/AdditionalInfoExample'
+    Validation:
+      type: object
+      properties:
+        appId:
+          type: string
+          description: Application identifier for client.
+          enum:
+          - MFN
+          - KUPAA
+          example: MFN
+          minLength: 3
+          maxLength: 15
+        partnerId:
+          type: string
+          description: 'Code to identify partner. E,g: school on Kupaa.'
+          example: '12345'
+          minLength: 5
+          maxLength: 30
+        accountId:
+          type: string
+          minLength: 1
+          maxLength: 60
+          description: 'Account Number being validated. E.g: student id.'
+          example: '25471234567'
+        partnerType:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Partner type can be one of values in enum.
+          enum:
+          - SCHOOL
+          - BUYER
+          - CHANNEL
+          - SUPPLIER
+          example: SCHOOL
+        correlationId:
+          type: string
+          format: uuid
+          description: Correlation Id for tracking request
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        transactionTime:
+          type: string
+          minLength: 0
+          maxLength: 50
+          example: '2020-07-16T19:20:30+01:00'
+          description: Transaction time in the format 'YYYY-MM-DDThh:mm:ssTZD'
+        paymentChannel:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Depicts mode of payment as mentioned in enum.
+          enum:
+          - MOBILE
+          - BANK
+          example: MOBILE
+      title: Validation
+      description: Validation Request
+    Errors:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+      description: Errors list
+      example:
+        $ref: '#/components/examples/BadRequestExample'
+    ErrorWrapper:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              $ref: '#/components/schemas/Errors'
+          description: Error object
+          example:
+            $ref: '#/components/examples/BadRequestExample'
+    PaymentValidationStatus:
+      type: object
+      properties:
+        accountId:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: '25471234567'
+          description: Account Id
+        accountName:
+          type: string
+          minLength: 1
+          maxLength: 250
+          example: Student Name
+          description: Account Name
+        additionalInfo:
+          $ref: '#/components/schemas/AdditionalInfo'
+      title: ValidationStatus
+      description: Validation Response
+    Error:
+      type: object
+      properties:
+        Source:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: An element used to indicate the source of the issue causing this error.
+          example: PAYMENT_SERVICE
+        ReasonCode:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: A reason code for the error that has occurred.
+          example: BAD_REQUEST
+        Description:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Description of the reason the operation failed.
+          example: We couldn't handle your request
+        Recoverable:
+          type: boolean
+          description: Generated by the gateway to indicate if the request could presented again for processing. Either "true" or "false".
+          example: true
+        Details:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Identifies the description of the error.
+          example: appId should be either MFN or Kupaa
+      description: Error Object
+  requestBodies:
+    ValidationRequest:
+      description: Validation Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Validation'
+  responses:
+    PaymentValidationStatus:
+      description: Payment validations request executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentValidationStatus'
+          examples:
+            PaymentValidationStatusExample:
+              $ref: '#/components/examples/PaymentValidationStatusExample'
+    InvalidKeyError:
+      description: Forbidden-You do not have necessary permission to access this resource on this server.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidKeyExample:
+              $ref: '#/components/examples/InvalidKeyExample'
+    BadRequestError:
+      description: Bad Request-The server cannot not process the request due to invalid request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    InvalidAuthHeaderError:
+      description: Bad Request - No Authorization header set
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidAuthHeaderExample:
+              $ref: '#/components/examples/InvalidAuthHeaderExample'
+    NotFoundError:
+      description: Not Found-The requested resource was not found on this server.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
+  examples:
+    AdditionalInfoExample:
+      value:
+        balance: 1500
+        currency: UGX
+    PaymentValidationStatusExample:
+      value:
+        accountId: 25471234567
+        accountName: Student Name
+        additionalInfo:
+          balance: 1500
+          currency: UGX
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: PAYMENT_SERVICE
+            ReasonCode: BAD_REQUEST
+            Description: We couldn't handle your request
+            Recoverable: false
+            Details: appId should be either MFN or Kupaa
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: PAYMENT_SERVICE
+            ReasonCode: NOT_FOUND
+            Description: You requested something we don't have
+            Recoverable: false
+            Details: Requested resource doesn't exist
+    InvalidAuthHeaderExample:
+      value:
+        Errors:
+          Error:
+          - Source: PAYMENT_SERVICE
+            ReasonCode: INVALID_AUTH_HEADER
+            Description: Bad Request - No Authorization header set
+            Recoverable: false
+            Details: check if key is passed to call the API
+    InvalidKeyExample:
+      value:
+        Errors:
+          Error:
+          - Source: PAYMENT_SERVIC
+            ReasonCode: INVALID_KEY
+            Description: Signing certificate must be valid
+            Recoverable: false
+            Details: 'null'

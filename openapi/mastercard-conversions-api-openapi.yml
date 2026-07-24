@@ -1,0 +1,231 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Conversions API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Conversions
+paths:
+  /conversion-rate:
+    get:
+      tags:
+      - Conversions
+      summary: Mastercard Get the Currency Conversion Rate Details.
+      description: Provides transaction details including date, transaction currency and amount, cardholder billing currency and issuer specific mark up to determine the applicable currency conversion rate and cardholder billing amount.
+      operationId: getConversionDetailUsingGET
+      parameters:
+      - name: fxDate
+        in: query
+        description: Date of the requested FX rates.
+        required: true
+        schema:
+          type: string
+        example: '2023-02-27'
+      - name: transCurr
+        in: query
+        description: Currency of the transaction.
+        required: true
+        schema:
+          type: string
+        example: ALL
+      - name: crdhldBillCurr
+        in: query
+        description: Cardholder billing currency.
+        required: true
+        schema:
+          type: string
+        example: DZD
+      - name: bankFee
+        in: query
+        description: Additional fees imposed by the bank.
+        required: false
+        schema:
+          type: number
+          format: number
+        example: 5
+      - name: transAmt
+        in: query
+        description: Amount in the transaction currency.
+        required: true
+        schema:
+          type: number
+          format: number
+        example: 23
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversionRateWrapper'
+              examples:
+                Getconversiondetailusingget200Example:
+                  summary: Default getConversionDetailUsingGET 200 response
+                  x-microcks-default: true
+                  value:
+                    name: Example Title
+                    description: A sample description.
+                    date: example_value
+                    type: example_value
+                    data:
+                      conversionRate: 42.5
+                      crdhldBillAmt: 42.5
+                      fxDate: example_value
+                      transCurr: example_value
+                      crdhldBillCurr: example_value
+                      transAmt: 42.5
+                      bankFee: 42.5
+                      errorCode: example_value
+                      errorMessage: example_value
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /conversion-rate-issued:
+    get:
+      tags:
+      - Conversions
+      summary: Mastercard Determine if the Settlement Rate Has Been Issued.
+      description: Provides status update if the present day Mastercard currency conversion rates are issued. Mastercard rates are published daily and effective for 24 hours.
+      operationId: isRateIssuedUsingGET
+      parameters:
+      - name: date
+        in: query
+        description: The date by which the rate would have been issued.
+        required: false
+        schema:
+          type: string
+        example: '2023-02-27'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettlementRateIssuedWrapper'
+              examples:
+                Israteissuedusingget200Example:
+                  summary: Default isRateIssuedUsingGET 200 response
+                  x-microcks-default: true
+                  value:
+                    name: Example Title
+                    description: A sample description.
+                    date: example_value
+                    data:
+                      rateIssued: example_value
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  schemas:
+    Conversion:
+      type: object
+      properties:
+        conversionRate:
+          type: number
+          format: number
+          example: 0.943078
+          description: Rate applied to the transaction to convert from Transaction Currency to Cardholder Billing Currency.
+        crdhldBillAmt:
+          type: number
+          format: number
+          example: 21.690798
+          description: Amount in the cardholder billing currency.
+        fxDate:
+          type: string
+          example: '2016-09-30'
+          description: Date of the requested FX rates.
+        transCurr:
+          type: string
+          example: ALL
+          description: Currency of the transaction.
+        crdhldBillCurr:
+          type: string
+          example: DZD
+          description: Cardholder billing currency.
+        transAmt:
+          type: number
+          format: number
+          example: 23
+          description: Amount in the transaction currency.
+        bankFee:
+          type: number
+          format: number
+          example: 5
+          description: Additional fees imposed by the bank.
+        errorCode:
+          type: string
+          example: 104
+          description: The error code associated with the error being returned.
+        errorMessage:
+          type: string
+          example: Not Found , The calculated cross rates for the selected date is not available.
+          description: The reason for the error.
+    SettlementRateIssued:
+      type: object
+      properties:
+        rateIssued:
+          type: string
+          example: 'NO'
+          description: The requested foreign exchange rate.
+    ConversionRateWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          example: settlement-conversion-rate
+          description: The name of the service being requested.
+        description:
+          type: string
+          example: Settlement conversion rate and billing amount
+          description: The description of the API being called.
+        date:
+          type: string
+          example: '2019-08-08 16:43:27'
+          description: The date and time the API is being called in GMT.
+        type:
+          type: string
+          example: error
+          description: The type of response being returned by the API.
+        data:
+          $ref: '#/components/schemas/Conversion'
+    SettlementRateIssuedWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          example: settlement-conversion-rate-issued
+          description: The name of the service being requested.
+        description:
+          type: string
+          example: Is settlement conversion rate issued
+          description: The description of the API being called.
+        date:
+          type: string
+          example: '2019-08-08 16:22:31'
+          description: The date and time the API is being called in GMT.
+        data:
+          $ref: '#/components/schemas/SettlementRateIssued'

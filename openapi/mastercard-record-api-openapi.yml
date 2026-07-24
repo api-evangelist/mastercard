@@ -1,0 +1,465 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Record API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Record
+paths:
+  /donations/record:
+    post:
+      tags:
+      - Record
+      summary: Record API
+      description: This API is used to store all external donations. Entire request body should be encrypted.
+      operationId: recordApi
+      parameters:
+      - $ref: '#/components/parameters/ClientId'
+      - name: x-correlation-id
+        in: header
+        description: CorrelationId is a unique donation request ID. It is recommended to pass the x-correlation-id by the customer and to use the format "bankname_UUID" (bank name can be indicated using the first 4 digits). Maximum length of this field should be 100 alphanumeric characters. If not passed, Mastercard will generate it. ***Note:*** If there is a timeout when doing the guest api call, it is important to redo the same api call with same x-correlation-id to get the status of the previous api call
+        required: false
+        schema:
+          type: string
+          example: 03f8c4e8-8bdc-4a30-a2b4-b6f989e96ca3
+      requestBody:
+        $ref: '#/components/requestBodies/RecordApi'
+      responses:
+        '200':
+          $ref: '#/components/responses/RecordApiResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-Record'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/Unsupported'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-InternalServerError'
+      deprecated: false
+components:
+  schemas:
+    Error-401:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to authorization failure
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: AUTHENTICATION_FAILED
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: OAuth signatures did not match.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error-Record:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an error condition.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: DUPLICATE_RECORD_FOUND
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Record already exists.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: null
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error-403:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to forbidden requests
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of forbidden request.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: INVALID_KEY
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The signing certificate is not valid.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error-415:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: UNSUPPORTED_CONTENT_TYPE
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The request Content-Type (<request content-type value>) is not supported for this service
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    RecordApi:
+      type: object
+      required:
+      - partner
+      - transactionDate
+      - transactionId
+      - currency
+      - amount
+      - charityName
+      properties:
+        partner:
+          $ref: '#/components/schemas/Partner'
+        customer:
+          $ref: '#/components/schemas/Customer'
+        merchant:
+          $ref: '#/components/schemas/Merchant'
+        transactionDate:
+          type: string
+          example: '2022-06-28T10:50:10.000Z'
+          format: yyyy-MM-dd HH:mm:ss
+          description: Transaction Date(yyyy-MM-dd HH:mm:ss)
+        transactionId:
+          type: string
+          example: Td-123567810
+          minLength: 10
+          maxLength: 255
+          description: transactionId
+        campaignId:
+          type: string
+          example: CampId12345
+          minLength: 10
+          maxLength: 255
+          description: campaignId
+        currency:
+          type: string
+          example: dollar
+          minLength: 4
+          maxLength: 10
+          description: currency
+        amount:
+          type: string
+          example: '51'
+          minLength: 1
+          maxLength: 10
+          description: amount
+        cardScheme:
+          type: string
+          example: Mastercard
+          minLength: 4
+          maxLength: 20
+          description: cardScheme
+        charityId:
+          type: string
+          example: CId-12345
+          minLength: 10
+          maxLength: 50
+          description: charityId
+        charityName:
+          type: string
+          example: Happy Smiles
+          minLength: 5
+          maxLength: 255
+          description: charityName
+        donationType:
+          type: string
+          example: Micro
+          minLength: 5
+          maxLength: 20
+          description: donationType
+      title: RecordApiRequest
+    Error-InternalServerError:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: INTERNAL_SERVER_ERROR
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: An error occurred on the server.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Partner:
+      type: object
+      required:
+      - partnerName
+      - isoCountryCode
+      properties:
+        partnerName:
+          type: string
+          example: Verestro
+          minLength: 5
+          maxLength: 255
+          description: Partner Name
+        isoCountryCode:
+          type: string
+          example: USA
+          minLength: 3
+          maxLength: 3
+          description: ISO Country Code
+        locale:
+          type: string
+          example: en
+          minLength: 2
+          maxLength: 10
+          description: Locale
+      title: Partner
+    Error-404:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to resource not found
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an resource not found.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: NOT_FOUND
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The signing certificate is not valid.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Merchant:
+      type: object
+      properties:
+        merchantId:
+          type: string
+          example: 5077f7d84
+          minLength: 5
+          maxLength: 50
+          description: Merchant Id
+        merchantName:
+          type: string
+          example: Santander
+          minLength: 5
+          maxLength: 255
+          description: Merchant Name
+      title: Merchant
+    Customer:
+      type: object
+      required:
+      - customerName
+      - isoCountryCode
+      properties:
+        customerName:
+          type: string
+          example: Amazon
+          minLength: 5
+          maxLength: 255
+          description: Customer Name
+        isoCountryCode:
+          type: string
+          example: USA
+          minLength: 3
+          maxLength: 3
+          description: ISO Country Code
+        locale:
+          type: string
+          example: en
+          minLength: 2
+          maxLength: 10
+          description: Locale
+      title: Customer
+  responses:
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-404'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-403'
+    Unauthorized:
+      description: Unauthorised
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-401'
+    Unsupported:
+      description: Unsupported Content Type
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-415'
+    RecordApiResponse:
+      description: Success
+  parameters:
+    ClientId:
+      name: x-openapi-clientid
+      in: header
+      description: ClientId is a unique and a mandatory ID shared while creating a project on Mastercard Developers Portal.
+      required: true
+      schema:
+        type: string
+        example: 0a7e433a-63fc-4557-8cf4
+  requestBodies:
+    RecordApi:
+      description: recordApiRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RecordApi'
+      required: false

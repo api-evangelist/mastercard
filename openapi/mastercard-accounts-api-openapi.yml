@@ -1,0 +1,2547 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Accounts API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Accounts
+paths:
+  /bin-ranges/account-searches:
+    post:
+      tags:
+      - Accounts
+      summary: Search by 6 - 8 Digit BINs, or up to the 11th digit of an account range
+      description: Find a specific account range by providing an 8 digit BIN, or up to 11 digits of an account range
+      requestBody:
+        $ref: '#/components/requestBodies/BinResourceSearchByAccountRangeRequest'
+      operationId: search-by-account-range-resources
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountRangeSearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/NotAuthorizedErrorResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundErrorResponse'
+  /user-account-activity-searches:
+    post:
+      tags:
+      - Accounts
+      responses:
+        '200':
+          $ref: '#/components/responses/UserAccountActivitySearchesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: 'Retrieve decrypted user activities and present them to the user in the
+
+        TP app. Does not require a minimum authentication standard.
+
+        **This API is mandatory.**
+
+        '
+      summary: View identity lifecycle activities which have occurred in a time period.
+      operationId: retrieveUserActivities
+      parameters:
+      - $ref: '#/components/parameters/XUserIdentityParameter'
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/UserAccountActivitySearchRequest'
+  /users/{user_guid}/virtual-card-accounts:
+    get:
+      tags:
+      - Accounts
+      summary: Retrieve a list of all virtual cards linked to a user
+      description: This endpoint allows users to retrieve a list of all virtual cards linked to a user
+      operationId: findVcnCardsByUser
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      responses:
+        '200':
+          $ref: '#/components/responses/VirtualCards'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    post:
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      tags:
+      - Accounts
+      summary: Register a virtual card linked to a user
+      description: This endpoint allows users to register a virtual card linked to a user
+      operationId: createVirtualCardWithControls
+      requestBody:
+        $ref: '#/components/requestBodies/NewVirtualCard'
+      responses:
+        '201':
+          $ref: '#/components/responses/ResourceCreated'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /users/{user_guid}/virtual-card-accounts/{account_guid}:
+    get:
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      tags:
+      - Accounts
+      summary: Retrieve virtual card account details linked to a user
+      description: This endpoint allows users to retrieve virtual card account details linked to a user
+      operationId: findVcnCardByUser
+      responses:
+        '200':
+          $ref: '#/components/responses/VirtualCard'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    put:
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      tags:
+      - Accounts
+      summary: Update virtual card account details linked to a user
+      description: This endpoint allows users to update virtual card account details linked to a user
+      operationId: updateUserCardAndControls
+      requestBody:
+        $ref: '#/components/requestBodies/UpdatedVirtualCard'
+      responses:
+        '200':
+          $ref: '#/components/responses/OKResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    delete:
+      tags:
+      - Accounts
+      summary: Delete a virtual card account linked to a user
+      description: This endpoint allows users to delete a virtual card account linked to a user
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      operationId: deleteUserVirtualCard
+      responses:
+        '204':
+          $ref: '#/components/responses/NOContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /real-card-accounts/{account_guid}:
+    delete:
+      tags:
+      - Accounts
+      summary: Delete all virtual cards linked to a real card
+      description: This endpoint allows users to delete all virtual cards linked to a real card account_guid
+      parameters:
+      - $ref: '#/components/parameters/accountGUID'
+      operationId: DeleteVcnsByRealCardAccountGuid
+      responses:
+        '204':
+          $ref: '#/components/responses/NOContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /users/{user_guid}/virtual-card-accounts/{account_guid}/tokens:
+    post:
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      tags:
+      - Accounts
+      summary: Register a token linked to a user and a virtual card
+      description: This endpoint allows users to register a token linked to a user and a virtual card
+      operationId: TokenCreate
+      requestBody:
+        $ref: '#/components/requestBodies/NewToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/ResourceCreated'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /users/{user_guid}/virtual-card-accounts/{account_guid}/tokens/{token_guid}:
+    get:
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      - $ref: '#/components/parameters/tokenGUID'
+      tags:
+      - Accounts
+      summary: Retrieve token details linked to a user and a virtual card
+      description: This endpoint allows users to retrieve token details linked to a user and a virtual card
+      operationId: getTokenById
+      responses:
+        '200':
+          $ref: '#/components/responses/Token'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    put:
+      tags:
+      - Accounts
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      - $ref: '#/components/parameters/tokenGUID'
+      summary: Update a token linked to a user and a virtual card
+      description: This endpoint allows users to update a token linked to a user and a virtual card
+      operationId: updateTokenById
+      requestBody:
+        $ref: '#/components/requestBodies/UpdatedToken'
+      responses:
+        '200':
+          $ref: '#/components/responses/OKResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    delete:
+      tags:
+      - Accounts
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      - $ref: '#/components/parameters/tokenGUID'
+      summary: Delete a token linked to a user and a virtual card
+      description: This endpoint allows users to delete a token linked to a user and a virtual card
+      operationId: deleteTokenById
+      responses:
+        '204':
+          $ref: '#/components/responses/NOContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /accounts:
+    put:
+      tags:
+      - Accounts
+      summary: Updates details for an enrolled account.
+      description: Updates a currently enrolled account. An account is a unique card, as compared to a user which is a unique cardholder.
+      operationId: updateAccount
+      requestBody:
+        $ref: '#/components/requestBodies/AccountUpdateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountUpdateResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+    post:
+      tags:
+      - Accounts
+      summary: 'Enrolls a new account for an existing User. An Account is a unique card, as compared to a User which is a unique cardholder. Use this operation only for subsequent account enrollments of an existing user.
+
+        '
+      description: Returns Account enrollment details.
+      operationId: enrollAccount
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/AccountEnrollRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/AccountEnrollResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+  /accounts/{id}:
+    get:
+      tags:
+      - Accounts
+      summary: Retrieves Account details using the Account Id, including the Account standing, enrollment date, and more.
+      description: Retrieves Account details using the Account Id, including the Account standing, enrollment date, and more. An Account is a unique card, as compared to a User which is a unique cardholder.
+      operationId: getAccount
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/AccountIdType'
+      - $ref: '#/components/parameters/UserIdType'
+      - $ref: '#/components/parameters/Offset'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountSearchDetailsResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+components:
+  schemas:
+    Errors:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    SearchByAccountRange:
+      type: object
+      required:
+      - accountRange
+      properties:
+        accountRange:
+          type: number
+          description: The first 8 digits of a card number (without spaces), or up to the 11th digit of an account range
+          minimum: 10000000
+          maximum: 99999999999
+          example: 22293261
+    ErrorResponse:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              $ref: '#/components/schemas/Errors'
+    BinResourceArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/BinResource'
+    BinResource:
+      type: object
+      properties:
+        lowAccountRange:
+          type: integer
+          description: The lowest possible account number that would be identified within this authorization account range.
+          minimum: 1111111111111111200
+          maximum: 10000000000000000000
+          example: 5132625400000000000
+        highAccountRange:
+          type: integer
+          description: The highest possible account number that would be identified within this authorization account range.
+          minimum: 1111111111111111200
+          maximum: 10000000000000000000
+          example: 5132625500000000000
+        binNum:
+          type: string
+          description: 'The RAW BIN assigned to the issuer. Can be the value UNKNOWN when the BIN of the account range has not been provdied. '
+          minLength: 6
+          maxLength: 11
+          example: '222899'
+        binLength:
+          type: integer
+          description: The length of the BIN, will be either 6 or 8 (or 0 when the binNumber is unknown)
+          minimum: 0
+          maximum: 8
+          example: 6
+        acceptanceBrand:
+          type: string
+          description: 'Mastercard or other proprietary service mark. Valid values: " MCC (Mastercard�) " DMC (Debit Mastercard�) " M (Maestro�) " CIR (Cirrus�) " PVL (Private Label)'
+          minLength: 1
+          maxLength: 3
+          example: MCC
+        ica:
+          type: string
+          description: Mastercard ICA number associated with this authorization account range in right justified, leading zeros format.
+          minLength: 1
+          maxLength: 11
+          example: '1111'
+        customerName:
+          type: string
+          description: The customer name.
+          minLength: 0
+          maxLength: 300
+          example: FISERV SOLUTIONS
+        country:
+          description: Country of origin for the issuer of the account range. Valuable in e-commerce fraud management to help detect inconsistencies between the IP address of the originating purchase and the cardholder billing address that may warrant additional analysis. When used in conjunction with the Local Use flag, a merchant can identify when a card is being used outside of its intended allowed area of use.
+          type: object
+          properties:
+            code:
+              type: string
+              description: Licensed Country Code of the account range in ISO code format
+              example: 280
+              minLength: 3
+              maxLength: 3
+            alpha3:
+              type: string
+              description: Licensed Country Code of the account range in Alpha-3 format
+              example: USA
+              minLength: 3
+              maxLength: 3
+            name:
+              description: Licensed Country name of the account range in a human readable format
+              example: United States of America
+              type: string
+              minLength: 1
+              maxLength: 200
+        localUse:
+          type: boolean
+          description: Indicates whether cards within the authorization account range may be used outside of the country of issuance. true = The range is intended for domestic use only. false = The range is intended for use outside the country of issuance.
+          example: true
+        authorizationOnly:
+          type: boolean
+          description: Indicates account range is only valid for authorization processing. true = Authorization only. false = Authorization and Clearing. Authorization only account ranges are used for promotional contexts in merchants such as branded rewards cards.
+          example: true
+        productCode:
+          type: string
+          description: The Brand Product Code associated with the account range.
+          minLength: 1
+          maxLength: 3
+          example: MPM
+        productDescription:
+          type: string
+          description: The description of the Brand Product Code named above.
+          minLength: 1
+          maxLength: 200
+          example: MASTERCARD PREPAID CONSUMER INCENTIVE
+        governmentRange:
+          type: boolean
+          description: Identifies if an account range product is a government product.
+          example: true
+        nonReloadableIndicator:
+          type: boolean
+          description: 'Indicates whether the account range is registered as a non-reloadable prepaid card program. Valid values: true = non-reloadable prepaid program false = reloadable prepaid program or non-prepaid program'
+          example: false
+        anonymousPrepaidIndicator:
+          type: string
+          description: "Valid values:\n  A = Anonymous prepaid program and not AMLDS compliant\n  E = Anonymous prepaid program and AMLDS compliant\n  N = Not prepaid or non-anonymous prepaid program/default\n  U = Unknown"
+          minLength: 1
+          maxLength: 1
+          pattern: ^[A|E|N|U]{1}$
+          example: A
+        cardholderCurrencyIndicator:
+          type: string
+          description: "Indicates whether a card is eligible for Dynamic Currency Conversion (DCC) at the point of sale or not. This indicator helps address DCC issues for Travel Prepaid Cards, other \"foreign currency cards\" (e.g. a Swiss bank that issues cards in Euros), and Commercial Cards (where the \"cardholder\" is a corporation and has a travel policy against accepting DCC and the resulting fees). Valid values:\n  C = Do not provide POI currency conversion (or DCC)  corporate client opt-out\n  D = POI currency conversion (or DCC) is permissible for account range per Mastercard Rules\n  T = Do not provide POI currency conversion (or DCC) per Mastercard Rules  travel cards or multi-currency accounts\n  U = Not a Mastercard- branded account range"
+          minLength: 1
+          maxLength: 1
+          example: C
+        billingCurrencyDefault:
+          type: string
+          description: The default currency of the cards in this range in ISO 4217 alphabetic format.
+          minLength: 3
+          maxLength: 3
+          example: USD
+        programName:
+          type: string
+          description: The program name of the affiliate using a BIN within the Issuer Sponsor's account range. This will be the name a customer sees on their card but the Account is actually owner by the Issuer, as shared in the customerName value. Data for this element is only available for prepaid BINs within the healthcare sector and will be null for the majority of account ranges.
+          minLength: 1
+          maxLength: 200
+          example: Alegues
+        vertical:
+          type: string
+          description: The vertical of a prepaid cards in the healthcare sector BIN such as CONSUMER, COMMERCIAL, PUBLIC SECTOR, HEALTHCARE. Data for this element is only available for prepaid BINs within the healthcare sector and will be null for the majority of account ranges.
+          minLength: 1
+          maxLength: 70
+          example: HEALTHCARE
+        fundingSource:
+          type: string
+          description: The funding source of the cards in this range. It can be any one of the following three values; CREDIT, DEBIT, PREPAID
+          minLength: 5
+          maxLength: 7
+          example: CREDIT
+        consumerType:
+          type: string
+          description: The type of customer the cards in this range are targeted at, can be either CONSUMER or CORPORATE. Unlike the vertical parameter, this data is available for all ranges.
+          minLength: 1
+          maxLength: 9
+          example: CONSUMER
+        smartDataEnabled:
+          type: boolean
+          description: Indicates if the issuer has enrolled this account range in Mastercard's Smart Data program. Smart Data provides enriched information about transactions provided by issuers and merchants. If true it means you can connect with the Smart Data team to collect additional insights about transactions within this account range.
+          example: false
+        affiliate:
+          type: string
+          description: When populated this is the name of the issuer on the card. In instances where the BIN is a sponsored BIN the affiliate will be the name of the issuing institution. When this has a value you should use this otherwise pull the customerName value.
+          minLength: 1
+          maxLength: 300
+          example: California Community Bank
+    Error:
+      type: object
+      required:
+      - Source
+      - ReasonCode
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application that generated this error. Possible values = GATEWAY/BIN_RESOURCE_SERVICE
+          example: BIN_RESOURCE_SERVICE
+          minLength: 1
+          maxLength: 50
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during transaction processing
+          example: resource.not.found
+          minLength: 1
+          maxLength: 100
+        Description:
+          type: string
+          description: Description of the 'ReasonCode' field with additional details
+          example: The requested resource does not exist
+          minLength: 0
+          maxLength: 500
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying with same value could change the outcome. For example, if the request contains an invalid signature, retrying will never result in a success. However, if the error is related to some unexpected timeout with the service, retrying the call could result in a successful response.
+          example: false
+        Details:
+          type: string
+          description: Could be null, present for backwards compatibility or extra information
+          example: The provided search value does not exist
+          minLength: 0
+          maxLength: 500
+    UserAccountActivitySearch:
+      required:
+      - pds
+      - startIndex
+      - endIndex
+      - userConsent
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        startIndex:
+          type: integer
+          description: Start index of the user account activity.
+          format: int32
+          minimum: 1
+          maximum: 999
+          example: 3
+        endIndex:
+          type: integer
+          description: End index of the user account activity.
+          format: int32
+          minimum: 1
+          maximum: 999
+          example: 10
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    PDS:
+      type: string
+      description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
+      pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+      minLength: 1
+      example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    UserAccountActivities:
+      required:
+      - userAccountActivities
+      properties:
+        userAccountActivities:
+          type: array
+          description: User account activity items.
+          items:
+            $ref: '#/components/schemas/UserAccountActivityItems'
+        rotatedPds:
+          type: string
+          description: A rotated PDS is created and returned when the encryption key expires and a new one is generated.
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          minLength: 1
+          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    UserAccountActivityItemContents:
+      required:
+      - value
+      properties:
+        attributeName:
+          type: string
+          description: Name of the updated attribute.
+          minLength: 1
+          maxLength: 255
+          example: legalName
+        previousValue:
+          type: string
+          description: Value before the update.
+          minLength: 1
+          maxLength: 255
+          example: John Doe
+        value:
+          type: string
+          description: Value after the update.
+          minLength: 1
+          maxLength: 255
+          example: John Dow
+        source:
+          type: string
+          description: The source document for the update.
+          minLength: 1
+          maxLength: 29
+          example: passport
+    UserAccountActivityItems:
+      required:
+      - action
+      - createdDate
+      properties:
+        action:
+          type: string
+          description: Type of the activity, possible values - ["ID Created", "Details Updated", "Add Drivers License", "Add Passport", "Add Health Card", "ID Backup", "ID Restore", "Attribute Deleted"].
+          minLength: 1
+          maxLength: 24
+          example: ID Created
+        createdDate:
+          type: string
+          description: Date of the event.
+          minLength: 1
+          maxLength: 29
+          example: '2020-01-28T13:16:01.714-05:00'
+        values:
+          type: array
+          description: Details of the activity.
+          items:
+            $ref: '#/components/schemas/UserAccountActivityItemContents'
+    ErrorResponse_2:
+      required:
+      - Errors
+      type: object
+      description: The error response model used by all the API endpoints.
+      properties:
+        Errors:
+          required:
+          - Error
+          type: object
+          description: The error response model used by all the API endpoints.
+          properties:
+            Error:
+              type: array
+              description: A list of Error objects.
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The source of the problem. That is where the error occurred.
+                    example: mids
+                  ReasonCode:
+                    type: string
+                    description: A code defining the error, as defined in documentation.
+                    example: USER_PROFILE_ID_NOT_FOUND
+                  Description:
+                    type: string
+                    description: A description of this specific occurrence of the Reason code.
+                    example: The provided user profile ID does not exist.
+                  Recoverable:
+                    type: boolean
+                    description: Whether or not retrying this request could result in a successful response.
+                    example: false
+                  Details:
+                    type: string
+                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+                    example: User X was not found
+                  redirectUri:
+                    type: string
+                    description: TP will use this URI to redirect to RP.
+                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
+    UserConsent:
+      enum:
+      - ACCEPT
+      - DECLINE
+      - REVOKE
+      - EXPIRE
+      type: string
+      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
+      pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+      minLength: 6
+      maxLength: 7
+      example: ACCEPT
+    VelocityControl:
+      required:
+      - period
+      - negate
+      type: object
+      properties:
+        maxTrans:
+          minimum: 1
+          type: integer
+          description: Maximum number of transactions allowed
+          format: int32
+          example: 12
+        cumulativeLimit:
+          minimum: 0
+          type: number
+          description: Maximum allowed cumulative amount
+          example: 1200
+          format: float
+        period:
+          minLength: 5
+          maxLength: 10
+          type: string
+          description: Velocity period. Valid values are DAILY, WEEKLY, QUARTERLY, CONTINUOUS, MONTHLY, and YEARLY
+          example: DAILY
+          pattern: ^(DAILY|WEEKLY|QUARTERLY|CONTINUOUS|MONTHLY|YEARLY)
+        availableBalance:
+          minimum: 0
+          type: number
+          description: The cumulative spend available for the velocity control for the specified period
+          example: 1200
+          format: float
+        currencyType:
+          minLength: 4
+          maxLength: 8
+          type: string
+          description: Type of the currency being used. Valid values are BASE and MERCHANT
+          pattern: ^(BASE|MERCHANT)
+          example: MERCHANT
+        currencyCode:
+          minLength: 3
+          maxLength: 3
+          pattern: ^[0-9]{3}$
+          type: string
+          description: Mastercard supported International Organization for Standardization (ISO) 4217 currency codes
+          example: '825'
+        endDate:
+          type: string
+          format: date-time
+          description: End date until which the control is valid, in ISO 8601 extended format "YYYY-MM-DDThh:mm:ss[.sss]Z", where [.sss] is optional and can be 1 to 3 digits
+          example: '2020-10-06T11:09:42.10Z'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The VelocityControl can limit the frequency, and the total cumulative amount of authorizations performed on the cardholders account within a specified time period
+    CurfewControl:
+      required:
+      - days
+      - fromTime
+      - negate
+      - toTime
+      type: object
+      properties:
+        fromTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The start time from which authorizations will be allowed
+          example: 08:20
+        toTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The end time at which authorizations will be allowed
+          example: '11:00'
+        timeZone:
+          type: string
+          description: Time zone of the from and to times
+          example: UTC
+        days:
+          maxItems: 7
+          minItems: 1
+          type: array
+          description: Days of week. Valid values are SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, and SATURDAY
+          example: SUNDAY
+          pattern: ^(SUNDAY|MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY)$
+          items:
+            type: string
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: Curfew Control
+    Vcn:
+      allOf:
+      - $ref: '#/components/schemas/Card'
+      - properties:
+          accountGuid:
+            type: string
+            format: uuid
+            description: The globally unique identifier of the virtual card account
+            example: 123e4567-e89b-12d3-a456-426614174000
+          description:
+            type: string
+            example: This is the description of what the VCN will be used for
+            description: The description of what the VCN will be used for
+    Token:
+      allOf:
+      - $ref: '#/components/schemas/Card'
+      properties:
+        accountGuid:
+          type: string
+          format: uuid
+          description: The globally unique identifier of the token
+          example: 123e4567-e89b-12d3-a456-426614174000
+        tokenUniqueRef:
+          type: string
+          maxLength: 64
+          description: The unique reference identifier of the token
+          example: DE9JOVYK6FVSO8I32DLDPHGTC9NZ7SLKPVLMDQ0RRGK3WYD2
+        paymentAppInstanceId:
+          type: string
+          maxLength: 64
+          description: The unique app device identifier
+          example: '128652974320250630'
+        status:
+          type: string
+          pattern: ^(ACTIVE|SUSPENDED)$
+          description: Token Status. Valid values are ACTIVE and SUSPENDED
+          example: ACTIVE
+    TransactionLimitControl:
+      required:
+      - amount
+      - negate
+      type: object
+      properties:
+        amount:
+          minimum: 0
+          type: number
+          description: The limit that will apply on a per transaction basis
+          example: 12
+          format: float
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The TransactionLimit control provides the ability to limit individual transaction authorizations to a maximum amount
+    VirtualCardAccount:
+      type: object
+      required:
+      - realCardAccountGuid
+      - accountGuid
+      allOf:
+      - $ref: '#/components/schemas/VcnUserDetail'
+      - $ref: '#/components/schemas/Vcn'
+      - properties:
+          realCardAccountGuid:
+            type: string
+            format: uuid
+            description: The globally unique identifier of the real card account
+            example: 123e4567-e89b-12d3-a456-426614174000
+          realCardBillingCurrencyCode:
+            pattern: ^[0-9]{3}$
+            type: string
+            description: Currency code of the RCN
+            example: '825'
+          rules:
+            $ref: '#/components/schemas/Controls'
+    UpdateVirtualCardAccount:
+      type: object
+      required:
+      - expiry
+      allOf:
+      - $ref: '#/components/schemas/VcnUserDetail'
+      - $ref: '#/components/schemas/UpdateVCN'
+      - properties:
+          realCardBillingCurrencyCode:
+            pattern: ^[0-9]{3}$
+            type: string
+            description: Currency code of the RCN
+            example: '825'
+          rules:
+            $ref: '#/components/schemas/Controls'
+    MerchantIdControl:
+      required:
+      - acquirerId
+      - acceptorId
+      - negate
+      type: object
+      properties:
+        acceptorId:
+          minLength: 15
+          maxLength: 15
+          type: string
+          description: The Merchant Id
+          example: '123456789012345'
+        acquirerId:
+          minLength: 1
+          maxLength: 10
+          pattern: .*\S.*
+          type: string
+          description: The Acquiring Institution ID Code which identifies the acquiring institution (for example, merchant bank) or its agent
+          example: '123456'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The Merchant ID control provides the ability to limit authorizations to particular merchants
+    ResourceIdentifier:
+      description: A UUID which uniquely identifies a resource
+      type: string
+      format: uuid
+      example: c63de020-a446-11eb-bcbc-0242ac130002
+    ValidityPeriodControl:
+      required:
+      - from
+      - negate
+      - to
+      type: object
+      properties:
+        from:
+          type: string
+          format: date-time
+          description: The start date from which the control is valid, in ISO 8601 extended format "YYYY-MM-DDThh:mm:ss[.sss]Z", where [.sss] is optional and can be 1 to 3 digits
+          example: '2020-10-26T00:00:00Z'
+        to:
+          type: string
+          format: date-time
+          description: The end date till which the control is valid, in ISO 8601 extended format "YYYY-MM-DDThh:mm:ss[.sss]Z", where [.sss] is optional and can be 1 to 3 digits
+          example: '2020-11-06T23:59:59Z'
+        strictPreAuthCheck:
+          type: boolean
+          description: Defines if strict pre-auth check needs to be applied
+          default: false
+          example: true
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The ValidityPeriod control provides the ability to limit authorization activity to a defined time period
+    MccControl:
+      required:
+      - mccs
+      - negate
+      type: object
+      properties:
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+        mccs:
+          minItems: 1
+          type: array
+          description: List of merchant category codes
+          example:
+          - '1234'
+          - '5678'
+          items:
+            type: string
+            example: '1234'
+          uniqueItems: true
+      description: The Card Acceptor Business Codes (MCC) control can control the type of purchases for which a card is used
+    Controls:
+      type: array
+      description: In Control Card Controls
+      items:
+        $ref: '#/components/schemas/Control'
+    Card:
+      type: object
+      required:
+      - accountNumber
+      - expiry
+      properties:
+        accountNumber:
+          type: string
+          minLength: 12
+          maxLength: 19
+          pattern: ^[0-9]+
+          example: '1234567891234567'
+          description: Card Account Number
+        expiry:
+          minLength: 7
+          maxLength: 7
+          type: string
+          pattern: ^20[2-9][0-9]-(0[1-9]|1[012])$
+          description: Card expiry date in yyyy-MM format
+          example: 2021-11
+    ErrorWrapper:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors_2'
+    AgeingVelocityControl:
+      required:
+      - authorizationHoldDays
+      - cumulativeLimit
+      - timeZone
+      - negate
+      type: object
+      properties:
+        authorizationHoldDays:
+          type: integer
+          minimum: 0
+          maximum: 9999
+          description: Number of days an authorization holds before ageing off
+          format: int32
+          example: 1234
+        cumulativeLimit:
+          minimum: 0
+          type: number
+          description: Maximum allowed cumulative amount
+          example: 1000
+          format: float
+        timeZone:
+          type: string
+          description: Time zone that is used for age-off calculations
+          example: UTC-06:00
+        availableBalance:
+          minimum: 0
+          type: number
+          description: The cumulative spend available for the velocity control for the specified period
+          example: 1000
+          format: float
+        currencyType:
+          minLength: 4
+          maxLength: 8
+          type: string
+          description: Type of the currency being used. Valid values are BASE and MERCHANT
+          example: MERCHANT
+          pattern: ^(BASE|MERCHANT)
+        currencyCode:
+          minLength: 3
+          maxLength: 3
+          pattern: ^[0-9]{3}$
+          type: string
+          description: Mastercard supported International Organization for Standardization (ISO) 4217 currency codes
+          example: '825'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The AgingVelocityControl provides the requester with the ability to set a notional credit line through the CumulativeControl. This control keeps track of the current remaining available credit and approves a transaction only if the requested amount is less than or equal to the remaining available credit
+    AmountRangeControl:
+      required:
+      - currencyType
+      - maxAmount
+      - minAmount
+      - negate
+      type: object
+      properties:
+        minAmount:
+          minimum: 0
+          type: number
+          description: Minimum allowed amount
+          format: float
+          example: 1000
+        maxAmount:
+          minimum: 0
+          type: number
+          description: Maximum allowed amount
+          format: float
+          example: 10000
+        strictPreAuthCheck:
+          type: boolean
+          description: Defines if strict pre-auth check needs to be applied
+          default: false
+          example: true
+        currencyType:
+          minLength: 4
+          maxLength: 8
+          type: string
+          description: Type of the currency being used. Valid values are BASE and MERCHANT
+          example: MERCHANT
+          pattern: ^(BASE|MERCHANT)
+        currencyCode:
+          minLength: 3
+          maxLength: 3
+          pattern: ^[0-9]{3}$
+          type: string
+          description: Mastercard supported International Organization for Standardization (ISO) 4217 currency codes
+          example: '825'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The exact amount range control will approve a transaction only if the requested amount is equal or greater than MinAmount and less than or equal to MaxAmount. In other words, if Min Amount <= Amount <= Max Amount
+    VcnUserDetail:
+      type: object
+      required:
+      - firstName
+      - lastName
+      - phone
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: First Name of User
+          example: Emerson
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Last Name of User
+          example: Bloggs
+        phone:
+          type: string
+          minLength: 4
+          maxLength: 16
+          description: Phone number of User
+          example: '+13556434378'
+    UpdateVCN:
+      type: object
+      properties:
+        expiry:
+          minLength: 7
+          maxLength: 7
+          type: string
+          pattern: ^20[2-9][0-9]-(0[1-9]|1[012])$
+          description: Expiry date in yyyy-MM format
+          example: 2021-11
+        description:
+          type: string
+          example: This is the description of what the VCN will be used for
+          description: The description of what the VCN will be used for
+    TokenUpdate:
+      allOf:
+      - $ref: '#/components/schemas/Card'
+      properties:
+        status:
+          type: string
+          pattern: ^(ACTIVE|SUSPENDED)$
+          description: Token Status. Valid values are ACTIVE and SUSPENDED
+          example: ACTIVE
+    TimeOfDayControl:
+      required:
+      - negate
+      - timeZone
+      - times
+      type: object
+      properties:
+        times:
+          maxItems: 7
+          minItems: 1
+          type: array
+          description: Times of day
+          items:
+            $ref: '#/components/schemas/TimeOfDay'
+        timeZone:
+          type: string
+          description: Time zone of the from and to times
+          example: UTC
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The TimeOfDayControl provides the ability to limit authorization activity to defined time periods for each day
+    Errors_2:
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    Control:
+      type: object
+      required:
+      - action
+      - alias
+      description: In Control Rule
+      properties:
+        action:
+          minLength: 1
+          maxLength: 1
+          type: string
+          description: control rule actions. Valid values are A (Approve), D (Decline), W (Warn), P (Promo) and F (Forced)
+          example: A
+        alias:
+          type: string
+          description: control rule alias name. alias should be unique
+          maxLength: 100
+          minLength: 1
+          pattern: .*\S.*
+          example: DAILY LIMIT
+        transactionLimits:
+          type: array
+          description: transaction limit controls provides the ability to limit individual transaction authorizations to a maximum amount
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/TransactionLimitControl'
+        geographies:
+          type: array
+          description: geography controls provides the ability to control where a card is physically used
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/GeographyControl'
+        velocities:
+          type: array
+          description: velocity controls can limit the frequency, and the total cumulative amount of authorizations performed on the cardholders account within a specified time period
+          items:
+            $ref: '#/components/schemas/VelocityControl'
+        validityPeriods:
+          type: array
+          description: validity period controls
+          items:
+            $ref: '#/components/schemas/ValidityPeriodControl'
+        amountRanges:
+          type: array
+          description: amount range controls
+          items:
+            $ref: '#/components/schemas/AmountRangeControl'
+        merchantIds:
+          type: array
+          description: merchant id controls
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/MerchantIdControl'
+        ageingVelocities:
+          type: array
+          description: ageing velocity controls
+          items:
+            $ref: '#/components/schemas/AgeingVelocityControl'
+        curfews:
+          type: array
+          description: curfew controls allows you to limit authorization activity on a card to a certain time period during set days. You can also set the time zone for this control
+          items:
+            $ref: '#/components/schemas/CurfewControl'
+        timeOfDays:
+          type: array
+          description: time of day controls provides the ability to limit authorization activity to defined time periods for each day
+          items:
+            $ref: '#/components/schemas/TimeOfDayControl'
+        merchantCategories:
+          type: array
+          description: merchant category controls
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/MccControl'
+    GeographyControl:
+      required:
+      - countryCodes
+      - negate
+      type: object
+      properties:
+        countryCodes:
+          minItems: 1
+          type: array
+          description: Country codes to be included in the rule
+          items:
+            type: string
+          example:
+          - '840'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The GeographicControl provides the ability to control where a card is physically used
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error_2'
+    TimeOfDay:
+      required:
+      - day
+      - fromTime
+      - toTime
+      type: object
+      properties:
+        day:
+          minLength: 6
+          maxLength: 9
+          type: string
+          example: SUNDAY
+          description: Days of week. Valid values are SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, and SATURDAY
+          pattern: ^(SUNDAY|MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY)
+        fromTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The start time from which authorizations will be allowed
+          example: 08:21
+        toTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The end time from which authorizations will be allowed
+          example: '12:00'
+    Error_2:
+      type: object
+      properties:
+        Source:
+          type: string
+          example: source
+          description: Source of error
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error
+          example: '123'
+        Description:
+          type: string
+          example: Error desc
+          description: Short description of the error
+        Recoverable:
+          type: boolean
+          example: true
+          description: Is recoverable error
+        Details:
+          type: string
+          example: Detail information
+          description: Optional detailed description of the issue
+    AccountSearchDetails:
+      required:
+      - accounts
+      type: object
+      properties:
+        offset:
+          type: integer
+          description: Indicates the number of items you asked the start of the list to be offset from.
+          example: 1
+        limit:
+          type: integer
+          description: Indicates the number of items you asked the list to be limited to.
+          example: 1
+        total:
+          type: integer
+          format: int64
+          description: Indicates the total number of items in the collection.
+          example: 1
+        count:
+          type: integer
+          description: Indicates the number of items in this batch (the size of the item array).
+          example: 1
+        accounts:
+          type: array
+          description: accounts
+          items:
+            $ref: '#/components/schemas/Account'
+    Account:
+      required:
+      - accountId
+      - accountIdType
+      - productCode
+      - programIdentifier
+      - status
+      type: object
+      properties:
+        accountId:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: The unique identifier for the given account.
+          example: '5330333671236516'
+        accountIdType:
+          type: string
+          description: Identifier type for the given account.
+          example: BAN
+        status:
+          type: string
+          description: Status of the user's account. Valid values are GOOD_STANDING, REDEEM_ONLY, NEW, ON_HOLD, CANCELLED, INACTIVE.
+          example: NEW
+        productCode:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: The account's associated reward product identifier as defined by the client and configured during the implementation of the program.
+          example: FIDOCASHBACK
+        programIdentifier:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: Program identifier for the program in which the cardholder is enrolled. The program ID is created by Mastercard Rewards System.
+          example: PGM42051
+        openDate:
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          type: string
+          description: The date of account opening as defined by the client.
+          example: '2014-12-31'
+          format: date
+        enrollmentDate:
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          type: string
+          description: The date when the account becomes eligible for rewards program. If undefined, enrollment date is defaulted to the date when Mastercard processes the enrollment.
+          example: '2018-03-10'
+          format: date
+        accruePoints:
+          type: boolean
+          description: This specifies if the account can accrue points. It is used in conjunction with Account Status to define earn and burn behavior for the account.
+          example: false
+        householdToken:
+          type: string
+          description: This field ties together multiple user accounts into one household. This value is typically assigned by the Client. To use this field, a rewards program must be configured to support the Token or Bank Customer Number householding scheme.
+          example: '254235'
+        primaryAccount:
+          type: boolean
+          description: Identifies if the account is primary for the User. A User may only have 1 primary account. In situations where householding is used, there may only be 1 primary account in the household, regardless of how many User accounts make up that household. A value of true indicates that the account is primary for the User or the household.
+          example: false
+        userDefined1:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 1
+          example: UDF 1 Example
+        userDefined2:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 2
+          example: UDF 2 Example
+        userDefined3:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 3
+          example: UDF 3 Example
+        userDefined4:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 4
+          example: UDF 4 Example
+        userDefined5:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Field 5
+          example: UDF 5 Example
+        userDefined6:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Field 6
+          example: UDF 6 Example
+        userDefined7:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Field 7
+          example: UDF 7 Example
+        userDefined8:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Field 8
+          example: UDF 8 Example
+        externalAccountId:
+          maxLength: 10
+          minLength: 0
+          type: string
+          description: Used for On-Soil customers when optional fields are turned on in the rewards system.
+          example: '2222332322'
+        cycleId:
+          type: integer
+          description: Bank cycle number that the cardholder/primary cardholder is assigned to.
+          format: int64
+          example: 1
+        cycled:
+          type: boolean
+          description: Flag to indicate whether a Rewards account has been cycled.
+          example: false
+        pcloAccountStatusCode:
+          type: string
+          description: Status of the user's account. Valid values are GOOD_STANDING, REDEEM_ONLY, NEW, ON_HOLD, CANCELLED, INACTIVE.
+          example: NEW
+        accountReferenceCode:
+          maxLength: 50
+          minLength: 0
+          type: string
+          description: Unique identifier the membership uses to identify an account.
+          example: 123456abcdef123456abcdef123456abcdef0
+        companyIca:
+          type: integer
+          description: Interbank Card Association number assigned by Mastercard to the financial institution.
+          format: int64
+          example: 611532
+        accountFirstFour:
+          type: string
+          description: The first 4 digits of the account number.
+          example: '5114'
+        accountLastFour:
+          type: string
+          description: The last 4 digits of the account number.
+          example: '5678'
+        userId:
+          type: string
+          description: Value of the user or account identification.
+          example: '5330333671236516'
+        userIdType:
+          type: string
+          description: Type of the user or account identification. Supported identifier is RANCU.
+          example: RANCU
+        autoEnrolled:
+          type: boolean
+          description: Indicates whether this card was auto-enrolled.
+          example: false
+        enrollmentTypeId:
+          type: integer
+          description: Indicates how the customer is enrolled.
+          format: int64
+          example: 12
+        enrollmentType:
+          type: string
+          description: Indicates the description of how the customer is enrolled.
+          example: B2B Service
+        previousAccountLostStolen:
+          type: boolean
+          description: Indicates whether this card number has been reported lost or stolen.
+          example: false
+        receiveStatements:
+          type: boolean
+          description: Used on programs receiving statements from Mastercard to determine which cardholders should receive a statement.
+          example: false
+        previousAccountFirstFour:
+          type: string
+          description: Indicates the first four digits of customer's previous bank account number.
+          example: '1234'
+        previousAccountLastFour:
+          type: string
+          description: Indicates the last four digits of customer's previous bank account number.
+          example: '5678'
+        programName:
+          type: string
+          description: Program name is the reference for a program associated to an account.
+          example: SURPREENDA
+        householdId:
+          type: integer
+          description: Unique ID for a Household in the rewards system. This is an internal value assigned to the household, when a customer is enrolled.
+          format: int64
+          example: 1234
+      description: accounts
+    AccountEnroll:
+      required:
+      - accountId
+      - accountIdType
+      - companyIca
+      - productCode
+      - programIdentifier
+      - status
+      - userId
+      - userIdType
+      type: object
+      properties:
+        accountId:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: The unique identifier for a given account. This is typically referred to as the Bank Account Number (BAN). When enrolling a card account, the physical card number should be followed by 3 trailing zeros.
+          example: '5330333671236516000'
+        accountIdType:
+          type: string
+          description: Identifier type for the given account. Supported identifier is BAN.
+          example: BAN
+        status:
+          type: string
+          description: "Status of the user's account. Valid values are GOOD_STANDING and NEW.\n - NEW  Used for auto and self-enrollment.  Can earn, but not redeem.\n - GOOD_STANDING  Can earn and redeem. This is the typical good status for an account."
+          example: NEW
+          enum:
+          - NEW
+          - GOOD_STANDING
+        productCode:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: The account's associated reward product identifier as defined by the client and configured during the implementation of the program.
+          example: FIDOCASHBACK
+        programIdentifier:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: Program identifier for the program in which the account is enrolled. Program identifier is assigned during the implementation of the program.
+          example: PGM42051
+        openDate:
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          type: string
+          description: The date of account opening as defined by the client. This date is typically when the banking account was opened.
+          example: '2014-12-31'
+          format: date
+        enrollmentDate:
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          type: string
+          description: The date when the account becomes eligible for rewards program. If undefined, enrollment date is defaulted to the date that Mastercard processes the enrollment.
+          example: '2018-03-10'
+          format: date
+        accruePoints:
+          type: boolean
+          description: "Suggested status and accruePoints settings are as follows:\n - status = NEW, accruePoints = true\n - status = GOOD_STANDING, accruePoints = true\n - status = REDEEM_ONLY, accruePoints = false\n - status = CANCELLED, accruePoints = false\n - status = ON_HOLD, accruePoints = true"
+          example: false
+        householdToken:
+          type: string
+          description: This field ties together multiple User accounts into one household. This value is typically assigned by the customer. To use this field, a rewards program must be configured to support the Token or Token then Bank Customer Number householding scheme.
+          example: '254235'
+        primaryAccount:
+          type: boolean
+          description: Identifies if the account is primary for the User. A User may only have 1 primary account. In situations where householding is used, there may only be 1 primary account in the household, regardless of how many User accounts make up that household. A value of true indicates that the account is primary for the User or the household.
+          example: false
+        userDefined1:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 1 Example
+        userDefined2:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 2 Example
+        userDefined3:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 3 Example
+        userDefined4:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 4 Example
+        userDefined5:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 5 Example
+        userDefined6:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 6 Example
+        userDefined7:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 7 Example
+        userDefined8:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 8 Example
+        externalAccountId:
+          maxLength: 10
+          minLength: 0
+          type: string
+          description: Used for On-Soil customers when optional fields are turned on in the rewards system.
+          example: '2222332322'
+        cycleId:
+          type: integer
+          description: Bank cycle number that the cardholder/primary cardholder is assigned to. This field is typically not used unless the customer is receiving a statement batch file from the rewards system.
+          format: int64
+          example: 1
+        cycled:
+          type: boolean
+          description: Flag to indicate whether a Rewards account has been cycled for the current period.
+          example: false
+        pcloAccountStatusCode:
+          type: string
+          description: "Status of the user's account. Valid values are NEW, GOOD_STANDING, REDEEM_ONLY, CANCELLED, ON_HOLD.\n - NEW  Used for auto and self-enrollment. Can earn, but not redeem.\n - GOOD_STANDING  Can earn and redeem. This is the typical good status for an account.\n - REDEEM_ONLY  Cannot earn but can redeem.\n - CANCELLED  Cannot earn or redeem. This is the typical final state for an account that is no longer active in a program.\n - ON_HOLD  Can earn, but not redeem. This status is for temporarily derogative accounts."
+          example: NEW
+          enum:
+          - NEW
+          - GOOD_STANDING
+          - REDEEM_ONLY
+          - CANCELLED
+          - ON_HOLD
+        accountReferenceCode:
+          maxLength: 50
+          minLength: 0
+          type: string
+          description: Unique identifier the membership uses to identify an account.
+          example: 123456abcdef123456abcdef123456abcdef0
+        companyIca:
+          type: integer
+          description: Interbank Card Association number assigned by Mastercard to the financial institution.
+          format: int64
+          example: 9989
+        userId:
+          maxLength: 50
+          minLength: 0
+          type: string
+          description: The unique identifier of the User.
+          example: '5600000000000003000'
+        userIdType:
+          type: string
+          description: Identifier type of the User. Supported identifiers are BCN or RANCU.
+          example: BCN
+    AccountUpdate:
+      required:
+      - accountId
+      - accountIdType
+      type: object
+      properties:
+        accountId:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: The unique identifier for the account.
+          example: '103580149704735875487800510667'
+        accountIdType:
+          type: string
+          description: Identifier type for the account. The static value of RANAC should be used for this field.
+          example: RANAC
+        status:
+          type: string
+          description: "Status of the user's account. Valid values are NEW, GOOD_STANDING, REDEEM_ONLY, CANCELLED, ON_HOLD, INACTIVE.\n - NEW  Used for auto and self-enrollment. Can earn, but not redeem.\n - GOOD_STANDING  Can earn and redeem. This is the typical good status for an account.\n - REDEEM_ONLY  Cannot earn but can redeem.\n - CANCELLED  Cannot earn or redeem. This is the typical final state for an account that is no longer active in a program.\n - ON_HOLD  Can earn, but not redeem. This status is for temporarily derogative accounts.\n - INACTIVE"
+          example: CANCELLED
+          enum:
+          - NEW
+          - GOOD_STANDING
+          - REDEEM_ONLY
+          - CANCELLED
+          - ON_HOLD
+          - INACTIVE
+        accruePoints:
+          type: boolean
+          description: "Suggested status and accruePoints settings are as follows:\n - status = NEW, accruePoints = true\n - status = GOOD_STANDING, accruePoints = true\n - status = REDEEM_ONLY, accruePoints = false\n - status = CANCELLED, accruePoints = false\n - status = ON_HOLD, accruePoints = true"
+          example: true
+        primaryAccount:
+          type: boolean
+          description: Identifies if the account is primary for the user. A user may only have one primary account. In situations where householding is used, there may only be one primary account in the household, regardless of how many user accounts make up that household. A value of true indicates that the account is primary for the user or the household.
+          example: false
+        receiveStatements:
+          type: boolean
+          description: Specifies if the account should be included in the outbound statement file that the rewards system can send a customer, for the purpose of producing paper Rewards Statements. A value of true indicates that the user will receive a paper statement.
+          example: true
+        externalAccountId:
+          maxLength: 10
+          minLength: 0
+          type: string
+          description: Used for On-Soil customers when optional fields are turned on in the rewards system.
+          example: '2222332322'
+        cycleId:
+          type: integer
+          description: Bank cycle number that the cardholder/primary cardholder is assigned to. This field is typically not used unless the customer is receiving a Statement batch file from the rewards system.
+          format: int64
+          example: 1
+        cycleRun:
+          type: boolean
+          description: Flag to indicate whether a Rewards account has been cycled for the current period.
+          example: false
+        pcloAccountStatusCode:
+          type: string
+          description: "Status of the user's account. This field is only for PCLO customers. Valid values are NEW, GOOD_STANDING, REDEEM_ONLY, CANCELLED, ON_HOLD.\n - NEW  Used for auto and self-enrollment. Can earn, but not redeem.\n - GOOD_STANDING  Can earn and redeem. This is the typical good status for an account.\n - REDEEM_ONLY  Cannot earn but can redeem.\n - CANCELLED  Cannot earn or redeem. This is the typical final state for an account that is no longer active in a program.\n - ON_HOLD  Can earn, but not redeem. This status is for temporarily derogative accounts."
+          example: NEW
+          enum:
+          - NEW
+          - GOOD_STANDING
+          - REDEEM_ONLY
+          - CANCELLED
+          - ON_HOLD
+        userDefined1:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 1 Example
+        userDefined2:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 2 Example
+        userDefined3:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 3 Example
+        userDefined4:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 4 Example
+        userDefined5:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 5 Example
+        userDefined6:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 6 Example
+        userDefined7:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 7 Example
+        userDefined8:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 8 Example
+        productTransfer:
+          type: boolean
+          description: Determines whether the Bank Product needs to be updated. When productTransfer is true, then only bank product for the given account will be updated ignoring other fields in the request payload.
+          example: true
+        bankProductCode:
+          maxLength: 30
+          type: string
+          description: Bank Product Code associated with the new card.
+          example: VISACD
+    EnrolledAccount:
+      type: object
+      properties:
+        accountIdType:
+          type: string
+          description: Account identifier type such as RANAC.
+          example: RANAC
+        accountId:
+          type: string
+          description: The unique identifier for the given account.
+          example: '136821076497727922312391057516'
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of the error
+          example: user-management
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during API request processing.
+          example: INVALID_FIELD_FORMAT
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Email Address must be in the valid format.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about the data received.
+          example: Invalid Details
+      description: Error Details
+    Errors_3:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error Details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors_3'
+  examples:
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: BINTABLE_API
+            ReasonCode: UNAUTHORIZED
+            Description: We couldn't recognize you
+            Recoverable: false
+            Details: 'Full authentication is required to access this resource. See also: https://mstr.cd/31YcrTi'
+    BINSuccessExample:
+      description: Individual Mastercard BIN data
+      value:
+      - lowAccountRange: 2229326100000000000
+        highAccountRange: 2229326200000000000
+        binNum: '22292931'
+        binLength: 8
+        acceptanceBrand: MCC
+        ica: '00000023460'
+        customerName: TRIPLINK INTERNATIONAL CO.,LIMITED
+        country:
+          code: '372'
+          alpha3: IRL
+          name: Ireland
+        localUse: false
+        authorizationOnly: false
+        productCode: MCO
+        productDescription: MASTERCARD CORPORATE
+        governmentRange: false
+        nonReloadableIndicator: false
+        anonymousPrepaidIndicator: N
+        programName: null
+        vertical: null
+        fundingSource: DEBIT
+        consumerType: CONSUMER
+        cardholderCurrencyIndicator: C
+        billingCurrencyDefault: USD
+        smartDataEnabled: false
+        affiliate: California Community Bank
+    BINNotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: BINTABLE_API
+            ReasonCode: NOT_FOUND
+            Description: Invalid BIN format, please ensure there are no spaces used
+            Recoverable: false
+            Details: BIN '131 840' doesn't exist
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: BINTABLE_API
+            ReasonCode: BAD_REQUEST
+            Description: Not all mandatory parameters are supplied or sent incorrectly.
+            Recoverable: false
+            Details: The value of parameter 'sort' is invalid.
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: BINTABLE_API
+            ReasonCode: PERMISSION_DENIED
+            Description: You don't seem authorized to do that
+            Recoverable: false
+            Details: The resource was processed and can't be updated anymore
+    UnauthorizedExample_2:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
+            Recoverable: false
+    UserAccountActivitiesExample:
+      value:
+        userAccountActivities:
+        - action: ID Created
+          createdDate: '2020-01-28T13:16:01.714-05:00'
+          values:
+          - attributeName: legalName
+            previousValue: John Doe
+            value: John Dow
+            source: passport
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    EncryptedPayloadWithRotatedPDSExample:
+      value:
+        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IoxNTE2MjM5MDIyf
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+    UserProfileDeletedErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_DELETED
+            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
+            Recoverable: false
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided user profile ID does not exist.
+            Recoverable: false
+    ForbiddenExample_2:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+    Token:
+      value:
+        accountNumber: '1234567891234567'
+        expiry: 2021-11
+        accountGuid: 123e4567-e89b-12d3-a456-426614174000
+        tokenUniqueRef: DE9JOVYK6FVSO8I32DLDPHGTC9NZ7SLKPVLMDQ0RRGK3WYD2
+        paymentAppInstanceId: '128652974320250630'
+        status: ACTIVE
+    AuthorizationError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: authorization.missing
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    NotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: not.found
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    ForbiddenError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: authorization.forbidden
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    UpdateUserCardAndControl:
+      value:
+        firstName: Emerson
+        lastName: Bloggs
+        phone: '+353871123456'
+        expiry: 2021-11
+        description: This is the description of what the VCN will be used for
+        realCardBillingCurrencyCode: '840'
+        rules:
+        - action: A
+          alias: DAILY LIMIT
+          transactionLimits:
+          - amount: 12
+            negate: true
+          geographies:
+          - countryCodes:
+            - USA
+            negate: true
+          velocities:
+          - maxTrans: 12
+            cumulativeLimit: 1200
+            period: DAILY
+            availableBalance: 1200
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          validityPeriods:
+          - from: '2020-10-06T11:09:42.10Z'
+            to: '2020-11-06T11:09:42.10Z'
+            strictPreAuthCheck: true
+            negate: true
+          amountRanges:
+          - minAmount: 1000
+            maxAmount: 10000
+            strictPreAuthCheck: true
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          merchantIds:
+          - acceptorId: '123456789012345'
+            acquirerId: '123456'
+            negate: true
+          ageingVelocities:
+          - authorizationHoldDays: 1234
+            cumulativeLimit: 1000
+            timeZone: UTC-06:00
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          curfews:
+          - fromTime: 08:20
+            toTime: '11:00'
+            timeZone: UTC
+            days:
+            - SUNDAY
+            negate: true
+          timeOfDays:
+          - times:
+            - day: SUNDAY
+              fromTime: 08:21
+              toTime: '12:40'
+            timeZone: UTC
+            negate: true
+          merchantCategories:
+          - negate: true
+            mccs:
+            - 1234
+            - 5678
+    CardDetails:
+      value:
+      - firstName: Emerson
+        lastName: Bloggs
+        phone: '+353871123456'
+        realCardAccountGuid: 123e4567-e89b-12d3-a456-426614174000
+        accountNumber: '1234567891234567'
+        expiry: 2021-11
+        accountGuid: 123e4567-e89b-12d3-a456-426614174000
+        description: This is the description of what the VCN will be used for
+        realCardBillingCurrencyCode: '840'
+        rules:
+        - action: A
+          alias: DAILY LIMIT
+          transactionLimits:
+          - amount: 12
+            negate: true
+          geographies:
+          - countryCodes:
+            - USA
+            negate: true
+          velocities:
+          - maxTrans: 12
+            cumulativeLimit: 1200
+            period: DAILY
+            availableBalance: 1200
+            currencyType: MERCHANT
+            currencyCode: '825'
+            endDate: '2020-10-06T11:09:42.10Z'
+            negate: true
+          validityPeriods:
+          - from: '2020-10-06T11:09:42.10Z'
+            to: '2020-11-06T11:09:42.10Z'
+            strictPreAuthCheck: true
+            negate: true
+          amountRanges:
+          - minAmount: 1000
+            maxAmount: 10000
+            strictPreAuthCheck: true
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          merchantIds:
+          - acceptorId: '123456789012345'
+            acquirerId: '123456'
+            negate: true
+          ageingVelocities:
+          - authorizationHoldDays: 1234
+            cumulativeLimit: 1000
+            timeZone: UTC-06:00
+            availableBalance: 1000
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          curfews:
+          - fromTime: 08:20
+            toTime: '11:00'
+            timeZone: UTC
+            days:
+            - SUNDAY
+            negate: true
+          timeOfDays:
+          - times:
+            - day: SUNDAY
+              fromTime: 08:21
+              toTime: '12:40'
+            timeZone: UTC
+            negate: true
+          merchantCategories:
+          - negate: true
+            mccs:
+            - 1234
+            - 5678
+    BadRequestError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: invalid.parameter
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    TokenUpdate:
+      value:
+        accountNumber: '1234567891234567'
+        expiry: 2021-11
+        status: ACTIVE
+  requestBodies:
+    BinResourceSearchByAccountRangeRequest:
+      description: BIN Resource Search By account range Request
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SearchByAccountRange'
+    UserAccountActivitySearchRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserAccountActivitySearch'
+      required: true
+    NewToken:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Token'
+          examples:
+            Token:
+              $ref: '#/components/examples/Token'
+    UpdatedToken:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TokenUpdate'
+          examples:
+            TokenUpdate:
+              $ref: '#/components/examples/TokenUpdate'
+    NewVirtualCard:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VirtualCardAccount'
+          examples:
+            VirtualCardAccount:
+              $ref: '#/components/examples/CardDetails'
+    UpdatedVirtualCard:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateVirtualCardAccount'
+          examples:
+            UpdateVirtualCardAccount:
+              $ref: '#/components/examples/UpdateUserCardAndControl'
+    AccountUpdateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountUpdate'
+    AccountEnrollRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountEnroll'
+  responses:
+    NotAuthorizedErrorResponse:
+      description: Authentication information was missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BINNotFoundExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    ForbiddenErrorResponse:
+      description: Insufficient permissions for interacting with the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BINNotFoundExample:
+              $ref: '#/components/examples/ForbiddenExample'
+    NotFoundErrorResponse:
+      description: The URI didn't match an existing resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BINNotFoundExample:
+              $ref: '#/components/examples/BINNotFoundExample'
+    BadRequestErrorResponse:
+      description: Invalid or insufficient parameters supplied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BINNotFoundExample:
+              $ref: '#/components/examples/BadRequestExample'
+    AccountRangeSearchResponse:
+      description: Account Range Search response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BinResourceArray'
+          examples:
+            BINSuccessExample:
+              $ref: '#/components/examples/BINSuccessExample'
+    UnauthorizedError:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_2'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample_2'
+    UserAccountActivitySearchesResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserAccountActivities'
+          examples:
+            UserAccountActivitySearchesUnencryptedResponse:
+              $ref: '#/components/examples/UserAccountActivitiesExample'
+            UserAccountActivitySearchesEncryptedResponse:
+              $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
+    NotFoundError:
+      description: The request didn't match an existing resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_2'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_2'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample_2'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_2'
+          examples:
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
+    UnauthorizedError_2:
+      description: Authentication Required
+      headers:
+        WWW-Authenticate:
+          description: Method of authentication
+          schema:
+            type: string
+      content:
+        application/json:
+          examples:
+            Unauthorized:
+              $ref: '#/components/examples/AuthorizationError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+    OKResponse:
+      description: OK
+    ResourceNotFoundError:
+      description: Resource Not Found
+      content:
+        application/json:
+          examples:
+            ResourceNotFound:
+              $ref: '#/components/examples/NotFoundError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+    Token:
+      description: Token detail
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Token'
+          examples:
+            Token:
+              $ref: '#/components/examples/Token'
+    NOContentResponse:
+      description: No Content
+    ResourceCreated:
+      description: Resource Created
+      headers:
+        Location:
+          description: location of the resource
+          schema:
+            type: string
+    ForbiddenError_2:
+      description: Not Authorized
+      content:
+        application/json:
+          examples:
+            Forbidden:
+              $ref: '#/components/examples/ForbiddenError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+    VirtualCard:
+      description: Virtual card details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VirtualCardAccount'
+          examples:
+            VirtualCardAccount:
+              $ref: '#/components/examples/CardDetails'
+    VirtualCards:
+      description: List of virtual cards
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/VirtualCardAccount'
+          examples:
+            UserCardsDetails:
+              $ref: '#/components/examples/CardDetails'
+    BadRequestError_2:
+      description: Invalid Request
+      content:
+        application/json:
+          examples:
+            BadRequest:
+              $ref: '#/components/examples/BadRequestError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+    AccountUpdateResponse:
+      description: Ok
+    ErrorsResponse:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+    AccountSearchDetailsResponse:
+      description: Successfully retrieved account.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountSearchDetails'
+    AccountEnrollResponse:
+      description: Successfully enrolled account.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EnrolledAccount'
+  parameters:
+    XEncryptedPayload:
+      in: header
+      name: X-Encrypted-Payload
+      type: boolean
+      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
+
+        '
+      example: true
+      schema: null
+    XUserIdentityParameter:
+      in: header
+      name: X-User-Identity
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      description: 'JWT token for session validation. Returned as response header in previous API calls with key X-User-Identity.
+
+        '
+      schema:
+        type: string
+    tokenGUID:
+      name: token_guid
+      in: path
+      description: The globally unique identifier of the token being queried
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceIdentifier'
+      example: 8f242496-b71a-11eb-8529-0242ac130003
+    accountGUID:
+      name: account_guid
+      in: path
+      description: The globally unique identifier of the card being queried
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceIdentifier'
+      example: 8f242496-b71a-11eb-8529-0242ac130003
+    userGUID:
+      name: user_guid
+      in: path
+      description: The globally unique identifier of the user being queried
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceIdentifier'
+      example: 8f242496-b71a-11eb-8529-0242ac130003
+    AccountId:
+      name: id
+      in: path
+      description: The unique identifier for the given account. Account Id is always RANAC.
+      required: true
+      schema:
+        type: string
+      example: '268810378058708149455458707247'
+    Limit:
+      name: limit
+      in: query
+      description: The number of items you ask the list to be limited to. Must be greater than 0 and less than or equal to 25, default value is 25.
+      required: false
+      schema:
+        type: integer
+      example: 2
+    UserIdType:
+      name: user_id_type
+      in: query
+      description: Determines the type of user identification. Supported identifier is RANCU.
+      required: false
+      schema:
+        type: string
+      example: RANCU
+    AccountIdType:
+      name: account_id_type
+      in: query
+      description: Determines the type of account identification. Supported identifier is RANAC.
+      required: false
+      schema:
+        type: string
+      example: RANAC
+    Offset:
+      name: offset
+      in: query
+      description: The number of items you ask the start of the list to be offset from. Zero-based offset index, must NOT be negative, default value is 0.
+      required: false
+      schema:
+        type: integer
+      example: 0

@@ -1,0 +1,390 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Deregistrations API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Deregistrations
+paths:
+  /consumers/pans/deregistrations:
+    post:
+      tags:
+      - Deregistrations
+      summary: Removes one or more PANs from an existing PAN List.
+      description: 'This endpoint allows customers to remove one or more PANs from an existing PAN List.
+
+        - This endpoint requires partial request and response payload encryption to encrypt the array of PANs (pans object) as part of sensitiveData field. Please refer to request and response specification for more details. The encryption needs to be performed using JWE payload encryption. Please refer to the [Securing Sensitive Data Using Payload Encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/) sections for implementation details.'
+      operationId: deregisterPans
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/PanDeregistrationBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/Deregistration'
+        '400':
+          $ref: '#/components/responses/BadRequestPanDeregistrationError'
+        '401':
+          $ref: '#/components/responses/ConsumerUnauthorized'
+        '403':
+          $ref: '#/components/responses/ConsumerForbiddenError'
+components:
+  examples:
+    BadRequestPanListIdNotFoundValidationError:
+      description: Error when provided pan list id is not present in the system.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-consumer-api
+            ReasonCode: invalid.request.parameter
+            Description: Pan list not found for id 289152609766342651
+            Recoverable: false
+            Details: ''
+    FailurePanDeregistrationResponse:
+      description: Response body of a failure deregistration. Counts fields showcase the number of pans processed successfully and unsuccessfully. In case of full failure response object, successfulCount will be '0' and failureCount will have the count of the failure pans. The encryptedValue will have the (encrypted sensitiveData object) with the corresponding error details like reasonCode and description.
+      value:
+        panListId: '230417253818957824'
+        successfulCount: '0'
+        failureCount: '1'
+        encryptedValue: eyJraWQiOiI3NjFiMDAzYzFlYWRlM(...).Y+oPYKZEMTKyYcSIVEgtQw
+    UnauthorizedError:
+      description: Unauthorized to access the resource.
+      value:
+        Errors:
+          Error:
+          - Source: Gateway
+            ReasonCode: DECLINED
+            Description: Unauthorized - Access Not Granted
+            Recoverable: false
+            Details: null
+    PanDeregistrationRequest:
+      description: Typical deregistration request for showing indicative payload after performing JWE encryption on sensitiveData field and assigning to encryptedValue field.
+      value:
+        panListId: '230417253818957824'
+        encryptedValue: eyJraWQiOiI3NjFiMDAzYzFlYWRlM(...).Y+oPYKZEMTKyYcSIVEgtQw
+    ConsumerForbiddenError:
+      description: Account not approved to access Mastercard Installments APIs
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-consumer-api
+            ReasonCode: forbidden
+            Description: Your account is not approved to access the API or resource, kindly contact your Mastercard associate to get approval.
+            Recoverable: false
+            Details: ''
+    UnencryptedPanDeregistrationRequest:
+      description: Request showing how to remove two PANs from an existing PAN List. Please note that the client needs to encrypt sensitiveData field using Mastercard provided JWE encryption libraries and populate encryptedValue field before calling the API. Refer to the example, PAN Registration with PAN and Account Range (Only for reference), to understand how the resulting payload should look like after performing encryption
+      value:
+        panListId: '230417253818957824'
+        sensitiveData:
+          pans:
+          - pan: '5110923494472279'
+          - pan: '5110922275884793'
+    BadRequestPanListIdNullValidationError:
+      description: Error when pan list id is not present in request.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-consumer-api
+            ReasonCode: 'invalid.data: panListId'
+            Description: must not be null
+            Recoverable: false
+            Details: ''
+    FullSuccessPanDeregistrationResponse:
+      description: Response body of a full success deregistration. Counts fields showcase the number of pans processed successfully and unsuccessfully. In case of the full success response successfulCount will have the count of successful pans and failureCount will have '0'. Since there are not failed pans the encryptedValue will not be present.
+      value:
+        panListId: '230417253818957824'
+        successfulCount: '1'
+        failureCount: '0'
+    UnencryptedPartialSuccessPanDeregistrationResponse:
+      description: Unencrypted deregistration response with pans object containing list of pan and error descriptions. Counts fields showcase the number of pans processed successfully and unsuccessfully.
+      value:
+        panListId: '230417253818957824'
+        successfulCount: '2'
+        failureCount: '4'
+        sensitiveData:
+          pans:
+          - pan: '5110922275884793'
+            error:
+              reasonCode: pan.not.linked
+              description: pan not associated with the pan list
+          - pan: '5110922275884792'
+            error:
+              reasonCode: Invalid.pan
+              description: pan failed for Luhn check
+          - pan: '23037'
+            error:
+              reasonCode: Invalid.pan
+              description: pan doesn't have required 11-19 digits
+          - pan: '5555552292032404'
+            error:
+              reasonCode: pan.not.registered
+              description: pan not present
+    BadRequestPanListIdRegexValidationError:
+      description: Error when pan list id does not align with regex.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-consumer-api
+            ReasonCode: 'invalid.data: panListId'
+            Description: must match "^[0-9]{18}$"
+            Recoverable: false
+            Details: ''
+    BadRequestInvalidEncryptedValueValidationError:
+      description: Error when encryptedValue is is not provided / null.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-consumer-api
+            ReasonCode: 'invalid.data: encryptedValue'
+            Description: must not be null or empty
+            Recoverable: false
+            Details: ''
+    PartialSuccessPanDeregistrationResponse:
+      description: Response body of a partial success deregistration. Counts fields showcase the number of pans processed successfully and unsuccessfully. In case of the partial success response both successfulCount and failureCount will have the corresponding counts of the pans whether they are successful or failed. The encryptedValue will have the (encrypted sensitiveData object) with the corresponding error details like reasonCode and description.
+      value:
+        panListId: '230417253818957824'
+        successfulCount: '1'
+        failureCount: '1'
+        encryptedValue: eyJraWQiOiI3NjFiMDAzYzFlYWRlM(...).Y+oPYKZEMTKyYcSIVEgtQw
+  schemas:
+    ViewPan:
+      title: ViewPan
+      type: object
+      description: pan to be registered
+      properties:
+        pan:
+          type: string
+          description: The PAN (Primary Account Number) of an individual.
+          example: '5110923494472279'
+        error:
+          $ref: '#/components/schemas/PanError'
+    Pans:
+      title: Pans
+      type: array
+      description: An array of pan objects (Unencrypted encryptedValue).
+      items:
+        $ref: '#/components/schemas/Pan'
+    Pan:
+      title: Pan
+      type: object
+      description: Pan to be registered
+      properties:
+        pan:
+          type: string
+          pattern: ^[0-9]{11,19}$
+          description: The PAN (Primary Account Number) of an individual. Every pan is validated against Luhn algorithm.
+          example: '5110923494472279'
+    sensitiveConsumerReqData:
+      title: sensitiveData
+      type: object
+      description: This object explains the definition of the Highly Sensitive and Special handling data fields, which will be obtained when Mastercard decrypts the 'encryptedValue' field using JWE decryption using Mastercard provided client decryption libraries.
+      properties:
+        pans:
+          $ref: '#/components/schemas/Pans'
+    sensitiveConsumerResData:
+      title: sensitiveData
+      type: object
+      description: This object explains the definition of the Highly Sensitive and Special handling data fields, which will be obtained when Mastercard decrypts the 'encryptedValue' field using JWE decryption using Mastercard provided client decryption libraries.
+      properties:
+        pans:
+          $ref: '#/components/schemas/ViewPans'
+    Deregistration:
+      type: object
+      description: pan deregistration object
+      properties:
+        panListId:
+          type: string
+          description: The unique identifier for the panList.
+          maxLength: 18
+          example: '230417253818957824'
+        successfulCount:
+          type: string
+          description: Count of the successful pans
+          example: '1'
+        failureCount:
+          type: string
+          description: Count of the failed pans
+          example: '1'
+        sensitiveData:
+          $ref: '#/components/schemas/sensitiveConsumerResData'
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object which gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    PanError:
+      title: PanError
+      type: object
+      description: This contains the error description and reason about why the pan failed during registration/deregistration
+      properties:
+        reasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: invalid.request.parameter
+        description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with correct request.
+    PanDeregistrationBody:
+      type: object
+      description: Request object for a pan deregistration
+      required:
+      - panListId
+      properties:
+        panListId:
+          type: string
+          description: The unique identifier for the panList.
+          pattern: ^[0-9]{18}$
+          example: '230417253818957824'
+        sensitiveData:
+          $ref: '#/components/schemas/sensitiveConsumerReqData'
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns the list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ViewPans:
+      title: View panLists
+      type: array
+      description: List of failed pans associated with the request (Decrypted encryptedValue)
+      items:
+        $ref: '#/components/schemas/ViewPan'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    Error:
+      title: Error
+      type: object
+      description: Error object which contains details about the Error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error.
+          minLength: 1
+          maxLength: 100
+          example: Mastercard Installments APIs
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: invalid.request.parameter
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with the correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+  requestBodies:
+    PanDeregistrationBody:
+      description: Request object for pans deregistration.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PanDeregistrationBody'
+          examples:
+            PAN Deregistration Encrypted (Only for reference):
+              $ref: '#/components/examples/PanDeregistrationRequest'
+            PAN Deregistration Request Plain:
+              $ref: '#/components/examples/UnencryptedPanDeregistrationRequest'
+  responses:
+    ConsumerForbiddenError:
+      description: This response code is returned when API or resource access is not approved for the client.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ForbiddenError:
+              $ref: '#/components/examples/ConsumerForbiddenError'
+    ConsumerUnauthorized:
+      description: Authorization information is missing or invalid.
+      headers:
+        Correlation-Id:
+          $ref: '#/components/headers/Correlation-Id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            Unauthorized:
+              $ref: '#/components/examples/UnauthorizedError'
+    Deregistration:
+      description: Response object for pan deregistration.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Deregistration'
+          examples:
+            PartialSuccessPanDeregistration:
+              $ref: '#/components/examples/PartialSuccessPanDeregistrationResponse'
+            FullSuccessPanDeregistration:
+              $ref: '#/components/examples/FullSuccessPanDeregistrationResponse'
+            FailurePanDeregistration:
+              $ref: '#/components/examples/FailurePanDeregistrationResponse'
+            UnencryptedPartialSuccessPanDeregistration(For reference):
+              $ref: '#/components/examples/UnencryptedPartialSuccessPanDeregistrationResponse'
+    BadRequestPanDeregistrationError:
+      description: This response code is returned when a request is invalid, or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            PanListIdRegex:
+              $ref: '#/components/examples/BadRequestPanListIdRegexValidationError'
+            PanListIdNull:
+              $ref: '#/components/examples/BadRequestPanListIdNullValidationError'
+            PanListIdNotFound:
+              $ref: '#/components/examples/BadRequestPanListIdNotFoundValidationError'
+            InvalidEncryptedValue:
+              $ref: '#/components/examples/BadRequestInvalidEncryptedValueValidationError'
+  headers:
+    Correlation-Id:
+      description: Correlation-Id response header to trace the request.
+      schema:
+        type: string
+      required: true
+      example: 44dc28d6-cf59-11ec-9d64-0242ac120002

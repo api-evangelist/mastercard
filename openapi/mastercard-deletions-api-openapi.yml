@@ -1,0 +1,849 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Deletions API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Deletions
+paths:
+  /payment-card-deletions:
+    post:
+      tags:
+      - Deletions
+      summary: Delete one or more Payment Cards (to be deprecated)
+      description: 'Allows a registered Service Provider to delete one or more Payment Cards from its profile. Any data associated with a requested paymentCardId will also be deleted permanently.
+
+
+        On the successful response from the server, a Service Provider should remove all the requested paymentCardIds from the system.
+
+
+        Once a request has been received from a Service Provider, data deletion will happen immediately.
+
+        '
+      operationId: PaymentCardDeletions
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentCardIds'
+      responses:
+        '202':
+          $ref: '#/components/responses/Accepted'
+        '400':
+          $ref: '#/components/responses/PaymentCardDeletionsBadRequestError'
+        '404':
+          $ref: '#/components/responses/PaymentCardDeletionsNotFoundError'
+        '415':
+          $ref: '#/components/responses/ServiceProviderUnsupportedMediaTypeError'
+  /issuers/user-deletions:
+    post:
+      tags:
+      - Deletions
+      summary: Mastercard Delete One or More Users.
+      description: <ul><li>Allows a registered Service Provider to delete one or more users.</li> <li>Payment cards associated with the user will also be deleted.</li> <li>On a successful response from the Server, the Service Provider should remove all the requested users and associated payment cards from the system.</li></ul>
+      operationId: deleteUsers
+      requestBody:
+        $ref: '#/components/requestBodies/UserIDs'
+      responses:
+        '202':
+          $ref: '#/components/responses/UserIDs'
+        '400':
+          $ref: '#/components/responses/DeleteUserBadRequestError'
+        '401':
+          $ref: '#/components/responses/DeleteUserUnauthorisedError'
+        '404':
+          $ref: '#/components/responses/DeleteUserNotFoundError'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /user-profiles/identity-attribute-deletions:
+    post:
+      tags:
+      - Deletions
+      responses:
+        '200':
+          $ref: '#/components/responses/IdentityAttributeDeletionsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: "Delete an identity attribute from a PDS and update the affected assurance levels. Requires GPA authentication.   \n**This API is mandatory.**\n"
+      summary: Delete Document.
+      operationId: deleteIdentityAttribute
+      parameters:
+      - $ref: '#/components/parameters/XUserIdentityParameter'
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/IdentityAttributeDeletionsRequest'
+components:
+  schemas:
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns a list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    PaymentCardId:
+      type: string
+      minLength: 36
+      maxLength: 36
+      pattern: ^[0-9A-Fa-f\-]{36}
+      description: Unique ID provided in the response while registering a payment card.
+      example: c5d88571-ac15-465a-a0d8-1ad1327b9a06
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    Error:
+      title: Error
+      type: object
+      description: Error object which contains details about the error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error. Every error message that is generated and returned by the gateway will have this field equal to Gateway. Other possible values are 'Carbon-Calculator' and 'Service-Provider'.
+          minLength: 1
+          maxLength: 100
+          example: Service-Provider-Mgmt
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: INVALID_REQUEST_PARAMETER
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+    Errors_2:
+      title: Errors
+      type: object
+      description: Error object which contains a list of error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error_2'
+          example: []
+    ErrorWrapper_2:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors_2'
+    UserID:
+      type: string
+      minLength: 36
+      maxLength: 36
+      pattern: ^[0-9A-Fa-f-]{36}
+      description: Unique identifier for a user enrolled in the Carbon Calculator Experience platform.
+      example: f5d88571-ac15-465a-a0d8-1ad1327b9a06
+    Error_2:
+      title: Error
+      type: object
+      description: Error object which contains details about a single error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error. If an error is generated and returned by the gateway, then this field will have value as `Gateway`. Other possible values are `CARBON CALCULATOR`, `DONATE`, `CARBON_CALCULATOR_EXPERIENCE` or `PRICELESS PLANET`.
+          minLength: 1
+          maxLength: 100
+          example: CARBON_CALCULATOR_EXPERIENCE
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: INVALID_REQUEST_PARAMETER
+        Description:
+          type: string
+          description: Short description of the `ReasonCode` field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: email must not be null.
+    TpAuditMetadata:
+      required:
+      - sessionId
+      - transactionGroupId
+      type: object
+      description: Object containing metadata related to the request.
+      properties:
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+    PDS:
+      type: string
+      description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
+      pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+      minLength: 1
+      example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      description: The error response model used by all the API endpoints.
+      properties:
+        Errors:
+          required:
+          - Error
+          type: object
+          description: The error response model used by all the API endpoints.
+          properties:
+            Error:
+              type: array
+              description: A list of Error objects.
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The source of the problem. That is where the error occurred.
+                    example: mids
+                  ReasonCode:
+                    type: string
+                    description: A code defining the error, as defined in documentation.
+                    example: USER_PROFILE_ID_NOT_FOUND
+                  Description:
+                    type: string
+                    description: A description of this specific occurrence of the Reason code.
+                    example: The provided user profile ID does not exist.
+                  Recoverable:
+                    type: boolean
+                    description: Whether or not retrying this request could result in a successful response.
+                    example: false
+                  Details:
+                    type: string
+                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+                    example: User X was not found
+                  redirectUri:
+                    type: string
+                    description: TP will use this URI to redirect to RP.
+                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    IdentityAttributeDeletions:
+      required:
+      - pds
+      - attributeName
+      - userConsent
+      - attributeId
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        attributeName:
+          type: string
+          description: The name of the attribute to be deleted.
+          enum:
+          - PASSPORT
+          - DRIVER_LICENSE
+          example: PASSPORT
+        attributeId:
+          type: string
+          description: The identifier of the attribute being queried. This can be retrieved from a call to either the authentication-decisions API, or the user-profiles/identity-searches API.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 1
+          example: cf11bb8d-b1b1-49c7-90ed-c63134cd1008
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    AuditEventsItem:
+      type: object
+      properties:
+        dateTime:
+          type: string
+          description: Date and time at which the event is created.
+          minLength: 1
+          maxLength: 29
+          example: '2020-01-28T13:16:01.714-05:00'
+        softwareVersion:
+          type: string
+          description: Software version.
+          minLength: 1
+          maxLength: 30
+          example: 1.0.0
+        userProfileId:
+          type: string
+          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 123ae1aa-6744-433e-879d-7da48d631234
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 28eae1aa-6744-433e-879d-7da48d63e89a
+        logRequestFlow:
+          type: string
+          description: Log Request Flow.
+          minLength: 1
+          maxLength: 255
+          example: CoreSDK-TP
+        logEvent:
+          type: string
+          description: Log Event.
+          minLength: 0
+          maxLength: 255
+          example: ID Enrollment
+        logEventType:
+          type: string
+          description: Log Event Type.
+          minLength: 1
+          maxLength: 255
+          example: User Profile Creation
+        osVersion:
+          type: string
+          description: OS version.
+          minLength: 1
+          maxLength: 255
+          example: Android 5.0
+        deviceMake:
+          type: string
+          description: Device make.
+          minLength: 1
+          maxLength: 255
+          example: Samsung S10
+        type:
+          type: string
+          description: Type of the event.
+          minLength: 1
+          maxLength: 255
+          example: audit
+        audit:
+          type: object
+          description: Represents the audit event.
+          properties:
+            privacyPolicy:
+              type: string
+              description: Version user confirmed.
+              minLength: 1
+              maxLength: 20
+              example: 1.0.0
+            userBiometricConsent:
+              type: string
+              description: User consent to capture details.
+              enum:
+              - 'TRUE'
+              - 'FALSE'
+              - NA
+              minLength: 4
+              maxLength: 5
+              example: 'TRUE'
+            event:
+              type: string
+              description: Event.
+              minLength: 1
+              maxLength: 255
+              example: Document Scan
+            eventType:
+              type: string
+              description: EventType.
+              minLength: 1
+              maxLength: 255
+              example: Enrollment
+            result:
+              type: string
+              description: API Call result.
+              enum:
+              - 'TRUE'
+              - 'FALSE'
+              - FAIL
+              minLength: 4
+              maxLength: 5
+              example: 'TRUE'
+            eventGeneratedSource:
+              type: string
+              description: Event generated source.
+              minLength: 1
+              maxLength: 50
+              example: CoreSDK
+            owner:
+              type: string
+              description: Owner.
+              minLength: 2
+              maxLength: 4
+              example: TP
+            requestDetails:
+              type: object
+              description: Request Details.
+              example: Request URL
+            responseDetails:
+              type: object
+              description: Response Details.
+              example: Response Data
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
+    UserConsent:
+      enum:
+      - ACCEPT
+      - DECLINE
+      - REVOKE
+      - EXPIRE
+      type: string
+      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
+      pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+      minLength: 6
+      maxLength: 7
+      example: ACCEPT
+    IdentityAttributeDeleted:
+      required:
+      - pds
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+  headers:
+    Location:
+      description: The URL to check on status of resource
+      schema:
+        type: string
+  examples:
+    PaymentCardDeletionsRequestValidationError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with the correct request.
+            Recoverable: false
+            Details: ''
+    PaymentCardDeletionsInvalidCardIdError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One or more payment card IDs in the request are invalid, try again by sending valid Ids.
+            Recoverable: false
+            Details: paymentCardId must match "^[0-9A-Fa-f\-]{36}"
+    ServiceProviderUnsupportedMediaTypeError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: UNSUPPORTED_MEDIA_TYPE
+            Description: Requested media type is not supported, try again with the supported media type.
+            Recoverable: false
+            Details: ''
+    ServiceProviderNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: ACCOUNT_NOT_FOUND
+            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
+            Recoverable: false
+            Details: ''
+    PaymentCardNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: PAYMENT_CARD_NOT_FOUND
+            Description: Paymentcards not found for the given payment card ids.
+            Recoverable: false
+            Details: ''
+    IssuerInactiveError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_INACTIVE
+            Description: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+    UnsupportedMediaTypeError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: UNSUPPORTED_MEDIA_TYPE
+            Description: The requested media type is not supported, try again with supported media type.
+            Recoverable: false
+            Details: ''
+    InvalidUserIdLengthError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: userId must match "^[0-9A-Fa-f\-]{36}"
+    IssuerSuspendedError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_SUSPENDED
+            Description: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
+    UserCountError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: true
+            Details: Request body should have at least 1 or not more than 500 userIds
+    IssuerNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: SERVICE_PROVIDER_NOT_FOUND
+            Description: Service provider clientId is not Identified
+            Recoverable: false
+            Details: Client not found.
+    IssuerTerminatedError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_TERMINATED
+            Description: Your account has been terminated, you won't be able to access any service. Kindly register yourself again.
+            Recoverable: false
+            Details: Your account has been terminated, you won't be able to access any service. Kindly register yourself again.
+    UserIDs:
+      value:
+      - 4ba581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+      - c5d88571-ac15-465a-a0d8-1ad1327b9a06
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
+            Recoverable: false
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+    UserProfileDeletedErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_DELETED
+            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
+            Recoverable: false
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided user profile ID does not exist.
+            Recoverable: false
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+  responses:
+    ServiceProviderUnsupportedMediaTypeError:
+      description: This response code is returned when the value of provided Content-Type parameter is other than expected.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderUnsupportedMediaTypeError:
+              $ref: '#/components/examples/ServiceProviderUnsupportedMediaTypeError'
+    Accepted:
+      description: Accepted
+      headers:
+        Location:
+          $ref: '#/components/headers/Location'
+    PaymentCardDeletionsNotFoundError:
+      description: This response code is returned when the server cannot find the account or one or more paymentcards which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+            PaymentCardNotFoundError:
+              $ref: '#/components/examples/PaymentCardNotFoundError'
+    PaymentCardDeletionsBadRequestError:
+      description: This response code is returned when either a request is invalid or one or more paymentCardIds are invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            PaymentCardDeletionsRequestValidationError:
+              $ref: '#/components/examples/PaymentCardDeletionsRequestValidationError'
+            PaymentCardDeletionsInvalidCardIdError:
+              $ref: '#/components/examples/PaymentCardDeletionsInvalidCardIdError'
+    UnsupportedMediaTypeError:
+      description: This response code is returned when the MediaType in the request is other than application/json format.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            UnsupportedMediaTypeError:
+              $ref: '#/components/examples/UnsupportedMediaTypeError'
+    UserIDs:
+      description: The response object contains a list of deleted user IDs
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/UserID'
+          examples:
+            DeletedUserIds:
+              $ref: '#/components/examples/UserIDs'
+    DeleteUserNotFoundError:
+      description: This response code is returned when a user or Issuer is not present.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            IssuerNotFoundError:
+              $ref: '#/components/examples/IssuerNotFoundError'
+    DeleteUserUnauthorisedError:
+      description: This response code is returned when a user is terminated or inactive.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            IssuerInactiveError:
+              $ref: '#/components/examples/IssuerInactiveError'
+            IssuerSuspendedError:
+              $ref: '#/components/examples/IssuerSuspendedError'
+            IssuerTerminatedError:
+              $ref: '#/components/examples/IssuerTerminatedError'
+    DeleteUserBadRequestError:
+      description: This response code is returned when a request is invalid or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            UserCountError:
+              $ref: '#/components/examples/UserCountError'
+            InvalidUserIdLengthError:
+              $ref: '#/components/examples/InvalidUserIdLengthError'
+    UnauthorizedError:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    NotFoundError:
+      description: The request didn't match an existing resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    IdentityAttributeDeletionsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentityAttributeDeleted'
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
+  requestBodies:
+    PaymentCardIds:
+      description: List of paymentCardIds for which all associated data needs to be deleted.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PaymentCardId'
+            minItems: 1
+            maxItems: 100
+          example:
+          - c5d88571-ac15-465a-a0d8-1ad1327b9a06
+          - 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+          - 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+          - b86fd2ba-c095-4acb-b9df-f3805655ba24
+    UserIDs:
+      description: List of user ids
+      required: true
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/UserID'
+            minItems: 1
+            maxItems: 500
+          examples:
+            UserIDs:
+              $ref: '#/components/examples/UserIDs'
+    IdentityAttributeDeletionsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentityAttributeDeletions'
+      required: true
+  parameters:
+    XEncryptedPayload:
+      in: header
+      name: X-Encrypted-Payload
+      type: boolean
+      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
+
+        '
+      example: true
+      schema: null
+    XUserIdentityParameter:
+      in: header
+      name: X-User-Identity
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      description: 'JWT token for session validation. Returned as response header in previous API calls with key X-User-Identity.
+
+        '
+      schema:
+        type: string

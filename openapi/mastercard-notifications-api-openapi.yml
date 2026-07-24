@@ -1,0 +1,2907 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Notifications API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Notifications
+  description: Notification Operations - Retrieving collection of generated notifications
+paths:
+  /notifications:
+    get:
+      summary: Getting notifications
+      description: 'This endpoint represents the collection of notifications that have been generated for the client within the retention period for notifications. A GET on this endpoint retrieves the notifications in a paginated manner.
+
+        '
+      tags:
+      - Notifications
+      operationId: getNotifications
+      parameters:
+      - $ref: '#/components/parameters/startDateParam'
+      - $ref: '#/components/parameters/endDateParam'
+      - $ref: '#/components/parameters/subscriptionNameParam'
+      - $ref: '#/components/parameters/subjectNameParam'
+      - $ref: '#/components/parameters/pushStatusParam'
+      - $ref: '#/components/parameters/notificationsOffsetParam'
+      - $ref: '#/components/parameters/notificationsLimitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/GetNotificationResponse'
+        '400':
+          $ref: '#/components/responses/NotFound'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+      - Notifications
+      description: This is an outbound notification from Mastercard Installments to customers API endpoint, to notify about an installment offer availed by a cardholder. This is an optional notification as per Issuers selection, which is configured as part of customer onboarding on Mastercard Installment program. This endpoint requires partial request payload encryption to encrypt sensitive data, consumers primary account number as part of encryptedValues field. Please refer to request specification for more details. The encryption/decryption needs to be performed using [JWE payload encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/#jwe-encryption). Please refer to the [Securing Sensitive Data Using Payload Encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/) sections for implementation details.
+      operationId: notifyPlan
+      parameters:
+      - $ref: '#/components/parameters/PlanNotifCorrelationIdHeaderParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/PlanProcessorRequestBody'
+      responses:
+        '201':
+          $ref: '#/components/responses/PlanNotifSuccessResponse'
+        '400':
+          $ref: '#/components/responses/PlanNotifBadRequestError'
+        '401':
+          $ref: '#/components/responses/PlanNotifUnauthorizedError'
+        '403':
+          $ref: '#/components/responses/PlanNotifForbiddenError'
+        '404':
+          $ref: '#/components/responses/PlanNotifNotFoundError'
+        '429':
+          $ref: '#/components/responses/PlanNotifTooManyRequestError'
+      summary: Notifies Issuer or Processor about an Installment offer availed by a cardholder.
+components:
+  schemas:
+    ICCPAuthorizationNotificationContent:
+      description: The content of the notification, the structure of which depends on the subject.
+      type: object
+      properties:
+        messageTypeIndicator:
+          description: 'Message Type Identifier. Following are the possible values for messageTypeIndicator: 0110 (Authorization Response), 0120 (Authorization Advice), 0400 (Reversal Request) and 0420 (Reversal Advice).'
+          type: string
+          minLength: 4
+          maxLength: 4
+          example: '0110'
+        systemTraceAuditNumber:
+          description: Systems Trace Audit Number (STAN) is a number a message initiator assigns to uniquely identify a transaction. This value is derived from DE 11.
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: '011174'
+        financialNetworkCode:
+          description: Financial network code derived from DE 63, subfield 1 identifies the specific program or service (for example, the financial network, financial program, or card program) with which the transaction is associated.
+          type: string
+          example: MCC
+        banknetReferenceNumber:
+          description: Banknet reference number derived from DE 63, subfield 2 is generated by the Authorization Platform for each originating message it routes. The reference number is guaranteed to be a unique value for any transaction within the specified financial network on any processing day.
+          type: string
+          example: Q4A91A
+        transactionAmount:
+          description: The transaction amount represented in minor units, which are the smallest units of a currency. The value is determined by the number of decimal places associated with the currency. Refers to DE 63, subfield 2.
+          type: number
+          example: 7550
+        transactionCurrencyCode:
+          description: Currency of the transaction (merchant currency) refers to DE 49.
+          type: string
+          example: USD
+        billingAmount:
+          description: Cardholder billing amount (DE 6) indicates the transaction amount in the issuers currency. It is the amount billed to the cardholder in the cardholder account currency, excluding cardholder billing fees and is represented in minor units, which are the smallest units of a currency. The value is determined by the number of decimal places associated with the currency.
+          type: number
+          example: 7550
+        billingCurrencyCode:
+          description: The currency code of the cardholder billing defines the currency of DE 6 (Amount, Cardholder Billing).
+          type: string
+          example: USD
+        responseCode:
+          description: DE 39 (Response Code) defines the disposition of a previous message or an action taken as a result of receipt of a previous message. Response codes also are used to indicate approval or decline of a transaction. In the event an authorization is declined, the response code indicates the reason for rejection and may indicate an action to be taken at the card acceptor (for example, capture card).
+          type: string
+          example: '00'
+        authorizationCode:
+          description: DE 38 (Authorization ID Response) contains the online authorization code provided by the issuer on the original authorization response. It is a transaction response ID code that the authorizing institution assigns. DE 38 is used to transmit a card issuers authorization code for Authorization transactions. In general, the authorization code used in DE 38 may be any combination of alphanumeric characters.
+          type: string
+          example: '502359'
+        transmissionRawDate:
+          description: DE 7, subfield 1 (Date) is the date (UTC) that the message was entered into the Mastercard Network in the format MMDD.
+          type: string
+          example: '1103'
+        transmissionRawTime:
+          description: DE 7, subfield 2 (Time) is the time (UTC) that the message was entered into the Mastercard Network in the format HHmmss.
+          type: string
+          example: '101611'
+        settlementDate:
+          description: Referring to DE 15, the reporting date to which a transaction applies in the format MMDD. This is the UTC date that the authorization is processed, not the date on which settlement will occur.
+          type: string
+          example: 0930
+        cardHolderTransactionTypeCode:
+          description: DE 3, subfield 1 describes the specific transaction type.
+          type: string
+          example: '00'
+        posTransactionStatus:
+          description: 'DE 61, subfield 7 indicates the purpose or status of the request. Following are the possible values for posTransactionStatus:  0 (Normal request [original presentment]),  2 (Identity Check Phone Order),  3 (ATM Installment Inquiry),  4 (Preauthorization request),  5 (Time Based Payment Authorization RequestBrazil domestic transactions),  6 (ATC Update),  8 (Account Status Inquiry Service (ASI)),  9 (Tokenization Request/Notification).'
+          type: string
+          example: '0'
+        traceId:
+          description: Contains data from DE 63 (Network Data), subfield 1 (Financial Network Code) and subfield 2 (Banknet Reference Number) and DE 15 (Date, Settlement) that is in the original Authorization Request Response/0110 message.
+          type: string
+          example: 'MCC9999991231  '
+        merchant:
+          description: Merchant details
+          type: object
+          properties:
+            merchantId:
+              description: DE 42 (Card Acceptor ID Code) identifies the card acceptor that defines the point of the transaction in both local and interchange environments. DE 42 is used as a merchant ID to uniquely identify the merchant in a POS transaction.
+              type: string
+              example: '497520000000000'
+            categoryCode:
+              description: DE 18 (Merchant Type) is the classification (card acceptor business code/merchant category code [MCC]) of the merchants type of business or service.
+              type: string
+              example: '5542'
+            name:
+              description: DE 43 (Acceptor Name and Location), subfield 1 (Acceptor Name) contains the merchant name against the merchant id. Merchant name is the merchant doing business as name.
+              type: string
+              example: JASPERHITECH
+            city:
+              description: ContainsDE 43 (Acceptor Name and Location), subfield 3 (Acceptor City) indicates the city of the merchant.
+              type: string
+              example: Jasper
+            stateOrCountryCode:
+              description: DE 43, subfield 5 contains the ISO 3166-1 country code of the merchant.
+              type: string
+              example: TN
+        realPaymentCard:
+          description: Real Payment Card Details
+          type: object
+          properties:
+            number:
+              description: DE 2 (Primary Account Number [PAN]) is a series of digits (represented masked) used to identify a customer account or relationship.
+              type: string
+              example: '************0112'
+            expiryMonth:
+              description: DE 14 (Date, Expiration) specifies the year and month after which an issuer assigns a cardholders card to be expired.
+              type: string
+              example: '12'
+            expiryYear:
+              description: DE 14 (Year, Expiration) specifies the year and month after which an issuer assigns a cardholders card to be expired.
+              type: string
+              example: '24'
+        virtualPaymentCard:
+          description: Virtual Payment Card Details
+          type: object
+          properties:
+            number:
+              description: DE 48, subelement 33, subfield 2 (Account Number) indicates the PAN (represented masked) mapping account number.
+              type: string
+              example: '************6213'
+            expiryMonth:
+              description: DE 48, subelement 33, subfield 3 (Expiration Date) indicates the expiration date of the PAN mapping account in format YYMM.
+              type: string
+              example: 09
+            expiryYear:
+              description: DE 48, subelement 33, subfield 3 (Expiration Date) indicates the expiration date of the PAN mapping account in format YYMM.
+              type: string
+              example: '27'
+        inControlOnBehalfServiceResult:
+          description: In Control Service Result details, derived from DE 48 (Additional DataPrivate Use). DE 48 is reserved for private organizations to define data unique to specific networks or specific programs and services. DE 48 provides other supplemental data in a message when a specific ISO-designated data element is not available. It is a free-format, variable-length data element that may be used for multiple purposes.
+          type: object
+          properties:
+            rcnServiceResultCode:
+              description: In Control RCN Spend Control Service (generally will be null). DE 48, subelement 71 (On-behalf [OB] Services) notifies the issuer of the On-behalf Service performed on the transaction and the results. Subelement 71 will support up to ten services for a transaction.
+              type: string
+              example: ''
+            vcnServiceResultCode:
+              description: VCN Service Result Code. DE 48, subelement 71 (On-behalf [OB] Services) notifies the issuer of the On-behalf Service performed on the transaction and the results. Subelement 71 will support up to ten services for a transaction.
+              type: string
+              example: V
+        originalMessage:
+          description: Original message identifying information, in the case of a follow-up message. DE 90 (Original Data Elements) is the data elements in the original message, intended to identify a transaction for correction or reversal.
+          type: object
+          properties:
+            messageTypeIndicator:
+              description: DE 90, subfield 1 (Original Message Type Identifier) indicates the Message Type Identifier (MTI) of the original message.
+              type: string
+              minLength: 4
+              maxLength: 4
+              example: '0110'
+            systemTraceAuditNumber:
+              description: DE 90, subfield 2 (Original DE 11 [Systems Trace Audit Number]) indicates the Systems Trace Audit Number (STAN) that was in DE 11 of the original message.
+              type: string
+              example: '11174'
+            transmissionRawDateTime:
+              description: DE 90, subfield 3 (Original DE 7 [Transmission Date and Time]) indicates the Transmission Date and Time that was in DE 7 of the original message.
+              type: string
+              example: '1029112800'
+        advice:
+          description: Advice information (valid for advice messages only, MTI=04xx).
+          type: object
+          properties:
+            reasonCode:
+              description: DE 60, subfield 1 (Advice Reason Code) indicates to the receiver of an Advice message the specific reason for the transmission of the Advice message.
+              type: string
+              example: '650'
+        replacementAmounts:
+          description: Replacement amounts, applicable for reversals, indicate the new values that replace the amounts in the original transaction. These amounts are represented in minor units, which are the smallest unit of a currency and vary depending on the number of decimal places used by the currency.
+          type: object
+          properties:
+            transactionAmount:
+              description: DE 95, subfield 1 (Actual Amount, Transaction) indicates the actual transaction amount. The amount for the replacement transaction represented in minor units, which are the smallest units of a currency. The value is determined by the number of decimal places associated with the currency.
+              type: number
+              example: 1200
+            settlementAmount:
+              description: DE 95, subfield 2 (Actual Amount, Settlement) indicates the actual settlement amount in the settlement currency. The amount for the settlement transaction represented in minor units, which are the smallest units of a currency. The value is determined by the number of decimal places associated with the currency.
+              type: number
+              example: 1200
+            billingAmount:
+              description: DE 95, subfield 3 (Actual Amount, Cardholder Billing) the actual amount in the issuer currency represented in minor units, which are the smallest units of a currency. The value is determined by the number of decimal places associated with the currency.
+              type: number
+              example: 1200
+        purchaseRequest:
+          description: Purchase Request Details
+          type: object
+          properties:
+            purchaseRequestId:
+              description: ICCP Purchase Request ID - uniquely identifies the purchase request and VCN
+              type: integer
+              example: 5213
+            rcnAlias:
+              description: Real card number alias
+              type: string
+              example: Travel Expense RCN
+            companyId:
+              description: ICCP Company ID - uniquely identifies the company that created the VCN
+              type: integer
+              example: 233191
+            companyGuid:
+              description: ICCP Company GUID - alternative ID to uniquely identify the company that created the VCN
+              type: string
+              example: SENTTY9951972A6FC0206CB494B560E5E6DC5D02A2BD21D89612EF4A18358ECC777DCF1494921797
+            issuerGuid:
+              description: ICCP Issuer GUID - uniquely identifies the issuer of the RCN funding the VCN
+              type: string
+              example: SENTTY5E4C4B4E0D1BF5991E64A1E0745F40A85B2510CE48EB537011DCED3C483669D61494938440
+    ICCPClearingNotificationContent:
+      description: The content of the notification, the structure of which depends on the subject.
+      type: object
+      properties:
+        clearingTransactionId:
+          description: Specifies the Clearing Incontrol transaction id.
+          type: integer
+          example: 123
+        type:
+          description: Incontrol specific field indicating if its a D(Debit) or C(Credit)
+          type: string
+          example: C
+        acquirerReferenceData:
+          description: The twenty-three-character alphanumeric acquirer Reference Data is data an acquirer supplies in an acquirer-originated message that may be required for an issuer to return to the acquirer in a subsequent message. DE 31 (Acquirer Reference Data) is data an acquirer supplies in an acquirer-originated message that may be required for an issuer to return to the acquirer in a subsequent message.
+          type: string
+          example: '39663858658842283834864'
+        functionCode:
+          description: The three-digit numeric function Code indicates a message specific purpose. DE 24 (Network International ID) identifies a single international network of card issuers.
+          type: integer
+          example: 200
+        messageTypeId:
+          description: 'Four-digit numeric field describing the type of message being interchanged. Possible values are: 1240-Presentment,  1442-Chargeback,  1644-Administrative,  1740-Fee Collection'
+          type: integer
+          example: 1240
+        txnType:
+          description: Specifies the ICCP derived field from Message Type.
+          type: string
+          example: First Presentment
+        isMastercardSwitched:
+          description: Specifies the flag used to indicate if transaction is to or from issuer. Possible values are T(True) or F(False), where T = To Issuer (switched), F = From Issuer (non-switched).
+          type: string
+          example: T
+        receiverId:
+          description: Identifies the transaction destination institution. DE 100 (Receiving Institution ID Code) is the identity of the institution receiving a Request or Advice message in an interchange system if not the same as identified in DE 2 (Primary Account Number [PAN]) or DE 34 (Primary Account Number [PAN], Extended).
+          type: string
+          example: '105678'
+        messageReasonCode:
+          description: The four-digit numeric code provides the message receiver with the reason for sending the message. DE 25 (Point-of-Service [POS] Condition Code) is an ID of the condition under which the transaction takes place at the point of interaction.
+          type: integer
+          example: 1401
+        originalTransactionId:
+          description: Specifies the In Control identifier for linked transaction. In Control txn ID of an original message.
+          type: integer
+          example: 127
+        conversionRateCardholderBilling:
+          description: Transaction exchange rate. DE 10 (Conversion Rate, Cardholder Billing) is the factor used in the conversion from transaction to cardholder billing amount. DE 4 (Amount, Transaction) is multiplied by DE 10 to determine DE 6 (Amount, Cardholder Billing).
+          type: number
+          example: 2
+        authCode:
+          description: The six-digit alphanumeric code used as authorization approval code of the issuer. DE 38 (Authorization ID Response) is a transaction response ID code that the authorizing institution assigns. DE 38 is used to transmit a card issuers authorization code for Authorization transactions.
+          type: string
+          example: '111111'
+        processingCode:
+          description: The processing Code. DE 3 (Processing Code) describes the effect of a transaction on the customer account and the type of accounts affected.
+          type: string
+          example: '010000'
+        tokenPan:
+          description: Specifies the PAN associated with the token, with digits 0-9, where minimum length is 12, and maximum  length is 19.
+          type: string
+          example: '1234567891011'
+        posEntryMode:
+          description: Codes that identify terminal capability, terminal environment, and point-of-interaction (POI) security data. DE 22 (Point-of-Service [POS] Entry Mode) indicates the method used for PAN entry to initiate a transaction and the PIN entry capabilities.
+          type: string
+          example: 099999B99001
+        dateTimeTransactionLocal:
+          description: Transaction timestamp is a string type which indicates the Datetime at which the transaction takes place at the card acceptor location. It should be in ISO Date Time with Offset format yyyy-MM-ddTHH:mm:ssXXX. It is combination of DE 12 and DE 13. DE12 - DE 12 (Time, Local Transaction) is the local time at which the transaction takes place at the point of card acceptor location. DE 13 - DE 13 (Date, Local Transaction) is the local month and day on which the transaction takes place at the point of card acceptor location.
+          type: string
+          example: '2020-07-16T11:09:42.10+01:00'
+        settlementAmount:
+          description: Specifies the amount of funds to be transferred between the acquirer and the issuer
+          type: object
+          properties:
+            amount:
+              description: DE 5 (Amount, Settlement) is the amount of funds to be transferred between the acquirer and the issuer equal to DE 4 (Amount, Transaction) in the settlement currency. Mastercard programs and services use U.S. dollars as the currency of settlement.
+              type: number
+              example: 1234.56
+            currencyCode:
+              description: Specifies the currency code of funds to be transferred between the acquirer and the issuer.
+              type: string
+              example: '840'
+            currencyCodeAlphabetic:
+              description: Specifies the currency name of funds to be transferred between the acquirer and the issuer.
+              type: string
+              example: USD
+        reversalIndicator:
+          description: Flag which indicates the Reversal of a clearing. Supported values are true if this is a reversal, false otherwise.
+          type: boolean
+          example: 'false'
+        isMatched:
+          description: 'Status of the transaction. Values: S - Settled, F - Fraudulent. Incontrol specific status Clearing event should have only True or False value for this attribute. When value for event is Settled - S, it should be translated as True or else False.'
+          type: string
+          example: 'true'
+        originalOrLinked:
+          description: Determines if it is an Original or linked transaction. Possible values can be O (Original), or L (Linked)
+          type: string
+          example: L
+        controlsAppliedDateTime:
+          description: Specifies the Settlement date, and should be in ISO Date Time with Offset format "yyyy-MM-dd'T'HH:mm:ssXXX". Defaults to System Date if not written by Settlement Process in Incontrol.
+          type: string
+          example: '2019-07-03T11:09:42.10+01:00'
+        banknetReferenceNumber:
+          description: Banknet Reference Number is generated by the Authorization Platform for each originating message it routes. The reference number is guaranteed to be a unique value for any transaction within the specified financial network on any processing day. DE 63 (Network Data) is generated by the Authorization Platform for each originating message routed through the network. The receiver must retain the data element and use it in any response or acknowledgement message associated with the originating message.
+          type: string
+          example: 4977D7
+        destinationInstitutionIdCode:
+          description: Identity of the institution receiving a request is a numeric value range from 6 to 11 digits. DE 100 (Receiving Institution ID Code) is the identity of the institution receiving a Request or Advice message in an interchange system if not the same as identified in DE 2 (Primary Account Number [PAN]) or DE 34 (Primary Account Number [PAN], Extended). The Authorization Platform uses DE 100 to determine the destination routing of Administrative/06xx messages. For these messages, DE 33 (Forwarding Institution ID Code) identifies the sender of the message; DE 100 identifies the receiver of the message.
+          type: integer
+          example: 111111
+        acquirerInstitutionIdCode:
+          description: Interbank Card Association ID of the acquirer is numeric value range from 1 to 11 digits. DE 32 (Acquiring Institution ID Code) identifies the acquiring institution (for example, merchant bank) or its agent.
+          type: integer
+          example: 123456
+        forwardingInstitutionIdCode:
+          description: ICA of the processer if available. DE 33 (Forwarding Institution ID Code) identifies the institution forwarding a Request or Advice message in an interchange system if it is not the same institution as specified in DE 32 (Acquiring Institution ID Code). DE 33 is used within a message to contain the Mastercard six-digit customer ID number of the CPS or INF responsible for directly routing that message to the Authorization Platform.
+          type: integer
+          example: 322222
+        cardHolderAmount:
+          description: Indicates the transaction amount in the issuers currency. It is the amount billed to the cardholder in the cardholder account currency, excluding cardholder billing fees.
+          type: object
+          properties:
+            amount:
+              description: Indicates the value of transaction amount in the issuers currency.
+              type: integer
+              example: 1234.56
+            currencyCode:
+              description: Indicates the currency code of the transaction amount in the issuers currency.
+              type: string
+              example: 840
+            currencyCodeAlphabetic:
+              description: Indicates the currency name of the transaction amount in the issuers currency. It is the amount billed to the cardholder in the cardholder account currency, excluding cardholder billing fees
+              type: string
+              example: USD
+        authorization:
+          description: ''
+          type: object
+          properties:
+            authorizationTransactionId:
+              description: Specifies the Authorization Transaction ID used for matching.
+              type: integer
+              example: 2450
+            systemTraceAuditNumber:
+              description: Systems Trace Audit Number (STAN) is a number a message initiator assigns to uniquely identify a transaction.
+              type: integer
+              example: 2450
+            type:
+              description: 'Indicates the type of transaction. Valid values include: 0 = Auth,  1 = Advice,  2 = Reversal,  3 = Reversal advice,  4 = Offline Auth,  5 = Offline purchase return,  8 = Offline Auth for purchase return.  6,7 = Transaction types 6 & 7 are reserved for internal use'
+              type: integer
+              example: 0
+            acceptorLocalDate:
+              description: Transaction local date in the format of MMDD. DE 13 (Date, Local Transaction) is the local month and day on which the transaction takes place at the point of card acceptor location. This date must be specified in local time zone units, not in UTC units. The original value of this data element must not be changed.
+              type: string
+              example: 0912
+            acceptorLocalTime:
+              description: Transaction local time. DE 12 (Time, Local Transaction) is the local time at which the transaction takes place at the point of card acceptor location. Time must be specified in local time zone units, not in UTC units. The original value of this data element must not be changed.
+              type: string
+              example: '175603'
+            mtIdType:
+              description: Message Type Identifier. One of 0100 - Auth, 0120 - Advice, 0400 - Reversal, 0420 - Reversal Advice.
+              type: string
+              example: '0100'
+            cardHolderAmount:
+              description: ''
+              type: object
+              properties:
+                amount:
+                  description: DE 6 (Amount, Cardholder Billing) indicates the transaction amount in the issuers currency. It is the amount billed to the cardholder in the cardholder account currency, excluding cardholder billing fees.
+                  type: number
+                  example: 75
+                currencyCode:
+                  description: Indicates the currency code of the transaction amount in the issuers currency. It is the amount billed to the cardholder in the cardholder account currency, excluding cardholder billing fees.
+                  type: string
+                  example: 840
+                currencyCodeAlphabetic:
+                  description: Indicates the currency name of the transaction amount in the issuers currency. It is the amount billed to the cardholder in the cardholder account currency, excluding cardholder billing fees.
+                  type: string
+                  example: USD
+            effectOnBalance:
+              description: This value will be same as DE 6 in event of Partial Replacement. In Partial replacement DE 95.3 will replace DE 6.
+              type: integer
+              example: 75
+            acceptorAmount:
+              description: ''
+              type: object
+              properties:
+                amount:
+                  description: DE 4 (Amount, Transaction) is the amount of funds the cardholder requested in the local currency of the acquirer or source location of the transaction.
+                  type: number
+                  example: 999
+                currencyCode:
+                  description: Specifies the currency code of amount of funds the cardholder requested in the local currency of the acquirer or source location of the transaction.
+                  type: string
+                  example: 840
+                currencyCodeAlphabetic:
+                  description: Specifies the currency name of amount of funds the cardholder requested in the local currency of the acquirer or source location of the transaction.
+                  type: string
+                  example: USD
+        virtualPaymentCard:
+          description: Virtual Payment Card Details
+          type: object
+          properties:
+            number:
+              description: Specifies the Primary Account Number (PAN) of the VCN, which can have digits between 0 to 9, and has a length of 12 to 19 digits. The value is masked and only last four digits are visible.
+              type: string
+              example: '"************1234'
+            expiry:
+              description: Specifies the cardholders expiry in the format yyyy-MM
+              type: string
+              example: 2024-11
+        realPaymentCard:
+          description: Real Payment Card Details
+          type: object
+          properties:
+            number:
+              description: Specifies the Primary Account Number (PAN) of the RCN, which can have digits between 0 to 9, and has a length of 12 to 19 digits. The value is masked and only last four digits are visible.
+              type: string
+              example: '************7890'
+            expiry:
+              description: Specifies the cardholders expiry in the format yyyy-MM
+              type: string
+              example: 2026-11
+        acceptor:
+          description: ''
+          type: object
+          properties:
+            merchantCategoryCode:
+              description: Specifies the classification (card acceptor business code/merchant category [MCC] code) of the merchants type of business or service
+              type: string
+              example: '0041'
+            merchantCategoryCodeDescription:
+              description: Specifies the classification (card acceptor business code/merchant category [MCC] name) of the merchants type of business or service
+              type: string
+              example: GAMBLING TRANSACTIONS
+            id:
+              description: Identifies the card acceptor that defines the point of the transaction in both local and interchange environments. DE 42 is used as a merchant ID to uniquely identify the merchant in a POS transaction.
+              type: string
+              example: '305678'
+            terminalId:
+              description: Specifies the Point of Sale terminal Id
+              type: string
+              example: '98123456'
+            name:
+              description: Name of the supplier can be represented by max 22 alphanumeric character
+              type: string
+              example: AUTH_TEST
+            additionalMerchantName:
+              description: PDS 0171 (Alternate Card Acceptor Description Data) may provide a local language version of the data in DE 43 (Card Acceptor Name/Location) using a non-standard character set
+              type: string
+              example: GAMBLING TRANSACTIONS PVT LTD
+            retrievalReferenceNumber:
+              description: Specifies the Terminal transaction Number in a number format
+              type: string
+              example: '123456'
+            streetAddress:
+              description: Specifies the address of the merchant
+              type: string
+              example: 123 THE DRIVE
+            cityName:
+              description: City in which the merchant operates can be represented by max thirteen-character alphanumeric.
+              type: string
+              example: USA
+            subDivisionCode:
+              description: Specifies the three-character alphabetic State Code
+              type: string
+              example: CA
+            postalCode:
+              description: Specifies the post code for merchant address
+              type: string
+              example: '90213'
+            countryCode:
+              description: Specifies the merchant country codes, 3 digit country code
+              type: string
+              example: USA
+            countryCodeDescription:
+              description: Specifies the merchant country name
+              type: string
+              example: United States"
+            amount:
+              description: ''
+              type: object
+              properties:
+                value:
+                  description: Specifies the amount of funds the cardholder requested in the local currency of the acquirer or source location of the transaction
+                  type: number
+                  example: 999
+                currencyCode:
+                  description: Specifies the currency code of the funds the cardholder requested in the local currency of the acquirer or source location of the transaction
+                  type: string
+                  example: 840
+                currencyCodeAlphabetic:
+                  description: Specifies the currency name of the funds the cardholder requested in the local currency of the acquirer or source location of the transaction
+                  type: string
+                  example: USD
+        purchaseRequest:
+          description: Purchase Request Details
+          type: object
+          properties:
+            purchaseRequestId:
+              description: ICCP Purchase Request ID - uniquely identifies the purchase request and VCN
+              type: integer
+              example: 5213
+            rcnAlias:
+              description: Real card number alias
+              type: string
+              example: Travel Expense RCN
+            companyId:
+              description: ICCP Company ID - uniquely identifies the company that created the VCN
+              type: integer
+              example: 233191
+            companyGuid:
+              description: ICCP Company GUID - alternative ID to uniquely identify the company that created the VCN
+              type: string
+              example: SENTTY9951972A6FC0206CB494B560E5E6DC5D02A2BD21D89612EF4A18358ECC777DCF1494921797
+            issuerGuid:
+              description: ICCP Issuer GUID - uniquely identifies the issuer of the RCN funding the VCN
+              type: string
+              example: SENTTY5E4C4B4E0D1BF5991E64A1E0745F40A85B2510CE48EB537011DCED3C483669D61494938440
+    Error-403:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              type: array
+              description: An array of error objects giving information about relevant errors.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The origin of the error
+                    example: Commercial Event Notifications
+                  ReasonCode:
+                    type: string
+                    description: A unique error code representing the error that occurred
+                    example: subscriber.notAllowed
+                  Description:
+                    type: string
+                    description: A developer-friendly description of the error that occurred
+                    example: Access not allowed
+                  Recoverable:
+                    type: boolean
+                    description: Can the error be recovered by retrying the same request later?
+                    example: false
+                  Details:
+                    type: string
+                    description: Additional details regarding the error that occurred
+                    example: Subscriber with consumerKey 'INVALID_CONSUMER_KEY' doesn't have permissions to complete the request
+    ICMPLifecycleNotificationContent:
+      type: object
+      properties:
+        tokenInfo:
+          type: object
+          properties:
+            accountNumber:
+              description: Conatins the Token Account Number.
+              type: string
+              minLength: 12
+              maxLength: 19
+              example: XXXXXXXXXX4733
+            expiry:
+              description: Contains the token expiry date in YYYY-MM format.
+              type: string
+              minLength: 7
+              maxLength: 7
+              example: 2026-12
+            accountGuid:
+              description: The globally unique identifier of the token.
+              type: string
+              example: afb79fa1-da6c-44c7-adda-6d7f3931dda9
+            createdDate:
+              description: Date when the account was created, in ISO 8601 extended format. It can be either in UTC "YYYY-MM-DDThh:mm:ss[.sss]Z" or with an offset "YYYY-MM-DDThh:mm:ss[.sss]�hh:mm", where [.sss] is optional and can be 1 to 3 digits.
+              type: string
+              example: '2024-02-01T00:00:00Z'
+            activatedDate:
+              description: Date when the account was activated, in ISO 8601 extended format. It can be either in UTC "YYYY-MM-DDThh:mm:ss[.sss]Z" or with an offset "YYYY-MM-DDThh:mm:ss[.sss]�hh:mm", where [.sss] is optional and can be 1 to 3 digits.
+              type: string
+              example: '2024-02-12T00:00:00Z'
+            lastUpdatedDate:
+              description: Date when the account was last updated, in ISO 8601 extended format. It can be either in UTC "YYYY-MM-DDThh:mm:ss[.sss]Z" or with an offset "YYYY-MM-DDThh:mm:ss[.sss]�hh:mm", where [.sss] is optional and can be 1 to 6 digits.
+              type: string
+              example: '2024-02-12T15:19:36.633965Z'
+        tokenType:
+          description: Refers to the type of token requested for this digitization. Valid values are EMBEDDED_SE = Embedded Secure Element, CLOUD = Mastercard Cloud-Based, Payments | STATIC = Static token.
+          type: string
+          minLength: 1
+          maxLength: 16
+          example: CLOUD
+        eventType:
+          description: Refers to the type of the provisioning event. Valid values are CREATED, UPDATED, DELETED.
+          type: string
+          example: CREATED
+        tokenRequestorId:
+          description: Refers to the party that requested the digitization. This field is conditional and is required only if the tokens are assigned by MDES.
+          type: string
+          minLength: 11
+          maxLength: 11
+          example: '50134085386'
+        correlationId:
+          description: Contains the value linking pre-digitization messages generated during provisioning.
+          type: string
+          minLength: 1
+          maxLength: 14
+          example: D0013529619845
+        status:
+          description: 'The current status of token. Must be one of:  - INACTIVE - Token has not yet been activated, - ACTIVE - Token is active and ready to transact, - SUSPENDED - Token is suspended and unable to transact, - DEACTIVATED - Token has been permanently deactivated.'
+          type: string
+          minLength: 1
+          maxLength: 32
+          example: SUSPENDED
+        reasonCode:
+          description: 'Contains the reason code for why the notification is being sent. This applies to all tokens in the Tokens array. Must be one of:  - STATUS_UPDATE- The status of the tokens has been changed, - REDIGITIZATION_COMPLETE - The token has been re-digitized to the device, - DELETED_FROM_CONSUMER_APP - The token has been deleted from the consumer application. The token may still be active.'
+          type: string
+          minLength: 1
+          maxLength: 32
+          example: STATUS_UPDATE
+        suspensionReasons:
+          description: 'Refers to who or what caused the token to be suspended. The field is optional and is required only if status is SUSPENDED. Can have one or more values of: - ISSUER = Suspended by the Issuer, - TOKEN_REQUESTOR = Suspended by the Token Requestor, - MOBILE_PIN_LOCKED = Suspended due to the Mobile PIN being locked, - CARDHOLDER = Suspended by the Cardholder.'
+          type: array
+          items:
+            type: string
+            example: CARDHOLDER
+        requestedBy:
+          description: 'Refers to who or what requested the token event. Can have one or more values of: - ISSUER = Requested by the Issuer, - TOKEN_REQUESTOR = Requested by the Token Requestor, - MOBILE_PIN_LOCK = Requested by a Mobile PIN Lock, - CARDHOLDER = Requested by the Cardholder, - SYSTEM = Requested by the System.'
+          type: string
+          example: CARDHOLDER
+        walletInfo:
+          description: Contains information about the wallet.
+          type: object
+          properties:
+            walletId:
+              description: The identifier of the Wallet Provider who requested the digitization. Only present when the token is provided to a Wallet Provider.
+              type: string
+              minLength: 1
+              maxLength: 3
+              example: '123'
+            paymentAppInstanceId:
+              description: The identifier of the Payment App instance within a device that will be provisioned with a token. Only present when supplied by a Wallet Provider.
+              type: string
+              minLength: 1
+              maxLength: 48
+              example: 047C4395D11690022347075090475326A02CB5118F774F2F
+            secureElementId:
+              description: The identifier of the Secure Element to be provisioned with the token. Present only when the token is provisioned to a Secure Element and when provided by the Wallet Provider.
+              type: string
+              minLength: 1
+              maxLength: 128
+              example: 1b24f24a24ba98e27d43e345b532a245e4723d7a9c4f624e93452c
+        vcnInfo:
+          description: Contains information about the virtual card account.
+          type: object
+          properties:
+            accountGuid:
+              description: The globally unique identifier of the virtual card account.
+              type: string
+              example: 4fd7fe39-48de-464e-bed2-c148250d7047
+            ownerInfo:
+              description: Contains information about the Issuer and Corporate.
+              type: object
+              properties:
+                issuerGuid:
+                  description: The globally unique identifier of the Issuer.
+                  type: string
+                  example: SENTTY83BAA6404E87C4D18F67669A687E8D8E86C9E74740FFE8EE403956EBEFF373661648820215
+                corpGuid:
+                  description: The globally unique identifier of the Corporate.
+                  type: string
+                  example: SENTTYA9C1DB157A85313B10E11ACA0B508844145FB98B7A8529E3DA099F1E5D744ADD1692330249
+            createdDate:
+              description: Date when the account was created, in ISO 8601 extended format. It can be either in UTC "YYYY-MM-DDThh:mm:ss[.sss]Z" or with an offset "YYYY-MM-DDThh:mm:ss[.sss]�hh:mm", where [.sss] is optional and can be 1 to 3 digits.
+              type: string
+              example: '2024-02-01T00:00:00Z'
+            lastUpdatedDate:
+              description: Date when the account was last updated, in ISO 8601 extended format. It can be either in UTC "YYYY-MM-DDThh:mm:ss[.sss]Z" or with an offset "YYYY-MM-DDThh:mm:ss[.sss]�hh:mm", where [.sss] is optional and can be 1 to 3 digits.
+              type: string
+              example: '2024-02-12T15:19:36.633965Z'
+            accountNumber:
+              description: Contains the Card Account Number.
+              type: string
+              minLength: 12
+              maxLength: 19
+              example: XXXXXXXXXXX4547
+            expiry:
+              description: Card expiry date in YYYY-MM format.
+              type: string
+              minLength: 7
+              maxLength: 7
+              example: 2026-12
+        rcnInfo:
+          description: Contains information about the real card account.
+          type: object
+          properties:
+            accountGuid:
+              description: The globally unique identifier of the real card account.
+              type: string
+              example: 8f89407e-1c7f-4b4b-bfc7-a7ef47207022
+            accountNumber:
+              description: Contains the Card Account Number.
+              type: string
+              minLength: 12
+              maxLength: 19
+              example: XXXXXXXXXXX1234
+            expiry:
+              description: Card expiry date in YYYY-MM format.
+              type: string
+              minLength: 7
+              maxLength: 7
+              example: 2026-12
+        purchaseRequest:
+          description: Purchase Request Details.
+          type: object
+          properties:
+            purchaseRequestId:
+              description: ICCP Purchase Request ID - uniquely identifies the purchase request and VCN
+              type: integer
+              example: 5213
+            rcnAlias:
+              description: Real card number alias.
+              type: string
+              example: Travel Expense RCN
+            companyId:
+              description: ICCP Company ID - uniquely identifies the company that created the VCN.
+              type: integer
+              example: 233191
+    NotificationsWrapper:
+      description: The envelope that contains a number of notifications. The notifications delivered in the envelope may be a subset of the overall collection, due to pagination of the result set.
+      type: object
+      properties:
+        count:
+          description: The total number of notifications returned in a GET request.
+          type: integer
+          example: 50
+        offset:
+          description: Used for pagination - the offset into the overall notification collection at which these notifications begin.
+          type: integer
+          example: 0
+        limit:
+          description: Used for pagination - the limit or page size is specified (or defaulted) in the request and returned in the response. Each response page will contain at most this number of notifications. The default value for 'limit' is 200.
+          type: integer
+          example: 200
+        total:
+          description: The total number of notifications that fall within the scope of the GET request. This value may dynamically update in subsequent cals, to reflect new notifications or expired notifications.
+          type: integer
+          format: int64
+          example: 2148
+        notifications:
+          description: The list of notifications in this wrapper structure
+          type: array
+          items:
+            $ref: '#/components/schemas/notification'
+    ICMPProvisioningNotificationContent:
+      type: object
+      properties:
+        tokenInfo:
+          type: object
+          properties:
+            accountNumber:
+              description: Conatins the Token Account Number.
+              type: string
+              minLength: 12
+              maxLength: 19
+              example: XXXXXXXXXX4733
+            expiry:
+              description: Contains the token expiry date in YYYY-MM format.
+              type: string
+              minLength: 7
+              maxLength: 7
+              example: 2026-12
+            accountGuid:
+              description: The globally unique identifier of the token.
+              type: string
+              example: afb79fa1-da6c-44c7-adda-6d7f3931dda9
+            createdDate:
+              description: Date when the account was created, in ISO 8601 extended format. It can be either in UTC "YYYY-MM-DDThh:mm:ss[.sss]Z" or with an offset "YYYY-MM-DDThh:mm:ss[.sss]�hh:mm", where [.sss] is optional and can be 1 to 3 digits.
+              type: string
+              example: '2024-02-01T00:00:00Z'
+            activatedDate:
+              description: Date when the account was activated, in ISO 8601 extended format. It can be either in UTC "YYYY-MM-DDThh:mm:ss[.sss]Z" or with an offset "YYYY-MM-DDThh:mm:ss[.sss]�hh:mm", where [.sss] is optional and can be 1 to 3 digits.
+              type: string
+              example: '2024-02-12T00:00:00Z'
+            lastUpdatedDate:
+              description: Date when the account was last updated, in ISO 8601 extended format. It can be either in UTC "YYYY-MM-DDThh:mm:ss[.sss]Z" or with an offset "YYYY-MM-DDThh:mm:ss[.sss]�hh:mm", where [.sss] is optional and can be 1 to 6 digits.
+              type: string
+              example: '2024-02-12T15:19:36.633965Z'
+        tokenType:
+          description: Refers to the type of token requested for this digitization. Valid values are EMBEDDED_SE = Embedded Secure Element, CLOUD = Mastercard Cloud-Based, Payments | STATIC = Static token.
+          type: string
+          minLength: 1
+          maxLength: 16
+          example: CLOUD
+        eventType:
+          description: Refers to the type of the provisioning event. Valid values are APPROVED, REQUIRE_ADDITIONAL_AUTHENTICATION, COMPLETED, REJECTED.
+          type: string
+          example: COMPLETED
+        tokenRequestorId:
+          description: Refers to the party that requested the digitization. This field is conditional and is required only if the tokens are assigned by MDES.
+          type: string
+          minLength: 11
+          maxLength: 11
+          example: '50134085386'
+        reasonCode:
+          description: 'Contains the reason code for why the notification is being sent. This applies to all tokens in the Tokens array. Must be one of:  STATUS_UPDATE- The status of the tokens has been changed, REDIGITIZATION_COMPLETE - The token has been re-digitized to the device, DELETED_FROM_CONSUMER_APP - The token has been deleted from the consumer application. The token may still be active.'
+          type: string
+          minLength: 1
+          maxLength: 32
+          example: STATUS_UPDATE
+        correlationId:
+          description: Contains the value linking pre-digitization messages generated during provisioning.
+          type: string
+          minLength: 1
+          maxLength: 14
+          example: D0013529619845
+        source:
+          description: 'Contains the source of the account information. Must be one of: - ACCOUNT_ON_FILE : Source was an existing account on file, - ACCOUNT_ADDED_MANUALLY: Source was a new account entered manually be the account holder, - ACCOUNT_ADDED_VIA_APPLICATION: Source was new account added by another application (for example, Issuer banking app), - EXISTING_TOKEN_CREDENTIAL: Source was an existing token, - ACCOUNT_ADDED_VIA_BROWSER: Source was browser.'
+          type: string
+          minLength: 1
+          maxLength: 32
+          example: ACCOUNT_ON_FILE
+        tokenizedMetaData:
+          type: object
+          properties:
+            accountHolderData:
+              description: Contains the account holder's personal information.
+              type: object
+              properties:
+                accountHolderName:
+                  description: Conatins the name of the account holder in the format LASTNAME/FIRSTNAME or FIRSTNAME LASTNAME.
+                  type: string
+                  minLength: 1
+                  maxLength: 27
+                  example: John Doe
+                accountHolderAddress:
+                  description: Contains the address for the account holder. Verified as part of reaching the digitization decision.
+                  type: object
+                  properties:
+                    city:
+                      description: Refers to the city of the billing address.
+                      type: string
+                      minLength: 1
+                      maxLength: 32
+                      example: St. Louis
+                    country:
+                      description: Refers to the country of the billing address. Expressed as a 3-letter (alpha-3) country code as defined in ISO 3166-1.
+                      type: string
+                      minLength: 3
+                      maxLength: 3
+                      example: USA
+                    countrySubdivision:
+                      description: Refers to the country subdivision (for example, the state in the U.S.) of the billing address.
+                      type: string
+                      minLength: 1
+                      maxLength: 12
+                      example: MO
+                    line1:
+                      description: First line of the billing address.
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                      example: zSqLUXpVDvIlGHqBgwWwaqjefUprTD
+                    line2:
+                      description: Second line of the billing address.
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                      example: PzWcIVnnUAcwIhClfoRFCpXVBKXKTz
+                    postalCode:
+                      description: Refers to the postal code (for example, zipcode in the U.S.) of the billing address.
+                      type: string
+                      minLength: 1
+                      maxLength: 16
+                      example: '61000'
+                accountHolderMobilePhoneNumber:
+                  description: accountHolderMobilePhoneNumber conatins the contact details/mobile number details of the account holder.
+                  type: object
+                  properties:
+                    countryDialInCode:
+                      description: Conatins the country code for the phone number. E.g. 1 for US or 44 for UK.
+                      type: string
+                      minLength: 1
+                      maxLength: 4
+                      example: '1'
+                    phoneNumber:
+                      description: Contains the phone number, may contain country code along with phone number when countryDialInCode is not present.
+                      type: string
+                      minLength: 1
+                      maxLength: 20
+                      example: '4692392391'
+                consumerIdentifier:
+                  description: Consumer Identifier provided by the token requestor. It's not a mandatory field and is optionally present in AuthorizeService when provided by the wallet provider.
+                  type: string
+                  minLength: 1
+                  maxLength: 88
+                  example: 1b24f24a24ba98e27d43e345b532a245e4723d7a9c4f624e93452c1b24f24a24b
+                accountHolderEmailAddress:
+                  description: The email address of the account holder. Not required - Optionally present in pushAccount request. Not present otherwise.
+                  type: string
+                  minLength: 6
+                  maxLength: 320
+                  example: abc@email.com
+                deviceLocation:
+                  description: Latitude and longitude where the device the consumer is attempting to authorize is located. In the format "(sign) latitude/(sign) longitude" with a precision of 2 decimal places. Ex:"38.63/-90.2". Latitude is between -90 and 90 and longitude is between -180 and 180.
+                  type: string
+                  minLength: 1
+                  maxLength: 64
+                  example: 38.63/-90.2
+                sourceIp:
+                  description: Contains the IP of the device initiating the request.
+                  type: string
+                  minLength: 7
+                  maxLength: 64
+                  example: 127.0.0.1
+            paymentAccountReference:
+              description: The unique account reference assigned to the PAN.
+              type: string
+              minLength: 29
+              maxLength: 29
+              example: 50017G8EU2RXB4YI1QIOT9R829RC4
+            deviceInfo:
+              description: Contains information about the target device to be provisioned.
+              type: object
+              properties:
+                cardCaptureTechnology:
+                  description: 'The technology used to capture the card details. New values can be added at any time and must not result in an error. Must be one of: - CAMERA = The card details were captured using the device camera,  - MANUAL = The card details were manually entered,  - UNKNOWN = It is not known how the card details were entered, READER_MODE = The card details were captured using reader mode.'
+                  type: string
+                  minLength: 1
+                  maxLength: 32
+                  example: CAMERA
+                deviceName:
+                  description: Contains the name that the Account holder has associated to the device with the Payment App Provider.
+                  type: string
+                  minLength: 1
+                  maxLength: 64
+                  example: Emerson Phone
+                formFactor:
+                  description: 'The form factor of the device to be provisioned. New values can be added without notice and should be accpeted. Must be one of: - PHONE = Mobile phone, - TABLET = Tablet computer, - TABLET_OR_EREADER = Tablet computer or e-reader, - WATCH = Watch, - WATCH_OR_WRISTBAND = Watch or wristband, including a fitness band, smart strap, disposable band, watch add-on, security/ID Band, - CARD = Card, STICKER = Sticker, - PC = PC or Laptop, - DEVICE_PERIPHERAL = Device peripherals, such as a mobile phone case or sleeve, - TAG = Tag, such as a key fob or mobile tag, - JEWELRY = Jewelry, such as a ring, bracelet, necklace and cuff links, - FASHION_ACCESSORY = Fashion accessory, such as a handbag, bag charm, glasses, - GARMENT = Garment, such as a dress, - DOMESTIC_APPLIANCE = Domestic appliance, such as a refrigerator, washing machine, - VEHICLE = Vehicle, including vehicle attached devices, - MEDIA_OR_GAMING_DEVICE = Media or gaming device, including a set top box, media player, television, - UNDEFINED = Device type that is not yet defined. Used for wallets introducing a new device type that is not yet public knowledge.'
+                  type: string
+                  minLength: 1
+                  maxLength: 64
+                  example: PHONE
+                imei:
+                  description: The IMEI number of the device being provisioned.
+                  type: string
+                  minLength: 15
+                  maxLength: 15
+                  example: '352099001761481'
+                isoDeviceType:
+                  description: Contains the 2 digit device type provided on the iso messages that the token is being provisioned to. Only present when provided by a Wallet Provider.
+                  type: string
+                  minLength: 1
+                  maxLength: 2
+                  example: 09
+                msisdn:
+                  description: The MSISDN of the device being provisioned.
+                  type: string
+                  minLength: 1
+                  maxLength: 15
+                  example: '7307406945'
+                osName:
+                  description: 'The name of the device operating system. Must be one of: - ANDROID = Google Android operating system, - WINDOWS = Microsoft Windows operating system, - TIZEN = Tizen operating system, - IOS = Apple iOS operating system, - PAGARE_EMBEDDED_OS = FitPay embedded operating system, - ANDROID_WEAR = Android wear operating system, - EMBEDDED_OS = All Embedded operating system and Real time Operating systems.'
+                  type: string
+                  minLength: 1
+                  maxLength: 32
+                  example: ANDROID
+                osVersion:
+                  description: The version of the device operating system.
+                  type: string
+                  minLength: 1
+                  maxLength: 32
+                  example: 4.4.4
+                paymentTypes:
+                  description: 'Different types of Payments supported for the token. Must be one of below and Array [String] type: - NFC = The token is NFC capable, - DSRP = The token is DSRP capable, - ECOMMERCE = The token can be used for e-commerce transactions.'
+                  type: array
+                  items:
+                    type: string
+                    example: NFC
+                serialNumber:
+                  description: Contains the serial number of the device. May be masked.
+                  type: string
+                  minLength: 1
+                  maxLength: 64
+                  example: 2F6D63
+                storageTechnology:
+                  description: 'The architecture or technology used for token storage. Must be one of: - DEVICE_MEMORY = Device memory, - DEVICE_MEMORY_PROTECTED_TPM = Device memory using a protected trust platform module, - TEE = Trusted execution environment, - SE = Secure element, - SERVER = Server host, - VEE - Virtual Execution Environment.'
+                  type: string
+                  minLength: 1
+                  maxLength: 32
+                  example: SERVER
+            accountIdHash:
+              description: SHA-256 hash of the Account holder's account ID with the Payment App Provider. Typically expected to be an email address. Type - string (Alpha Numeric) Hex-encoded data (case-insensitive).
+              type: string
+              minLength: 1
+              maxLength: 64
+              example: 8F7A8970515A65202E24F7A7240557F467B5218433CD38BCA94778FB445A6952
+            activeTokenCount:
+              description: The number of active tokens that already exist for the Funding Account based on the token type. Secure Element and Cloud tokens are counted together. Valid values are 0 to 99. A value of 99 means there are 99 or more active tokens. Tokens that have been deleted from the wallet are excluded from the count.
+              type: string
+              minLength: 1
+              maxLength: 2
+              example: '44'
+            consumerFacingEntityName:
+              description: Entity name that account holder recognizes as being where they store their PAN (wallets, merchants, commerce platforms&).
+              type: string
+              minLength: 1
+              maxLength: 100
+              example: MasterCard
+        walletInfo:
+          description: Contains information about the wallet.
+          type: object
+          properties:
+            walletId:
+              description: The identifier of the Wallet Provider who requested the digitization. Only present when the token is provided to a Wallet Provider.
+              type: string
+              minLength: 1
+              maxLength: 3
+              example: '103'
+            paymentAppInstanceId:
+              description: The identifier of the Payment App instance within a device that will be provisioned with a token. Only present when supplied by a Wallet Provider.
+              type: string
+              minLength: 1
+              maxLength: 48
+              example: 047C4395D11690022347075090475326A02CB5118F774F2F
+            secureElementId:
+              description: The identifier of the Secure Element to be provisioned with the token. Present only when the token is provisioned to a Secure Element and when provided by the Wallet Provider.
+              type: string
+              minLength: 1
+              maxLength: 128
+              example: 1b24f24a24ba98e27d43e345b532a245e4723d7a9c4f624e93452c
+        walletProviderDecisioningInfo:
+          description: Contains information about the decision recommended by the Wallet Provider.
+          type: object
+          properties:
+            accountLifeTime:
+              description: The lifetime of the account with the Token Requestor.
+              type: string
+              minLength: 1
+              maxLength: 2
+              example: '4'
+            accountScore:
+              description: Score given to the account by the Wallet Provider. Value must be between 1 and 5.
+              type: string
+              minLength: 1
+              maxLength: 64
+              example: '4'
+            deviceScore:
+              description: Score given to the device by the Wallet Provider. Value must be between 1 and 5.
+              type: string
+              minLength: 1
+              maxLength: 64
+              example: '3'
+            phoneNumberScore:
+              description: Score given to the phone number by the Wallet Provider. Value must be between 1 and 5.
+              type: string
+              minLength: 1
+              maxLength: 64
+              example: '3'
+            recommendationReasons:
+              description: Reasons provided to the Wallet Provider on how the recommended decision was reached. Please refer to the Reason Codes section in [Mastercard Developers](https://developer.mastercard.com/mdes-pre-digitization/documentation/code-formats/#reason-codes) for all eligible values. Type - Array [String].
+              type: array
+              items:
+                type: string
+                example: ACCOUNT_TOO_NEW
+            recommendationStandardVersion:
+              description: The standards version used by the Wallet Provider to determine the recommended decision.
+              type: string
+              minLength: 1
+              maxLength: 64
+              example: 1.0.0
+            recommendedDecision:
+              description: 'The decision recommended by the Wallet Provider. Must be one of: - APPROVED = Services request was approved, - DECLINED = Services request was declined, - REQUIRE_ADDITIONAL_AUTHENTICATION = Services request requires additional authentication to be approved.'
+              type: string
+              minLength: 1
+              maxLength: 64
+              example: APPROVED
+        vcnInfo:
+          description: Contains information about the virtual card account.
+          type: object
+          properties:
+            accountGuid:
+              description: The globally unique identifier of the virtual card account.
+              type: string
+              example: 4fd7fe39-48de-464e-bed2-c148250d7047
+            ownerInfo:
+              description: Contains information about the Issuer and Corporate.
+              type: object
+              properties:
+                issuerGuid:
+                  description: The globally unique identifier of the Issuer.
+                  type: string
+                  example: SENTTY83BAA6404E87C4D18F67669A687E8D8E86C9E74740FFE8EE403956EBEFF373661648820215
+                corpGuid:
+                  description: The globally unique identifier of the Corporate.
+                  type: string
+                  example: SENTTYA9C1DB157A85313B10E11ACA0B508844145FB98B7A8529E3DA099F1E5D744ADD1692330249
+            createdDate:
+              description: Date when the account was created, in ISO 8601 extended format. It can be either in UTC "YYYY-MM-DDThh:mm:ss[.sss]Z" or with an offset "YYYY-MM-DDThh:mm:ss[.sss]�hh:mm", where [.sss] is optional and can be 1 to 3 digits.
+              type: string
+              example: '2024-02-01T00:00:00Z'
+            lastUpdatedDate:
+              description: Date when the account was last updated, in ISO 8601 extended format. It can be either in UTC "YYYY-MM-DDThh:mm:ss[.sss]Z" or with an offset "YYYY-MM-DDThh:mm:ss[.sss]�hh:mm", where [.sss] is optional and can be 1 to 3 digits.
+              type: string
+              example: '2024-02-12T15:19:36.633965Z'
+            accountNumber:
+              description: Contains the Card Account Number.
+              type: string
+              minLength: 12
+              maxLength: 19
+              example: XXXXXXXXXXX4547
+            expiry:
+              description: Card expiry date in YYYY-MM format.
+              type: string
+              minLength: 7
+              maxLength: 7
+              example: 2026-12
+        rcnInfo:
+          description: Contains information about the real card account.
+          type: object
+          properties:
+            accountGuid:
+              description: The globally unique identifier of the real card account.
+              type: string
+              example: 8f89407e-1c7f-4b4b-bfc7-a7ef47207022
+            accountNumber:
+              description: Contains the Card Account Number.
+              type: string
+              minLength: 12
+              maxLength: 19
+              example: XXXXXXXXXXX1234
+            expiry:
+              description: Card expiry date in YYYY-MM format.
+              type: string
+              minLength: 7
+              maxLength: 7
+              example: 2026-12
+        purchaseRequest:
+          description: Purchase Request Details.
+          type: object
+          properties:
+            purchaseRequestId:
+              description: ICCP Purchase Request ID - uniquely identifies the purchase request and VCN
+              type: integer
+              example: 5213
+            rcnAlias:
+              description: Real card number alias.
+              type: string
+              example: Travel Expense RCN
+            companyId:
+              description: ICCP Company ID - uniquely identifies the company that created the VCN.
+              type: integer
+              example: 233191
+    notification:
+      description: The notification structure - contains information about the notification and the notification content itself
+      type: object
+      properties:
+        subject:
+          description: The subject or type of event responsible for the notification to generate. Currently, this API supports PAYMENT_AUTHORIZATION, PAYMENT_UPDATE, CLEARING, BPC_PAYMENT_AUTHORIZATION , TOKEN_PROVISIONING_EVENT and TOKEN_LIFECYCLE_EVENT events.
+          type: string
+          example: BPC_PAYMENT_AUTHORIZATION
+        subscriptionName:
+          description: Name of the subscription for which this notification was generated
+          type: string
+          example: subscription name
+        pushStatus:
+          description: 'Indicates the status of the push delivery for this notification. The possible values are: NOT_APPLICABLE: The service will not push the notification, because push delivery for this subscriber is disabled. PENDING: The notification is in the process of being delivered. DELIVERED: The service has pushed the notification to the push endpoint successfully. FAILED: The services attempts to deliver the notification have failed and no future deliveries will be performed. The notification is available via the pull approach until its retention period expires.'
+          type: string
+          example: DELIVERED
+        createdTimestamp:
+          description: Indicates the UTC date and time when the notification was created. Note that this is independent of time that the event itself occurred. The time the event occurred may be present in the notification content.
+          type: string
+          example: '2019-01-01T12:00:00.000Z'
+        idempotencyKey:
+          description: The idempotency key is a free identifier created by the client to identify a request. It is used by the service to identify subsequent retries of the same request and ensure idempotent behavior by sending the same response without executing the request a second time. This field is only available for ICMP events (TOKEN_PROVISIONING_EVENT and TOKEN_LIFECYCLE_EVENT).
+          type: string
+          example: 0CNSe09a5d3a26ae170adcc8b089cf8ea56c82c7d63df0e107cedee5199bac022a921724033906
+        content:
+          type: object
+          oneOf:
+          - $ref: '#/components/schemas/BPCAuthorizationNotificationContent'
+          - $ref: '#/components/schemas/ICCPClearingNotificationContent'
+          - $ref: '#/components/schemas/ICCPAuthorizationNotificationContent'
+          - $ref: '#/components/schemas/BPSPaymentUpdateNotificationContent'
+          - $ref: '#/components/schemas/ICMPLifecycleNotificationContent'
+          - $ref: '#/components/schemas/ICMPProvisioningNotificationContent'
+    BPCAuthorizationNotificationContent:
+      description: Payment authorization details for a virtual card generated by Business Payment Controls.
+      type: object
+      properties:
+        messageTypeIndicator:
+          description: DE 90, subfield 1 specifies the message type indicator (MTI) present in the authorization message.
+          type: string
+          minLength: 4
+          maxLength: 4
+          example: '0100'
+        traceId:
+          description: Contains data from DE 63 (Network Data), subfield 1 (Financial Network Code) and subfield 2 (Banknet Reference Number) and DE 15 (Date, Settlement) that is in the original Authorization Request Response/0110 message.
+          type: string
+          example: 'null'
+        issuerGuid:
+          description: The globally unique identifier of the issuer.
+          type: string
+          example: SENTTY5E4C4B4E0D1BF5991E64A1E0745F40A85B2510CE48EB537011DCED3C483669D61494938440
+        corpGuid:
+          description: Alternative ID used to uniquely identify the company that created the VCN.
+          type: string
+          example: SENTTY9951972A6FC0206CB494B560E5E6DC5D02A2BD21D89612EF4A18358ECC777DCF1494921797
+        processor:
+          description: ''
+          type: object
+          properties:
+            issuerId:
+              description: Unique identifier of the issuer
+              type: integer
+              example: 523456789
+            responseCode:
+              description: Two-character alphanumeric reason code received from the processor for the Advice/Reversal. For all possible values refer to Customer Interface Specification field name DE-39.
+              type: string
+              example: '00'
+            financialNetworkCode:
+              description: DE 63, subfield 1 identifies the specific program or service (for example, the financial network, financial program, or card program) with which the transaction is associated.
+              type: string
+              example: MCC
+            banknetReferenceNumber:
+              description: Banknet Reference Number is generated by the Authorization Platform for each originating message it routes. The reference number is guaranteed to be a unique value for any transaction within the specified financial network on any processing day. This value is derived from DE63, subfield 2.
+              type: string
+              example: Q4A91A
+            onBehalfResult:
+              description: Letter representing the decision that has been made. This value is derived from DE-48 SF71 subfield-1. For all possible values refer to Customer Interface Specification field name DE-48 SF71.
+              type: string
+              example: V
+            onBehalfService:
+              description: This field notifies the issuer of the On-behalf Service performed on the transaction and the results. This value is derived from DE-48 SF71 subfield-2. For all possible values refer to Customer Interface Specification field name DE-48 SF71.
+              type: string
+              example: '17'
+        realPaymentCard:
+          description: ''
+          type: object
+          properties:
+            number:
+              description: DE 2 (Primary Account Number [PAN]) is a series of digits used to identify a customer account or relationship.
+              type: string
+              example: '5540590000100111'
+            expiry:
+              description: DE 14 (Date, Expiration) specifies the year and month after which an issuer designates a cardholders card as expired.
+              type: string
+              example: '2404'
+            accountGuid:
+              description: Business Payment Controls real card Guid.
+              type: string
+              example: 0ENT7d2bb852a22f822d441f61605054dab329ab2024a6c37cac5151e845cbb15d291698658882
+        virtualPaymentCard:
+          description: ''
+          type: object
+          properties:
+            number:
+              description: DE 48, subelement 33, subfield 2 (Account Number) indicates the Primary Account Number (PAN) mapping account number.
+              type: string
+              example: '5522446433180570'
+            expiry:
+              description: DE 48, subelement 33, subfield 3 (Expiration Date) indicates the expiration date of the PAN mapping account.
+              type: string
+              example: '2402'
+            accountGuid:
+              description: Business Payment Controls virtual card Guid.
+              type: string
+              example: SENTTY13379505AC33CDA796BCBE850EADAF625FAD6B071E8D100CB1ECBEA
+        acceptor:
+          description: A collection of field definitions that provide acceptor (merchant) details
+          type: object
+          properties:
+            name:
+              description: DE 43 (Acceptor Name and Location), subfield 1 (Acceptor Name) contains the name of the acceptor that should be recognizable by the cardholder and may include other descriptors, such as a store number.
+              type: string
+              example: acceptor.name
+            cityName:
+              description: DE 43 (Acceptor Name and Location), subfield 3 (Acceptor City) indicates the city of the merchant.
+              type: string
+              example: cityName
+            subDivisionCode:
+              description: DE 43, subfield 5 contains the ISO 3166-1 state or country code of the acceptor.
+              type: string
+              example: TN
+            terminalId:
+              description: DE 41 contains the identifier assigned by the acceptor or the acquirer to the terminal, payment gateway, or other acceptance device used to capture account data to affect a transaction at the acceptor location.
+              type: string
+              example: '0001'
+            id:
+              description: DE 42 contains Identifies the acceptor ID assigned by the acquirer to the acceptor and its location, or to the payment facilitator.
+              type: string
+              example: '497520000000000'
+            merchantCategoryCode:
+              description: DE 18 (Merchant Type) is the classification (acceptor business code/merchant category code [MCC]) of the merchants type of business or service.
+              type: string
+              example: '0041'
+            merchantCategoryCodeDescription:
+              description: Description of the merchant category code defined under DE 18 (Merchant Type).
+              type: string
+              example: GAMBLING TRANSACTIONS
+            environment:
+              description: DE 22, subfield 1 (POS Terminal PAN Entry Mode) indicates the method (transaction environment) used for PAN entry to initiate a transaction.
+              type: string
+              example: 'null'
+            localDate:
+              description: DE 13 (Date, Local Transaction) is the local month and day on which the transaction takes place at the point of acceptor location. Date format in MMDD.
+              type: string
+              example: '0410'
+            localTime:
+              description: DE 12 (Time, Local Transaction) is the local time at which the transaction takes place at the point of acceptor location. Time format in hhmmss.
+              type: string
+              example: 092900
+            retrievalReferenceNumber:
+              description: DE 37 (Retrieval Reference Number) is a document reference number supplied by the system retaining the original source document of the transaction and assists in locating that source document or a copy thereof.
+              type: string
+              example: 074975208903
+            posCountryCode:
+              description: DE 61, subfield 13 (POS Country Code) indicates the country of the POS location (not the acquirer location) using ISO-specified codes.
+              type: string
+              example: '840'
+            posCountryCodeDescription:
+              description: Specifies the name of the country in which the merchant operates.
+              type: string
+              example: 'null'
+            posTransactionStatus:
+              description: Specifies the indicates the purpose or status of the request. For all possible values refer to Customer Interface Specification field name DE 61 S7.
+              type: string
+              example: '0'
+            amount:
+              description: ''
+              type: object
+              properties:
+                amount:
+                  description: DE 4 (Amount, Transaction) specifies the amount requested by the cardholder, denominated in the local currency of the acquirer or the source location of the transaction. This value is represented in minor units, which are the smallest units of a currency and are determined by the number of decimal places.
+                  type: number
+                  example: 9110
+                currencyCode:
+                  description: DE 49 (Currency Code, Transaction) specifies the currency code of the funds the cardholder requested in the local currency of the acquirer or source location of the transaction.
+                  type: string
+                  example: 840
+                currencyCodeAlphabetic:
+                  description: Specifies the currency name of the funds the cardholder requested in the local currency of the acquirer or source location of the transaction.
+                  type: string
+                  example: USD
+        cardHolderAmount:
+          description: ''
+          type: object
+          properties:
+            amount:
+              description: DE 6 (Amount, Cardholder Billing) represents the transaction amount in the issuers currency. This is the amount billed to the cardholder in the cardholder's account currency, excluding any cardholder billing fees. The value is expressed in minor units, which are the smallest units of a currency and depend on the number of decimal places for that currency.
+              type: number
+              example: 16100
+            currencyCode:
+              description: DE 51 (Currency Code, Cardholder Billing) defines the currency of DE 6 (Amount, Cardholder Billing). It indicates the currency code of the transaction amount in the issuers currency.
+              type: string
+              example: 840
+            currencyCodeAlphabetic:
+              description: Indicates the currency name of the transaction amount in the issuers currency.
+              type: string
+              example: USD
+        transactionInformation:
+          description: ''
+          type: object
+          properties:
+            acquirerInstitutionIdCode:
+              description: DE 32 (Acquiring Institution ID Code) identifies the acquiring institution (for example, merchant bank) or its agent by Interbank Card Association ID.
+              type: integer
+              example: 5173
+            forwardingInstitutionIdCode:
+              description: Specifies the Interbank Card Association ID of the processor. This data element contains the identifier assigned by the acquirer to the acceptor and its location, or to the payment facilitator.
+              type: integer
+              example: 497520000000000
+            conversionRateCardholderBilling:
+              description: DE 10 (Conversion Rate, Cardholder Billing) is the factor used in the conversion (currency exchange rate) from transaction to cardholder billing amount.
+              type: number
+              example: 1234
+            processingCode:
+              description: DE 3 (Processing Code) describes the effect of a transaction on the customer account and the type of accounts affected.
+              type: string
+              example: '00'
+            authCode:
+              description: DE 38 (Authorization ID Response) is a transaction response ID code that the authorizing institution assigns. DE 38 is used to transmit a card issuers authorization code for Authorization transactions.
+              type: string
+              example: '04'
+            dateTime:
+              description: DE 7 (Transmission Date and Time) is the date and time that a message is entered into the Mastercard Network. Date and time must be expressed in Coordinated Universal Time (UTC). Date and time format is MM-DD'T'HH:MM:SS.SSSXXX".
+              type: string
+              example: 'null'
+            environment:
+              description: DE 22, subfield 1 (POS Terminal PAN Entry Mode) indicates the method used for PAN entry to initiate a transaction. Possible values are UNKNOWN, POS, MOTO, ECOM, ATM, PAYPASS, PWCB.
+              type: string
+              example: 'null'
+            issuerResponse:
+              description: Two-character alphanumeric reason code received from the processor for the Advice/Reversal. For all possible values refer to Customer Interface Specification field name DE-39.
+              type: string
+              example: 'null'
+            systemTraceAuditNumber:
+              description: Unique six-digit identifier generated by the Acquirer, must be the same in the Advice, will be different for the reversal.
+              type: string
+              example: '011174'
+            reversal:
+              description: ''
+              type: object
+              properties:
+                replacementTransactionAmount:
+                  description: DE 95, subfield 1 (Actual Amount, Transaction) indicates the amount for a reversal transaction in the case of a partial reversal. This amount is represented in the smallest unit of the currency, also known as minor units, and varies depending on the number of decimal places the currency uses.
+                  type: number
+                  example: 100000
+                replacementSettlementAmount:
+                  description: DE 95, subfield 2 (Actual Amount, Settlement) indicates the actual settlement amount in the settlement currency in the case of a partial reversal. This amount is represented in the smallest unit of the currency, also known as minor units, and varies depending on the number of decimal places the currency uses.
+                  type: number
+                  example: '000000200000'
+                replacementCardholderAmount:
+                  description: DE 95, subfield 3 (Actual Amount, Cardholder Billing) the actual amount in the issuer currencyin the case of a partial reversal. This amount is represented in minor units, which are the smallest units of a currency, and is dependent on the number of decimal places in the currency.
+                  type: number
+                  example: 300000
+            posEntryMode:
+              description: Indicates the method used for PAN entry to initiate a transaction and the PIN entry capabilities.
+              type: string
+              example: '801'
+        originalMessage:
+          description: ''
+          type: object
+          properties:
+            messageTypeIndicator:
+              description: Indicates the Message Type Identifier (MTI) of the original message.
+              type: string
+              minLength: 4
+              maxLength: 4
+              example: '0110'
+            systemTraceAuditNumber:
+              description: Unique six-digit identifier generated by the Acquirer, must be the same in the Advice, will be different for the reversal.
+              type: string
+              example: '011174'
+            transmissionRawDateTime:
+              description: Indicates the Transmission Date and Time that was in the original message when it entered into the Mastercard Network. Date and time must be expressed in Coordinated Universal Time (UTC).
+              type: string
+              example: 0412112800
+        advice:
+          description: ''
+          type: object
+          properties:
+            reasonCode:
+              description: DE 60, subfield 1 (Advice Reason Code) indicates to the receiver of an Advice message the specific reason for the transmission of the Advice message.
+              type: string
+              example: '650'
+        fundingSource:
+          description: ''
+          type: object
+          properties:
+            fundingSourceAlias:
+              description: BPC Funding Source Alias
+              type: string
+              example: testFSAlias
+            fundingSourceGuid:
+              description: BPC Funding Source Guid. The globally unique identifier for the funding source.
+              type: string
+              example: 0ENTde1a52b828ca014dff5de6038bbfab426f8f05ac5a2fc143783aeb01d161d6b11698658887
+    Error-404:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              type: array
+              description: An array of error objects giving information about relevant errors.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The origin of the error
+                    example: Commercial Event Notifications
+                  ReasonCode:
+                    type: string
+                    description: A unique error code representing the error that occurred
+                    example: resource.not.found
+                  Description:
+                    type: string
+                    description: A developer-friendly description of the error that occurred
+                    example: The resource provided is not found
+                  Recoverable:
+                    type: boolean
+                    description: Can the error be recovered by retrying the same request later?
+                    example: false
+                  Details:
+                    type: string
+                    description: Additional details regarding the error that occurred
+                    example: The specified resource was not found
+    BPSPaymentUpdateNotificationContent:
+      description: The content of the notification, the structure of which depends on the subject.
+      type: object
+      properties:
+        source:
+          description: Originating system of the notification, which is Business Payment Service (BPS).
+          type: string
+          example: BPS
+        purchaseRequestId:
+          description: ICCP Purchase Request ID - uniquely identifies the purchase request and VCN
+          type: string
+          example: '360147'
+        bpsTransactionId:
+          description: BPS Payment Instruction ID.
+          type: string
+          example: 65098ff7-54f9-42fe-b89c-3fff8470658c
+        status:
+          description: "Purchase request status in Business Payment Service (BPS).\n  SUBMITTED: Payment instruction is submitted to Supplier Payment Agent.\n  PENDING: Payment instruction is pending payment.\n  RECEIVED: Payment instruction is received by Track BPS.\n  ACCEPTED: Payment instruction is accepted by BPS based on the Suppliers Payment preferences.\n  APPROVED: Payment instruction is approved by Supplier Payment Agent.\n  DECLINED: Payment instruction is declined by Supplier Payment Agent."
+          type: string
+          example: APPROVED
+        updatedDate:
+          description: Last updated date (UTC) on which the purchase request is updated in BPS.
+          type: string
+          example: '2021-09-08T16:06:11.598505Z'
+        transactionIdentification:
+          description: Identification of the authorization transaction.
+          type: object
+          properties:
+            approvalCode:
+              description: Value assigned by the approval entity indicating approval.
+              type: string
+              example: SUBMITTED
+            retrievalReferenceNumber:
+              description: Reference supplied by the system retaining the original source information and used to assist in locating that information or a copy of the information.
+              type: string
+              example: testRetrievalReferenceNumber
+            transactionReference:
+              description: Identification of the transaction by the card acceptor. It may appear on the receipt of the cardholder. It remains unchanged throughout the lifetime of the transaction.
+              type: string
+              example: testTransactionReference
+            transactionDateTime:
+              description: Local date and time of the transaction assigned by the Point Of Interaction (POI).
+              type: string
+              example: '2021-08-17T17:37:23.230Z'
+        statusReasonInformation:
+          description: Identification of the authorization transaction.
+          type: object
+          properties:
+            reasonCode:
+              description: Specifies the reason for the status.
+              type: string
+              example: ALT_MOP_NOT_BPS
+            description:
+              description: Specifies the description for the status.
+              type: string
+              example: Does not accepts BPS payment
+        errors:
+          description: Error Codes
+          type: object
+          properties:
+            reasonCode:
+              description: Specifies the reason for the error.
+              type: string
+              example: parameter.limit.invalid
+            description:
+              description: Specifies the description for the error.
+              type: string
+              example: The start parameter is required but was not provided.
+    PlanNotifMerchant:
+      type: object
+      properties:
+        name:
+          description: Merchant legal name or "doing business as" name. For 'Mastercard Installments Payment Services', this will be optional parameter.
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Globex Decor
+        country:
+          type: string
+          description: Country code in ISO 3166 alpha 3 format. (ISO DE-43 SF-5)
+          example: USA
+          maxLength: 3
+          minLength: 3
+        mcc:
+          type: string
+          description: Merchant Category Code. (ISO DE-18)
+          example: '1711'
+          maxLength: 4
+          minLength: 4
+        acquirerId:
+          description: Acquiring Institution ID Code to identifies the acquiring institution. (ISO DE-32)
+          type: string
+          minLength: 1
+          maxLength: 6
+          example: '456789'
+        merchantId:
+          description: Merchant ID assigned by Acquirer. (ISO DE-42)
+          type: string
+          minLength: 1
+          maxLength: 15
+          example: '456789'
+        url:
+          description: URL for the Merchant.
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: www.globexdecor.com
+    TransactionOffers:
+      type: array
+      description: A list of offers presented to the consumer. This is a mandatory field for During Purchase use case of Mastercard Installments Payment Services.
+      items:
+        $ref: '#/components/schemas/TransactionOffer'
+      maxItems: 50
+    PlanNotifSchedulePayments:
+      type: array
+      description: List of Schedule Payments.
+      items:
+        $ref: '#/components/schemas/PlanNotifSchedulePayment'
+      maxItems: 99
+    PlanNotifPlanInstallmentInformation:
+      type: object
+      required:
+      - frequency
+      - tenure
+      description: Plan Installment Information set of fields.
+      properties:
+        apr:
+          type: number
+          format: double
+          description: Annual Percentage Rate (APR).
+          example: 25.03
+          exclusiveMaximum: false
+          exclusiveMinimum: false
+          maximum: 200
+          minimum: 0
+        currency:
+          type: string
+          description: Currency code according to ISO 4217.
+          example: USD
+          maxLength: 3
+          minLength: 3
+        frequency:
+          type: string
+          description: Frequency of installment (single installment time duration).It will be one of the [WEEKLY, BIWEEKLY, MONTHLY]
+          example: BIWEEKLY
+          maxLength: 20
+          minLength: 3
+        firstInstallmentAmount:
+          type: number
+          format: double
+          description: Amount to be paid for the first installment.
+          example: 100
+        otherInstallmentAmount:
+          type: number
+          format: double
+          description: Subsequent Installment amounts with minor unit according to ISO 4217.
+          example: 100
+        feeValue:
+          type: number
+          format: double
+          description: Installment fee amount.
+          example: 2.05
+        tenure:
+          type: integer
+          format: int32
+          description: Total number of installments for an offer. Offer tenure.
+          example: 2
+          maximum: 99
+          minimum: 2
+        totalAmount:
+          type: number
+          format: double
+          description: The total amount owed by the cardholder on an installment purchase inclusive of fees, tax and interest for the installment plan.
+          example: 200
+    PlanNotifTransaction:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+          description: Transaction amount. (ISO DE-4)
+          example: 2.05
+        currency:
+          type: string
+          description: Currency code according to ISO 4217. (ISO DE-44)
+          example: USD
+          maxLength: 3
+          minLength: 3
+        stan:
+          description: The System Trace Audit Number (STAN) for this transaction. (ISO DE-11)
+          type: string
+          minLength: 1
+          maxLength: 6
+          example: 123456
+        rrn:
+          description: The Retrieval Reference Number (RRN) for this transaction. (ISO DE-37)
+          type: string
+          minLength: 0
+          maxLength: 12
+          example: 123456123456
+        authorizationCode:
+          description: Authorization identification response (ISO DE-38).
+          type: string
+          minLength: 0
+          maxLength: 6
+          example: 123456
+        localDateTime:
+          description: Transaction local date. [Date and Time RFC](https://datatracker.ietf.org/doc/html/rfc3339). (ISO DE-12, ISO DE-13).
+          type: string
+          example: '2012-01-01T00:00:00Z'
+        transmissionDateTime:
+          description: Transaction transmission date. [Date and Time RFC](https://datatracker.ietf.org/doc/html/rfc3339). (ISO DE-7)
+          type: string
+          example: '2012-01-01T00:00:00Z'
+        transactionLinkId:
+          description: Unique Value generated by Mastercard to track the transaction (ISO DE-105)
+          type: string
+          minLength: 0
+          maxLength: 22
+          example: 123456adada12345
+      required:
+      - amount
+      - currency
+    PlanNotifError:
+      type: object
+      description: Error response wrapper
+      properties:
+        Errors:
+          $ref: '#/components/schemas/PlanNotifErrorWrapper'
+      required:
+      - Errors
+    PlanProcessorPost:
+      type: object
+      properties:
+        planId:
+          $ref: '#/components/schemas/PlanNotifPlanIdField'
+        issuerCid:
+          $ref: '#/components/schemas/issuerCid'
+        issuerIca:
+          $ref: '#/components/schemas/issuerIca'
+        merchant:
+          $ref: '#/components/schemas/PlanNotifMerchant'
+        offerId:
+          $ref: '#/components/schemas/PlanNotifOfferIdField'
+        planInstallmentInformation:
+          $ref: '#/components/schemas/PlanNotifPlanInstallmentInformation'
+        schedulePayments:
+          $ref: '#/components/schemas/PlanNotifSchedulePayments'
+        transaction:
+          $ref: '#/components/schemas/PlanNotifTransaction'
+        sensitiveData:
+          $ref: '#/components/schemas/PlanNotifSensitiveDataField'
+        transactionOffers:
+          $ref: '#/components/schemas/TransactionOffers'
+      required:
+      - consumer
+      - planId
+      - issuerCid
+      - issuerIca
+      - offerId
+      - schedulePayments
+      - planInstallmentInformation
+      - transaction
+    PlanProcessorNotify:
+      type: object
+      required:
+      - status
+      properties:
+        status:
+          type: string
+          description: Plan Notification status. Possible values - [ SUCCESS, FAILURE ]
+          example: SUCCESS
+          maxLength: 12
+          minLength: 7
+        message:
+          type: string
+          description: Human readable short description for the notification processing.
+          example: Notification Received Successfully
+          maxLength: 256
+          minLength: 0
+    PlanNotifSensitiveDataField:
+      title: sensitiveData
+      type: object
+      description: This object explains the definition of the Highly Sensitive and Special handling data fields, which will be obtained when customers decrypts the 'encryptedValue' field using JWE decryption using Mastercard provided client decryption libraries.
+      properties:
+        consumer:
+          properties:
+            primaryAccountNumber:
+              type: number
+              description: Consumer Credit or Debit card number (PAN) to offer Installments (ISO-DE2). This field will always contain a funding PAN, even if the transaction has been performed using a tokenized PAN.
+              maxLength: 19
+              minLength: 11
+              example: 5110921032063789
+      required:
+      - consumer
+    issuerCid:
+      type: string
+      description: Customer ID of the Issuer
+      maxLength: 10
+      example: '202020'
+    PlanNotifSchedulePayment:
+      type: object
+      required:
+      - installmentAmount
+      - dueDate
+      - installmentNumber
+      properties:
+        installmentAmount:
+          type: number
+          format: double
+          description: Amount to be paid in an installment.
+          example: 100
+        dueDate:
+          type: string
+          description: Due date for an installment.
+          example: 2024-3-21
+          maxLength: 10
+          minLength: 8
+        installmentNumber:
+          type: integer
+          format: int32
+          description: Number of an installment.
+          example: 1
+          maximum: 99
+          minimum: 1
+    PlanNotifErrors:
+      type: object
+      description: A single error
+      properties:
+        Description:
+          type: string
+          description: A description for this specific occurrence corresponding to the ReasonCode
+          example: Invalid Format
+          maxLength: 500
+          minLength: 1
+        Details:
+          type: string
+          description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+          example: purchaseDate, billingAddress.city
+          maxLength: 1000
+          minLength: 1
+        ReasonCode:
+          type: string
+          description: A code defining the error, as defined in documentation
+          example: VALIDATION_ERROR
+          maxLength: 36
+          minLength: 1
+        Recoverable:
+          type: boolean
+          description: Whether or not retrying this request could result in a successful response
+          example: false
+        Source:
+          type: string
+          description: The source of the problem. i.e where the error occurred
+          example: TRA
+          maxLength: 15
+          minLength: 1
+    PlanNotifErrorWrapper:
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Object that contains the list of errors
+          items:
+            $ref: '#/components/schemas/PlanNotifErrors'
+      required:
+      - Error
+    PlanNotifPlanIdField:
+      type: string
+      format: uuid
+      description: A unique number assigned to an installment plan
+      example: 3d56f5a7-db48-41f0-875e-30920e8465f3
+      maxLength: 36
+      minLength: 36
+    PlanNotifOfferIdField:
+      type: string
+      description: Unique identifier for installment offers.
+      example: '24092019'
+      maxLength: 64
+      minLength: 8
+    issuerIca:
+      type: string
+      description: ICA of the Issuer
+      maxLength: 11
+      example: '7432'
+    TransactionOffer:
+      type: object
+      properties:
+        offerId:
+          type: string
+          description: unique identifier for installment offers.
+          example: '24092019'
+          maxLength: 64
+          minLength: 8
+      required:
+      - offerId
+    Errors:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+      description: Errors list
+      example:
+        $ref: '#/components/examples/BadRequestExample'
+    ErrorWrapper:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              $ref: '#/components/schemas/Errors'
+          description: Error object
+          example:
+            $ref: '#/components/examples/BadRequestExample'
+    Notification:
+      type: object
+      properties:
+        appId:
+          type: string
+          description: Application identifier for client.
+          enum:
+          - MFN
+          - KUPAA
+          example: MFN
+          minLength: 3
+          maxLength: 15
+        partnerId:
+          type: string
+          minLength: 0
+          maxLength: 50
+          description: 'Code to identify partner. Eg: school on Kupaa'
+          example: '1234'
+        providerReference:
+          type: string
+          description: Unique transaction ID from Payment Provider
+          example: ABC123
+          minLength: 5
+          maxLength: 50
+        srcAccount:
+          type: string
+          description: Payer mobile bank account number
+          example: '25471234567'
+          minLength: 5
+          maxLength: 30
+        paymentChannel:
+          type: string
+          minLength: 1
+          maxLength: 30
+          description: Depicts mode of payment as mentioned in enum.
+          enum:
+          - MOBILE
+          - BANK
+          example: MOBILE
+        transactionAmount:
+          type: number
+          format: double
+          description: Transaction amount
+          example: 12567.89
+        accountId:
+          type: string
+          minLength: 1
+          maxLength: 30
+          example: '1234'
+          description: Payer's account id
+        transactionDate:
+          type: string
+          minLength: 0
+          maxLength: 30
+          example: '2020-07-15'
+          description: Transaction date in the format 'YYYY-MM-DD'
+        narration:
+          type: string
+          minLength: 0
+          maxLength: 500
+          description: Description of payment
+          example: Payment for XYZ
+        accountName:
+          type: string
+          minLength: 0
+          maxLength: 100
+          example: Payer Name
+          description: Payer Name
+        accountNumber:
+          type: string
+          minLength: 1
+          maxLength: 30
+          example: '25471234589'
+          description: Destination account number
+        currency:
+          type: string
+          example: UGX
+          minLength: 3
+          maxLength: 3
+          description: Alphabetic code of currency as per ISO4217 standard.
+        countryCode:
+          type: string
+          minLength: 3
+          maxLength: 3
+          example: USA
+          description: ISO 3-alpha country code format.
+        signature:
+          type: string
+          minLength: 0
+          maxLength: 500
+          description: Signature for request
+          example: Signature for request
+        correlationId:
+          type: string
+          format: uuid
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+          description: CorrelationId for request
+      title: Notification
+      description: notification request
+    Error:
+      type: object
+      properties:
+        Source:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: An element used to indicate the source of the issue causing this error.
+          example: PAYMENT_SERVICE
+        ReasonCode:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: A reason code for the error that has occurred.
+          example: BAD_REQUEST
+        Description:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Description of the reason the operation failed.
+          example: We couldn't handle your request
+        Recoverable:
+          type: boolean
+          description: Generated by the gateway to indicate if the request could presented again for processing. Either "true" or "false".
+          example: true
+        Details:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Identifies the description of the error.
+          example: appId should be either MFN or Kupaa
+      description: Error Object
+  responses:
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-403'
+    GetNotificationResponse:
+      description: Collection of notification events
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NotificationsWrapper'
+          examples:
+            BPC PAYMENT AUTHORIZATION:
+              $ref: '#/components/examples/GetNotificationBPCAuthorizationResponse'
+            ICCP CLEARING:
+              $ref: '#/components/examples/GetNotificationICCPClearingResponse'
+            ICCP PAYMENT AUTHORIZATION:
+              $ref: '#/components/examples/GetNotificationICCPAuthorizationResponse'
+            BPS PAYMENT UPDATE:
+              $ref: '#/components/examples/GetNotificationBPSPaymentUpdateResponse'
+            ICMP TOKEN LIFECYCLE:
+              $ref: '#/components/examples/GetNotificationICMPLifecycleResponse'
+            ICMP TOKEN PROVISIONING:
+              $ref: '#/components/examples/GetNotificationICMPProvisioningResponse'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-404'
+    PlanNotifSuccessResponse:
+      content:
+        application/json:
+          example: '{"status":"SUCCESS", "message":"Notification received successfully"}'
+          schema:
+            $ref: '#/components/schemas/PlanProcessorNotify'
+      description: Returns "Location" response header which contains the relative URL to get the status of this request.
+      headers:
+        Location:
+          schema:
+            type: string
+            description: Unique id generated for this request.
+            example: /notification?request_id=7223372036854776000
+    PlanNotifTooManyRequestError:
+      content:
+        application/json:
+          example:
+            Errors:
+              Error:
+              - Source: CustomerService
+                ReasonCode: too.many.requests
+                Description: Too many requests.
+                Recoverable: true
+                Details: You have exceeded the IP rate limit. Maximum allowed - 10 TPS.
+          schema:
+            $ref: '#/components/schemas/PlanNotifError'
+      description: This kind of error indicates the user has sent too many requests in a given amount of time.
+    PlanNotifNotFoundError:
+      content:
+        application/json:
+          example:
+            Errors:
+              Error:
+              - Source: CustomerService
+                ReasonCode: not.found
+                Description: Resource not found.
+                Recoverable: false
+                Details: It looks like you are accessing a resource that doesn't exist. Please go through the specifications to get actual URL details..
+          schema:
+            $ref: '#/components/schemas/PlanNotifError'
+      description: Not found error. The URI didn't match an existing resource, the server can't find the requested resource.
+    PlanNotifForbiddenError:
+      content:
+        application/json:
+          example:
+            Errors:
+              Error:
+              - Source: CustomerService
+                ReasonCode: forbidden
+                Description: Unable to authorize the request.
+                Recoverable: false
+                Details: None
+          schema:
+            $ref: '#/components/schemas/PlanNotifError'
+      description: 'Forbidden: User doesn''t have a permission required to access the resource.'
+    PlanNotifUnauthorizedError:
+      content:
+        application/json:
+          example:
+            Errors:
+              Error:
+              - Source: CustomerService
+                ReasonCode: unauthorized
+                Description: Unauthorized to access the resource.
+                Recoverable: false
+                Details: User doesn't have access to the requested resource.
+          schema:
+            $ref: '#/components/schemas/PlanNotifError'
+      description: 'Unauthorized: Authentication is required and has failed or has not been provided.'
+    PlanNotifBadRequestError:
+      content:
+        application/json:
+          example:
+            Errors:
+              Error:
+              - Source: CustomerService
+                ReasonCode: bad.request
+                Description: Bad or malformed request.
+                Recoverable: false
+                Details: Invalid PAN (Primary Account Number).
+          schema:
+            $ref: '#/components/schemas/PlanNotifError'
+      description: 'Bad Request: The server cannot or will not process the request due to an apparent client error (e.g., malformed request syntax, size too large, invalid request message framing, or deceptive request routing).'
+    NotificationSuccess:
+      description: Payment notification request executed successfully.
+    InvalidKeyError:
+      description: Forbidden-You do not have necessary permission to access this resource on this server.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidKeyExample:
+              $ref: '#/components/examples/InvalidKeyExample'
+    BadRequestError:
+      description: Bad Request-The server cannot not process the request due to invalid request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    InvalidAuthHeaderError:
+      description: Bad Request - No Authorization header set
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidAuthHeaderExample:
+              $ref: '#/components/examples/InvalidAuthHeaderExample'
+    NotFoundError:
+      description: Not Found-The requested resource was not found on this server.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
+  examples:
+    GetNotificationICMPLifecycleResponse:
+      value:
+        count: 1
+        offset: 0
+        limit: 1
+        total: 49
+        notifications:
+        - subject: TOKEN_LIFECYCLE_EVENT
+          subscriptionName: TestICMPLifecycleSubscription
+          pushStatus: DELIVERED
+          createdTimestamp: '2024-07-11T10:41:49.588Z'
+          idempotencyKey: 0CNSe09a5d3a26ae170adcc8b089cf8ea56c82c7d63df0e107cedee5199bac022a921724033906
+          content:
+            tokenInfo:
+              accountNumber: '****************1234'
+              expiry: '2024-07-04T10:39:36.727670300Z'
+              accountGuid: fd7fe39-48de-464e-bed2-c148250d2024
+              createdDate: '2024-07-04T10:39:36.727670300Z'
+              activatedDate: '2024-07-04T10:39:36.727670300Z'
+              lastUpdatedDate: '2024-07-04T10:39:36.727670300Z'
+            tokenType: CLOUD
+            eventType: CREATED
+            tokenRequestorId: '12342185998'
+            correlationId: vPRbS5k
+            status: A
+            reasonCode: TEST
+            suspensionReasons:
+            - TEST1
+            - Test2
+            requestedBy: Jon Doe
+            walletInfo:
+              walletId: '166'
+              paymentAppInstanceId: 8WUzXTwOrkG77xekQf0r9Yw4
+              secureElementId: 'null'
+            vcnInfo:
+              accountNumber: '****************1415'
+              expiry: 2026-12
+              accountGuid: 4fd7fe39-48de-464e-bed2-c148250d2005
+              ownerInfo:
+                issuerGuid: SENTTY55EA64767D38251998BDEF1A058EDA2F4F5A5A00F1580052C6D46330ED9514571560150119
+                corpGuid: SENTTY9F510FE8BABCAF905C9A137BD31DD94B3EC93B1B83CA0682D68BF21F6A0027D71560150210
+              createdDate: '2024-07-04T10:39:36.727791100Z'
+              lastUpdatedDate: '2024-07-04T10:39:36.727791100Z'
+            rcnInfo:
+              accountNumber: '****************0112'
+              expiry: 2025-12
+              accountGuid: 0ENTd5180861dab52b34f9854b4098eea4c2b5a9d29e923492b95d48e0152e6100ae1698658905
+            purchaseRequest:
+              purchaseRequestId: 7408404
+              rcnAlias: test
+              companyId: 248947
+    GetNotificationICCPAuthorizationResponse:
+      value:
+        count: 1
+        offset: 0
+        limit: 1
+        total: 46058
+        notifications:
+        - subject: PAYMENT_AUTHORIZATION
+          subscriptionName: TestICCPAuthorizationSubscription
+          pushStatus: DELIVERED
+          createdTimestamp: '2024-05-30T10:43:59.640Z'
+          content:
+            messageTypeIndicator: '0120'
+            systemTraceAuditNumber: '011174'
+            financialNetworkCode: MCC
+            banknetReferenceNumber: Q4A91A
+            transactionAmount: 9110
+            transactionCurrencyCode: JPY
+            billingAmount: 16100
+            billingCurrencyCode: JPY
+            responseCode: '00'
+            authorizationCode: 009999
+            transmissionRawDate: '1103'
+            transmissionRawTime: '101611'
+            settlementDate: '0410'
+            cardHolderTransactionTypeCode: '00'
+            posTransactionStatus: '0'
+            traceId: 'MCC9999991231  '
+            merchant:
+              merchantId: '497520000000000'
+              categoryCode: '5542'
+              name: Jasper
+              city: 'Jasper       '
+              stateOrCountryCode: 'TN '
+            realPaymentCard:
+              number: '****************0112'
+              expiryMonth: '04'
+              expiryYear: '24'
+            virtualPaymentCard:
+              number: '****************6090'
+              expiryMonth: '02'
+              expiryYear: '24'
+            inControlOnBehalfServiceResult:
+              rcnServiceResultCode: null
+              vcnServiceResultCode: V
+            originalMessage:
+              messageTypeIndicator: '0100'
+              systemTraceAuditNumber: '11174'
+              transmissionRawDateTime: 0412112800
+            advice:
+              reasonCode: '650'
+            replacementAmounts:
+              transactionAmount: 100000
+              settlementAmount: 200000
+              billingAmount: 300000
+            purchaseRequest:
+              purchaseRequestId: 7163960
+              rcnAlias: test
+              companyId: 248947
+              companyGuid: SENTTY9F510FE8BABCAF905C9A137BD31DD94B3EC93B1B83CA0682D68BF21F6A0027D71560150210
+              issuerGuid: SENTTY55EA64767D38251998BDEF1A058EDA2F4F5A5A00F1580052C6D46330ED9514571560150119
+    GetNotificationICMPProvisioningResponse:
+      value:
+        count: 1
+        offset: 0
+        limit: 1
+        total: 12604
+        notifications:
+        - subject: TOKEN_PROVISIONING_EVENT
+          subscriptionName: TEST1_TOKEN__SUBSCRIBER_withoutspec
+          pushStatus: DELIVERED
+          createdTimestamp: '2024-06-18T13:14:14.521Z'
+          idempotencyKey: 0CNSe09a5d3a26ae170adcc8b089cf8ea56c82c7d63df0e107cedee5199bac022a921724033906
+          content:
+            tokenInfo:
+              accountNumber: '****************1234'
+              expiry: '2024-07-04T10:39:36.727670300Z'
+              accountGuid: fd7fe39-48de-464e-bed2-c148250d2024
+              createdDate: '2024-07-04T10:39:36.727670300Z'
+              activatedDate: '2024-07-04T10:39:36.727670300Z'
+              lastUpdatedDate: '2024-07-04T10:39:36.727670300Z'
+            tokenType: CLOUD
+            eventType: COMPLETED
+            tokenRequestorId: '3911966485555'
+            reasonCode: TEST
+            correlationId: vPRbS5k
+            source: ACCOUNT_ON_FILE
+            tokenizedMetaData:
+              accountHolderData:
+                accountHolderName: CXDzKYEdEbBI
+                accountHolderAddress:
+                  line1: zSqLUXpVDvIlGHqBgwWwaqjefUprTD
+                  line2: PzWcIVnnUAcwIhClfoRFCpXVBKXKTz
+                  city: VtbWldDNyr
+                  countrySubdivision: TinGpkyTrQ
+                  postalCode: jPgSKxia
+                  country: cbN
+                sourceIp: 127.0.0.1
+                deviceLocation: 38.63/-90.2
+                consumerIdentifier: RRVpadJNZRizXXsiSNOAjXZKotnbOLZL
+                accountHolderEmailAddress: abc@email.com
+                accountHolderMobilePhoneNumber:
+                  countryDialInCode: qg
+                  phoneNumber: cejvqlS
+              paymentAccountReference: TEST_paymentAccountReference
+              deviceInfo:
+                deviceName: hyXFWikbFTLnbFZXceWQAWKMNuAUSPXA
+                serialNumber: hnhoemOmejajGuFpFTKLnBtGySKZXjqx
+                formFactor: PHONE
+                isoDeviceType: sO
+                osName: ANDROID
+                osVersion: '4.4'
+                imei: '352099001761481'
+                msisdn: '7307406945'
+                paymentTypes:
+                - NFC
+                storageTechnology: SERVER
+                cardCaptureTechnology: CAMERA
+              accountIdHash: 3eIWgiQAkw6Wel3qaOoYt400szJDwlee
+              activeTokenCount: '44'
+              consumerFacingEntityName: SRLuCGDgOnnuhcdhaLvZTGEqAdmDluCamUoaJysNluznpTJLXs
+            walletInfo:
+              walletId: '166'
+              paymentAppInstanceId: 8WUzXTwOrkG77xekQf0r9Yw4
+              secureElementId: 'null'
+            walletProviderDecisioningInfo:
+              recommendedDecision: APPROVED
+              recommendationStandardVersion: 1.0.0
+              deviceScore: '3'
+              accountScore: '4'
+              phoneNumberScore: '3'
+              accountLifeTime: '4'
+              recommendationReasons:
+              - ACCOUNT_TOO_NEW
+            vcnInfo:
+              accountNumber: ' ****************3589'
+              expiry: 2026-12
+              accountGuid: 4fd7fe39-48de-464e-bed2-c148250d2005
+              ownerInfo:
+                issuerGuid: SENTTY55EA64767D38251998BDEF1A058EDA2F4F5A5A00F1580052C6D46330ED9514571560150119
+                corpGuid: SENTTY9F510FE8BABCAF905C9A137BD31DD94B3EC93B1B83CA0682D68BF21F6A0027D71560150210
+            rcnInfo:
+              accountNumber: '****************1115'
+              expiry: 2025-12
+              accountGuid: 8f89407e-1c7f-4b4b-bfc7-a7ef47201005
+            purchaseRequest:
+              purchaseRequestId: 7017240
+              rcnAlias: TestRCN
+              companyId: 248947
+    GetNotificationBPCAuthorizationResponse:
+      value:
+        count: 1
+        offset: 0
+        limit: 1
+        total: 119482
+        notifications:
+        - subject: BPC_PAYMENT_AUTHORIZATION
+          subscriptionName: TestBPCAuthorizationSubscription
+          pushStatus: DELIVERED
+          createdTimestamp: '2024-05-30T06:09:28.409Z'
+          content:
+            messageTypeIndicator: '0100'
+            systemTraceAuditNumber: '011174'
+            traceId: MCC9999991200
+            issuerGuid: SENTTY55EA64767D38251998BDEF1A058EDA2F4F5A5A00F1580052C6D46330ED9514571560150119
+            corpGuid: SENTTY9F510FE8BABCAF905C9A137BD31DD94B3EC93B1B83CA0682D68BF21F6A0027D71560150210
+            processor:
+              issuerId: 1
+              appliedDateTime: '0410'
+              responseCode: '12'
+              financialNetworkCode: MCC
+              banknetReferenceNumber: CurrencyCodeExtraHeader1
+              onBehalfResult: V
+              onBehalfService: '17'
+            realPaymentCard:
+              number: '****************0112'
+              expiry: '2404'
+              accountGuid: 0ENTd5180861dab52b34f9854b4098eea4c2b5a9d29e923492b95d48e0152e6100ae1698658905
+            virtualPaymentCard:
+              number: '****************0576'
+              expiry: '2402'
+              accountGuid: 0ENTb7c9b10627302423cc08963bb1e01779868251f0eafd39783224af427fd5b2051698658907
+            acceptor:
+              name: acceptor.name
+              cityName: cityName
+              subDivisionCode: 'TN '
+              terminalId: '0001'
+              id: '497520000000000'
+              merchantCategoryCode: '5542'
+              environment: '0'
+              localDate: '0410'
+              localTime: 092900
+              retrievalReferenceNumber: 074975208903
+              posCountryCode: '840'
+              posTransactionStatus: '0'
+              amount:
+                amount: 9110
+                currencyCode: '840'
+            cardHolderAmount:
+              amount: 16100
+              currencyCode: '840'
+            transactionInformation:
+              acquirerInstitutionIdCode: 5173
+              forwardingInstitutionIdCode: 497520000000000
+              conversionRateCardholderBilling: 1234
+              processingCode: '00'
+              authCode: '04'
+              dateTime: '1103'
+              environment: '0'
+              issuerResponse: '00'
+              systemTraceAuditNumber: '011174'
+              reversal:
+                replacementTransactionAmount: 100000
+                replacementSettlementAmount: 200000
+                replacementCardholderAmount: 300000
+              posEntryMode: '0'
+            originalMessage:
+              systemTraceAuditNumber: '011174'
+              transmissionRawDateTime: transmissionRawDateTime
+            advice:
+              reasonCode: '650'
+            fundingSource:
+              fundingSourceAlias: Notif Test Alias
+              fundingSourceGuid: 0ENT88251ced800ba36d3ab1b6cec151342e309d42605021e8503dfc3712d4cb9b911698658905
+    GetNotificationBPSPaymentUpdateResponse:
+      value:
+        count: 1
+        offset: 0
+        limit: 1
+        total: 22
+        notifications:
+        - subject: PAYMENT_UPDATE
+          subscriptionName: TestBPSPaymentUpdateSubscription
+          pushStatus: DELIVERED
+          createdTimestamp: '2024-07-29T02:20:55.801Z'
+          content:
+            source: BPS
+            purchaseRequestId: '5995026075916099'
+            bpsTransactionId: '157231973'
+            status: APPROVED
+            updatedDate: '2024-07-29'
+            transactionIdentification:
+              approvalCode: AC
+              retrievalReferenceNumber: Rreq_b7d45aaa82ad4d688b64e64b63001e39
+              transactionReference: RE
+              transactionDateTime: '2024-07-29'
+            statusReasonInformation:
+            - reasonCode: RC
+              description: description here
+            errors: null
+    GetNotificationICCPClearingResponse:
+      value:
+        count: 1
+        offset: 0
+        limit: 1
+        total: 158748
+        notifications:
+        - subject: CLEARING
+          subscriptionName: TestClearingSubscription
+          pushStatus: DELIVERED
+          createdTimestamp: '2024-05-30T01:06:20.874Z'
+          content:
+            clearingTransactionId: 9876996
+            type: C
+            acquirerReferenceData: '25502590195480000239999'
+            functionCode: 200
+            messageTypeId: 12345
+            txnType: First Presentment
+            isMastercardSwitched: T
+            receiverId: '6789'
+            messageReasonCode: 200
+            originalTransactionId: 123456
+            conversionRateCardholderBilling: 23.23
+            authCode: '123'
+            processingCode: '00'
+            tokenPan: 'null'
+            posEntryMode: 099999B99001
+            dateTimeTransactionLocal: '2024-05-23T01:05:50.419541Z'
+            settlementAmount:
+              amount: 12.3
+              currencyCode: '840'
+              currencyCodeAlphabetic: USD
+            reversalIndicator: false
+            isMatched: S
+            originalOrLinked: O
+            controlsAppliedDateTime: '2024-05-23T01:05:50.419517Z'
+            banknetReferenceNumber: '1234'
+            destinationInstitutionIdCode: '64456'
+            acquirerInstitutionIdCode: 10000
+            forwardingInstitutionIdCode: 22222
+            cardHolderAmount:
+              amount: 41.2
+              currencyCode: '840'
+              currencyCodeAlphabetic: USD
+            authorization:
+              authorizationTransactionId: 567890
+              systemTraceAuditNumber: 1234
+              type: 0
+              acceptorLocalDate: ''
+              acceptorLocalTime: ''
+              mtIdType: '1'
+              cardHolderAmount:
+                amount: 123.2
+                currencyCode: '840'
+                currencyCodeAlphabetic: USD
+              effectOnBalance: 1.2
+              acceptorAmount:
+                amount: 21
+                currencyCode: '840'
+                currencyCodeAlphabetic: USD
+            virtualPaymentCard:
+              number: '****************1878'
+              expiry: 2024-02
+            realPaymentCard:
+              number: '****************2222'
+              expiry: 2024-02
+            acceptor:
+              merchantCategoryCode: '1711'
+              merchantCategoryCodeDescription: HEATING, PLUMBING, AIR CONDITIONING CONTRACTORS
+              id: '520009999999'
+              terminalId: 01999999
+              name: sample name
+              additionalMerchantName: SAMPLE MERCHANT
+              retrievalReferenceNumber: '123'
+              streetAddress: Wheel street
+              cityName: dublin
+              subDivisionCode: dublin
+              postalCode: '432531'
+              countryCode: '840'
+              countryCodeDescription: XXX
+              amount:
+                value: 14.1
+                currencyCode: '840'
+                currencyCodeAlphabetic: USD
+            purchaseRequest:
+              purchaseRequestId: 7022463
+              rcnAlias: test
+              companyId: 248947
+              companyGuid: SENTTY9F510FE8BABCAF905C9A137BD31DD94B3EC93B1B83CA0682D68BF21F6A0027D71560150210
+              issuerGuid: SENTTY55EA64767D38251998BDEF1A058EDA2F4F5A5A00F1580052C6D46330ED9514571560150119
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: PAYMENT_SERVICE
+            ReasonCode: BAD_REQUEST
+            Description: We couldn't handle your request
+            Recoverable: false
+            Details: appId should be either MFN or Kupaa
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: PAYMENT_SERVICE
+            ReasonCode: NOT_FOUND
+            Description: You requested something we don't have
+            Recoverable: false
+            Details: Requested resource doesn't exist
+    InvalidAuthHeaderExample:
+      value:
+        Errors:
+          Error:
+          - Source: PAYMENT_SERVICE
+            ReasonCode: INVALID_AUTH_HEADER
+            Description: Bad Request - No Authorization header set
+            Recoverable: false
+            Details: check if key is passed to call the API
+    InvalidKeyExample:
+      value:
+        Errors:
+          Error:
+          - Source: PAYMENT_SERVIC
+            ReasonCode: INVALID_KEY
+            Description: Signing certificate must be valid
+            Recoverable: false
+            Details: 'null'
+  parameters:
+    endDateParam:
+      name: end
+      description: End date and time in UTC of the notifications to retrieve, EXCLUDING the end date-time specified. This field is specified on an 'excluding' basis to allow the same value to be used as a start date-time in a later request without the risk of having overlapping data or gaps in the data
+      schema:
+        type: string
+        format: date-time
+      in: query
+      required: true
+      example: '2019-01-30T10:00:00.000Z'
+    pushStatusParam:
+      name: push_status
+      description: 'Push notification delivery status (Example: FAILED, PENDING, DELIVERED, NOT_APPLICABLE). Allows the client to request a subset of notifications based on their push delivery status, e.g. to request all except those already delivered by the push mechanism'
+      schema:
+        type: array
+        items:
+          type: string
+      in: query
+      required: false
+      example:
+      - PENDING
+      - DELIVERED
+    subscriptionNameParam:
+      name: subscription_name
+      description: Specify a subscription name to return notifications only for that subscription. Provide multiple values separated by commas. Skip this value to return notifications for all subscriptions defined for the subscriber.
+      schema:
+        type: array
+        items:
+          type: string
+      in: query
+      required: false
+      example:
+      - Unique subscription name
+      - Another unique subscription name
+    notificationsLimitParam:
+      in: query
+      name: limit
+      description: For pagination - the number of notifications to return in a single response. The default value for limit is 200.
+      schema:
+        type: integer
+      required: false
+      example: 200
+    notificationsOffsetParam:
+      in: query
+      name: offset
+      description: For pagination - the offset within the current response stream of the notifications to read from
+      schema:
+        type: integer
+      required: false
+      example: 0
+    subjectNameParam:
+      name: subject
+      description: 'Subject name for which to return notifications (Example: PAYMENT_AUTHORIZATION, PAYMENT_UPDATE, CLEARING, BPC_PAYMENT_AUTHORIZATION, TOKEN_PROVISIONING_EVENT, TOKEN_LIFECYCLE_EVENT). Specify the subject to return notifications only for a particular event type.'
+      schema:
+        type: string
+      in: query
+      required: false
+      example: BPC_PAYMENT_AUTHORIZATION
+    startDateParam:
+      name: start
+      description: Start date and time in UTC of the notifications to retrieve, including the start date-time specified
+      schema:
+        type: string
+        format: date-time
+      in: query
+      required: true
+      example: '2019-01-30T09:00:00.000Z'
+    PlanNotifCorrelationIdHeaderParameter:
+      description: Client correlation id for request tracing.
+      in: header
+      name: Correlation-Id
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 3d56f5a7-db48-41f0-875e-30920e8465f3
+        maxLength: 36
+        minLength: 36
+  requestBodies:
+    PlanProcessorRequestBody:
+      content:
+        application/json:
+          examples:
+            Plan Processor Notify Request (Plain):
+              description: Typical request for **Mastercard Installments Payment Services** indicating plain payload after decryption.
+              value:
+                planId: 3d56f5a7-db48-41f0-875e-30920e8465f3
+                issuerCid: '242666'
+                issuerIca: '19246'
+                sensitiveData:
+                  consumer:
+                    primaryAccountNumber: 5110921032063789
+                merchant:
+                  name: Globex Decor
+                  country: USA
+                  mcc: 1711
+                  acquirerId: 856478
+                  merchantId: 1234856
+                  url: https://www.clover.com
+                offerId: '24092019'
+                transactionOffers:
+                - offerId: '24092019'
+                - offerId: '87654321'
+                planInstallmentInformation:
+                  apr: 0.83
+                  currency: USD
+                  frequency: MONTHLY
+                  firstInstallmentAmount: 67.66
+                  otherInstallmentAmount: 66.66
+                  feeValue: 1
+                  tenure: 6
+                  totalAmount: 400.96
+                schedulePayments:
+                - installmentAmount: 67.66
+                  dueDate: '2024-03-21'
+                  installmentNumber: 1
+                - installmentAmount: 66.66
+                  dueDate: '2024-04-21'
+                  installmentNumber: 2
+                - installmentAmount: 66.66
+                  dueDate: '2024-05-21'
+                  installmentNumber: 3
+                - installmentAmount: 66.66
+                  dueDate: '2024-06-21'
+                  installmentNumber: 4
+                - installmentAmount: 66.66
+                  dueDate: '2024-07-21'
+                  installmentNumber: 5
+                - installmentAmount: 66.66
+                  dueDate: '2024-08-21'
+                  installmentNumber: 6
+                transaction:
+                  amountType: PURCHASE
+                  amount: 200.11
+                  currency: USD
+                  stan: 123456
+                  rrn: 123456123456
+                  authorizationCode: 123456
+                  localDateTime: '2024-03-11T00:00:00Z'
+                  transmissionDateTime: '2024-03-11T00:00:00Z'
+                  transactionLinkId: 123456adada12345
+            Plan Processor Notify Request (Encrypted):
+              description: Typical request for **Mastercard Installments Payment Services** showing how a customer would receive request from Mastercard. Customer need to decrypt the payload using Mastercard encrypted libraries to retrieve sensitive data, as shown in Plan Processor Notify Request (Plain) example.
+              value:
+                planId: 3d56f5a7-db48-41f0-875e-30920e8465f3
+                issuerCid: '242666'
+                issuerIca: '19246'
+                merchant:
+                  name: Globex Decor
+                  country: USA
+                  mcc: 1711
+                  acquirerId: 856478
+                  merchantId: 1234856
+                  url: https://www.clover.com
+                offerId: '24092019'
+                transactionOffers:
+                - offerId: '24092019'
+                - offerId: '87654321'
+                planInstallmentInformation:
+                  apr: 0.83
+                  currency: USD
+                  frequency: MONTHLY
+                  firstInstallmentAmount: 67.66
+                  otherInstallmentAmount: 66.66
+                  feeValue: 1
+                  tenure: 6
+                  totalAmount: 400.96
+                schedulePayments:
+                - installmentAmount: 67.66
+                  dueDate: '2024-03-21'
+                  installmentNumber: 1
+                - installmentAmount: 66.66
+                  dueDate: '2024-04-21'
+                  installmentNumber: 2
+                - installmentAmount: 66.66
+                  dueDate: '2024-05-21'
+                  installmentNumber: 3
+                - installmentAmount: 66.66
+                  dueDate: '2024-06-21'
+                  installmentNumber: 4
+                - installmentAmount: 66.66
+                  dueDate: '2024-07-21'
+                  installmentNumber: 5
+                - installmentAmount: 66.66
+                  dueDate: '2024-08-21'
+                  installmentNumber: 6
+                transaction:
+                  amountType: PURCHASE
+                  amount: 200.11
+                  currency: USD
+                  stan: 123456
+                  rrn: 123456123456
+                  authorizationCode: 123456
+                  localDateTime: '2024-03-11T00:00:00Z'
+                  transmissionDateTime: '2024-03-11T00:00:00Z'
+                  transactionLinkId: 123456adada12345
+                encryptedValue: eyJjdHkiOiI8bWEtZW5jLWtleS1hbGlhcz4iLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.SoSsDIDCNrT5aDFzZrQiLhY3dB87Kx-j0q52ShlJR62nZ3T4lKZ1RAPLkTH3QRQi017lUoVbr20c9qfHEKe4fCV6MOpdFyZM0LcYk3N6xfYBm_UL2X7bH2ihr9FYY-60UWE3A-or1W6boClZnTcwXhhJUnsgTYuf5Xr7WB32ludIS-OK3oPOU-pz_uN-OQurhj8zCMKCnQPEOis56LecRjp2-hW0LcAkN4HcMO_S_Gd34nXcCIbzGHWJFAjkIfdVTfVSEkXEq0qMID8CYMnvPA_GbiUU-fPh25cHDK8M_QGhrMZAdvA_QTDfvhq_8uVl6aJ7LhB9FI3iLyu-mqKmuw.hh8vNhwA4plS_Mk-.VHCbABQCav5DkhK5E4i37ccb.sUut6LTwK7JJ3SVMi-2Fng
+          schema:
+            $ref: '#/components/schemas/PlanProcessorPost'
+      required: true
+    NotificationRequest:
+      description: Notification Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Notification'

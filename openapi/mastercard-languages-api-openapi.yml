@@ -1,0 +1,207 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Languages API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Languages
+paths:
+  /consent-languages:
+    get:
+      operationId: getConsentLanguages
+      summary: Get consent languages
+      tags:
+      - Languages
+      responses:
+        '200':
+          $ref: '#/components/responses/GetConsentLanguagesSuccess'
+        '400':
+          $ref: '#/components/responses/GetConsentLanguagesBadRequestError'
+      parameters:
+      - $ref: '#/components/parameters/locale'
+      - $ref: '#/components/parameters/consent_types'
+      description: Get the consent language text for enrolled service(s). A merchant/psp can use this API to get the text for their enrollment and cache it for later use.
+components:
+  responses:
+    GetConsentLanguagesBadRequestError:
+      description: Server is unable to process the request due to invalid query parameter.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            InvalidLocalParameterLengthExample:
+              $ref: '#/components/examples/InvalidLocalParameterLengthExample'
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    GetConsentLanguagesSuccess:
+      description: Consent languages for given filters, if filters not provided then return all consent languages.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConsentLanguages'
+  schemas:
+    Errors:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    ErrorResponse:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              $ref: '#/components/schemas/Errors'
+    ConsentLanguage:
+      description: Consent language details
+      type: object
+      required:
+      - consentLanguageId
+      - longText
+      - defaultText
+      - privacyNoticeURL
+      - consentType
+      - version
+      - locale
+      properties:
+        consentLanguageId:
+          type: string
+          description: A unique identifier of a consent language text.
+          example: ca91870b-02e5-40e1-9ad6-88aded6a72ab
+          minLength: 36
+          maxLength: 36
+        longText:
+          type: string
+          description: Actual consent language text.
+          example: By clicking below, you consent to bypass entry of One Time Password (OTP) for most transactions below �2000 initiated from this merchant app on this device. You may continue to receive an OTP for transactions at or above �2000. You can revoke your consent any time within the merchant app.
+          minLength: 50
+          maxLength: 5000
+        defaultText:
+          type: string
+          description: A short description of the consent language text.
+          example: By consenting, you agree to the Mastercard Global Privacy Notice
+          minLength: 50
+          maxLength: 500
+        privacyNoticeURL:
+          type: string
+          description: A global Mastercard privacy policy URL.
+          example: https://www.mastercard.co.in/en-in/privacy.html
+          minLength: 10
+          maxLength: 150
+        consentType:
+          type: string
+          description: Type of the consent. Possible valid values are india_frictionless, device_auth and frictionless_device_auth.
+          example: india_frictionless
+          minLength: 2
+          maxLength: 50
+        version:
+          type: string
+          description: Current version of the consent language.
+          example: '1.0'
+          minLength: 3
+          maxLength: 10
+        locale:
+          type: string
+          description: Locale of the consent language text.
+          example: en-US
+          minLength: 5
+          maxLength: 50
+    ConsentLanguages:
+      description: Collection of Consent Language details
+      type: object
+      required:
+      - consentLanguages
+      properties:
+        consentLanguages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsentLanguage'
+    Error:
+      type: object
+      required:
+      - Source
+      - ReasonCode
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application that generated this error. <br>Possible values = GATEWAY/AUTHENTICATION_CONSENT_SERVICE
+          example: AUTHENTICATION_CONSENT_SERVICE
+          minLength: 1
+          maxLength: 50
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during transaction processing
+          example: resource.not.found
+          minLength: 1
+          maxLength: 100
+        Description:
+          type: string
+          description: Description of the 'ReasonCode' field with additional details
+          example: The requested resource does not exist
+          minLength: 0
+          maxLength: 500
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying with same value could change the outcome. For example, if the request contains an invalid signature, retrying will never result in a success. However, if the error is related to some unexpected timeout with the service, retrying the call could result in a successful response.
+          example: false
+        Details:
+          type: string
+          description: Could be null, present for backwards compatibility or extra information
+          example: The provided acctNumber did not pass the Mod10 validation
+          minLength: 0
+          maxLength: 500
+  examples:
+    BadRequestExample:
+      summary: When something went wrong with the request
+      value:
+        Errors:
+          Error:
+          - Source: AUTHENTICATION_CONSENT_SERVICE
+            ReasonCode: system.error
+            Description: Something went wrong with your request. Please try again later
+            Recoverable: false
+    InvalidLocalParameterLengthExample:
+      summary: When locale query parameter length is invalid
+      value:
+        Errors:
+          Error:
+          - Source: AUTHENTICATION_CONSENT_SERVICE
+            ReasonCode: 'invalid data: locale'
+            Description: size must be between 5 and 50
+            Recoverable: false
+  parameters:
+    locale:
+      in: query
+      name: locale
+      schema:
+        type: string
+        minLength: 5
+        maxLength: 50
+      description: Locale of the requested consent language. An optional field, if not passed then en-US will be used.
+      example: en-US
+    consent_types:
+      in: query
+      name: consent_types
+      schema:
+        type: string
+      description: List of Consent Type for different services. An optional query parameter, if not provided then all type of consent languages will be returned in the response <br/>Possible values are INDIA_FRICTIONLESS, DEVICE_AUTH and FRICTIONLESS_DEVICE_AUTH <br/>Multiple values can be sent in the request in order to receive multiple consents in response.
+      example: INDIA_FRICTIONLESS

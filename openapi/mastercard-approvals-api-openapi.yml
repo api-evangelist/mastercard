@@ -1,0 +1,574 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Approvals API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Approvals
+  description: The API provides ability for the lender to approve a BNPL loan during purchase.
+paths:
+  /approvals:
+    post:
+      tags:
+      - Approvals
+      summary: Approve or decline an installment plan.
+      x-mastercard-api-encrypted: true
+      description: This API will be used by the provider to approve or decline a plan. This endpoint uses [JWE payload encryption] (https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/#jwe-encryption). Please refer to the [Securing Sensitive Data Using Payload Encryption] (https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/) sections for implementation details.
+      operationId: planApproval
+      parameters:
+      - $ref: '#/components/parameters/Sync'
+      requestBody:
+        $ref: '#/components/requestBodies/PlanApprovalParameters'
+      responses:
+        '200':
+          $ref: '#/components/responses/PSPData'
+        '202':
+          $ref: '#/components/responses/Accepted'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '406':
+          $ref: '#/components/responses/NotAcceptableHeader'
+  /approvals/{plan_id}:
+    get:
+      tags:
+      - Approvals
+      summary: Get the status of checkout and callback URL to PSP (Payment service provider).
+      description: This API will be used by the provider to get the status of checkout and callback URL to PSP (Payment service provider). This API should be used within 24 hours from the time the approval was posted.
+      operationId: getPlanApprovalStatus
+      parameters:
+      - $ref: '#/components/parameters/plan_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/CompletionPSPData'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptableHeader'
+components:
+  responses:
+    CompletionPSPData:
+      description: Success response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CompletionPSPData'
+          examples:
+            Completed:
+              $ref: '#/components/examples/ApprovedCompleted'
+            In Progress:
+              $ref: '#/components/examples/ApprovedInProgress'
+    Accepted:
+      description: The request was successful and will be processed asynchronously.
+      headers:
+        Location:
+          schema:
+            type: string
+          description: The URL that the client should poll for a response status. Refer to GET /approvals/{plan_id}.
+    Unauthorized:
+      description: Unauthorized to access the resource.
+      headers:
+        Correlation-Id:
+          $ref: '#/components/headers/Correlation-Id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            Unauthorized:
+              $ref: '#/components/examples/Unauthorized'
+    NotAcceptableHeader:
+      description: This response code is returned when a user enters anything except application/json in the Accept header.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            NotAcceptableHeader:
+              $ref: '#/components/examples/NotAcceptableHeader'
+    NotFound:
+      description: Not Found.
+      headers:
+        Correlation-Id:
+          $ref: '#/components/headers/Correlation-Id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            NotFound:
+              $ref: '#/components/examples/NotFound'
+    PSPData:
+      description: Success response. Returns only if the sync parameter is true.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PSPData'
+    ForbiddenError:
+      description: This response code is returned when API or resource access is not approved for the client.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ForbiddenError:
+              $ref: '#/components/examples/ForbiddenError'
+    BadRequestError:
+      description: This response code is returned when a request is invalid, or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidCardProductError:
+              $ref: '#/components/examples/InvalidCardProductError'
+            InvalidFieldFormat:
+              $ref: '#/components/examples/InvalidFieldFormat'
+            InvalidFieldLength:
+              $ref: '#/components/examples/InvalidFieldLength'
+            InvalidFieldValue:
+              $ref: '#/components/examples/InvalidFieldValue'
+            MissingRequiredField:
+              $ref: '#/components/examples/MissingRequiredField'
+  examples:
+    ApprovedInProgress:
+      description: Approval processing is in progress.
+      value:
+        status: IN_PROGRESS
+    ApprovedCompleted:
+      description: Approval processing is completed
+      value:
+        status: COMPLETED
+        callbackUrl: https://src.mastercard.com?action=COMPLETED&checkoutResponse=EncryptedData
+    Unauthorized:
+      description: Unauthorized to access the resource.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: unauthorized
+            Description: Unauthorized to access the resource.
+            Recoverable: false
+            Details: ''
+    ConsumerSelectedOffer:
+      description: This example shows a consumer-selected offer that is approved by the lender.
+      value:
+        planId: 3d56f5a7-db48-41f0-875e-30920e8465f3
+        status: APPROVED
+        approvedAmount: 300
+        approvedCurrency: USD
+        paymentAuthorization:
+          primaryAccountNumber: '5110921032063789'
+          panExpirationMonth: 08
+          panExpirationYear: '2022'
+          cardSecurityCode: '123'
+          cardholderFullName: John Doe
+          cardholderFirstName: John
+          cardholderLastName: Doe
+          billingAddress:
+            line1: 5 Street Drive
+            line2: Apartment 123
+            line3: Southampton
+            city: O'Fallon
+            state: MO
+            countryCode: US
+            zip: '123456'
+    LenderSelectedOffer:
+      description: This example shows an offer approved by the lender. The offer in this case is selected by the consumer on the lenders experience.
+      value:
+        planId: 3d56f5a7-db48-41f0-875e-30920e8465f3
+        status: APPROVED
+        offerId: '24092019'
+        approvedAmount: 300
+        approvedCurrency: USD
+        paymentAuthorization:
+          primaryAccountNumber: '5110921032063789'
+          panExpirationMonth: 08
+          panExpirationYear: '2022'
+          cardSecurityCode: '123'
+          cardholderFullName: John Doe
+          cardholderFirstName: John
+          cardholderLastName: Doe
+          billingAddress:
+            line1: 5 Street Drive
+            line2: Apartment 123
+            line3: Southampton
+            city: O'Fallon
+            state: MO
+            countryCode: US
+            zip: '123456'
+    InvalidFieldLength:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.body.parameter
+            Description: Field length is out of bound
+            Recoverable: false
+            Details: ''
+    NotFound:
+      description: URI/Resource not found.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: not.found
+            Description: URI/Resource not found.
+            Recoverable: false
+            Details: ''
+    InvalidFieldFormat:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.body.parameter
+            Description: Field format or type is invalid
+            Recoverable: false
+            Details: ''
+    InvalidCardProductError:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.parameter
+            Description: Product SPP is not available for the IND country
+            Recoverable: false
+            Details: ''
+    NotAcceptableHeader:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: not.acceptable.header
+            Description: Accept header value is not application/json.
+            Recoverable: false
+            Details: ''
+    Declined:
+      description: This example shows an installment loan request being declined.
+      value:
+        planId: 3d56f5a7-db48-41f0-875e-30920e8465f3
+        status: DECLINED
+        rejectReasonCode: LENDER_DRIVEN_REJECTION
+        rejectReasonDetail: Credit score is too low
+    MissingRequiredField:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.body.parameter
+            Description: One or more of the required fields are missing
+            Recoverable: false
+            Details: ''
+    ForbiddenError:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: forbidden
+            Description: Your account is not approved to access the API or resource, kindly contact your Mastercard associate to get approval.
+            Recoverable: false
+            Details: ''
+    InvalidFieldValue:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.body.parameter
+            Description: Value doesn't exist / doesn't meet specified range
+            Recoverable: false
+            Details: ''
+  schemas:
+    PlanApprovalParameters:
+      type: object
+      required:
+      - planId
+      - status
+      properties:
+        planId:
+          description: A unique identifier assigned to an installment plan.
+          type: string
+          format: uuid
+          example: 3d56f5a7-db48-41f0-875e-30920e8465f3
+        status:
+          type: string
+          description: Plan approval status. It will be either APPROVED or DECLINED.
+          enum:
+          - APPROVED
+          - DECLINED
+          example: APPROVED
+        offerId:
+          description: 'Installment Program Provider''s offer identifier generated by Mastercard. This ID is generated at the time of setup on MC Connect UI when the Lender creates an Offer.
+
+
+            The lender must provide the offer ID if the consumer offer selection is disabled. The offer ID provided must be one of the offer IDs retrieved via Plan API.
+
+            '
+          type: string
+          format: string
+          minLength: 8
+          maxLength: 8
+          example: '24092019'
+        rejectReasonCode:
+          type: string
+          description: Describes the reason for plan rejection. Mandatory for when the status is DECLINED.
+          enum:
+          - CONSUMER_AUTH_FAIL
+          - CONSUMER_APPLICATION_FAIL
+          - CONSUMER_CANCELLATION
+          - LENDER_DRIVEN_REJECTION
+          - LENDER_SYSTEM_ERROR
+          - OTHER_REASON
+          example: CONSUMER_APPLICATION_FAIL
+        rejectReasonDetail:
+          type: string
+          description: Indicates detailed information about the reason for rejection.
+          minLength: 0
+          maxLength: 5000
+          example: No credit or credit score too low
+        approvedAmount:
+          description: The total approved amount owed by the consumer on an installment purchase, inclusive of fees and interest, for the installment plan. This field is required if the status is APPROVED.
+          type: number
+          format: double
+          example: 300
+          minimum: 0
+          maximum: 999999999999999
+        approvedCurrency:
+          description: Alphanumeric currency code as per ISO 4217. This field is required if the status is APPROVED.
+          type: string
+          minLength: 3
+          maxLength: 3
+          example: USD
+        paymentAuthorization:
+          description: This block is required in the event that the status is APPROVED.
+          type: object
+          required:
+          - primaryAccountNumber
+          - panExpirationMonth
+          - panExpirationYear
+          - cardSecurityCode
+          - billingAddress
+          properties:
+            primaryAccountNumber:
+              type: string
+              minLength: 9
+              maxLength: 19
+              description: 'Primary Account Number. A variable length, ISO/IEC 7812-compliant account number is generated within account ranges associated with a BIN, by a Card Issuer.
+
+                '
+              example: '5555111122223333'
+            panExpirationMonth:
+              type: string
+              minLength: 2
+              maxLength: 2
+              description: The expiration month of the card, expressed as a two-digit calendar month.
+              example: 08
+            panExpirationYear:
+              type: string
+              minLength: 4
+              maxLength: 4
+              description: The expiration year of the Card, expressed as a four-digit calendar year.
+              example: '2022'
+            cardSecurityCode:
+              type: string
+              minLength: 3
+              maxLength: 4
+              description: Card security code
+              example: '123'
+            cardholderFullName:
+              type: string
+              maxLength: 60
+              description: Cardholders Name. This field is optional if cardholderFirstName and cardholderLastName are used.
+              example: John Doe
+            cardholderFirstName:
+              type: string
+              maxLength: 30
+              description: Cardholders First Name. This field is optional if cardholderFullName is used.
+              example: John
+            cardholderLastName:
+              type: string
+              maxLength: 30
+              description: Cardholders Last Name. This field is optional if cardholderFullName is used.
+              example: Doe
+            billingAddress:
+              type: object
+              required:
+              - line1
+              - city
+              - state
+              - countryCode
+              - zip
+              description: Cardholders Billing Address.
+              properties:
+                line1:
+                  type: string
+                  maxLength: 60
+                  description: Address line 1
+                  example: 5 Street Drive
+                line2:
+                  type: string
+                  maxLength: 75
+                  description: Address line 2
+                  example: Apartment 123
+                line3:
+                  type: string
+                  maxLength: 75
+                  description: Address line 3
+                  example: Southampton
+                city:
+                  type: string
+                  maxLength: 50
+                  description: City of residence
+                  example: O'Fallon
+                state:
+                  type: string
+                  maxLength: 30
+                  description: State of Residence
+                  example: MO
+                countryCode:
+                  description: Address country code in ISO 3166 alpha 2 format.
+                  type: string
+                  minLength: 2
+                  maxLength: 2
+                  pattern: ^[a-zA-Z]{2}$
+                  example: US
+                zip:
+                  description: Address zip/postal code
+                  type: string
+                  maxLength: 16
+                  example: '123456'
+    PSPData:
+      type: object
+      properties:
+        callbackUrl:
+          description: PSP (Payment service provider) callback URL with checkout response. This URL will expire after 24 hours from the time the approval is posted.
+          type: string
+          example: https://src.mastercard.com#%7B%22action%22%3A%22COMPLETED%22%2C%22checkoutResponse%22%3AEncryptedData%7D
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object which gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    CompletionPSPData:
+      allOf:
+      - $ref: '#/components/schemas/PSPData'
+      - type: object
+        required:
+        - status
+        properties:
+          status:
+            description: Indicates the status of processing. It will be either IN_PROGRESS or COMPLETED.
+            type: string
+            example: IN_PROGRESS
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns the list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    Error:
+      title: Error
+      type: object
+      description: Error object which contains details about the Error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error.
+          minLength: 1
+          maxLength: 100
+          example: Mastercard Installments APIs
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: invalid.request.parameter
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with the correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+  requestBodies:
+    PlanApprovalParameters:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PlanApprovalParameters'
+          examples:
+            Approved Consumer Selected Offer:
+              $ref: '#/components/examples/ConsumerSelectedOffer'
+            Approved Lender Selected Offer:
+              $ref: '#/components/examples/LenderSelectedOffer'
+            Declined Offer:
+              $ref: '#/components/examples/Declined'
+  parameters:
+    plan_id:
+      description: Unique identifier for plan
+      in: path
+      name: plan_id
+      required: true
+      schema:
+        type: string
+        format: uuid
+      example: 3d56f5a7-db48-41f0-875e-30920e8465f3
+    Sync:
+      in: query
+      description: Indicates whether the request is synchronous (the default value is false) or asynchronous.
+      name: sync
+      schema:
+        type: boolean
+      example: true
+  headers:
+    Correlation-Id:
+      description: Correlation-Id response header to trace the request.
+      schema:
+        type: string
+      required: true
+      example: 44dc28d6-cf59-11ec-9d64-0242ac120002

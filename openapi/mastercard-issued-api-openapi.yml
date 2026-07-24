@@ -1,0 +1,87 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Issued API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Issued
+paths:
+  /conversion-rate-issued:
+    get:
+      tags:
+      - Issued
+      summary: Mastercard Determine if the Settlement Rate Has Been Issued.
+      description: Provides status update if the present day Mastercard currency conversion rates are issued. Mastercard rates are published daily and effective for 24 hours.
+      operationId: isRateIssuedUsingGET
+      parameters:
+      - name: date
+        in: query
+        description: The date by which the rate would have been issued.
+        required: false
+        schema:
+          type: string
+        example: '2023-02-27'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettlementRateIssuedWrapper'
+              examples:
+                Israteissuedusingget200Example:
+                  summary: Default isRateIssuedUsingGET 200 response
+                  x-microcks-default: true
+                  value:
+                    name: Example Title
+                    description: A sample description.
+                    date: example_value
+                    data:
+                      rateIssued: example_value
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  schemas:
+    SettlementRateIssued:
+      type: object
+      properties:
+        rateIssued:
+          type: string
+          example: 'NO'
+          description: The requested foreign exchange rate.
+    SettlementRateIssuedWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          example: settlement-conversion-rate-issued
+          description: The name of the service being requested.
+        description:
+          type: string
+          example: Is settlement conversion rate issued
+          description: The description of the API being called.
+        date:
+          type: string
+          example: '2019-08-08 16:22:31'
+          description: The date and time the API is being called in GMT.
+        data:
+          $ref: '#/components/schemas/SettlementRateIssued'

@@ -1,0 +1,4981 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Users API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Users
+paths:
+  /user-profiles/identity-searches:
+    post:
+      tags:
+      - Users
+      responses:
+        '200':
+          $ref: '#/components/responses/IdentitySearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: "Retrieve decrypted identities along with rotated PDS to present the user\nwith the registered identity in the TP app. Does not require a minimum authentication standard.   \n**This API is mandatory.**\n"
+      summary: View an Identity
+      operationId: retrieveIdentities
+      parameters:
+      - $ref: '#/components/parameters/XUserIdentityParameter'
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/IdentitySearchRequest'
+  /user-profiles:
+    post:
+      tags:
+      - Users
+      responses:
+        '201':
+          $ref: '#/components/responses/UserProfilesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+      description: "- This endpoint registers a user profile using the given\n`user profile ID`.\n\n- An error will be returned if the user profile already exists.   \n**This API is mandatory.**\n"
+      summary: Create a new user.
+      operationId: createUserProfile
+      requestBody:
+        $ref: '#/components/requestBodies/UserProfilesRequest'
+    delete:
+      tags:
+      - Users
+      responses:
+        '200':
+          $ref: '#/components/responses/UserProfilesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: "Enable TP app to mark user account as deleted on Mastercard ID Network. Requires GPA authentication.   \n**This API is mandatory.**\n"
+      summary: Delete an Identity.
+      operationId: deleteUserProfile
+      parameters:
+      - $ref: '#/components/parameters/UserProfileIdParameter'
+      - $ref: '#/components/parameters/UserConsentParameter'
+  /user-profiles/identity-attribute-deletions:
+    post:
+      tags:
+      - Users
+      responses:
+        '200':
+          $ref: '#/components/responses/IdentityAttributeDeletionsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: "Delete an identity attribute from a PDS and update the affected assurance levels. Requires GPA authentication.   \n**This API is mandatory.**\n"
+      summary: Delete Document.
+      operationId: deleteIdentityAttribute
+      parameters:
+      - $ref: '#/components/parameters/XUserIdentityParameter'
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/IdentityAttributeDeletionsRequest'
+  /user-account-activity-searches:
+    post:
+      tags:
+      - Users
+      responses:
+        '200':
+          $ref: '#/components/responses/UserAccountActivitySearchesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: 'Retrieve decrypted user activities and present them to the user in the
+
+        TP app. Does not require a minimum authentication standard.
+
+        **This API is mandatory.**
+
+        '
+      summary: View identity lifecycle activities which have occurred in a time period.
+      operationId: retrieveUserActivities
+      parameters:
+      - $ref: '#/components/parameters/XUserIdentityParameter'
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/UserAccountActivitySearchRequest'
+  /claims/user-data-extractions:
+    post:
+      tags:
+      - Users
+      responses:
+        '200':
+          $ref: '#/components/responses/RPClaimsDataResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorClaimSharing'
+        '404':
+          $ref: '#/components/responses/NotFoundErrorClaimSharing'
+      description: 'Returns the user information from the PDS that is requested by the
+
+        Relying Party based on the ARID. Does not require a minimum authentication standard.
+
+        **This API is mandatory.**
+
+        '
+      summary: Share an Identity with an External RP - Provide the PDS to enable ID for TP to determine if these satisfy an RPs scope request.
+      operationId: extractClaimsUserData
+      parameters:
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/RPClaimsDataRequestData'
+  /claims/user-consents:
+    post:
+      tags:
+      - Users
+      responses:
+        '200':
+          $ref: '#/components/responses/UserConsentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorClaimSharing'
+        '404':
+          $ref: '#/components/responses/NotFoundErrorClaimSharing'
+      description: "Inform the Trust Party about the user consent. If the consent is given,\nthe identity attributes will be shared with Relying Party. Does not require a minimum authentication standard. \n**This API is mandatory.**\n"
+      summary: Share an Identity with an External RP - Provide consent to share the identity attributes which satisfy an RPs scope request.
+      operationId: getUserConsentStatus
+      requestBody:
+        $ref: '#/components/requestBodies/UserConsentRequest'
+  /users:
+    post:
+      tags:
+      - Users
+      summary: Register a new user
+      description: This endpoint allows users to register a new user
+      operationId: Users
+      requestBody:
+        $ref: '#/components/requestBodies/User'
+      responses:
+        '201':
+          $ref: '#/components/responses/ResourceIdentifier'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    put:
+      tags:
+      - Users
+      summary: 'Updates personal information for currently enrolled users (cardholders), including their name, contact information, security question, and more.
+
+        '
+      description: Updates the existing user's demographic information.
+      operationId: updateUser
+      requestBody:
+        $ref: '#/components/requestBodies/UserUpdateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserUpdateResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+  /users/{user_guid}/virtual-card-accounts:
+    get:
+      tags:
+      - Users
+      summary: Retrieve a list of all virtual cards linked to a user
+      description: This endpoint allows users to retrieve a list of all virtual cards linked to a user
+      operationId: findVcnCardsByUser
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      responses:
+        '200':
+          $ref: '#/components/responses/VirtualCards'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    post:
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      tags:
+      - Users
+      summary: Register a virtual card linked to a user
+      description: This endpoint allows users to register a virtual card linked to a user
+      operationId: createVirtualCardWithControls
+      requestBody:
+        $ref: '#/components/requestBodies/NewVirtualCard'
+      responses:
+        '201':
+          $ref: '#/components/responses/ResourceCreated'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /users/{user_guid}/virtual-card-accounts/{account_guid}:
+    get:
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      tags:
+      - Users
+      summary: Retrieve virtual card account details linked to a user
+      description: This endpoint allows users to retrieve virtual card account details linked to a user
+      operationId: findVcnCardByUser
+      responses:
+        '200':
+          $ref: '#/components/responses/VirtualCard'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    put:
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      tags:
+      - Users
+      summary: Update virtual card account details linked to a user
+      description: This endpoint allows users to update virtual card account details linked to a user
+      operationId: updateUserCardAndControls
+      requestBody:
+        $ref: '#/components/requestBodies/UpdatedVirtualCard'
+      responses:
+        '200':
+          $ref: '#/components/responses/OKResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    delete:
+      tags:
+      - Users
+      summary: Delete a virtual card account linked to a user
+      description: This endpoint allows users to delete a virtual card account linked to a user
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      operationId: deleteUserVirtualCard
+      responses:
+        '204':
+          $ref: '#/components/responses/NOContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /users/{user_guid}:
+    get:
+      tags:
+      - Users
+      summary: Retrieve user details
+      description: This endpoint allows users to retrieve details of a particular user
+      operationId: getUserById
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      responses:
+        '200':
+          $ref: '#/components/responses/User'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    put:
+      tags:
+      - Users
+      summary: Update a user
+      description: This endpoint allows users to update details of a particular user
+      operationId: updateUserById
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      requestBody:
+        $ref: '#/components/requestBodies/User'
+      responses:
+        '200':
+          $ref: '#/components/responses/OKResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    delete:
+      tags:
+      - Users
+      summary: Delete a user
+      description: This endpoint allows users to delete a particular user
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      operationId: deleteUser
+      responses:
+        '204':
+          $ref: '#/components/responses/NOContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /users/{user_guid}/virtual-card-accounts/{account_guid}/tokens:
+    post:
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      tags:
+      - Users
+      summary: Register a token linked to a user and a virtual card
+      description: This endpoint allows users to register a token linked to a user and a virtual card
+      operationId: TokenCreate
+      requestBody:
+        $ref: '#/components/requestBodies/NewToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/ResourceCreated'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /users/{user_guid}/virtual-card-accounts/{account_guid}/tokens/{token_guid}:
+    get:
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      - $ref: '#/components/parameters/tokenGUID'
+      tags:
+      - Users
+      summary: Retrieve token details linked to a user and a virtual card
+      description: This endpoint allows users to retrieve token details linked to a user and a virtual card
+      operationId: getTokenById
+      responses:
+        '200':
+          $ref: '#/components/responses/Token'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    put:
+      tags:
+      - Users
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      - $ref: '#/components/parameters/tokenGUID'
+      summary: Update a token linked to a user and a virtual card
+      description: This endpoint allows users to update a token linked to a user and a virtual card
+      operationId: updateTokenById
+      requestBody:
+        $ref: '#/components/requestBodies/UpdatedToken'
+      responses:
+        '200':
+          $ref: '#/components/responses/OKResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+    delete:
+      tags:
+      - Users
+      parameters:
+      - $ref: '#/components/parameters/userGUID'
+      - $ref: '#/components/parameters/accountGUID'
+      - $ref: '#/components/parameters/tokenGUID'
+      summary: Delete a token linked to a user and a virtual card
+      description: This endpoint allows users to delete a token linked to a user and a virtual card
+      operationId: deleteTokenById
+      responses:
+        '204':
+          $ref: '#/components/responses/NOContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError_2'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_2'
+        '403':
+          $ref: '#/components/responses/ForbiddenError_2'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+  /users/{id}/verifications:
+    post:
+      tags:
+      - Users
+      summary: Verifies user
+      description: Verify user based on answers to the security questions.
+      operationId: verifyUser
+      parameters:
+      - $ref: '#/components/parameters/UserId'
+      - $ref: '#/components/parameters/VerifyUsersIdType'
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/VerifyUserRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/VerifyUserResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+  /users/{id}:
+    get:
+      tags:
+      - Users
+      summary: 'Retrieves a cardholder''s information, including their name, address, communication preferences, and more.
+
+        Users are unique cardholders, as compared to Accounts that are unique cards. Each User can have multiple Accounts.'
+      description: Retrieves Cardholder information.
+      operationId: getUser
+      parameters:
+      - $ref: '#/components/parameters/UserId'
+      - $ref: '#/components/parameters/UsersIdType'
+      - $ref: '#/components/parameters/IncludeVerificationDetails'
+      - $ref: '#/components/parameters/Language'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserDetailsResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+  /user-consents/{user_consent_id}:
+    delete:
+      operationId: revokeUserConsentById
+      summary: Revoke user consent using an identifier
+      description: A merchant/PSP can use this API to revoke the user consent for a user consent identifier (user_consent_id). Once the user consent is revoked (deleted), it will not be available via Retrieve User-Consent request.
+      tags:
+      - Users
+      responses:
+        '204':
+          $ref: '#/components/responses/DeleteConsentsSuccess'
+        '400':
+          $ref: '#/components/responses/DeleteConsentsBadRequestError'
+        '401':
+          $ref: '#/components/responses/UnAuthorizedMerchantError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError_2'
+      parameters:
+      - $ref: '#/components/parameters/user_consent_id'
+    get:
+      operationId: getUserConsentById
+      summary: Retrieve user consent by an identifier
+      description: Retrieve the user consent by an identifier. A Merchants/PSP can use this API to check whether the user consent for the user_consent_id exist or not.
+      tags:
+      - Users
+      parameters:
+      - $ref: '#/components/parameters/user_consent_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/GetConsentsSuccess'
+        '400':
+          $ref: '#/components/responses/GetConsentsBadRequestError'
+        '401':
+          $ref: '#/components/responses/UnAuthorizedMerchantError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError_2'
+  /issuers/users:
+    post:
+      tags:
+      - Users
+      summary: Mastercard Allows Issuer to Enroll Cardholders to the Carbon Calculator Experience Platform.
+      description: "Used to enroll users for the Carbon Calculator Experience API so that\nthey can track the carbon usage for their transactions and provides\nthem with an option to donate towards tree plantation.\n\n**Note-**\n* If the issuer has opted for the Donation feature then the fields - *name, billing address, email, locale, cardholder name, card number, card base currency and card expiry date* fields are **mandatory** in the payload.\n* This endpoint uses the Mastercard payload\n  encryption. Refer to the **[Payload\n  Encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/#mastercard-encryption)**\n  page for implementation details.\n"
+      operationId: userRegistration
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/UserProfile'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserReference'
+        '400':
+          $ref: '#/components/responses/UserEnrolmentBadRequestError'
+        '401':
+          $ref: '#/components/responses/UserEnrolmentUnauthorisedError'
+        '404':
+          $ref: '#/components/responses/IssuerNotFoundError'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /issuers/users/{userid}:
+    put:
+      tags:
+      - Users
+      summary: Mastercard Allows Issuer to Update Enrolled User Information Onto Carbon Calculator Experience Platform.
+      description: Used to update the user's information for Carbon Calculator Experience.
+      operationId: updateUser
+      parameters:
+      - $ref: '#/components/parameters/UserID'
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateUserProfile'
+      responses:
+        '200':
+          $ref: '#/components/responses/UpdateUserReference'
+        '400':
+          $ref: '#/components/responses/UserEnrolmentBadRequestError'
+        '401':
+          $ref: '#/components/responses/UpdateUserUnauthorisedError'
+        '404':
+          $ref: '#/components/responses/IssuerNotFoundError'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /issuers/users/{userid}/dashboards:
+    get:
+      tags:
+      - Users
+      summary: Mastercard Used to Retrieve the Short-lived Url of a User's Dashboard to View Their Carbon Footprints and Contributions to Priceless Planet.
+      description: It allows issuers to retrieve a short-lived URL for an enrolled user. An Issuer needs to load this URL within their application so that the user can view the dashboard in their preferred language. Currently, four languages are supported, including English, Spanish (Latin America), Swedish, and Polish.
+      operationId: getAuthToken
+      parameters:
+      - $ref: '#/components/parameters/UserID'
+      - $ref: '#/components/parameters/Lang'
+      responses:
+        '200':
+          $ref: '#/components/responses/Dashboard'
+        '400':
+          $ref: '#/components/responses/DashboardBadRequestError'
+        '401':
+          $ref: '#/components/responses/DashboardsUnauthorisedError'
+        '404':
+          $ref: '#/components/responses/DashboardNotFoundError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /issuers/users/{userid}/aggregate-carbon-scores:
+    get:
+      tags:
+      - Users
+      summary: Mastercard Fetches Monthly Aggregate Carbon Score for the Transactions Made for the Current Month.
+      description: Allows Issuers to retrieve an aggregate carbon footprint for the transactions done by a user.
+      operationId: getAggregateCarbonScore
+      parameters:
+      - $ref: '#/components/parameters/UserID'
+      responses:
+        '200':
+          $ref: '#/components/responses/AggregateCarbonScore'
+        '400':
+          $ref: '#/components/responses/AggregateCarbonScoreBadRequestError'
+        '401':
+          $ref: '#/components/responses/AggregateCarbonScoreUnauthorisedError'
+        '404':
+          $ref: '#/components/responses/AggregateCarbonScoreNotFoundError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /issuers/user-deletions:
+    post:
+      tags:
+      - Users
+      summary: Mastercard Delete One or More Users.
+      description: <ul><li>Allows a registered Service Provider to delete one or more users.</li> <li>Payment cards associated with the user will also be deleted.</li> <li>On a successful response from the Server, the Service Provider should remove all the requested users and associated payment cards from the system.</li></ul>
+      operationId: deleteUsers
+      requestBody:
+        $ref: '#/components/requestBodies/UserIDs'
+      responses:
+        '202':
+          $ref: '#/components/responses/UserIDs'
+        '400':
+          $ref: '#/components/responses/DeleteUserBadRequestError'
+        '401':
+          $ref: '#/components/responses/DeleteUserUnauthorisedError'
+        '404':
+          $ref: '#/components/responses/DeleteUserNotFoundError'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /user-data-tokens:
+    post:
+      tags:
+      - Users
+      summary: Mastercard Create a User Data Token Which Is Used in the Redirection Url That Redirects the Cardholder to the Website for Submitting a New Claim.
+      description: Create a user data token for submitting claim.
+      operationId: createUserToken
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/UserDataClaim'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserDataToken'
+        '400':
+          $ref: '#/components/responses/UserBadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError_3'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  examples:
+    ClientIdentitiesSuccessfulExample:
+      value:
+        attributes:
+          dateOfBirth:
+            e95b7c68-ebcb-4a88-9978-c33d78cde128:
+              value: '1980-01-01'
+              lastVerifiedDate: '2022-04-04T02:49:27.915Z'
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    UserProfileDeletedErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_DELETED
+            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
+            Recoverable: false
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+    BadRequestARIDErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value null for ARID.
+            Recoverable: false
+            Details: Must not be null.
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    EncryptedPayloadWithRotatedPDSExample:
+      value:
+        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IoxNTE2MjM5MDIyf
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided user profile ID does not exist.
+            Recoverable: false
+    BadRequestPDSErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value null for PDS.
+            Recoverable: false
+            Details: Must not be null.
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+    RPClaimsUserDataSuccessExample:
+      value:
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+        rpName: RP Name
+        rpLogoUrl: https://www.rpsite.com/logo.jpg
+        claimsData:
+          claimsAttributes:
+            postalCode:
+              claims:
+                postalCode: '63368'
+              dataMatch: FULL
+          dataMatch: FULL
+        redirectUri: null
+        rotatedPds: null
+    RPClaimsUserConsentDataSuccessExample:
+      value:
+        flow: APP2APP
+        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        rpSpecificIdentifier: 46eb72430ffeca3daf31360264fa0424ba4facfdcb69c6f43e73063f290a75a8
+        redirectUri: https://sample-rp-redirect-uri.com/?arid=2cd8ed7e-0cbc-44cc-b393-45e42915d6db&code=eyJ4NXQjUzI1NiI6Ildvank5ekFZQzFCWlMxMTJDeTIzM&state=random%20string%22
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
+            Recoverable: false
+    UserAccountActivitiesExample:
+      value:
+        userAccountActivities:
+        - action: ID Created
+          createdDate: '2020-01-28T13:16:01.714-05:00'
+          values:
+          - attributeName: legalName
+            previousValue: John Doe
+            value: John Dow
+            source: passport
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    NotFoundExampleARIDnotExists:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CLAIM_SHARING_ARID_DOES_NOT_EXIST
+            Description: 'CLAIM_SHARING_ARID_DOES_NOT_EXIST: ARID does not Exist'
+            Recoverable: false
+            Details: ARID does not exist.
+            redirectUri: https://sample-rp-redirect-uri.com/?arid=b6990018-73bb-4e8c-9658-556012c22a25&state=random%20string&error=server_error
+    RPClaimsUserConsentDataExampleConsentNotGiven:
+      value:
+        flow: APP2APP
+        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        rpSpecificIdentifier: null
+        redirectUri: https://sample-rp-redirect-uri.com/?arid=966eaf60-fa83-46d6-8ed5-7029609b4601&error_description=access_to_claims_denied&state=random%20string&error=access_denied
+    RPClaimsUserDataExampleClaimsNotSatisfied:
+      value:
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+        rpName: RP Name
+        rpLogoUrl: https://www.rpsite.com/logo.jpg
+        claimsData: null
+        redirectUri: https://sample-rp-redirect-uri.com/?arid=c00dc42f-fb5c-49a0-80c7-69faa65ac2af&error_description=scope_data_not_available&state=random%20string&error=invalid_scope
+        rotatedPds: null
+    Token:
+      value:
+        accountNumber: '1234567891234567'
+        expiry: 2021-11
+        accountGuid: 123e4567-e89b-12d3-a456-426614174000
+        tokenUniqueRef: DE9JOVYK6FVSO8I32DLDPHGTC9NZ7SLKPVLMDQ0RRGK3WYD2
+        paymentAppInstanceId: '128652974320250630'
+        status: ACTIVE
+    AuthorizationError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: authorization.missing
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    NotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: not.found
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    ForbiddenError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: authorization.forbidden
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    UpdateUserCardAndControl:
+      value:
+        firstName: Emerson
+        lastName: Bloggs
+        phone: '+353871123456'
+        expiry: 2021-11
+        description: This is the description of what the VCN will be used for
+        realCardBillingCurrencyCode: '840'
+        rules:
+        - action: A
+          alias: DAILY LIMIT
+          transactionLimits:
+          - amount: 12
+            negate: true
+          geographies:
+          - countryCodes:
+            - USA
+            negate: true
+          velocities:
+          - maxTrans: 12
+            cumulativeLimit: 1200
+            period: DAILY
+            availableBalance: 1200
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          validityPeriods:
+          - from: '2020-10-06T11:09:42.10Z'
+            to: '2020-11-06T11:09:42.10Z'
+            strictPreAuthCheck: true
+            negate: true
+          amountRanges:
+          - minAmount: 1000
+            maxAmount: 10000
+            strictPreAuthCheck: true
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          merchantIds:
+          - acceptorId: '123456789012345'
+            acquirerId: '123456'
+            negate: true
+          ageingVelocities:
+          - authorizationHoldDays: 1234
+            cumulativeLimit: 1000
+            timeZone: UTC-06:00
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          curfews:
+          - fromTime: 08:20
+            toTime: '11:00'
+            timeZone: UTC
+            days:
+            - SUNDAY
+            negate: true
+          timeOfDays:
+          - times:
+            - day: SUNDAY
+              fromTime: 08:21
+              toTime: '12:40'
+            timeZone: UTC
+            negate: true
+          merchantCategories:
+          - negate: true
+            mccs:
+            - 1234
+            - 5678
+    CardDetails:
+      value:
+      - firstName: Emerson
+        lastName: Bloggs
+        phone: '+353871123456'
+        realCardAccountGuid: 123e4567-e89b-12d3-a456-426614174000
+        accountNumber: '1234567891234567'
+        expiry: 2021-11
+        accountGuid: 123e4567-e89b-12d3-a456-426614174000
+        description: This is the description of what the VCN will be used for
+        realCardBillingCurrencyCode: '840'
+        rules:
+        - action: A
+          alias: DAILY LIMIT
+          transactionLimits:
+          - amount: 12
+            negate: true
+          geographies:
+          - countryCodes:
+            - USA
+            negate: true
+          velocities:
+          - maxTrans: 12
+            cumulativeLimit: 1200
+            period: DAILY
+            availableBalance: 1200
+            currencyType: MERCHANT
+            currencyCode: '825'
+            endDate: '2020-10-06T11:09:42.10Z'
+            negate: true
+          validityPeriods:
+          - from: '2020-10-06T11:09:42.10Z'
+            to: '2020-11-06T11:09:42.10Z'
+            strictPreAuthCheck: true
+            negate: true
+          amountRanges:
+          - minAmount: 1000
+            maxAmount: 10000
+            strictPreAuthCheck: true
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          merchantIds:
+          - acceptorId: '123456789012345'
+            acquirerId: '123456'
+            negate: true
+          ageingVelocities:
+          - authorizationHoldDays: 1234
+            cumulativeLimit: 1000
+            timeZone: UTC-06:00
+            availableBalance: 1000
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          curfews:
+          - fromTime: 08:20
+            toTime: '11:00'
+            timeZone: UTC
+            days:
+            - SUNDAY
+            negate: true
+          timeOfDays:
+          - times:
+            - day: SUNDAY
+              fromTime: 08:21
+              toTime: '12:40'
+            timeZone: UTC
+            negate: true
+          merchantCategories:
+          - negate: true
+            mccs:
+            - 1234
+            - 5678
+    BadRequestError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: invalid.parameter
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    UserDetail:
+      value:
+        firstName: Emerson
+        lastName: Bloggs
+        phone: '+12345678910111'
+        email: emersonbloggs@gmail.com
+    TokenUpdate:
+      value:
+        accountNumber: '1234567891234567'
+        expiry: 2021-11
+        status: ACTIVE
+    IssuerInactiveError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_INACTIVE
+            Description: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+    IssuerNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: SERVICE_PROVIDER_NOT_FOUND
+            Description: Service provider clientId is not Identified
+            Recoverable: false
+            Details: Client not found.
+    UserTerminatedError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: USER_TERMINATE_IN_PROGRESS
+            Description: User termination is in progress, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: 'User termination is in progress, kindly contact your Mastercard associate to activate it again. Until then you won''t be able to access any service. '
+    UserCountError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: true
+            Details: Request body should have at least 1 or not more than 500 userIds
+    BadRequestError_2:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: 'Email must be in the format: xyz@mail.com'
+    BadRequestExample:
+      summary: When something went wrong with the request
+      value:
+        Errors:
+          Error:
+          - Source: AUTHENTICATION_CONSENT_SERVICE
+            ReasonCode: system.error
+            Description: Something went wrong with your request. Please try again later
+            Recoverable: false
+    InvalidUserIdError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: UserId should be of size 36
+    AggregateCarbonScore:
+      value:
+        carbonEmissionInGrams: '32.45'
+        aggregateDate: november-2020
+    UserBadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: Loyalty Service - Insurance
+            ReasonCode: INVALID_FIELD
+            Description: Invalid Field(s).
+            Recoverable: false
+            Details: Invalid field - 'pan' is not a string.
+    InvalidUserNameError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: Username must only contain alphanumeric (A-Z, a-z, 0-9) and the characters ('), (,) and (')
+    UnAuthorizedMerchantRequest:
+      summary: When requestor is not authorized to perform requested operation
+      value:
+        Errors:
+          Error:
+          - Source: AUTHENTICATION_CONSENT_SERVICE
+            ReasonCode: unauthorized
+            Description: Unable to perform this operation as the requestor is unauthorized
+            Recoverable: false
+    UserInactiveError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: USER_INACTIVE
+            Description: The user is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: The user is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+    InvalidCardHolderNameError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: CardholderName must only contain alphanumeric (A-Z, a-z, 0-9), whitespace, and the characters ('), (,) and (')
+    UserIDs:
+      value:
+      - 4ba581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+      - c5d88571-ac15-465a-a0d8-1ad1327b9a06
+    InvalidUserIdLengthError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: userId must match "^[0-9A-Fa-f\-]{36}"
+    EncryptedDataLengthError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: encryptedData size must be between 128 and 54000
+    UnauthorizedExample_2:
+      value:
+        Errors:
+          Error:
+          - Source: Gateway
+            ReasonCode: DECLINED
+            Description: Unauthorized - Access Not Granted.
+            Recoverable: false
+            Details: null
+    InvalidMerchantRequest:
+      summary: When registration for the requestor does not exist
+      value:
+        Errors:
+          Error:
+          - Source: AUTHENTICATION_CONSENT_SERVICE
+            ReasonCode: invalid.requestor
+            Description: The registration for the requestor does not exist
+            Recoverable: false
+    ResourceNotFoundExample:
+      summary: When resource not found
+      value:
+        Errors:
+          Error:
+          - Source: AUTHENTICATION_CONSENT_SERVICE
+            ReasonCode: resource.not.found
+            Description: The requested resource was not found
+            Recoverable: false
+    RequestDecryptionError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: CRYPTO_ERROR
+            Description: We are unable to decipher your request, kindly verify your request before trying again. If the problem persists then reach out to your Mastercard associate.
+            Recoverable: false
+            Details: ''
+    UserNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: USER_NOT_FOUND
+            Description: We cannot find user details for provided userId. Kindly register the user through the enrollment process.
+            Recoverable: false
+            Details: Make sure the user is enrolled through /issuers/users API endpoint.
+    IssuerTerminatedError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_TERMINATED
+            Description: Your account has been terminated, you won't be able to access any service. Kindly register yourself again.
+            Recoverable: false
+            Details: Your account has been terminated, you won't be able to access any service. Kindly register yourself again.
+    UnsupportedMediaTypeError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: UNSUPPORTED_MEDIA_TYPE
+            Description: The requested media type is not supported, try again with supported media type.
+            Recoverable: false
+            Details: ''
+    IssuerSuspendedError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_SUSPENDED
+            Description: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
+    UpdateUserNotAccessible:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: UPDATE_USER_NOT_ACCESSIBLE
+            Description: You do not have permission to access this API. The Donate feature for your bank is disabled.
+            Recoverable: false
+            Details: You do not have permission to access this API. The Donate feature for your bank is disabled.
+  responses:
+    UnauthorizedError:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    NotFoundErrorClaimSharing:
+      description: The request didn't match an existing resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            NotFoundExampleARIDnotExists:
+              $ref: '#/components/examples/NotFoundExampleARIDnotExists'
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
+    UserAccountActivitySearchesResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserAccountActivities'
+          examples:
+            UserAccountActivitySearchesUnencryptedResponse:
+              $ref: '#/components/examples/UserAccountActivitiesExample'
+            UserAccountActivitySearchesEncryptedResponse:
+              $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
+    UserConsentResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RPClaimsUserConsentData'
+          examples:
+            RPClaimsUserConsentDataSuccess:
+              $ref: '#/components/examples/RPClaimsUserConsentDataSuccessExample'
+            RPClaimsUserDataConsentNotGiven:
+              $ref: '#/components/examples/RPClaimsUserConsentDataExampleConsentNotGiven'
+    IdentityAttributeDeletionsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentityAttributeDeleted'
+    NotFoundError:
+      description: The request didn't match an existing resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
+    IdentitySearchResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClientIdentities'
+          examples:
+            ClientIdentitiesSuccessfulExampleUnencrypted:
+              $ref: '#/components/examples/ClientIdentitiesSuccessfulExample'
+            ClientIdentitiesSuccessfulExampleEncrypted:
+              $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    UserProfilesResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+    BadRequestErrorClaimSharing:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BadRequestARIDErrorExample:
+              $ref: '#/components/examples/BadRequestARIDErrorExample'
+            BadRequestPDSErrorExample:
+              $ref: '#/components/examples/BadRequestPDSErrorExample'
+    RPClaimsDataResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RPClaimsUserData'
+          examples:
+            RPClaimsUserDataUnencryptedSuccess:
+              $ref: '#/components/examples/RPClaimsUserDataSuccessExample'
+            RPClaimsUserDataEncryptedSuccess:
+              $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
+            RPClaimsUserDataClaimsNotSatisfied:
+              $ref: '#/components/examples/RPClaimsUserDataExampleClaimsNotSatisfied'
+    UnauthorizedError_2:
+      description: Authentication Required
+      headers:
+        WWW-Authenticate:
+          description: Method of authentication
+          schema:
+            type: string
+      content:
+        application/json:
+          examples:
+            Unauthorized:
+              $ref: '#/components/examples/AuthorizationError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+    ResourceIdentifier:
+      description: Resource Created
+      headers:
+        Location:
+          description: location of the resource
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResourceIdentifier'
+    OKResponse:
+      description: OK
+    User:
+      description: User details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserDetail'
+          examples:
+            UserDetail:
+              $ref: '#/components/examples/UserDetail'
+    ResourceNotFoundError:
+      description: Resource Not Found
+      content:
+        application/json:
+          examples:
+            ResourceNotFound:
+              $ref: '#/components/examples/NotFoundError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+    Token:
+      description: Token detail
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Token'
+          examples:
+            Token:
+              $ref: '#/components/examples/Token'
+    NOContentResponse:
+      description: No Content
+    ResourceCreated:
+      description: Resource Created
+      headers:
+        Location:
+          description: location of the resource
+          schema:
+            type: string
+    ForbiddenError_2:
+      description: Not Authorized
+      content:
+        application/json:
+          examples:
+            Forbidden:
+              $ref: '#/components/examples/ForbiddenError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+    VirtualCard:
+      description: Virtual card details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VirtualCardAccount'
+          examples:
+            VirtualCardAccount:
+              $ref: '#/components/examples/CardDetails'
+    VirtualCards:
+      description: List of virtual cards
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/VirtualCardAccount'
+          examples:
+            UserCardsDetails:
+              $ref: '#/components/examples/CardDetails'
+    BadRequestError_2:
+      description: Invalid Request
+      content:
+        application/json:
+          examples:
+            BadRequest:
+              $ref: '#/components/examples/BadRequestError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+    UserDetailsResponse:
+      description: Successfully retrieved user.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserDetails'
+    ErrorsResponse:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+    UserUpdateResponse:
+      description: Ok
+    UserEnrollResponse:
+      description: Successfully enrolled user.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EnrolledUser'
+    VerifyUserResponse:
+      description: Successfully verified user
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VerifiedUser'
+    UnauthorizedError_3:
+      description: Unauthorized - Access Not Granted
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorItems'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample_2'
+    UpdateUserUnauthorisedError:
+      description: This response code is returned for unauthorized Issuer and User.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            IssuerInactiveError:
+              $ref: '#/components/examples/IssuerInactiveError'
+            IssuerSuspendedError:
+              $ref: '#/components/examples/IssuerSuspendedError'
+            IssuerTerminatedError:
+              $ref: '#/components/examples/IssuerTerminatedError'
+            UpdateUserNotAccessible:
+              $ref: '#/components/examples/UpdateUserNotAccessible'
+    UserEnrolmentUnauthorisedError:
+      description: This response code is returned for unauthorized Issuer.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            IssuerInactiveError:
+              $ref: '#/components/examples/IssuerInactiveError'
+            IssuerSuspendedError:
+              $ref: '#/components/examples/IssuerSuspendedError'
+            IssuerTerminatedError:
+              $ref: '#/components/examples/IssuerTerminatedError'
+    DeleteUserNotFoundError:
+      description: This response code is returned when a user or Issuer is not present.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            IssuerNotFoundError:
+              $ref: '#/components/examples/IssuerNotFoundError'
+    UserEnrolmentBadRequestError:
+      description: This response code is returned when a request is invalid or data in the request is not valid or a card user is already registered on the server.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            BadRequestError:
+              $ref: '#/components/examples/BadRequestError_2'
+            InvalidNameError:
+              $ref: '#/components/examples/InvalidUserNameError'
+            InvalidFirstNameError:
+              $ref: '#/components/examples/InvalidUserNameError'
+            InvalidLastNameError:
+              $ref: '#/components/examples/InvalidUserNameError'
+            InvalidCardHolderNameError:
+              $ref: '#/components/examples/InvalidCardHolderNameError'
+            EncryptedDataLengthError:
+              $ref: '#/components/examples/EncryptedDataLengthError'
+            RequestDecryptionError:
+              $ref: '#/components/examples/RequestDecryptionError'
+    UpdateUserReference:
+      description: The response object that contains userID and Payment Card information after successful updation of users personal information.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserReference'
+    UnsupportedMediaTypeError:
+      description: This response code is returned when the MediaType in the request is other than application/json format.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            UnsupportedMediaTypeError:
+              $ref: '#/components/examples/UnsupportedMediaTypeError'
+    DeleteConsentsBadRequestError:
+      description: Server is unable to parse the request data due to malformed json.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_2'
+          examples:
+            InvalidMerchantRequest:
+              $ref: '#/components/examples/InvalidMerchantRequest'
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    UserIDs:
+      description: The response object contains a list of deleted user IDs
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/UserID'
+          examples:
+            DeletedUserIds:
+              $ref: '#/components/examples/UserIDs'
+    AggregateCarbonScoreNotFoundError:
+      description: This response code is returned when a user or Issuer is not present.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            UserNotFoundError:
+              $ref: '#/components/examples/UserNotFoundError'
+            IssuerNotFoundError:
+              $ref: '#/components/examples/IssuerNotFoundError'
+    GetConsentsBadRequestError:
+      description: Server is unable to parse the request data due to malformed json.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_2'
+          examples:
+            InvalidMerchantRequest:
+              $ref: '#/components/examples/InvalidMerchantRequest'
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    Dashboard:
+      description: The response object after decryption contains a short-lived URL along with an authentication token and its expiry time.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Dashboard'
+    DeleteUserBadRequestError:
+      description: This response code is returned when a request is invalid or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            UserCountError:
+              $ref: '#/components/examples/UserCountError'
+            InvalidUserIdLengthError:
+              $ref: '#/components/examples/InvalidUserIdLengthError'
+    GetConsentsSuccess:
+      description: The success response for retrieving user consent
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserConsent_2'
+    DashboardsUnauthorisedError:
+      description: This response code is returned when a user and the Issuer are unauthorized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            IssuerInactiveError:
+              $ref: '#/components/examples/IssuerInactiveError'
+            UserInactiveError:
+              $ref: '#/components/examples/UserInactiveError'
+            IssuerSuspendedError:
+              $ref: '#/components/examples/IssuerSuspendedError'
+            UserTerminatedError:
+              $ref: '#/components/examples/UserTerminatedError'
+            IssuerTerminatedError:
+              $ref: '#/components/examples/IssuerTerminatedError'
+    DeleteConsentsSuccess:
+      description: The server successfully processed the request
+    DashboardBadRequestError:
+      description: This response code is returned when a request is invalid or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            InvalidUserIdError:
+              $ref: '#/components/examples/InvalidUserIdError'
+    AggregateCarbonScore:
+      description: The response object contains an aggregation of carbon footprint.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AggregateCarbonScore'
+          examples:
+            AggregateCarbonScores:
+              $ref: '#/components/examples/AggregateCarbonScore'
+    UnAuthorizedMerchantError:
+      description: Requestor is not authorised to perform requested operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_2'
+          examples:
+            UnAuthorizedMerchantRequest:
+              $ref: '#/components/examples/UnAuthorizedMerchantRequest'
+    UserDataToken:
+      description: The user data token generated from the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubmitClaimUserToken'
+    DeleteUserUnauthorisedError:
+      description: This response code is returned when a user is terminated or inactive.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            IssuerInactiveError:
+              $ref: '#/components/examples/IssuerInactiveError'
+            IssuerSuspendedError:
+              $ref: '#/components/examples/IssuerSuspendedError'
+            IssuerTerminatedError:
+              $ref: '#/components/examples/IssuerTerminatedError'
+    AggregateCarbonScoreBadRequestError:
+      description: This response code is returned when a request is invalid or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            InvalidUserIdError:
+              $ref: '#/components/examples/InvalidUserIdError'
+    AggregateCarbonScoreUnauthorisedError:
+      description: This response code is returned when a user is terminated or inactive.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            IssuerInactiveError:
+              $ref: '#/components/examples/IssuerInactiveError'
+            UserInactiveError:
+              $ref: '#/components/examples/UserInactiveError'
+            UserTerminatedError:
+              $ref: '#/components/examples/UserTerminatedError'
+            IssuerSuspendedError:
+              $ref: '#/components/examples/IssuerSuspendedError'
+            IssuerTerminatedError:
+              $ref: '#/components/examples/IssuerTerminatedError'
+    UserBadRequestError:
+      description: 'Bad Request
+
+        Reason Codes:
+
+        * MISSING_REQ_FIELD_GW - Missing required field(s)
+
+        * INVALID_FIELD - Invalid field(s)
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorItems'
+          examples:
+            UserBadRequestExample:
+              $ref: '#/components/examples/UserBadRequestExample'
+    DashboardNotFoundError:
+      description: This response code is returned when a user or Issuer is not present.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            UserNotFoundError:
+              $ref: '#/components/examples/UserNotFoundError'
+            IssuerNotFoundError:
+              $ref: '#/components/examples/IssuerNotFoundError'
+    ResourceNotFoundError_2:
+      description: The requested resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_2'
+          examples:
+            ResourceNotFoundExample:
+              $ref: '#/components/examples/ResourceNotFoundExample'
+    IssuerNotFoundError:
+      description: This response code is returned when the server cannot find the account which has been used to call the API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            IssuerNotFoundError:
+              $ref: '#/components/examples/IssuerNotFoundError'
+    UserReference:
+      description: The response object contains Payment Card information after a successful registration.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserReference'
+  schemas:
+    UserAccountActivitySearch:
+      required:
+      - pds
+      - startIndex
+      - endIndex
+      - userConsent
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        startIndex:
+          type: integer
+          description: Start index of the user account activity.
+          format: int32
+          minimum: 1
+          maximum: 999
+          example: 3
+        endIndex:
+          type: integer
+          description: End index of the user account activity.
+          format: int32
+          minimum: 1
+          maximum: 999
+          example: 10
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    RPClaimsUserData:
+      required:
+      - transactionId
+      - rpName
+      - rpLogoUrl
+      - claimsData
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: A random 128-bit. UUID represents the MIDS transaction.
+          minLength: 36
+          maxLength: 36
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+        rpName:
+          type: string
+          description: The display name of the RP.
+          minLength: 1
+          maxLength: 255
+          example: RP Name
+        rpLogoUrl:
+          type: string
+          description: The URL of the logo of the RP.
+          pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+          minLength: 1
+          example: https://www.rpsite.com/logo.jpg
+        claimsData:
+          $ref: '#/components/schemas/ClaimsData'
+        redirectUri:
+          type: string
+          description: TP will use this URI to redirect to RP.
+          pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+          minLength: 1
+          example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+        rotatedPds:
+          type: string
+          description: A rotated PDS is created and returned when the encryption key expires and a new key is generated.
+          minLength: 1
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    UserAccountActivities:
+      required:
+      - userAccountActivities
+      properties:
+        userAccountActivities:
+          type: array
+          description: User account activity items.
+          items:
+            $ref: '#/components/schemas/UserAccountActivityItems'
+        rotatedPds:
+          type: string
+          description: A rotated PDS is created and returned when the encryption key expires and a new one is generated.
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          minLength: 1
+          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    UserAccountActivityItemContents:
+      required:
+      - value
+      properties:
+        attributeName:
+          type: string
+          description: Name of the updated attribute.
+          minLength: 1
+          maxLength: 255
+          example: legalName
+        previousValue:
+          type: string
+          description: Value before the update.
+          minLength: 1
+          maxLength: 255
+          example: John Doe
+        value:
+          type: string
+          description: Value after the update.
+          minLength: 1
+          maxLength: 255
+          example: John Dow
+        source:
+          type: string
+          description: The source document for the update.
+          minLength: 1
+          maxLength: 29
+          example: passport
+    Cnh:
+      allOf:
+      - $ref: '#/components/schemas/DriverLicenseCardNumber'
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
+    GovtId:
+      oneOf:
+      - $ref: '#/components/schemas/PassportIdentity'
+      - $ref: '#/components/schemas/DriverLicenseIdentity'
+    UserConsent:
+      enum:
+      - ACCEPT
+      - DECLINE
+      - REVOKE
+      - EXPIRE
+      type: string
+      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
+      pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+      minLength: 6
+      maxLength: 7
+      example: ACCEPT
+    ARID:
+      type: string
+      description: A unique identifier for any activity being executed arising out of a Claim Share request. This value is passed as a parameter in the URL redirecting a User to the TP Flow during a Claim Share.
+      format: uuid
+      pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+      minLength: 36
+      maxLength: 36
+      example: a15fa6de-b199-11eb-8529-0242ac130003
+    IdentityAttribute:
+      allOf:
+      - {}
+      - oneOf:
+        - $ref: '#/components/schemas/Address'
+        - $ref: '#/components/schemas/DateOfBirth'
+        - $ref: '#/components/schemas/Email'
+        - $ref: '#/components/schemas/FathersName'
+        - $ref: '#/components/schemas/MothersName'
+        - $ref: '#/components/schemas/LegalName'
+        - $ref: '#/components/schemas/Phone'
+        - $ref: '#/components/schemas/Selfie'
+        - $ref: '#/components/schemas/MobileIdEligibility'
+        - $ref: '#/components/schemas/GovtId'
+        - $ref: '#/components/schemas/GovtIdDetails'
+        - $ref: '#/components/schemas/GovtIdImage'
+        - $ref: '#/components/schemas/PassportIdentity'
+        - $ref: '#/components/schemas/PassportDetails'
+        - $ref: '#/components/schemas/PassportImage'
+        - $ref: '#/components/schemas/DriverLicenseIdentity'
+        - $ref: '#/components/schemas/DriverLicenseCardNumber'
+        - $ref: '#/components/schemas/DriverLicenseDetails'
+        - $ref: '#/components/schemas/DriverLicenseImage'
+        - $ref: '#/components/schemas/VisaMatched'
+        - $ref: '#/components/schemas/Cnh'
+        - $ref: '#/components/schemas/Cpf'
+        - $ref: '#/components/schemas/Rg'
+    RPClaimsUserConsent:
+      required:
+      - arid
+      - userConsent
+      - pds
+      type: object
+      properties:
+        arid:
+          $ref: '#/components/schemas/ARID'
+        userConsent:
+          type: string
+          enum:
+          - ACCEPT
+          - DECLINE
+          pattern: ^(ACCEPT|DECLINE)$
+          description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
+          example: ACCEPT
+        pds:
+          $ref: '#/components/schemas/PDS'
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+        locale:
+          $ref: '#/components/schemas/Locale'
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+    GovtIdImage:
+      oneOf:
+      - $ref: '#/components/schemas/PassportImage'
+      - $ref: '#/components/schemas/DriverLicenseImage'
+    PDS:
+      type: string
+      description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
+      pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+      minLength: 1
+      example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    DateOfBirth:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: '1996-07-10T00:00:00.000Z'
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    MothersName:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: Jane Doe
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    PassportIdentity:
+      type: object
+      properties:
+        lastName:
+          type: string
+          description: Last name.
+          minLength: 1
+          maxLength: 255
+          example: Doe
+        firstName:
+          type: string
+          description: First name.
+          minLength: 1
+          maxLength: 255
+          example: John
+        dateOfBirth:
+          type: string
+          description: Date of birth.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      description: The error response model used by all the API endpoints.
+      properties:
+        Errors:
+          required:
+          - Error
+          type: object
+          description: The error response model used by all the API endpoints.
+          properties:
+            Error:
+              type: array
+              description: A list of Error objects.
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The source of the problem. That is where the error occurred.
+                    example: mids
+                  ReasonCode:
+                    type: string
+                    description: A code defining the error, as defined in documentation.
+                    example: USER_PROFILE_ID_NOT_FOUND
+                  Description:
+                    type: string
+                    description: A description of this specific occurrence of the Reason code.
+                    example: The provided user profile ID does not exist.
+                  Recoverable:
+                    type: boolean
+                    description: Whether or not retrying this request could result in a successful response.
+                    example: false
+                  Details:
+                    type: string
+                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+                    example: User X was not found
+                  redirectUri:
+                    type: string
+                    description: TP will use this URI to redirect to RP.
+                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    IdentityAttributeDeletions:
+      required:
+      - pds
+      - attributeName
+      - userConsent
+      - attributeId
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        attributeName:
+          type: string
+          description: The name of the attribute to be deleted.
+          enum:
+          - PASSPORT
+          - DRIVER_LICENSE
+          example: PASSPORT
+        attributeId:
+          type: string
+          description: The identifier of the attribute being queried. This can be retrieved from a call to either the authentication-decisions API, or the user-profiles/identity-searches API.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 1
+          example: cf11bb8d-b1b1-49c7-90ed-c63134cd1008
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    AuditEventsItem:
+      type: object
+      properties:
+        dateTime:
+          type: string
+          description: Date and time at which the event is created.
+          minLength: 1
+          maxLength: 29
+          example: '2020-01-28T13:16:01.714-05:00'
+        softwareVersion:
+          type: string
+          description: Software version.
+          minLength: 1
+          maxLength: 30
+          example: 1.0.0
+        userProfileId:
+          type: string
+          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 123ae1aa-6744-433e-879d-7da48d631234
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 28eae1aa-6744-433e-879d-7da48d63e89a
+        logRequestFlow:
+          type: string
+          description: Log Request Flow.
+          minLength: 1
+          maxLength: 255
+          example: CoreSDK-TP
+        logEvent:
+          type: string
+          description: Log Event.
+          minLength: 0
+          maxLength: 255
+          example: ID Enrollment
+        logEventType:
+          type: string
+          description: Log Event Type.
+          minLength: 1
+          maxLength: 255
+          example: User Profile Creation
+        osVersion:
+          type: string
+          description: OS version.
+          minLength: 1
+          maxLength: 255
+          example: Android 5.0
+        deviceMake:
+          type: string
+          description: Device make.
+          minLength: 1
+          maxLength: 255
+          example: Samsung S10
+        type:
+          type: string
+          description: Type of the event.
+          minLength: 1
+          maxLength: 255
+          example: audit
+        audit:
+          type: object
+          description: Represents the audit event.
+          properties:
+            privacyPolicy:
+              type: string
+              description: Version user confirmed.
+              minLength: 1
+              maxLength: 20
+              example: 1.0.0
+            userBiometricConsent:
+              type: string
+              description: User consent to capture details.
+              enum:
+              - 'TRUE'
+              - 'FALSE'
+              - NA
+              minLength: 4
+              maxLength: 5
+              example: 'TRUE'
+            event:
+              type: string
+              description: Event.
+              minLength: 1
+              maxLength: 255
+              example: Document Scan
+            eventType:
+              type: string
+              description: EventType.
+              minLength: 1
+              maxLength: 255
+              example: Enrollment
+            result:
+              type: string
+              description: API Call result.
+              enum:
+              - 'TRUE'
+              - 'FALSE'
+              - FAIL
+              minLength: 4
+              maxLength: 5
+              example: 'TRUE'
+            eventGeneratedSource:
+              type: string
+              description: Event generated source.
+              minLength: 1
+              maxLength: 50
+              example: CoreSDK
+            owner:
+              type: string
+              description: Owner.
+              minLength: 2
+              maxLength: 4
+              example: TP
+            requestDetails:
+              type: object
+              description: Request Details.
+              example: Request URL
+            responseDetails:
+              type: object
+              description: Response Details.
+              example: Response Data
+    MobileIdEligibility:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: boolean
+          description: Value of whether user is eligible for mobile id enrollment.
+          example: true
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    ClaimsData:
+      type: object
+      properties:
+        dataMatch:
+          type: string
+          description: The overall data match the status result of the claim sharing request. Possible values are FULL or PARTIAL.
+          minLength: 4
+          maxLength: 7
+          example: FULL
+        claimsAttributes:
+          type: object
+          description: An object that represents the claims data.
+          example:
+            claims:
+              legalName: John
+            dataMatch: FULL
+          additionalProperties:
+            $ref: '#/components/schemas/Scopes'
+    Cpf:
+      type: string
+      description: CPF Number. This will only be available when the Brazilian DL is scanned.
+      minLength: 1
+      maxLength: 255
+      example: 12345
+    Address:
+      required:
+      - lastVerifiedDate
+      allOf:
+      - $ref: '#/components/schemas/AddressData'
+      - type: object
+        properties:
+          value:
+            type: string
+            description: Formatted address.
+            minLength: 1
+            maxLength: 255
+            example: 36271 GrandRiver Ave Building no 2 48335 Farmington MI USA
+          lastVerifiedDate:
+            type: string
+            description: Last verified date and time.
+            format: date-time
+            example: '2021-02-19T10:55:58.165Z'
+    DriverLicenseImage:
+      type: object
+      description: Driver License Images.
+      properties:
+        front:
+          type: string
+          description: Value.
+          minLength: 1
+          example: U29tZSBTdHJpbmc=
+        back:
+          type: string
+          description: Value.
+          minLength: 1
+          example: YGS75JHSljhs86K=
+    FathersName:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: Josh Doe
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    PassportImage:
+      type: object
+      description: Passport License Images.
+      properties:
+        front:
+          type: string
+          description: Value.
+          minLength: 1
+          example: JH65ghKHG76KS=
+    Selfie:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          example: U29tZSBTdHJpbmc=
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    UserAccountActivityItems:
+      required:
+      - action
+      - createdDate
+      properties:
+        action:
+          type: string
+          description: Type of the activity, possible values - ["ID Created", "Details Updated", "Add Drivers License", "Add Passport", "Add Health Card", "ID Backup", "ID Restore", "Attribute Deleted"].
+          minLength: 1
+          maxLength: 24
+          example: ID Created
+        createdDate:
+          type: string
+          description: Date of the event.
+          minLength: 1
+          maxLength: 29
+          example: '2020-01-28T13:16:01.714-05:00'
+        values:
+          type: array
+          description: Details of the activity.
+          items:
+            $ref: '#/components/schemas/UserAccountActivityItemContents'
+    IdentitySearch:
+      required:
+      - pds
+      - scopedFields
+      - userConsent
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        scopedFields:
+          type: array
+          description: 'Array of enums representing the identity attributes which the TP is requesting access to.
+
+            The acceptable values are any/all of: ''all'', ''legalName'', ''email'', ''phone'', ''dateOfBirth'', ''driverLicense'', ''passport'', ''address''
+
+            '
+          minItems: 1
+          items:
+            enum:
+            - all - legalName - email - phone - dateOfBirth - selfie - address - ageOver - ageUnder - city - postalCode - subDivision - govtId - govtIdDetails - govtIdImage - passportIdentity - passportDetails - passportImage - driverLicenseIdentity - driverLicenseCardNumber - driverLicenseDetails - driverLicenseImage - driverLicenseIssuingState - visaMatched - cpf - rgNumber - cnh - mothersName - fathersName
+            type: string
+            example: all
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    DriverLicenseDetails:
+      properties:
+        expiryDate:
+          type: string
+          description: Expiry date.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        issuingCountry:
+          type: string
+          description: Country code.
+          minLength: 1
+          maxLength: 255
+          example: USA
+        documentNumber:
+          type: string
+          description: Passport number.
+          minLength: 1
+          maxLength: 255
+          example: 1234567890
+    IdentityAttributesById:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/IdentityAttribute'
+      description: Identity attributes are keyed by attribute IDs.
+      minLength: 1
+    VisaMatched:
+      type: boolean
+      description: Flag indicating if the documentDetails are to be checked against a visa for a particular country.
+      example: false
+    Rg:
+      type: string
+      description: RG Number. This will only be available when the Brazilian DL is scanned.
+      minLength: 1
+      maxLength: 255
+      example: 12345
+    LegalName:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: John Doe
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    TpAuditMetadata:
+      required:
+      - sessionId
+      - transactionGroupId
+      type: object
+      description: Object containing metadata related to the request.
+      properties:
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+    Locale:
+      type: string
+      description: IETF BCP 47 code which identifies the language to be used in any dialogs being shown to the user during the flow.  The default value is "en-US".
+      pattern: ^[a-z]{2}-[a-zA-Z]{2}$
+      example: en-US
+    AddressData:
+      type: object
+      properties:
+        addressLine1:
+          type: string
+          description: Address line 1.
+          minLength: 1
+          maxLength: 255
+          example: 36271 GrandRiver Ave
+        addressLine2:
+          type: string
+          description: Address line 2.
+          minLength: 1
+          maxLength: 255
+          example: Building no 2
+        addressZipCode:
+          type: string
+          description: Zip code.
+          minLength: 1
+          maxLength: 255
+          example: 48335
+        addressCity:
+          type: string
+          description: City.
+          minLength: 1
+          maxLength: 255
+          example: Farmington
+        addressSubdivision:
+          type: string
+          description: Subdivision of the user address, possible values include county, state, province, and municipality.
+          minLength: 2
+          maxLength: 2
+          example: MO
+        addressCountry:
+          type: string
+          description: Country provided in the address from the scanned document.
+          minLength: 1
+          maxLength: 255
+          example: USA
+    GovtIdDetails:
+      oneOf:
+      - $ref: '#/components/schemas/PassportDetails'
+      - $ref: '#/components/schemas/DriverLicenseDetails'
+    Phone:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: 11234567890
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    RPClaimsUserDetails:
+      required:
+      - arid
+      - pds
+      type: object
+      properties:
+        arid:
+          $ref: '#/components/schemas/ARID'
+        pds:
+          $ref: '#/components/schemas/PDS'
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+        locale:
+          $ref: '#/components/schemas/Locale'
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+    DriverLicenseCardNumber:
+      type: string
+      description: Document number.
+      minLength: 1
+      maxLength: 255
+      example: 7435675436
+    IdentityAttributesByName:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/IdentityAttributesById'
+      description: Identity attributes keyed by IdentitySearch.scopedFields enum.
+      minLength: 1
+      example:
+        dateOfBirth:
+          e95b7c68-ebcb-4a88-9978-c33d78cde128:
+            value: '1980-01-01'
+            lastVerifiedDate: '2022-04-04T02:49:27.915Z'
+    RPClaimsUserConsentData:
+      required:
+      - flow
+      - pds
+      - rpSpecificIdentifier
+      - redirectUri
+      type: object
+      properties:
+        flow:
+          type: string
+          description: The user navigation flow for the RP Claim Sharing process.
+          minLength: 1
+          maxLength: 20
+          example: APP2APP
+        pds:
+          $ref: '#/components/schemas/PDS'
+        rpSpecificIdentifier:
+          type: string
+          description: The field rpSpecificIdentifier refers to a unique value for the Relying Party to identify the user for future reporting.
+          minLength: 64
+          maxLength: 64
+          example: 46eb72430ffeca3daf31360264fa0424ba4facfdcb69c6f43e73063f290a75a8
+        redirectUri:
+          type: string
+          description: TP will use this URI to redirect to RP.
+          pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+          minLength: 1
+          example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    IdentityAttributeDeleted:
+      required:
+      - pds
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+    Email:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: person@mastercard.com
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    UserProfile:
+      required:
+      - countryCode
+      - userProfileId
+      type: object
+      properties:
+        userProfileId:
+          type: string
+          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: c908bc7c-9917-48fd-b862-d901a0880fef
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    Scopes:
+      type: object
+      description: An object that represents a list of requested scopes and values.
+      properties:
+        claims:
+          type: object
+          description: The keys will be the scopes that come as part of the request and the data structure will be the data object named after the key.
+          example:
+            legalName: John
+          additionalProperties:
+            type: string
+        dataMatch:
+          description: The data match the status result of the individual scope.
+          type: string
+          minLength: 4
+          maxLength: 7
+          example: FULL
+    ClientIdentities:
+      required:
+      - attributes
+      type: object
+      properties:
+        rotatedPds:
+          type: string
+          description: A rotated PDS is created and returned when the encryption key expires and a new key is generated.
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          minLength: 1
+          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        attributes:
+          $ref: '#/components/schemas/IdentityAttributesByName'
+    CountryCode:
+      type: string
+      description: The country code of the country where the transaction originates from.
+      pattern: ^[a-zA-Z]{2}$
+      example: US
+    DriverLicenseIdentity:
+      type: object
+      properties:
+        lastName:
+          type: string
+          description: Last name.
+          minLength: 1
+          maxLength: 255
+          example: Doe
+        firstName:
+          type: string
+          description: First name.
+          minLength: 1
+          maxLength: 255
+          example: John
+        dateOfBirth:
+          type: string
+          description: Date of birth.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+    PassportDetails:
+      type: object
+      properties:
+        expiryDate:
+          type: string
+          description: Expiry date.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        issuingCountry:
+          type: string
+          description: Country code.
+          minLength: 1
+          maxLength: 255
+          example: USA
+        passportNumber:
+          type: string
+          description: Passport number.
+          minLength: 1
+          maxLength: 255
+          example: 1234567890
+    VelocityControl:
+      required:
+      - period
+      - negate
+      type: object
+      properties:
+        maxTrans:
+          minimum: 1
+          type: integer
+          description: Maximum number of transactions allowed
+          format: int32
+          example: 12
+        cumulativeLimit:
+          minimum: 0
+          type: number
+          description: Maximum allowed cumulative amount
+          example: 1200
+          format: float
+        period:
+          minLength: 5
+          maxLength: 10
+          type: string
+          description: Velocity period. Valid values are DAILY, WEEKLY, QUARTERLY, CONTINUOUS, MONTHLY, and YEARLY
+          example: DAILY
+          pattern: ^(DAILY|WEEKLY|QUARTERLY|CONTINUOUS|MONTHLY|YEARLY)
+        availableBalance:
+          minimum: 0
+          type: number
+          description: The cumulative spend available for the velocity control for the specified period
+          example: 1200
+          format: float
+        currencyType:
+          minLength: 4
+          maxLength: 8
+          type: string
+          description: Type of the currency being used. Valid values are BASE and MERCHANT
+          pattern: ^(BASE|MERCHANT)
+          example: MERCHANT
+        currencyCode:
+          minLength: 3
+          maxLength: 3
+          pattern: ^[0-9]{3}$
+          type: string
+          description: Mastercard supported International Organization for Standardization (ISO) 4217 currency codes
+          example: '825'
+        endDate:
+          type: string
+          format: date-time
+          description: End date until which the control is valid, in ISO 8601 extended format "YYYY-MM-DDThh:mm:ss[.sss]Z", where [.sss] is optional and can be 1 to 3 digits
+          example: '2020-10-06T11:09:42.10Z'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The VelocityControl can limit the frequency, and the total cumulative amount of authorizations performed on the cardholders account within a specified time period
+    CurfewControl:
+      required:
+      - days
+      - fromTime
+      - negate
+      - toTime
+      type: object
+      properties:
+        fromTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The start time from which authorizations will be allowed
+          example: 08:20
+        toTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The end time at which authorizations will be allowed
+          example: '11:00'
+        timeZone:
+          type: string
+          description: Time zone of the from and to times
+          example: UTC
+        days:
+          maxItems: 7
+          minItems: 1
+          type: array
+          description: Days of week. Valid values are SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, and SATURDAY
+          example: SUNDAY
+          pattern: ^(SUNDAY|MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY)$
+          items:
+            type: string
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: Curfew Control
+    Vcn:
+      allOf:
+      - $ref: '#/components/schemas/Card'
+      - properties:
+          accountGuid:
+            type: string
+            format: uuid
+            description: The globally unique identifier of the virtual card account
+            example: 123e4567-e89b-12d3-a456-426614174000
+          description:
+            type: string
+            example: This is the description of what the VCN will be used for
+            description: The description of what the VCN will be used for
+    Token:
+      allOf:
+      - $ref: '#/components/schemas/Card'
+      properties:
+        accountGuid:
+          type: string
+          format: uuid
+          description: The globally unique identifier of the token
+          example: 123e4567-e89b-12d3-a456-426614174000
+        tokenUniqueRef:
+          type: string
+          maxLength: 64
+          description: The unique reference identifier of the token
+          example: DE9JOVYK6FVSO8I32DLDPHGTC9NZ7SLKPVLMDQ0RRGK3WYD2
+        paymentAppInstanceId:
+          type: string
+          maxLength: 64
+          description: The unique app device identifier
+          example: '128652974320250630'
+        status:
+          type: string
+          pattern: ^(ACTIVE|SUSPENDED)$
+          description: Token Status. Valid values are ACTIVE and SUSPENDED
+          example: ACTIVE
+    TransactionLimitControl:
+      required:
+      - amount
+      - negate
+      type: object
+      properties:
+        amount:
+          minimum: 0
+          type: number
+          description: The limit that will apply on a per transaction basis
+          example: 12
+          format: float
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The TransactionLimit control provides the ability to limit individual transaction authorizations to a maximum amount
+    Error:
+      type: object
+      properties:
+        Source:
+          type: string
+          example: source
+          description: Source of error
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error
+          example: '123'
+        Description:
+          type: string
+          example: Error desc
+          description: Short description of the error
+        Recoverable:
+          type: boolean
+          example: true
+          description: Is recoverable error
+        Details:
+          type: string
+          example: Detail information
+          description: Optional detailed description of the issue
+    UpdateVirtualCardAccount:
+      type: object
+      required:
+      - expiry
+      allOf:
+      - $ref: '#/components/schemas/VcnUserDetail'
+      - $ref: '#/components/schemas/UpdateVCN'
+      - properties:
+          realCardBillingCurrencyCode:
+            pattern: ^[0-9]{3}$
+            type: string
+            description: Currency code of the RCN
+            example: '825'
+          rules:
+            $ref: '#/components/schemas/Controls'
+    VirtualCardAccount:
+      type: object
+      required:
+      - realCardAccountGuid
+      - accountGuid
+      allOf:
+      - $ref: '#/components/schemas/VcnUserDetail'
+      - $ref: '#/components/schemas/Vcn'
+      - properties:
+          realCardAccountGuid:
+            type: string
+            format: uuid
+            description: The globally unique identifier of the real card account
+            example: 123e4567-e89b-12d3-a456-426614174000
+          realCardBillingCurrencyCode:
+            pattern: ^[0-9]{3}$
+            type: string
+            description: Currency code of the RCN
+            example: '825'
+          rules:
+            $ref: '#/components/schemas/Controls'
+    MerchantIdControl:
+      required:
+      - acquirerId
+      - acceptorId
+      - negate
+      type: object
+      properties:
+        acceptorId:
+          minLength: 15
+          maxLength: 15
+          type: string
+          description: The Merchant Id
+          example: '123456789012345'
+        acquirerId:
+          minLength: 1
+          maxLength: 10
+          pattern: .*\S.*
+          type: string
+          description: The Acquiring Institution ID Code which identifies the acquiring institution (for example, merchant bank) or its agent
+          example: '123456'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The Merchant ID control provides the ability to limit authorizations to particular merchants
+    ResourceIdentifier:
+      description: A UUID which uniquely identifies a resource
+      type: string
+      format: uuid
+      example: c63de020-a446-11eb-bcbc-0242ac130002
+    ValidityPeriodControl:
+      required:
+      - from
+      - negate
+      - to
+      type: object
+      properties:
+        from:
+          type: string
+          format: date-time
+          description: The start date from which the control is valid, in ISO 8601 extended format "YYYY-MM-DDThh:mm:ss[.sss]Z", where [.sss] is optional and can be 1 to 3 digits
+          example: '2020-10-26T00:00:00Z'
+        to:
+          type: string
+          format: date-time
+          description: The end date till which the control is valid, in ISO 8601 extended format "YYYY-MM-DDThh:mm:ss[.sss]Z", where [.sss] is optional and can be 1 to 3 digits
+          example: '2020-11-06T23:59:59Z'
+        strictPreAuthCheck:
+          type: boolean
+          description: Defines if strict pre-auth check needs to be applied
+          default: false
+          example: true
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The ValidityPeriod control provides the ability to limit authorization activity to a defined time period
+    MccControl:
+      required:
+      - mccs
+      - negate
+      type: object
+      properties:
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+        mccs:
+          minItems: 1
+          type: array
+          description: List of merchant category codes
+          example:
+          - '1234'
+          - '5678'
+          items:
+            type: string
+            example: '1234'
+          uniqueItems: true
+      description: The Card Acceptor Business Codes (MCC) control can control the type of purchases for which a card is used
+    Controls:
+      type: array
+      description: In Control Card Controls
+      items:
+        $ref: '#/components/schemas/Control'
+    UserDetail:
+      type: object
+      required:
+      - firstName
+      - lastName
+      - phone
+      - email
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: .*\S.*
+          description: First Name of User
+          example: Emerson
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: .*\S.*
+          description: Last Name of User
+          example: Bloggs
+        phone:
+          type: string
+          minLength: 4
+          maxLength: 16
+          description: Phone number of User
+          example: '+12345678910111'
+        email:
+          type: string
+          minLength: 1
+          maxLength: 300
+          description: Email address of User
+          example: emersonbloggs@gmail.com
+    Card:
+      type: object
+      required:
+      - accountNumber
+      - expiry
+      properties:
+        accountNumber:
+          type: string
+          minLength: 12
+          maxLength: 19
+          pattern: ^[0-9]+
+          example: '1234567891234567'
+          description: Card Account Number
+        expiry:
+          minLength: 7
+          maxLength: 7
+          type: string
+          pattern: ^20[2-9][0-9]-(0[1-9]|1[012])$
+          description: Card expiry date in yyyy-MM format
+          example: 2021-11
+    ErrorWrapper:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    AgeingVelocityControl:
+      required:
+      - authorizationHoldDays
+      - cumulativeLimit
+      - timeZone
+      - negate
+      type: object
+      properties:
+        authorizationHoldDays:
+          type: integer
+          minimum: 0
+          maximum: 9999
+          description: Number of days an authorization holds before ageing off
+          format: int32
+          example: 1234
+        cumulativeLimit:
+          minimum: 0
+          type: number
+          description: Maximum allowed cumulative amount
+          example: 1000
+          format: float
+        timeZone:
+          type: string
+          description: Time zone that is used for age-off calculations
+          example: UTC-06:00
+        availableBalance:
+          minimum: 0
+          type: number
+          description: The cumulative spend available for the velocity control for the specified period
+          example: 1000
+          format: float
+        currencyType:
+          minLength: 4
+          maxLength: 8
+          type: string
+          description: Type of the currency being used. Valid values are BASE and MERCHANT
+          example: MERCHANT
+          pattern: ^(BASE|MERCHANT)
+        currencyCode:
+          minLength: 3
+          maxLength: 3
+          pattern: ^[0-9]{3}$
+          type: string
+          description: Mastercard supported International Organization for Standardization (ISO) 4217 currency codes
+          example: '825'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The AgingVelocityControl provides the requester with the ability to set a notional credit line through the CumulativeControl. This control keeps track of the current remaining available credit and approves a transaction only if the requested amount is less than or equal to the remaining available credit
+    AmountRangeControl:
+      required:
+      - currencyType
+      - maxAmount
+      - minAmount
+      - negate
+      type: object
+      properties:
+        minAmount:
+          minimum: 0
+          type: number
+          description: Minimum allowed amount
+          format: float
+          example: 1000
+        maxAmount:
+          minimum: 0
+          type: number
+          description: Maximum allowed amount
+          format: float
+          example: 10000
+        strictPreAuthCheck:
+          type: boolean
+          description: Defines if strict pre-auth check needs to be applied
+          default: false
+          example: true
+        currencyType:
+          minLength: 4
+          maxLength: 8
+          type: string
+          description: Type of the currency being used. Valid values are BASE and MERCHANT
+          example: MERCHANT
+          pattern: ^(BASE|MERCHANT)
+        currencyCode:
+          minLength: 3
+          maxLength: 3
+          pattern: ^[0-9]{3}$
+          type: string
+          description: Mastercard supported International Organization for Standardization (ISO) 4217 currency codes
+          example: '825'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The exact amount range control will approve a transaction only if the requested amount is equal or greater than MinAmount and less than or equal to MaxAmount. In other words, if Min Amount <= Amount <= Max Amount
+    VcnUserDetail:
+      type: object
+      required:
+      - firstName
+      - lastName
+      - phone
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: First Name of User
+          example: Emerson
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Last Name of User
+          example: Bloggs
+        phone:
+          type: string
+          minLength: 4
+          maxLength: 16
+          description: Phone number of User
+          example: '+13556434378'
+    UpdateVCN:
+      type: object
+      properties:
+        expiry:
+          minLength: 7
+          maxLength: 7
+          type: string
+          pattern: ^20[2-9][0-9]-(0[1-9]|1[012])$
+          description: Expiry date in yyyy-MM format
+          example: 2021-11
+        description:
+          type: string
+          example: This is the description of what the VCN will be used for
+          description: The description of what the VCN will be used for
+    TokenUpdate:
+      allOf:
+      - $ref: '#/components/schemas/Card'
+      properties:
+        status:
+          type: string
+          pattern: ^(ACTIVE|SUSPENDED)$
+          description: Token Status. Valid values are ACTIVE and SUSPENDED
+          example: ACTIVE
+    TimeOfDayControl:
+      required:
+      - negate
+      - timeZone
+      - times
+      type: object
+      properties:
+        times:
+          maxItems: 7
+          minItems: 1
+          type: array
+          description: Times of day
+          items:
+            $ref: '#/components/schemas/TimeOfDay'
+        timeZone:
+          type: string
+          description: Time zone of the from and to times
+          example: UTC
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The TimeOfDayControl provides the ability to limit authorization activity to defined time periods for each day
+    Errors:
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    Control:
+      type: object
+      required:
+      - action
+      - alias
+      description: In Control Rule
+      properties:
+        action:
+          minLength: 1
+          maxLength: 1
+          type: string
+          description: control rule actions. Valid values are A (Approve), D (Decline), W (Warn), P (Promo) and F (Forced)
+          example: A
+        alias:
+          type: string
+          description: control rule alias name. alias should be unique
+          maxLength: 100
+          minLength: 1
+          pattern: .*\S.*
+          example: DAILY LIMIT
+        transactionLimits:
+          type: array
+          description: transaction limit controls provides the ability to limit individual transaction authorizations to a maximum amount
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/TransactionLimitControl'
+        geographies:
+          type: array
+          description: geography controls provides the ability to control where a card is physically used
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/GeographyControl'
+        velocities:
+          type: array
+          description: velocity controls can limit the frequency, and the total cumulative amount of authorizations performed on the cardholders account within a specified time period
+          items:
+            $ref: '#/components/schemas/VelocityControl'
+        validityPeriods:
+          type: array
+          description: validity period controls
+          items:
+            $ref: '#/components/schemas/ValidityPeriodControl'
+        amountRanges:
+          type: array
+          description: amount range controls
+          items:
+            $ref: '#/components/schemas/AmountRangeControl'
+        merchantIds:
+          type: array
+          description: merchant id controls
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/MerchantIdControl'
+        ageingVelocities:
+          type: array
+          description: ageing velocity controls
+          items:
+            $ref: '#/components/schemas/AgeingVelocityControl'
+        curfews:
+          type: array
+          description: curfew controls allows you to limit authorization activity on a card to a certain time period during set days. You can also set the time zone for this control
+          items:
+            $ref: '#/components/schemas/CurfewControl'
+        timeOfDays:
+          type: array
+          description: time of day controls provides the ability to limit authorization activity to defined time periods for each day
+          items:
+            $ref: '#/components/schemas/TimeOfDayControl'
+        merchantCategories:
+          type: array
+          description: merchant category controls
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/MccControl'
+    GeographyControl:
+      required:
+      - countryCodes
+      - negate
+      type: object
+      properties:
+        countryCodes:
+          minItems: 1
+          type: array
+          description: Country codes to be included in the rule
+          items:
+            type: string
+          example:
+          - '840'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The GeographicControl provides the ability to control where a card is physically used
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    TimeOfDay:
+      required:
+      - day
+      - fromTime
+      - toTime
+      type: object
+      properties:
+        day:
+          minLength: 6
+          maxLength: 9
+          type: string
+          example: SUNDAY
+          description: Days of week. Valid values are SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, and SATURDAY
+          pattern: ^(SUNDAY|MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY)
+        fromTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The start time from which authorizations will be allowed
+          example: 08:21
+        toTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The end time from which authorizations will be allowed
+          example: '12:00'
+    VerifiedUser:
+      type: object
+      properties:
+        message:
+          type: string
+          description: result
+          example: Successfully verified user
+    EnrolledUser:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: Unique identifier of the user.
+          example: '282947573008198049562610279575'
+        userIdType:
+          type: string
+          description: Identifier type for the given user.
+          example: RANCU
+        accountId:
+          type: string
+          description: The unique identifier for the given account.
+          example: '609330255453162553303101469598'
+        accountIdType:
+          type: string
+          description: Identifier type for the given account.
+          example: RANAC
+    AccountBase:
+      required:
+      - accountId
+      - accountIdType
+      - productCode
+      - programIdentifier
+      - status
+      type: object
+      description: This object will define the users initial account that is being enrolled  at the same time as the user.
+      properties:
+        accountId:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: The unique identifier for the given account.
+          example: '5330333671236516'
+        accountIdType:
+          type: string
+          description: Identifier type for the given account. Supported identifier is BAN.
+          example: BAN
+        status:
+          type: string
+          description: Status of the user's account. Valid values are GOOD_STANDING and NEW.
+          example: NEW
+          enum:
+          - NEW
+          - GOOD_STANDING
+        productCode:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: The account's associated reward product identifier as defined by the client and configured during the implementation of the program.
+          example: FIDOCASHBACK
+        programIdentifier:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: Program identifier for the program in which the cardholder is enrolled. Program ID is created by Mastercard Rewards System.
+          example: PGM42051
+        openDate:
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          type: string
+          description: The date of account opening as defined by the client.
+          example: '2014-12-31'
+          format: date
+        enrollmentDate:
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          type: string
+          description: The date for when the account becomes eligible for the rewards program. If undefined, the enrollment date defaults to the date when Mastercard processes the enrollment.
+          example: '2018-03-10'
+          format: date
+        accruePoints:
+          type: boolean
+          description: This specifies if the account can accrue points. It is used in conjunction with Account Status to define earn and burn behavior for the account.
+          example: false
+        householdToken:
+          type: string
+          description: This field ties together multiple user accounts into one household. This value is typically assigned by the Client. To use this field, a rewards program must be configured to support the Token or Bank Customer Number householding scheme.
+          example: '254235'
+        primaryAccount:
+          type: boolean
+          description: Identifies if the account is primary for the User. A User may only have 1 primary account. In situations where householding is used, there may only be 1 primary account in the household, regardless of how many User accounts make up that household. A value of true indicates that the account is primary for the User or the household.
+          example: false
+        userDefined1:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 1
+          example: UDF 1 Example
+        userDefined2:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 2
+          example: UDF 2 Example
+        userDefined3:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 3
+          example: UDF 3 Example
+        userDefined4:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 4
+          example: UDF 4 Example
+        userDefined5:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Field 5
+          example: UDF 5 Example
+        userDefined6:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Field 6
+          example: UDF 6 Example
+        userDefined7:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Field 7
+          example: UDF 7 Example
+        userDefined8:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Field 8
+          example: UDF 8 Example
+        externalAccountId:
+          maxLength: 10
+          minLength: 0
+          type: string
+          description: Used for On-Soil customers when optional fields are turned on in the rewards system.
+          example: '2222332322'
+        cycleId:
+          type: integer
+          description: Bank cycle number that the cardholder/primary cardholder is assigned to.
+          format: int64
+          example: 1
+        cycled:
+          type: boolean
+          description: Flag to indicate whether a Rewards account has been cycled.
+          example: false
+        accountReferenceCode:
+          maxLength: 50
+          minLength: 0
+          type: string
+          description: Unique identifier the membership uses to identify an account.
+          example: 123456abcdef123456abcdef123456abcdef0
+        pcloAccountStatusCode:
+          type: string
+          description: Status of the user's account. Valid values are GOOD_STANDING, REDEEM_ONLY, NEW, ON_HOLD, CANCELLED, INACTIVE.
+          example: NEW
+          enum:
+          - NEW
+          - GOOD_STANDING
+          - REDEEM_ONLY
+          - CANCELLED
+          - ON_HOLD
+          - INACTIVE
+    UserUpdate:
+      required:
+      - userId
+      - userIdType
+      type: object
+      properties:
+        userId:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: Unique identifier for the user.
+          example: '268810378058708149455458707247'
+        userIdType:
+          type: string
+          description: Identifier type of the User. The value of RANCU or RANAC should be used for this field.
+          example: RANCU
+        firstName:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: User's first name.
+          example: John
+        lastName:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: User's last name.
+          example: Smith
+        motherMaidenName:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: User's mother's maiden name.
+          example: Jennifer
+        birthDate:
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          type: string
+          description: User's date of birth.
+          example: '1975-03-11'
+          format: date
+        nationalIdentifier:
+          maxLength: 11
+          minLength: 0
+          type: string
+          description: The user's unique identifier is assigned by the national or government system. For example, passport number or tax identification number.
+          example: 324-56-7574
+        businessPhoneNumber:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: User's unformatted business phone number. Provide an unformatted phone number,  except for a leading "+" if including a country code.
+          example: '+11234567890'
+        mobilePhoneNumber:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: User's unformatted mobile phone number. Provide an unformatted phone number,  except for a leading "+" if including a country code.
+          example: '+11234567890'
+        emailAddress:
+          maxLength: 120
+          minLength: 0
+          type: string
+          description: User's email address.
+          example: john.smith@mastercard.com
+        vip:
+          type: boolean
+          description: Used to assign VIP status to a user. The default value is false.
+          example: true
+        employee:
+          type: boolean
+          description: Used to assign Employee status to a user. The default value is false.
+          example: false
+        acceptTracking:
+          type: boolean
+          description: This field is to document if the user has agreed to their activity being tracked on  a customer or partner-hosted experience.
+          example: true
+        managePromotionalEmail:
+          type: boolean
+          description: Specifies if the Promotional E-Mail contact preference on record is being managed by the user, instead of the issuer. True indicates  that promotional participation is managed by the user.
+          example: true
+        managePromotionalParticipation:
+          type: boolean
+          description: Specifies if the Promotional participation preference on record is being  managed by the user, instead of the issuer. True indicates that  promotional participation is managed by the user.
+          example: true
+        managePromotionalSMS:
+          type: boolean
+          description: Specifies if the Promotional SMS contact preference on record is being  managed by the user, instead of the issuer. True indicates that promotional  participation is managed by the user.
+          example: true
+        authorizedUser1:
+          maxLength: 80
+          type: string
+          description: This is the first person authorized to access a user's rewards account(s). Authorized users only  apply to designating a person that can call into the Rewards Call Center and be serviced. This  Authorized user must still provide valid answers to the user's security questions.
+          example: testUser1
+        authorizedUser2:
+          maxLength: 80
+          type: string
+          description: This is the second person authorized to access a user's rewards account(s). Authorized users only  apply to designating a person that can call into the Rewards Call Center and be serviced. This  Authorized user must still provide valid answers to the user's security questions.
+          example: testUser2
+        comments:
+          maxLength: 200
+          type: string
+          description: Used to keep comments on updated accounts.
+          example: Account closed due to fraud.
+        customerReplaced:
+          type: boolean
+          description: Indicates that the Customer was replaced.
+          example: true
+        manageEmail:
+          type: boolean
+          description: Specifies if the email address on record is being managed by the user, instead of the issuer.  True indicates that the email address is managed by the user.
+          example: true
+        faxPhoneNumber:
+          maxLength: 25
+          type: string
+          description: User's unformatted fax phone number. Provide an unformatted phone number, except for a leading  "+" if including a country code.
+          example: '+11234567890'
+        genderCode:
+          type: string
+          description: 'The ISO code is used to specify the gender of the customer.
+
+            Valid values for ISO 5218 standard:
+
+
+            �    NULL - not known
+
+
+            �    0 - not known
+
+
+            �    1 - male
+
+
+            �    2 - female
+
+
+            �    9 - not applicable'
+          example: '0'
+        homePhoneNumber:
+          maxLength: 25
+          type: string
+          description: User's unformatted home phone number. Provide an unformatted phone number, except for a  leading "+" if including a country code.
+          example: '384579387593'
+        middleName:
+          maxLength: 25
+          type: string
+          description: Middle name of the primary cardholder.
+          example: test middle name
+        manageMobilePhone:
+          type: boolean
+          description: Specifies if the mobile phone on record is being managed by the user, instead of the issuer.  True indicates that the mobile phone is managed by the user.
+          example: true
+        namePrefix:
+          maxLength: 4
+          type: string
+          description: Name prefix (Mr., Ms., etc) of the primary cardholder.
+          example: Mr
+        nameSuffix:
+          maxLength: 4
+          type: string
+          description: Name suffix (Jr., PhD., etc) of the primary cardholder.
+          example: Jr
+        preferredLanguage:
+          type: string
+          description: A code name for a global area or language combination. This is the language the cardholder wants  to do business in. The ISO Language Code and ISO Country Code (separated by an underscore) will  specify the default language for the user. ISO Language Code is 2-characters and lowercase. ISO  Country Code is 2-characters and uppercase. For example, if the user spoke US English, the value  for this field would be en_US.
+          example: en_US
+        programPreview:
+          type: boolean
+          description: Determines if the card is being used for program preview. Triggers the Internet Redemptions website to ask for preview date and language.
+          example: true
+        segmentationCluster:
+          maxLength: 50
+          type: string
+          description: The field stores proprietary segmentation cluster information for the purpose of segmenting users as determined by the customer.
+          example: Ruby
+        genericIdentification:
+          maxLength: 15
+          minLength: 0
+          type: string
+          description: Answer to the user's bank-provided custom verification question. Can be used as a Security Question data point by the Internet Redemptions website, Customer Service, or web services.
+          example: Duster
+        genericIdentificationDescription:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: The descriptive label for the user's bank-provided custom verification question. Can be used as a Security Question data point by the Internet Redemptions website, Customer Service, or web services.
+          example: Pet's name
+        userDefined1:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be  used for promotions and other business rules.
+          example: UDF 1 Example
+        userDefined2:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 2
+          example: UDF 2 Example
+        userDefined3:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 3
+          example: UDF 3 Example
+        userDefined4:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 4
+          example: UDF 4 Example
+        acceptEmails:
+          type: boolean
+          description: Specifies if the user allows contact via email for promotional purposes.  The default value is false.
+          example: false
+        acceptSms:
+          type: boolean
+          description: Specifies if the user allows contact to their mobile phone for promotional  purposes. The default value is false.
+          example: false
+        acceptPromotionalInfo:
+          type: boolean
+          description: Specifies if the user is interested in receiving promotional information.  The default value is false.
+          example: false
+        pcloUser:
+          $ref: '#/components/schemas/PCLOUser'
+        address:
+          $ref: '#/components/schemas/UserAddress'
+    PCLOUser:
+      type: object
+      description: This object should only be used by Personal Card Linked Offers (PCLO) users. This object  will define the users communications preferences for PCLO.
+      properties:
+        pcloAcceptPromotionalOffers:
+          type: boolean
+          description: Specifies if the PCLO user would like to receive information about special promotional offers.
+          example: false
+        pcloAcceptEmails:
+          type: boolean
+          description: Specifies if the PCLO user allows contact via email for promotional purposes.
+          example: false
+        pcloAcceptSms:
+          type: boolean
+          description: Specifies if the PCLO user allows contact to their mobile phone for promotional purposes.
+          example: false
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of the error
+          example: user-management
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during API request processing.
+          example: INVALID_FIELD_FORMAT
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Email Address must be in the valid format.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about the data received.
+          example: Invalid Details
+      description: Error Details
+    UserVerificationDetails:
+      type: object
+      properties:
+        code:
+          type: string
+          description: User verification question. Supported question codes are VALID_CUST_SSN_LAST_4, VALID_CUST_BIRTHDATE, VALID_CUST_MOTHERS_MAIDEN_NAME, VALID_CUST_POSTAL_CODE, VALID_CUST_GENERIC_IDENTIFIER_SW, VALID_CUST_GENERIC_IDENTIFIER_TXT - VALID_CUST_SSN_LAST_4  Verify the user SSN value. - VALID_CUST_BIRTHDATE  Verify the user Birthdate. - VALID_CUST_MOTHERS_MAIDEN_NAME  Verify the user Mothers Maiden Name. - VALID_CUST_POSTAL_CODE  Verify the user Postal code. - VALID_CUST_GENERIC_IDENTIFIER_SW/VALID_CUST_GENERIC_IDENTIFIER_TXT  Verify the user Generic Identifier description.
+          example: VALID_CUST_POSTAL_CODE
+        answer:
+          type: string
+          description: Answer to the User verification question
+          example: '638001'
+    VerificationDetails:
+      type: object
+      properties:
+        question:
+          type: string
+          description: Verification question description.
+          example: Zip Code
+        code:
+          type: string
+          description: Verification question code
+          example: VALID_CUST_POSTAL_CODE
+        answer:
+          type: string
+          description: Answer to the Verification question
+          example: '1234'
+    UserAddress:
+      type: object
+      description: This object will define the users default shipping/mailing address.
+      properties:
+        addressLine1:
+          maxLength: 80
+          minLength: 0
+          type: string
+          description: Address Line 1 of the User's address.
+          example: 10 Upper Bank Street
+        addressLine2:
+          maxLength: 80
+          minLength: 0
+          type: string
+          description: Address Line 2 of the User's address.
+          example: Chesterfield
+        addressLine3:
+          maxLength: 80
+          minLength: 0
+          type: string
+          description: Address Line 3 of the User's address.
+          example: Canary Wharf
+        addressLine4:
+          maxLength: 80
+          minLength: 0
+          type: string
+          description: Address Line 4 of the User's address.
+          example: Tower Hamlets
+        city:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: City name as per User's address.
+          example: London
+        countryCode:
+          maxLength: 3
+          minLength: 2
+          type: string
+          description: This value should be the 3-character ISO Country Code for the user.
+          example: ENG
+        postalCode:
+          maxLength: 14
+          minLength: 0
+          type: string
+          description: Postal Code as per User's address.
+          example: '63368'
+        stateProvinceCode:
+          maxLength: 3
+          minLength: 2
+          type: string
+          description: State Code as per User's address.
+          example: JS
+    VerifyUser:
+      required:
+      - userVerificationDetails
+      type: object
+      properties:
+        userVerificationDetails:
+          type: array
+          description: User Verification Details
+          items:
+            $ref: '#/components/schemas/UserVerificationDetails'
+    Errors_2:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error Details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    UserDetails:
+      type: object
+      properties:
+        companyIca:
+          type: integer
+          description: The unique identifier of the company.
+          format: int64
+          example: 611532
+        userId:
+          type: string
+          description: A system generated unique User identifier such as random customer number.
+          example: '282947573008198049562610279575'
+        userIdType:
+          type: string
+          description: User identifier type. Supported identifier is RANCU.
+          example: RANCU
+        namePrefix:
+          type: string
+          description: User's name prefix.
+          example: R
+        firstName:
+          type: string
+          description: User's first name.
+          example: John
+        middleName:
+          type: string
+          description: User's middle name.
+          example: Robert
+        lastName:
+          type: string
+          description: User's last name.
+          example: Smith
+        motherMaidenName:
+          type: string
+          description: User's mother maiden name.
+          example: Jennifer
+        authorizedUser1:
+          type: string
+          description: First authorized user in primary cardholder's account.
+          example: testUser1
+        authorizedUser2:
+          type: string
+          description: Second authorized user in primary cardholder's account.
+          example: testUser2
+        birthDate:
+          type: string
+          description: User's Date of Birth.
+          example: Mon Mar 10 19:00:00 CDT 1975
+        nationalIdentifier:
+          type: string
+          description: National Identifier of the User.
+          example: 324-56-7574
+        businessPhoneNumber:
+          type: string
+          description: Valid business phone number used by the User.
+          example: +1(0)1234567890
+        mobilePhoneNumber:
+          type: string
+          description: Valid mobile phone number used by the User.
+          example: +1(0)1234567891
+        homePhoneNumber:
+          type: string
+          description: Valid home phone number used by the User.
+          example: +1(0)1234567891
+        faxPhoneNumber:
+          type: string
+          description: Valid fax phone number used by the User.
+          example: +1(0)1234567891
+        emailAddress:
+          type: string
+          description: Valid email address used by the User.
+          example: abc@example.com
+        vip:
+          type: boolean
+          description: Allows the user to hold VIP status, default value is false.
+          example: true
+        employee:
+          type: boolean
+          description: Allows the user to hold EMPLOYEE status, default value is false.
+          example: false
+        acceptEmails:
+          type: boolean
+          description: Specifies if the account holder can be contacted via email, default value is false.
+          example: false
+        acceptSms:
+          type: boolean
+          description: Specifies if the account holder can be contacted via SMS, default value is false.
+          example: false
+        acceptPromotionalInfo:
+          type: boolean
+          description: Specifies if the account holder is interested in receiving promotional information, the default value is false.
+          example: true
+        acceptTracking:
+          type: boolean
+          description: Specifies whether or not a particular customer has accepted tracking.
+          example: true
+        genericIdentification:
+          type: string
+          description: Answer to the user's verification question.
+          example: Duster
+        genericIdentificationDescription:
+          type: string
+          description: The user's custom verification question.
+          example: Pet's name
+        userDefined1:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 1
+          example: UDF 1 Example
+        userDefined2:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 2
+          example: UDF 2 Example
+        userDefined3:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 3
+          example: UDF 3 Example
+        userDefined4:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 4
+          example: UDF 4 Example
+        pcloUser:
+          $ref: '#/components/schemas/PCLOUser'
+        preferredLanguage:
+          type: string
+          description: Customer's preferred language.
+          example: en_US
+        address:
+          $ref: '#/components/schemas/UserAddress'
+        verificationDetails:
+          type: array
+          description: Cardholder verification details.
+          items:
+            $ref: '#/components/schemas/VerificationDetails'
+    UserEnroll:
+      required:
+      - account
+      - companyIca
+      - userId
+      - userIdType
+      type: object
+      properties:
+        companyIca:
+          type: integer
+          description: Interbank Card Association number assigned by Mastercard to the financial institution or partner. This is typically a 4-6 digit value.
+          format: int64
+          example: 9989
+        userId:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: Unique identifier for the user.  This is typically referred to as the Bank  Customer Number (BCN).
+          example: '5600000000000003000'
+        userIdType:
+          type: string
+          description: Identifier type for the given user. Supported identifier is BCN.
+          example: BCN
+        firstName:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: User's first name.
+          example: John
+        lastName:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: User's last name.
+          example: Smith
+        motherMaidenName:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: User's mother's maiden name. This field should be provided if Mother's Maiden  Name will be used as a security data point.
+          example: Jennifer
+        birthDate:
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          type: string
+          description: User's date of birth. This field should be provided if Date of Birth will be  used as a security data point.
+          example: '1975-03-10'
+          format: date
+        nationalIdentifier:
+          maxLength: 11
+          minLength: 0
+          type: string
+          description: User's unique identifier assigned by the national or government system. For example, passport number or tax identification number.
+          example: 324-56-7574
+        businessPhoneNumber:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: User's unformatted business phone number. Provide an unformatted  phone number, except for a leading "+" if including a country code.
+          example: '+11234567890'
+        mobilePhoneNumber:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: User's unformatted mobile phone number. Provide an  unformatted phone number, except for a leading "+" if including a country code.
+          example: '+11234567890'
+        homePhoneNumber:
+          type: string
+          description: User's unformatted home phone number. Provide an unformatted phone number,  except for a leading "+" if including a country code.
+          example: '+11234567890'
+        faxPhoneNumber:
+          type: string
+          description: Valid fax phone number used by the user.
+          example: +1(0)1234567891
+        emailAddress:
+          maxLength: 120
+          minLength: 0
+          type: string
+          description: User's email address.
+          example: john.smith@mastercard.com
+        vip:
+          type: boolean
+          description: Used to assign VIP status to a user. The default value is false.
+          example: true
+        employee:
+          type: boolean
+          description: Used to assign Employee status to a user. The default value is false.
+          example: false
+        acceptEmails:
+          type: boolean
+          description: Specifies if the user allows contact via email for promotional purposes.  The default value is false.
+          example: false
+        acceptSms:
+          type: boolean
+          description: Specifies if the user allows contact to their mobile phone for promotional  purposes. The default value is false.
+          example: false
+        acceptPromotionalInfo:
+          type: boolean
+          description: Specifies if the user is interested in receiving promotional information.  The default value is false.
+          example: false
+        genericIdentification:
+          maxLength: 15
+          minLength: 0
+          type: string
+          description: Answer to the user's bank-provided custom verification question. Can be used as a Security Question data point by the Internet Redemptions website, Customer Service, or web services.
+          example: Duster
+        genericIdentificationDescription:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: The descriptive label for the user's bank-provided custom verification question. Can be used as a Security Question data point by the Internet Redemptions website, Customer Service, or web services.
+          example: Pet's name
+        userDefined1:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that  can be used for promotions and other business rules.
+          example: UDF 1 Example
+        userDefined2:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that  can be used for promotions and other business rules.
+          example: UDF 2 Example
+        userDefined3:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that  can be used for promotions and other business rules.
+          example: UDF 3 Example
+        userDefined4:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that  can be used for promotions and other business rules.
+          example: UDF 4 Example
+        pcloUser:
+          $ref: '#/components/schemas/PCLOUser'
+        address:
+          $ref: '#/components/schemas/UserAddress'
+        account:
+          $ref: '#/components/schemas/AccountBase'
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors_2'
+    Error_2:
+      title: Error
+      type: object
+      description: Error object which contains details about a single error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error. If an error is generated and returned by the gateway, then this field will have value as `Gateway`. Other possible values are `CARBON CALCULATOR`, `DONATE`, `CARBON_CALCULATOR_EXPERIENCE` or `PRICELESS PLANET`.
+          minLength: 1
+          maxLength: 100
+          example: CARBON_CALCULATOR_EXPERIENCE
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: INVALID_REQUEST_PARAMETER
+        Description:
+          type: string
+          description: Short description of the `ReasonCode` field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: email must not be null.
+    UserConsent_2:
+      type: object
+      description: The user consent resource
+      required:
+      - userConsentId
+      - consentLanguageId
+      - consentedDate
+      properties:
+        userConsentId:
+          type: string
+          description: User consent Identifier, generated at the time of store consent API to track the user consents.
+          example: 2c0743c0-fe6a-41a6-88c4-2c94786fb9c2
+          minLength: 36
+          maxLength: 36
+        consentLanguageId:
+          type: string
+          description: Unique Id for a specific consent language text. This Id will be available through GET consent-languages API.
+          example: 75c4f996-1910-420f-b82b-fcc3e5196b99
+          minLength: 36
+          maxLength: 36
+        consentedDate:
+          type: string
+          format: YYYYMMDDHHMMSS
+          description: Consented date (in UTC) at which the user is consented.
+          example: '20200223000001'
+          minLength: 14
+          maxLength: 14
+    Errors_2_2:
+      title: Errors
+      type: object
+      description: Error object which contains a list of error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error_2'
+          example: []
+    UserReference:
+      title: UserReference
+      type: object
+      description: Successful user enrollment response
+      required:
+      - cardNumberLastFourDigits
+      - status
+      - userid
+      properties:
+        userid:
+          $ref: '#/components/schemas/UserID'
+        cardNumberLastFourDigits:
+          type: string
+          minLength: 4
+          maxLength: 4
+          pattern: ^\d{4}$
+          description: Last 4 digits of a full payment card number which were provided as enrollment request.
+          example: '4363'
+        status:
+          type: string
+          minLength: 6
+          maxLength: 7
+          description: Status of the user on Carbon Calculator Experience API. Possible values are ACTIVE and INACTIVE.
+          example: ACTIVE
+    SubmitClaimUserData:
+      type: object
+      required:
+      - pan
+      properties:
+        firstName:
+          type: string
+          description: First name
+          example: John
+          maxLength: 20
+        lastName:
+          type: string
+          description: Last name
+          example: Smith
+          maxLength: 40
+        addressLine1:
+          type: string
+          description: Address line 1
+          example: Rua Francisco Pereira da Silva 1480
+          maxLength: 40
+        addressLine2:
+          type: string
+          description: Address line 2
+          example: Apt. 302
+          maxLength: 40
+        city:
+          type: string
+          description: City
+          example: Guarulhos
+          maxLength: 20
+        state:
+          type: string
+          description: State
+          example: SP
+        postalCode:
+          type: string
+          description: Postal code
+          example: 07272-060
+          maxLength: 12
+        country:
+          type: string
+          description: Alpha-3 ISO 3166-1 country code
+          example: BRA
+        email:
+          type: string
+          description: Email address
+          example: john.smith@mail.com
+          maxLength: 40
+        phone:
+          type: string
+          description: Phone number
+          example: (11) 1111-1111
+          maxLength: 20
+        pan:
+          type: string
+          description: Payment card number
+          example: '5534782345678238'
+    UserName:
+      type: object
+      required:
+      - firstName
+      - lastName
+      properties:
+        firstName:
+          type: string
+          example: John
+          minLength: 1
+          maxLength: 100
+          description: Denotes the first name of the user.
+        lastName:
+          type: string
+          description: Denotes the last name of the user.
+          minLength: 1
+          maxLength: 100
+          example: Doe
+      title: Username
+    ErrorItem_2:
+      type: object
+      properties:
+        Source:
+          type: string
+          example: Error source
+          description: Source of the error.
+        Description:
+          type: string
+          example: Generic error description
+          description: Short description of the ReasonCode field.
+        ReasonCode:
+          type: string
+          example: REASON_CODE
+          description: A unique constant identifying the error case encountered during API request processing.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          example: Detailed error description
+          description: Where appropriate, indicates detailed information about data received.
+    ErrorResponse_2:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              $ref: '#/components/schemas/Errors_3'
+    CardExpiry:
+      type: object
+      properties:
+        month:
+          type: string
+          example: '10'
+          description: Denotes a month by when the card will be expired.
+          pattern: ^[0-9]{2}$
+        year:
+          type: string
+          description: Denotes a year by when the card will be expired.
+          example: '2024'
+          pattern: ^[0-9]{4}$
+      title: CardExpiry
+    Errors_3:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error_3'
+    SubmitClaimUserToken:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Encrypted user data token to be used in the generated url that redirects the cardholder to the target website to submit a new claim.
+          example: EkRKarafAVJkljljfafkljeiwie
+    Address_2:
+      type: object
+      required:
+      - countryCode
+      - type
+      properties:
+        countryCode:
+          description: Denotes three-character country code.
+          type: string
+          example: USA
+          minLength: 3
+          maxLength: 3
+        locality:
+          description: Neighborhood.
+          type: string
+          minLength: 3
+          maxLength: 30
+          example: Rly Station
+        postalCode:
+          description: <p> The postal code in the address is the ZIP code or equivalent and can be an alphanumeric value including whitespace (for example, PE7 8FT). <br><b> Note - Special characters and only whitespace characters are not allowed. </b></p>
+          type: string
+          example: '11746'
+          maxLength: 12
+        state:
+          type: string
+          description: The state or region or province to which the address belongs.
+          example: New York
+          minLength: 3
+          maxLength: 20
+        city:
+          type: string
+          description: City.
+          example: Brooklyn
+          minLength: 3
+          maxLength: 20
+        line1:
+          type: string
+          description: Street Address line1.
+          minLength: 3
+          maxLength: 20
+          example: 83 Mayfair Street
+        line2:
+          type: string
+          description: Street Address line2.
+          minLength: 3
+          maxLength: 20
+          example: Main Road
+        line3:
+          type: string
+          description: Street Address line3.
+          minLength: 3
+          maxLength: 20
+          example: Snake Hill Ave
+        type:
+          type: string
+          description: Denotes the type of address. (For example, home or work)
+          example: work
+          minLength: 3
+          maxLength: 20
+      title: Address
+    CurrencyCode:
+      title: currencyCode
+      type: string
+      description: Currency code as per ISO 4217
+      pattern: ^[A-Za-z]{3}$
+      example: EUR
+    UserID:
+      type: string
+      minLength: 36
+      maxLength: 36
+      pattern: ^[0-9A-Fa-f-]{36}
+      description: Unique identifier for a user enrolled in the Carbon Calculator Experience platform.
+      example: f5d88571-ac15-465a-a0d8-1ad1327b9a06
+    CardNumber:
+      type: string
+      pattern: ^\d{16}$
+      description: Original payment card number in full.
+      example: '5344035171224363'
+    UpdateUserProfile:
+      title: UpdateUserProfile
+      type: object
+      description: The request object for updating a enrolled user onto Carbon Calculator Experience platform.
+      required:
+      - name
+      - locale
+      properties:
+        name:
+          $ref: '#/components/schemas/UserName'
+        billingAddress:
+          $ref: '#/components/schemas/Address_2'
+        locale:
+          type: string
+          description: Updating User locale which is registered with issuer.
+          minLength: 1
+          maxLength: 100
+          example: en-US
+    ErrorItems:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          required:
+          - Error
+          type: object
+          properties:
+            Error:
+              type: array
+              description: Error Details
+              items:
+                $ref: '#/components/schemas/ErrorItem_2'
+          example: example_value
+    Lang:
+      type: string
+      description: Language for the issuer.
+      example: en-US
+    AggregateCarbonScore:
+      type: object
+      required:
+      - carbonEmissionInGrams
+      - aggregateDate
+      properties:
+        carbonEmissionInGrams:
+          type: string
+          description: An aggregate value of CO2 emission in grams.
+          minLength: 1
+          maxLength: 10
+          example: '3245'
+        aggregateDate:
+          type: string
+          description: Denotes aggregate duration.
+          minLength: 1
+          maxLength: 20
+          example: november-2020
+    ErrorWrapper_2:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors_2_2'
+    UserProfile_2:
+      title: UserProfile
+      type: object
+      description: The request object for enrolling a new user to Carbon Calculator Experience API.
+      required:
+      - cardNumber
+      - email
+      - expiryInfo
+      - cardBaseCurrency
+      - cardholderName
+      properties:
+        email:
+          $ref: '#/components/schemas/Email_2'
+        name:
+          $ref: '#/components/schemas/UserName'
+        cardholderName:
+          type: string
+          description: Name of the card-holder. (format- First Name Last Name)
+          minLength: 1
+          maxLength: 100
+          example: John Doe
+        cardNumber:
+          $ref: '#/components/schemas/CardNumber'
+        cardBaseCurrency:
+          $ref: '#/components/schemas/CurrencyCode'
+        expiryInfo:
+          $ref: '#/components/schemas/CardExpiry'
+        billingAddress:
+          $ref: '#/components/schemas/Address_2'
+        locale:
+          type: string
+          description: User locale which is registered with Issuer.
+          minLength: 1
+          maxLength: 100
+          example: en-US
+    Email_2:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Denotes the  type of email (For example, home)
+          minLength: 1
+          maxLength: 10
+          example: home
+        value:
+          type: string
+          description: Denotes email address.
+          minLength: 5
+          maxLength: 100
+          example: John.Doe@mail.com
+      title: Email
+    Dashboard:
+      type: object
+      required:
+      - url
+      - expiryInMillis
+      properties:
+        url:
+          type: string
+          description: This is the URL that needs to be rendered in web view with language code send by the issuer appended at the end of the URL.
+          minLength: 1
+          maxLength: 5000
+          example: https://ppctwebview.b221.net/home/?auth_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c&lang=en-US
+        expiryInMillis:
+          type: string
+          description: Denotes expiry limit for the URL.
+          minLength: 1
+          maxLength: 10
+          example: '300000'
+    Error_3:
+      type: object
+      required:
+      - Source
+      - ReasonCode
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application that generated this error. <br>Possible values = GATEWAY/AUTHENTICATION_CONSENT_SERVICE
+          example: AUTHENTICATION_CONSENT_SERVICE
+          minLength: 1
+          maxLength: 50
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during transaction processing
+          example: resource.not.found
+          minLength: 1
+          maxLength: 100
+        Description:
+          type: string
+          description: Description of the 'ReasonCode' field with additional details
+          example: The requested resource does not exist
+          minLength: 0
+          maxLength: 500
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying with same value could change the outcome. For example, if the request contains an invalid signature, retrying will never result in a success. However, if the error is related to some unexpected timeout with the service, retrying the call could result in a successful response.
+          example: false
+        Details:
+          type: string
+          description: Could be null, present for backwards compatibility or extra information
+          example: The provided acctNumber did not pass the Mod10 validation
+          minLength: 0
+          maxLength: 500
+  parameters:
+    UserConsentParameter:
+      name: user_consent
+      in: query
+      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
+      example: ACCEPT
+      required: true
+      schema:
+        type: string
+        pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+    XEncryptedPayload:
+      in: header
+      name: X-Encrypted-Payload
+      type: boolean
+      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
+
+        '
+      example: true
+      schema: null
+    XUserIdentityParameter:
+      in: header
+      name: X-User-Identity
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      description: 'JWT token for session validation. Returned as response header in previous API calls with key X-User-Identity.
+
+        '
+      schema:
+        type: string
+    UserProfileIdParameter:
+      name: user_profile_id
+      in: query
+      description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+      example: ee13a7ec-5a5a-4618-a55d-5e1ed016ccd5
+      required: true
+      schema:
+        type: string
+        pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+    tokenGUID:
+      name: token_guid
+      in: path
+      description: The globally unique identifier of the token being queried
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceIdentifier'
+      example: 8f242496-b71a-11eb-8529-0242ac130003
+    accountGUID:
+      name: account_guid
+      in: path
+      description: The globally unique identifier of the card being queried
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceIdentifier'
+      example: 8f242496-b71a-11eb-8529-0242ac130003
+    userGUID:
+      name: user_guid
+      in: path
+      description: The globally unique identifier of the user being queried
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceIdentifier'
+      example: 8f242496-b71a-11eb-8529-0242ac130003
+    IncludeVerificationDetails:
+      name: include_verification_details
+      in: query
+      description: Cardholder verification details are included in the response if true.
+      required: false
+      schema:
+        type: boolean
+      example: true
+    UsersIdType:
+      name: user_id_type
+      in: query
+      description: Determines the type of user or account identification. Supported identifiers are RANAC or RANCU.
+      required: false
+      schema:
+        type: string
+      example: RANCU
+    Language:
+      name: language
+      in: query
+      description: Cardholder verification details are returned in the language requested.
+      required: false
+      schema:
+        type: string
+      example: en_US
+    UserId:
+      name: id
+      in: path
+      description: The unique identifier for the given user.
+      required: true
+      schema:
+        type: string
+      example: '268810378058708149455458707247'
+    VerifyUsersIdType:
+      name: user_id_type
+      in: query
+      description: Determines the type of user or account identification. Supported identifiers are RANAC or RANCU.
+      required: true
+      schema:
+        type: string
+      example: RANCU
+    Lang:
+      in: query
+      name: lang
+      description: Language preference (en-US - English, es-cr - Spanish (Costa Rica), es-cl - Spanish (Chile), sv - Swedish, pl-PL - Polish (Poland))
+      required: false
+      example: en-US
+      schema:
+        $ref: '#/components/schemas/Lang'
+    user_consent_id:
+      in: path
+      name: user_consent_id
+      required: true
+      schema:
+        type: string
+        minLength: 36
+        maxLength: 36
+      description: User Consent Identifier
+      example: 2c0743c0-fe6a-41a6-88c4-2c94786fb9c2
+    UserID:
+      in: path
+      name: userid
+      description: Unique identifier for a user enrolled into Carbon Calculator Experience platform.
+      required: true
+      example: f5d88571-ac15-465a-a0d8-1ad1327b9a06
+      schema:
+        $ref: '#/components/schemas/UserID'
+  requestBodies:
+    UserAccountActivitySearchRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserAccountActivitySearch'
+      required: true
+    UserProfilesRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserProfile'
+      required: true
+    RPClaimsDataRequestData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RPClaimsUserDetails'
+      required: true
+    IdentitySearchRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentitySearch'
+      required: true
+    IdentityAttributeDeletionsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentityAttributeDeletions'
+      required: true
+    UserConsentRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RPClaimsUserConsent'
+      required: true
+    User:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserDetail'
+          examples:
+            UserDetail:
+              $ref: '#/components/examples/UserDetail'
+    NewToken:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Token'
+          examples:
+            Token:
+              $ref: '#/components/examples/Token'
+    UpdatedToken:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TokenUpdate'
+          examples:
+            TokenUpdate:
+              $ref: '#/components/examples/TokenUpdate'
+    NewVirtualCard:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VirtualCardAccount'
+          examples:
+            VirtualCardAccount:
+              $ref: '#/components/examples/CardDetails'
+    UpdatedVirtualCard:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateVirtualCardAccount'
+          examples:
+            UpdateVirtualCardAccount:
+              $ref: '#/components/examples/UpdateUserCardAndControl'
+    UserUpdateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserUpdate'
+    UserEnrollRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserEnroll'
+    VerifyUserRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VerifyUser'
+    UserDataClaim:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubmitClaimUserData'
+      description: User data for the submitted claim.
+      required: true
+    UpdateUserProfile:
+      description: The request object for updating a enrolled user onto Carbon Calculator Experience platform. This endpoint uses the Mastercard payload encryption. Refer to the **[Payload Encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/#mastercard-encryption)** page for implementation details.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateUserProfile'
+    UserProfile:
+      description: User's Personal and Card information needs to be registered to the Carbon Calculator Experience API.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserProfile_2'
+    UserIDs:
+      description: List of user ids
+      required: true
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/UserID'
+            minItems: 1
+            maxItems: 500
+          examples:
+            UserIDs:
+              $ref: '#/components/examples/UserIDs'

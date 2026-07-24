@@ -1,0 +1,515 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Scores API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Scores
+paths:
+  /issuers/users/{userid}/aggregate-carbon-scores:
+    get:
+      tags:
+      - Scores
+      summary: Mastercard Fetches Monthly Aggregate Carbon Score for the Transactions Made for the Current Month.
+      description: Allows Issuers to retrieve an aggregate carbon footprint for the transactions done by a user.
+      operationId: getAggregateCarbonScore
+      parameters:
+      - $ref: '#/components/parameters/UserID'
+      responses:
+        '200':
+          $ref: '#/components/responses/AggregateCarbonScore'
+        '400':
+          $ref: '#/components/responses/AggregateCarbonScoreBadRequestError'
+        '401':
+          $ref: '#/components/responses/AggregateCarbonScoreUnauthorisedError'
+        '404':
+          $ref: '#/components/responses/AggregateCarbonScoreNotFoundError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /scores:
+    post:
+      tags:
+      - Scores
+      summary: Retrieval of Mastercard Transaction-based Credit Scores and Data Insights.
+      description: 'Using the provided encrypted list of PAN and consent,
+
+        returns a delinquency score,
+
+        that can be used by lenders to make credit application decisions.
+
+        '
+      operationId: getScores
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/ConsumerCreditAnalytics'
+      responses:
+        '200':
+          $ref: '#/components/responses/ConsumerCreditAnalyticsScore'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  schemas:
+    Error_2:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: The name of the application that generated this error.
+          example: ConsumerCreditAnalytics
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered while processing the API request.
+          example: INVALID_ARGUMENT
+        Description:
+          type: string
+          description: A short description of the ReasonCode field.
+          example: This error is thrown when an argument passed to the API doesn't pass validation
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome. For example, if the request contains an invalid signature, retrying will never result in a success. However, if the error is related to some unexpected timeout with the service, retrying the call could result in a successful response.
+          example: true
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about data received and calculated during request processing, to help the user with diagnosing errors.
+          example: The PAN argument does not match any of the supported, valid PAN numbers
+    UserID:
+      type: string
+      minLength: 36
+      maxLength: 36
+      pattern: ^[0-9A-Fa-f-]{36}
+      description: Unique identifier for a user enrolled in the Carbon Calculator Experience platform.
+      example: f5d88571-ac15-465a-a0d8-1ad1327b9a06
+    PredictionDataError:
+      type: object
+      properties:
+        customerPAN:
+          type: string
+          description: The card number for which error is thrown
+          example: 5553********4106
+        errors:
+          type: array
+          description: List of errors for card number.
+          items:
+            $ref: '#/components/schemas/ErrorData'
+          example: []
+    ErrorWrapper_2:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors_2'
+    ConsumerCreditAnalyticsScore:
+      type: object
+      properties:
+        predictionDataSuccesses:
+          type: array
+          description: List of scores retrieved for the card numbers.
+          items:
+            $ref: '#/components/schemas/PredictionDataSuccess'
+          example: []
+        predictionDataErrors:
+          type: array
+          description: List of errors while retrieving the score for the card numbers.
+          items:
+            $ref: '#/components/schemas/PredictionDataError'
+          example: []
+    PredictionDataSuccess:
+      type: object
+      properties:
+        customerPAN:
+          type: string
+          description: The card number for which the score is retrieved.
+          example: 5553********4105
+          minimum: 16
+          maximum: 19
+        scores:
+          type: array
+          description: Score data for the card numbers.
+          items:
+            $ref: '#/components/schemas/score'
+          example: []
+    score:
+      type: object
+      properties:
+        scoreType:
+          type: string
+          description: A score type for which score is retrieved, Possible value - DELINQUENCY.
+          example: DELINQUENCY
+        productType:
+          type: string
+          description: A product type for which score is retrieved, Possible value - CREDIT_CARD.
+          example: CREDIT_CARD
+        score:
+          type: integer
+          description: The score retrieved for the card number.
+          example: 790
+          minimum: 1
+          maximum: 999
+        decile:
+          type: integer
+          description: The decile is any of the values in a series that divides the distribution of individuals in that series into ten groups of equal frequency.
+          example: 7
+        modelName:
+          type: string
+          description: Name of the model used for scoring against customerPANs.
+          example: CCA_CCS_Del_M1_v1.0
+        embeddingFeatures:
+          type: string
+          description: Optional parameter embeddings is intermediate machine readable output from score calculation.
+          example: '{f1:0.113484,f2:0.113484,f3:0.070811,f4:0.059630,......................f16:0.020333}'
+        hasScoreChangedFromLastWeek:
+          type: boolean
+          description: Indicates whether the change in score has resulted in a change in decile classification compared to the previous week. For new prospects, this value is always set to 'false' based on the underlying model's criteria.
+          example: true
+        isNewProspect:
+          type: boolean
+          description: Indicates whether the card is not issued by the bank requesting the score.
+          example: true
+    CustomerPAN:
+      type: object
+      properties:
+        customerPAN:
+          type: string
+          description: The card number for which the score needs to be retrieved. A minimum of 16 and a maximum of 19 digits are allowed.
+          example: 5553********4105
+        hasConsent:
+          type: boolean
+          description: A parameter indicating that the user of this API has consent to pull the score for the requested PAN number.
+          example: true
+    AggregateCarbonScore:
+      type: object
+      required:
+      - carbonEmissionInGrams
+      - aggregateDate
+      properties:
+        carbonEmissionInGrams:
+          type: string
+          description: An aggregate value of CO2 emission in grams.
+          minLength: 1
+          maxLength: 10
+          example: '3245'
+        aggregateDate:
+          type: string
+          description: Denotes aggregate duration.
+          minLength: 1
+          maxLength: 20
+          example: november-2020
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which contains a list of error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+          example: []
+    ConsumerCreditAnalytics:
+      type: object
+      description: 'Object containing list of customer PAN''s along with score type and product type for which score will be fetched.
+
+        '
+      properties:
+        hasEmbedding:
+          type: boolean
+          description: A boolean indicating that the user of this API has requested for embedding data for the PANs. Possible value - true or false
+          example: true
+        countryCode:
+          type: string
+          description: The 3-letter country abbreviation for the customer. These abbreviations follow https://www.iso.org/iso-3166-country-codes.html.
+          example: USA
+        customerPANs:
+          type: array
+          description: The card numbers and consents for which score needs to be retrieved. Max 20 PAN numbers are allowed in a request.
+          items:
+            $ref: '#/components/schemas/CustomerPAN'
+          example:
+          - customerPAN: 5553********4105
+            hasConsent: true
+          - customerPAN: 5553********4106
+            hasConsent: true
+        scoreTypes:
+          type: array
+          description: Type of score needs to be retrieved for the card number, Possible value - DELINQUENCY.
+          example:
+          - DELINQUENCY
+          items:
+            type: string
+            description: Type of score needs to be retrieved for the card number, Possible value - DELINQUENCY.
+            example: DELINQUENCY
+        productTypes:
+          type: array
+          description: Type of products for which score needs to be retrieved of the card number, Possible value - CREDIT_CARD.
+          example:
+          - CREDIT_CARD
+          items:
+            type: string
+            description: Type of product for which score needs to be retrieved of the card number, Possible value - CREDIT_CARD.
+            example: CREDIT_CARD
+    Errors_2:
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error_2'
+    ErrorData:
+      type: object
+      properties:
+        reasonCode:
+          type: string
+          description: A short description of the ErrorCode field.
+          example: PAN_NOT_FOUND
+        errorMessage:
+          type: string
+          description: A detailed description of the Error.
+          example: This error is thrown when a PAN number is not found in Mastercard database
+        modelName:
+          type: string
+          description: Name of the model used for scoring against customerPANs.
+          example: CCA_CCS_Del_M1_v1.0
+        scoreType:
+          type: string
+          description: A score type for which score is not retrieved.
+          example: DELINQUENCY
+        productType:
+          type: string
+          description: A product type for which score is not retrieved.
+          example: CREDIT_CARD
+    Error:
+      title: Error
+      type: object
+      description: Error object which contains details about a single error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error. If an error is generated and returned by the gateway, then this field will have value as `Gateway`. Other possible values are `CARBON CALCULATOR`, `DONATE`, `CARBON_CALCULATOR_EXPERIENCE` or `PRICELESS PLANET`.
+          minLength: 1
+          maxLength: 100
+          example: CARBON_CALCULATOR_EXPERIENCE
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: INVALID_REQUEST_PARAMETER
+        Description:
+          type: string
+          description: Short description of the `ReasonCode` field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: email must not be null.
+  examples:
+    IssuerInactiveError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_INACTIVE
+            Description: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: ConsumerCreditAnalytics
+            ReasonCode: MISSING_REQUIRED_FIELD
+            Description: The parameter is required but not provided.
+            Recoverable: false
+            Details: The countryCode parameter is required but was not provided.
+    IssuerNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: SERVICE_PROVIDER_NOT_FOUND
+            Description: Service provider clientId is not Identified
+            Recoverable: false
+            Details: Client not found.
+    InvalidUserIdError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: UserId should be of size 36
+    UserTerminatedError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: USER_TERMINATE_IN_PROGRESS
+            Description: User termination is in progress, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: 'User termination is in progress, kindly contact your Mastercard associate to activate it again. Until then you won''t be able to access any service. '
+    AggregateCarbonScore:
+      value:
+        carbonEmissionInGrams: '32.45'
+        aggregateDate: november-2020
+    UserNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: USER_NOT_FOUND
+            Description: We cannot find user details for provided userId. Kindly register the user through the enrollment process.
+            Recoverable: false
+            Details: Make sure the user is enrolled through /issuers/users API endpoint.
+    IssuerTerminatedError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_TERMINATED
+            Description: Your account has been terminated, you won't be able to access any service. Kindly register yourself again.
+            Recoverable: false
+            Details: Your account has been terminated, you won't be able to access any service. Kindly register yourself again.
+    UserInactiveError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: USER_INACTIVE
+            Description: The user is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: The user is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+    IssuerSuspendedError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_SUSPENDED
+            Description: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
+  responses:
+    AggregateCarbonScoreBadRequestError:
+      description: This response code is returned when a request is invalid or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidUserIdError:
+              $ref: '#/components/examples/InvalidUserIdError'
+    AggregateCarbonScoreUnauthorisedError:
+      description: This response code is returned when a user is terminated or inactive.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            IssuerInactiveError:
+              $ref: '#/components/examples/IssuerInactiveError'
+            UserInactiveError:
+              $ref: '#/components/examples/UserInactiveError'
+            UserTerminatedError:
+              $ref: '#/components/examples/UserTerminatedError'
+            IssuerSuspendedError:
+              $ref: '#/components/examples/IssuerSuspendedError'
+            IssuerTerminatedError:
+              $ref: '#/components/examples/IssuerTerminatedError'
+    AggregateCarbonScore:
+      description: The response object contains an aggregation of carbon footprint.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AggregateCarbonScore'
+          examples:
+            AggregateCarbonScores:
+              $ref: '#/components/examples/AggregateCarbonScore'
+    ConsumerCreditAnalyticsScore:
+      description: 'Operation was successful
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConsumerCreditAnalyticsScore'
+    AggregateCarbonScoreNotFoundError:
+      description: This response code is returned when a user or Issuer is not present.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            UserNotFoundError:
+              $ref: '#/components/examples/UserNotFoundError'
+            IssuerNotFoundError:
+              $ref: '#/components/examples/IssuerNotFoundError'
+    BadRequest:
+      description: We couldn't handle your request, see response payload for more information.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+  requestBodies:
+    ConsumerCreditAnalytics:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConsumerCreditAnalytics'
+  parameters:
+    UserID:
+      in: path
+      name: userid
+      description: Unique identifier for a user enrolled into Carbon Calculator Experience platform.
+      required: true
+      example: f5d88571-ac15-465a-a0d8-1ad1327b9a06
+      schema:
+        $ref: '#/components/schemas/UserID'

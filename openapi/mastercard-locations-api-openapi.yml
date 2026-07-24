@@ -1,0 +1,1226 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Locations API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Locations
+  description: Self serve APIs for Consumer Clarity sub-merchants to onboard their locations
+paths:
+  /sub-merchants/{guid}/locations/{location_id}:
+    get:
+      summary: Mastercard Get Location by Id
+      description: Returns location object
+      operationId: getLocationById
+      parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MerchantGuidParam'
+      - $ref: '#/components/parameters/LocationIdParam'
+      tags:
+      - Locations
+      responses:
+        '200':
+          $ref: '#/components/responses/LocationSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    put:
+      summary: Mastercard Update an Existing Location
+      description: Updates a location object
+      operationId: updateLocation
+      tags:
+      - Locations
+      parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MerchantGuidParam'
+      - $ref: '#/components/parameters/LocationIdParam'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        $ref: '#/components/requestBodies/LocationBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/LocationSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    delete:
+      summary: Mastercard Delete an Existing Location
+      description: Returns 204 status code if Location deleted successfully
+      operationId: deleteLocation
+      parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MerchantGuidParam'
+      - $ref: '#/components/parameters/LocationIdParam'
+      tags:
+      - Locations
+      responses:
+        '204':
+          $ref: '#/components/responses/SuccessWithoutBody'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /sub-merchants/{guid}/locations/{location_id}/card-acceptor-names:
+    parameters:
+    - $ref: '#/components/parameters/UserIdParam'
+    - $ref: '#/components/parameters/SubmitterFirstNameParam'
+    - $ref: '#/components/parameters/SubmitterLastNameParam'
+    - $ref: '#/components/parameters/MerchantGuidParam'
+    - $ref: '#/components/parameters/LocationIdParam'
+    post:
+      summary: Mastercard Add Card Acceptor Names
+      description: Creates card acceptor names under a location of an existing sub-merchant
+      operationId: addCardAcceptorNames
+      tags:
+      - Locations
+      requestBody:
+        $ref: '#/components/requestBodies/CardAcceptorNamesBulkRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/CardAcceptorNamesBulkSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    get:
+      parameters:
+      - $ref: '#/components/parameters/ClarityOffsetParam'
+      - $ref: '#/components/parameters/ClarityPageNumberParam'
+      - $ref: '#/components/parameters/ClaritySortDirectionParam'
+      - $ref: '#/components/parameters/ClaritySortFieldParam'
+      - $ref: '#/components/parameters/CardAcceptorNameSearchTextParam'
+      summary: Mastercard Get Card Acceptor Names
+      description: Returns Card Acceptor Names with pagination metadata
+      operationId: getCardAcceptorNames
+      tags:
+      - Locations
+      responses:
+        '200':
+          $ref: '#/components/responses/PageableCardAcceptorNamesSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /sub-merchants/{guid}/locations/{location_id}/card-acceptor-names/{id}:
+    get:
+      summary: Mastercard Get Card Acceptor Name by Id
+      description: Returns card acceptor name object
+      operationId: getCardAcceptorNameById
+      tags:
+      - Locations
+      parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MerchantGuidParam'
+      - $ref: '#/components/parameters/LocationIdParam'
+      - $ref: '#/components/parameters/CardAcceptorNameIdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/CardAcceptorSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    put:
+      summary: Mastercard Update Card Acceptor Name by Id
+      description: Updates card acceptor name object
+      operationId: updateCardAcceptorNameById
+      tags:
+      - Locations
+      parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MerchantGuidParam'
+      - $ref: '#/components/parameters/LocationIdParam'
+      - $ref: '#/components/parameters/CardAcceptorNameIdParam'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        $ref: '#/components/requestBodies/CardAcceptorNamesBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/CardAcceptorSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    delete:
+      summary: Mastercard Delete Existing Card Acceptor Name
+      description: Returns 204 status code if Card Acceptor Name deleted successfully
+      operationId: deleteCardAcceptorById
+      tags:
+      - Locations
+      parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      - $ref: '#/components/parameters/MerchantGuidParam'
+      - $ref: '#/components/parameters/LocationIdParam'
+      - $ref: '#/components/parameters/CardAcceptorNameIdParam'
+      responses:
+        '204':
+          $ref: '#/components/responses/SuccessWithoutBody'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /sub-merchants/{guid}/locations/{location_id}/acquirer-merchant-ids:
+    parameters:
+    - $ref: '#/components/parameters/UserIdParam'
+    - $ref: '#/components/parameters/SubmitterFirstNameParam'
+    - $ref: '#/components/parameters/SubmitterLastNameParam'
+    - $ref: '#/components/parameters/MerchantGuidParam'
+    - $ref: '#/components/parameters/LocationIdParam'
+    post:
+      summary: Mastercard Add Acquirer Reference Id and Card Acceptor Id Pairs
+      description: Returns added pairs of Acquirer Reference ID and Card Acceptor ID. Non unique pairs are placed in the rejected list.
+      operationId: addAcquirerMerchantIds
+      tags:
+      - Locations
+      requestBody:
+        $ref: '#/components/requestBodies/AcquirerMerchantIdsRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/AcquirerMerchantIdsSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    get:
+      parameters:
+      - $ref: '#/components/parameters/ClarityOffsetParam'
+      - $ref: '#/components/parameters/ClarityPageNumberParam'
+      - $ref: '#/components/parameters/ClaritySortDirectionParam'
+      - $ref: '#/components/parameters/AcquirerMerchantIdsSortFieldParam'
+      - $ref: '#/components/parameters/AcquirerMerchantIdsSearchTextParam'
+      summary: Mastercard Get Accepted Acquirer Reference Id and Card Acceptor Id Pairs
+      description: Returns accepted Acquirer Reference ID and CardAcceptor ID pairs with pagination metadata
+      operationId: getAcceptedAcquirerMerchantIds
+      tags:
+      - Locations
+      responses:
+        '200':
+          $ref: '#/components/responses/PageableAcceptedAcquirerMerchantIdsSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /sub-merchants/{guid}/locations/{location_id}/acquirer-merchant-ids/{acquirer_merchant_id}:
+    parameters:
+    - $ref: '#/components/parameters/UserIdParam'
+    - $ref: '#/components/parameters/SubmitterFirstNameParam'
+    - $ref: '#/components/parameters/SubmitterLastNameParam'
+    - $ref: '#/components/parameters/MerchantGuidParam'
+    - $ref: '#/components/parameters/LocationIdParam'
+    - $ref: '#/components/parameters/AcquirerMerchantIdParam'
+    delete:
+      summary: Mastercard Delete Existing Acquirer Reference Id and Card Acceptor Id Pair
+      description: Returns 204 status code if acquirer reference ID and card acceptor ID pair deleted successfully
+      operationId: deleteAcceptedAcquirerMerchantId
+      tags:
+      - Locations
+      responses:
+        '204':
+          $ref: '#/components/responses/SuccessWithoutBody'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  schemas:
+    AcquirerMerchantIds:
+      title: Acquirer reference ID & card acceptor ID pairs
+      maxItems: 100
+      minItems: 1
+      type: array
+      uniqueItems: true
+      description: Set of acquirer reference ID & card acceptor ID pairs
+      items:
+        $ref: '#/components/schemas/AcquirerMerchantId'
+    LocationWithoutCardAcceptors:
+      type: object
+      required:
+      - countryCode
+      allOf:
+      - $ref: '#/components/schemas/Address'
+      - properties:
+          website:
+            title: Website
+            maxLength: 100
+            minLength: 1
+            type: string
+            description: URL for merchant's customer service focused information.
+            example: https://merchantwebsite.example.com/customerservice.html
+            nullable: true
+          email:
+            $ref: '#/components/schemas/ShortEmail'
+          contactWebsite:
+            title: Contact Website
+            maxLength: 100
+            minLength: 1
+            type: string
+            description: Merchant's contact website.
+            example: https://merchantwebsite.example.com/contactus.html
+            nullable: true
+          displayAddressToCardHolder:
+            title: Display Address To Card Holder
+            type: boolean
+            description: Set true to display this location's address to card holder
+            example: true
+            nullable: true
+          displayPhoneToCardHolder:
+            title: Display Phone To Card Holder
+            type: boolean
+            description: Set true to display this location's phone number to card holder
+            example: true
+            nullable: true
+          refundPolicy:
+            title: Refund Policy
+            maxLength: 1500
+            minLength: 1
+            type: string
+            description: Entire merchant refund policy, formatted for text display
+            example: Complete merchant refund policy
+            nullable: true
+          terms:
+            title: Terms and Conditions
+            maxLength: 2000
+            minLength: 1
+            type: string
+            description: Entire merchant Terms & Conditions, formatted for text display
+            example: Entire merchant Terms & Conditions
+            nullable: true
+          customerServiceInstructions:
+            title: Customer Service Information
+            maxLength: 500
+            minLength: 1
+            type: string
+            description: Free form text displayed to issuer that can be sent to the cardholder. Can be specific to transaction.
+            example: Include Transaction ID in all communications.
+            nullable: true
+          additionalInfo:
+            title: Additional Info
+            maxLength: 1500
+            minLength: 1
+            type: string
+            description: Additional information that a merchant would want a customer or Issuer to know in regards to a transaction.
+            example: Customers can contact merchants for a refund 24 hours a day.
+            nullable: true
+          termsWebsite:
+            title: Merchant Terms Website
+            maxLength: 255
+            minLength: 1
+            type: string
+            description: Merchant terms website URL
+            example: https://merchantwebsite.example.com/terms.html
+            nullable: true
+          refundPolicyWebsite:
+            title: Merchant Refund Policy Website
+            maxLength: 255
+            minLength: 1
+            type: string
+            description: Merchant refund policy website URL
+            example: https://merchantwebsite.example.com/refunds.html
+            nullable: true
+          defaultLocation:
+            title: Default Location
+            type: boolean
+            description: true if this is a default location of a merchant
+            example: true
+          cardAcceptorLocation:
+            title: Card Acceptor Location
+            maxLength: 150
+            minLength: 1
+            type: string
+            description: Card Acceptor Location
+            example: Pan American Airlines Canada
+            nullable: true
+          cardAcceptorLocationType:
+            title: Card Acceptor Location Type
+            type: string
+            description: Types of card acceptor location - ONLINE, PHONE, CARD_PRESENT
+            example: CARD_PRESENT
+            nullable: true
+            enum:
+            - ONLINE
+            - PHONE
+            - CARD_PRESENT
+        description: Merchant location details
+    AcquirerMerchant:
+      description: Acquirer & Merchant IDs information
+      title: AcquirerMerchant
+      required:
+      - acquirerMerchantIds
+      properties:
+        acquirerMerchantIds:
+          $ref: '#/components/schemas/AcquirerMerchantIds'
+    AcquirerMerchantIdsResource:
+      title: Acquirer reference ID & card acceptor ID pairs resource
+      description: Set of acquirer reference ID & card acceptor ID pairs resource
+      properties:
+        acceptedIds:
+          $ref: '#/components/schemas/AcceptedAcquirerMerchantIdsResource'
+        rejectedIds:
+          description: Rejected acquirer reference ID & card acceptor ID pairs
+          type: array
+          items:
+            $ref: '#/components/schemas/AcquirerMerchantId'
+          example: []
+    ShortEmail:
+      title: Email Address
+      maxLength: 100
+      minLength: 1
+      type: string
+      description: Email address
+      example: john.doe@example.com
+      format: email
+      nullable: true
+    UserId:
+      title: User Id
+      maxLength: 300
+      minLength: 1
+      type: string
+      description: The user id of the submitter/technical contact.
+      example: princess.diana
+    AcquirerReferenceId:
+      title: Acquirer Reference ID (ARID)
+      description: The acquirer BINs that a partner currently services under their portfolio. This is represented by Mastercard DE 31 - Subfield 2 (Clearing), DE 32 (Authorization), or Visa Field 32.
+      type: string
+      minLength: 6
+      maxLength: 6
+      pattern: ^[\d]+$
+      example: '123456'
+    ResourceId:
+      type: string
+      minLength: 1
+      maxLength: 40
+      description: Unique identifier of resource
+      nullable: true
+      example: Mxyz123
+    ClarityResponseHeader:
+      allOf:
+      - $ref: '#/components/schemas/ResponseHeader'
+      - type: object
+        properties:
+          currentPage:
+            type: integer
+            description: Current page
+            minimum: 0
+            maximum: 999999999
+            example: 2
+    CardAcceptor:
+      title: Merchant Card Acceptor
+      maxLength: 50
+      minLength: 1
+      type: string
+      description: Merchant Card Acceptor
+      example: ETHOCA NINJA GAMES
+    AcceptedAcquirerMerchantIdsResource:
+      description: Accepted acquirer reference ID & card acceptor ID pairs
+      type: array
+      items:
+        $ref: '#/components/schemas/AcquirerMerchantIdResource'
+    CardAcceptorId:
+      title: Card Acceptor's ID (CAID)
+      description: Identifies the card acceptor ID assigned by the acquirer. This ID must represent a unique identifier for each merchant name/location within the acquirer BIN. This is represented by Mastercard DE 42 and Visa Field 42.
+      type: string
+      minLength: 1
+      maxLength: 15
+      example: card_acceptor1
+    LocationWithoutCardAcceptorsResource:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/LocationWithoutCardAcceptors'
+      - properties:
+          id:
+            $ref: '#/components/schemas/ResourceId'
+          cardAcceptorLocationType:
+            title: Card Acceptor Location Type
+            type: string
+            description: Types of card acceptor location - ONLINE, PHONE, CARD_PRESENT
+            example: ONLINE
+            nullable: true
+    CardAcceptorDataResource:
+      title: Merchant Card Acceptor Names
+      type: object
+      required:
+      - matchType
+      - cardAcceptorName
+      - id
+      - status
+      properties:
+        matchType:
+          title: Card Acceptor Match Type
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: The card acceptor match type
+          example: EXACT
+        cardAcceptorName:
+          $ref: '#/components/schemas/CardAcceptor'
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        status:
+          title: Response Status
+          type: string
+          description: The status of Card Acceptor Name - PENDING, PASS, FAILED
+          example: PENDING
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+      description: Error Response object
+    FirstName:
+      title: First Name
+      maxLength: 30
+      minLength: 1
+      type: string
+      description: The individual's first name
+      example: Michael
+      nullable: true
+    Etag:
+      title: Entity Tag
+      maxLength: 100
+      minLength: 1
+      type: string
+      description: Etag is a response header which is an identifier for a specific version of a resource.
+      example: '"842DFBC17F921E7716642B9164F3B22B"'
+    MerchantGuid:
+      title: Merchant GUID
+      maxLength: 16
+      minLength: 11
+      type: string
+      description: Consumer Clarity internal merchant's GUID
+      example: jK2dA5aybhQQBq6C
+    ResponseHeader:
+      type: object
+      properties:
+        totalRecords:
+          type: integer
+          format: int64
+          description: Total number of records found
+          minimum: 0
+          maximum: 999999999
+          example: 500
+        totalPages:
+          type: integer
+          description: Total number of pages based on limit
+          minimum: 0
+          maximum: 999999999
+          example: 10
+        currentPage:
+          type: integer
+          description: The current page number
+          minimum: 1
+          maximum: 999999999
+          example: 2
+        responseTime:
+          $ref: '#/components/schemas/ResponseTime'
+    AcquirerMerchantIdResource:
+      type: object
+      title: Acquirer reference ID & card acceptor ID resource
+      description: Acquirer reference ID & card acceptor ID resource
+      required:
+      - id
+      allOf:
+      - $ref: '#/components/schemas/AcquirerMerchantId'
+      - type: object
+        properties:
+          id:
+            $ref: '#/components/schemas/ResourceId'
+    CardAcceptorData:
+      title: Merchant Card Acceptor Names
+      type: object
+      required:
+      - matchType
+      - cardAcceptorName
+      properties:
+        matchType:
+          title: Card Acceptor Match Type
+          type: string
+          description: Types of card acceptor match type
+          example: EXACT
+          enum:
+          - EXACT
+          - STARTS_WITH
+          - STRICT_CONTAINS
+          - CONTAINS
+        cardAcceptorName:
+          $ref: '#/components/schemas/CardAcceptor'
+    PageableCardAcceptorNamesResource:
+      title: Pageable card acceptor names resource
+      description: Pageable card acceptor names resource with pagination metadata
+      properties:
+        data:
+          type: array
+          description: List of card acceptor resources
+          items:
+            $ref: '#/components/schemas/CardAcceptorDataResource'
+          example: []
+        metadata:
+          $ref: '#/components/schemas/ClarityResponseHeader'
+    Email:
+      title: Email Address
+      maxLength: 254
+      minLength: 1
+      type: string
+      description: Email address
+      example: john.doe@example.com
+      format: email
+      nullable: true
+    PageableAcceptedAcquirerMerchantIdsResource:
+      title: Pageable accepted acquirer reference ID & card acceptor ID pairs resource
+      description: Pageable accepted acquirer reference ID & card acceptor ID pairs resource with pagination metadata
+      properties:
+        data:
+          $ref: '#/components/schemas/AcceptedAcquirerMerchantIdsResource'
+        metadata:
+          $ref: '#/components/schemas/ClarityResponseHeader'
+    CardAcceptorNamesBulk:
+      title: Merchant Card Acceptor Names
+      type: object
+      required:
+      - cardAcceptorNames
+      properties:
+        cardAcceptorNames:
+          minItems: 1
+          maxItems: 250
+          type: array
+          description: List of merchant card acceptors
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/CardAcceptorData'
+          example: []
+    BulkOperationResource:
+      title: Bulk post resource
+      description: Resource with responseCode and details
+      type: object
+      required:
+      - status
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        errors:
+          type: array
+          description: List of error objects
+          nullable: true
+          items:
+            $ref: '#/components/schemas/Error'
+          example: []
+        status:
+          title: Response Status
+          type: string
+          description: The status of resource - PENDING, PASS, FAILED
+          example: PENDING
+    CardAcceptorNamesBulkResource:
+      title: Card Acceptor Names resource
+      description: Set of Card Acceptor Names resource
+      type: object
+      properties:
+        cardAcceptorNames:
+          type: array
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/BulkOperationResource'
+          example: []
+    AcquirerMerchantId:
+      type: object
+      title: Acquirer reference ID & card acceptor ID pair
+      description: Acquirer reference ID & card acceptor ID pair
+      required:
+      - acquirerReferenceId
+      - cardAcceptorId
+      properties:
+        acquirerReferenceId:
+          $ref: '#/components/schemas/AcquirerReferenceId'
+        cardAcceptorId:
+          $ref: '#/components/schemas/CardAcceptorId'
+        firstPartyTrustEnabled:
+          type: boolean
+          description: Marks the ARID/CAID pair as relevant for the FPT engine. When false, the FPT engine won't use the ARID/CAID pair for identifying transactions.
+          example: true
+          default: false
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: List of error objects
+          items:
+            $ref: '#/components/schemas/Error'
+          example: []
+      description: Errors object
+    Address:
+      title: Address
+      description: Address entity associated to merchant's location and legal address.
+      required:
+      - countryCode
+      allOf:
+      - $ref: '#/components/schemas/ShortAddress'
+      - properties:
+          website:
+            title: Website
+            maxLength: 500
+            minLength: 1
+            type: string
+            description: URL for merchant's website
+            example: https://merchantwebsite.example.com
+            nullable: true
+          email:
+            $ref: '#/components/schemas/Email'
+          phone:
+            title: Phone
+            maxLength: 30
+            minLength: 3
+            type: string
+            description: Phone number of the merchant's office
+            example: 1-234-567-9999
+            nullable: true
+    ShortAddress:
+      title: Address
+      description: Address.
+      properties:
+        addressLine1:
+          title: Address Line 1
+          maxLength: 250
+          minLength: 1
+          type: string
+          description: The street detail for the address.
+          example: 223 Blythwood Rd
+          nullable: true
+        addressLine2:
+          title: Address Line 2
+          maxLength: 250
+          minLength: 1
+          type: string
+          description: The secondary street detail for the address.
+          example: Suite 123
+          nullable: true
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        regionCode:
+          title: Region code
+          maxLength: 3
+          minLength: 1
+          type: string
+          description: Region where merchant's legal office is located
+          example: 'ON'
+          nullable: true
+        city:
+          title: City
+          maxLength: 100
+          minLength: 1
+          type: string
+          description: City where merchant's legal office is located
+          example: Toronto
+          nullable: true
+        postalCode:
+          title: Postal Code
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: The zip/postal detail for the merchant's legal address
+          example: M4N1A7
+          nullable: true
+    CountryCode:
+      title: Country Code
+      maxLength: 3
+      minLength: 3
+      type: string
+      description: The [ISO 3166-1](https://www.iso.org/obp/ui/#search) alpha-3 compliant country code.
+      example: CAN
+      nullable: true
+    LastName:
+      title: Last Name
+      maxLength: 30
+      minLength: 1
+      type: string
+      description: The individual's last name
+      example: Fox
+      nullable: true
+    ResponseTime:
+      type: string
+      description: Total response time in ms
+      minLength: 0
+      maxLength: 10
+      example: 300 ms
+    Error:
+      type: object
+      properties:
+        Source:
+          maxLength: 100
+          minLength: 0
+          type: string
+          description: Source of the error
+          example: Service
+          nullable: true
+        ReasonCode:
+          maxLength: 100
+          minLength: 0
+          type: string
+          description: A unique constant identifying the error
+          example: format.invalid
+          nullable: true
+        Description:
+          maxLength: 1000
+          minLength: 0
+          type: string
+          description: Short description of the error
+          example: Short description of the error
+          nullable: true
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+          example: false
+          default: false
+          nullable: true
+        Details:
+          maxLength: 1000
+          minLength: 0
+          type: string
+          description: Optional detailed description of the issue
+          example: Detailed description of the error
+          nullable: true
+      description: Error object
+  responses:
+    Default:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ServerError:
+              $ref: '#/components/examples/ServerError'
+    PageableCardAcceptorNamesSuccess:
+      description: Pageable card acceptor names resource with pagination metadata
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PageableCardAcceptorNamesResource'
+    PageableAcceptedAcquirerMerchantIdsSuccess:
+      description: Pageable accepted acquirer reference ID and card acceptor ID response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PageableAcceptedAcquirerMerchantIdsResource'
+    AcquirerMerchantIdsSuccess:
+      description: Acquirer Reference ID and CardAcceptor ID response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AcquirerMerchantIdsResource'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ResourceNotFound:
+              $ref: '#/components/examples/ResourceNotFound'
+            EntityNotFound:
+              $ref: '#/components/examples/EntityNotFound'
+            AlertsEntityNotFound:
+              $ref: '#/components/examples/AlertsEntityNotFound'
+    SuccessWithoutBody:
+      description: Successful Operation
+    CardAcceptorNamesBulkSuccess:
+      description: Card Acceptor Names response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CardAcceptorNamesBulkResource'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            InvalidData:
+              $ref: '#/components/examples/InvalidData'
+            AlertsInvalidData:
+              $ref: '#/components/examples/AlertsInvalidData'
+            InvalidParameterSet:
+              $ref: '#/components/examples/InvalidParameterSet'
+            FormatInvalid:
+              $ref: '#/components/examples/FormatInvalid'
+            AlertsFormatInvalid:
+              $ref: '#/components/examples/AlertsFormatInvalid'
+            MissingRequiredHeader:
+              $ref: '#/components/examples/MissingRequiredHeader'
+    LocationSuccess:
+      description: Location response
+      headers:
+        Etag:
+          required: true
+          schema:
+            $ref: '#/components/schemas/Etag'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LocationWithoutCardAcceptorsResource'
+    CardAcceptorSuccess:
+      description: Card Acceptor response
+      headers:
+        Etag:
+          required: true
+          schema:
+            $ref: '#/components/schemas/Etag'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CardAcceptorDataResource'
+  examples:
+    AlertsEntityNotFound:
+      summary: Entity Not Found Error Response For Alerts
+      description: If a requested entity(e.g. Sub-Merchant or Card Acceptor ID or Card Acceptor Name) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: subMerchantId'
+            Description: Sub-Merchant 99ca4b15-72a6-41dd-8127-573d4b07669c not found
+            Recoverable: false
+            Details: ''
+    MissingRequiredHeader:
+      summary: Missing Required Header Error Response
+      description: If a required request header is missing or null, then MissingRequiredHeader error response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: missing required header
+            Description: Submitter-First-Name
+            Recoverable: false
+            Details: ''
+    ResourceNotFound:
+      summary: Resource Not Found Error Response
+      description: If request URI doesn't match with any available endpoints, then ResourceNotFound error response is returned the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: resource.not.found
+            Description: Not Found
+            Recoverable: false
+            Details: /merchant-self-services/sub-merchantTs/
+    ServerError:
+      summary: Server Error Response
+      description: If an unexpected internal server error occurs, then ServerError response is returned to the caller with HTTP Status code 500.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: server.error
+            Description: Internal Server Error
+            Recoverable: false
+            Details: ''
+    FormatInvalid:
+      summary: Format Invalid Error Response For Consumer Clarity
+      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: format.invalid
+            Description: orderHistoryMonths
+            Recoverable: false
+            Details: ''
+    AlertsFormatInvalid:
+      summary: Format Invalid Error Response For Alerts
+      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: merchantCategoryCode'
+            Description: must match \"^[0-9]*$\"
+            Recoverable: false
+            Details: ''
+    EntityNotFound:
+      summary: Entity Not Found Error Response For Consumer Clarity
+      description: If a requested entity(e.g. Merchant or Logo) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: GUID'
+            Description: Merchant 1E37M8VSX1D28QYX not found
+            Recoverable: false
+            Details: ''
+    InvalidParameterSet:
+      summary: Invalid Parameter Set Error Response
+      description: If request body is malformed or missing, then InvalidParameterSet error response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: invalid.parameter.set
+            Description: request body is malformed
+            Recoverable: false
+            Details: ''
+    InvalidData:
+      summary: Invalid Data Error Response For Consumer Clarity
+      description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: merchantType'
+            Description: must not be blank
+            Recoverable: false
+            Details: ''
+    AlertsInvalidData:
+      summary: Invalid Data Field Error Response For Alerts
+      description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: name'
+            Description: size must be between 3 and 200
+            Recoverable: false
+            Details: ''
+  parameters:
+    AcquirerMerchantIdsSortFieldParam:
+      name: sort_field
+      in: query
+      required: false
+      description: Field to Sort data in response
+      schema:
+        type: string
+        default: acquirerReferenceId
+        maxLength: 30
+      example: acquirerReferenceId
+    SubmitterFirstNameParam:
+      name: Submitter-First-Name
+      in: header
+      required: true
+      example: Diana
+      description: The first name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/FirstName'
+    CardAcceptorNameSearchTextParam:
+      name: search_text
+      in: query
+      required: false
+      description: "Input field used as wild search against Card Acceptor. \nThe service searches for substring, following the %search_text% pattern.\n"
+      schema:
+        type: string
+        maxLength: 100
+      example: Test
+    ClaritySortFieldParam:
+      name: sort_field
+      in: query
+      required: false
+      description: Field to Sort data in response
+      schema:
+        type: string
+        default: modifiedDateTime
+        maxLength: 100
+      example: modifiedDateTime
+    AcquirerMerchantIdParam:
+      name: acquirer_merchant_id
+      in: path
+      required: true
+      example: Mxyz123
+      description: Unique identifier of Acquirer Reference Id and Card Acceptor Id Pair
+      schema:
+        $ref: '#/components/schemas/ResourceId'
+    AcquirerMerchantIdsSearchTextParam:
+      name: search_text
+      in: query
+      required: false
+      description: 'Input field used as wild search against Acquirer Reference ID and Card Acceptor
+
+        ID. The service searches for substring, following the %search_text% pattern.
+
+        '
+      schema:
+        type: string
+        maxLength: 30
+      example: Test
+    MerchantGuidParam:
+      name: guid
+      in: path
+      required: true
+      description: Consumer Clarity internal merchant's GUID
+      example: jK2dA5aybhQQBq6C
+      schema:
+        $ref: '#/components/schemas/MerchantGuid'
+    SubmitterLastNameParam:
+      name: Submitter-Last-Name
+      in: header
+      required: true
+      example: Princess
+      description: The last name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/LastName'
+    ClarityOffsetParam:
+      name: offset
+      in: query
+      required: false
+      description: The number of items to skip before starting to collect the result set
+      schema:
+        type: integer
+        default: 50
+        minimum: 0
+        example: 0
+    UserIdParam:
+      name: User-Id
+      in: header
+      required: true
+      example: princess.diana
+      description: The user id of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/UserId'
+    ClarityPageNumberParam:
+      name: page_number
+      in: query
+      required: false
+      description: current page number
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+      example: 2
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      example: '"842DFBC17F921E7716642B9164F3B22B"'
+      description: If-Match is a request header which makes the request conditional. Client must send the corresponding value from the latest Etag response header received for this merchant.
+      schema:
+        $ref: '#/components/schemas/Etag'
+    ClaritySortDirectionParam:
+      name: sort_direction
+      in: query
+      required: false
+      description: Direction to sort the data using sort_field in response
+      schema:
+        type: string
+        default: DESC
+        enum:
+        - ASC
+        - DESC
+        example: ASC
+    CardAcceptorNameIdParam:
+      name: id
+      in: path
+      required: true
+      example: Mxyz123
+      description: Unique identifier of the card acceptor name.
+      schema:
+        $ref: '#/components/schemas/ResourceId'
+    LocationIdParam:
+      name: location_id
+      in: path
+      required: true
+      example: Mxyz123
+      description: Unique identifier of location
+      schema:
+        $ref: '#/components/schemas/ResourceId'
+  requestBodies:
+    CardAcceptorNamesBulkRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CardAcceptorNamesBulk'
+    LocationBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LocationWithoutCardAcceptors'
+    AcquirerMerchantIdsRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AcquirerMerchant'
+    CardAcceptorNamesBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CardAcceptorData'

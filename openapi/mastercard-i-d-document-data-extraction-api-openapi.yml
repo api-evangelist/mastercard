@@ -1,0 +1,346 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening I D  Document  Data  Extraction API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: I D  Document  Data  Extraction
+paths:
+  /data-extractions/facematch:
+    post:
+      summary: Verifies the details of a selfie with an identity verification provider
+      tags:
+      - I D  Document  Data  Extraction
+      responses:
+        '200':
+          $ref: '#/components/responses/FacematchResult'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+      description: Returns the Status of the Source Verification that has been processed by a trusted IVP.
+      operationId: facematchVerification
+      parameters:
+      - $ref: '#/components/parameters/EncryptedPayloadParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/SelfieVerificationRequest'
+components:
+  examples:
+    BadRequestExampleIVPConnectionTimeout:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: IVP_CONNECTION_TIMEOUT
+            Description: Connection timeout when trying to connect with the Identity Verification Provider. Please look at 'details' for additional information.
+            Recoverable: false
+            Details: Received Connection TimeOut Exception
+    BadRequestExampleCountryCode:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value US4 for 'countryCode'.
+            Recoverable: false
+            Details: null
+    BadRequestExampleIVPSystemError:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: IVP_SYSTEM_ERROR
+            Description: Received system error from the Identity Verification Provider. Please look at 'details' for additional information.
+            Recoverable: false
+            Details: System Error Received
+    BadRequestExampleMedicareName:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'nameLine' field OR value exceeds allowed max characters.
+            Recoverable: false
+            Details: null
+    BadRequestExampleUserConsent:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Unexpected value 'Invalid' for enumerate field.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareCountryCode:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'Country code'.
+            Recoverable: false
+            Details: null
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+            Details: null
+    BadRequestExampleDocumentMismatch:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: BAD_REQUEST
+            Description: The document uploaded by the User does not comply to the document type/country specified by the client in the originating access-token request.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareIndividualReferenceNo:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'INDIVIDUAL_REFERENCE_NO'.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareExpireDate:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'expiry date'.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareUserConsent:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: User consent not given.
+            Recoverable: false
+            Details: null
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided userProfileId does not exist.
+            Recoverable: false
+    BadRequestExampleMedicareMedicareNumber:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'Medicare card number'.
+            Recoverable: false
+            Details: null
+    BadRequestExamplePhoneNumber:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value ASD for 'phoneNumber'.
+            Recoverable: false
+            Details: null
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+  schemas:
+    ApiError:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    SelfieVerificationRequest:
+      required:
+      - accountId
+      - selfie
+      - channelType
+      - livenessType
+      type: object
+      properties:
+        accountId:
+          description: User account ID
+          example: 14c01794-926a-426f-ad72-c45f8fbf78a4
+          type: string
+        selfie:
+          description: Base 64 selfie
+          example: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          type: string
+        livenessType:
+          type: string
+          example: GPA
+          description: liveness type, GPA takes longer and provides more accuracy, LA is faster
+          enum:
+          - GPA
+          - LA
+        channelType:
+          type: string
+          example: WEB
+          description: the platform of enrollment process
+          enum:
+          - WEB
+          - SDK
+    FacematchSourceVerificationResult:
+      required:
+      - verificationResult
+      - accountId
+      - workflowId
+      type: object
+      properties:
+        verificationResult:
+          type: string
+          example: DOCUMENT_VERIFIED
+          description: 'Verification Results, following: DOCUMENT_VERIFIED - Document matches with the IVP registered document, DOCUMENT_NOT_VERIFIED - Document does not match with any of the IVP registered document, DOCUMENT_INVALID - Document is invalid or not electronically captured'
+        workflowId:
+          description: The workflowId is the identifier for the scan on the identity verification provider used by ID Verification.
+          type: string
+          example: 5226539e-78e7-45ac-a924-072d1301c24c
+          minLength: 36
+          maxLength: 36
+        accountId:
+          description: The accountId is an identifier for the client's account on the identity verification provider used by ID Verification.
+          type: string
+          example: 14c01794-926a-426f-ad72-c45f8fbf78a4
+          minLength: 36
+          maxLength: 36
+    Errors:
+      description: List of Errors.
+      example:
+        $ref: '#/components/examples/NotFoundExample'
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorList:
+      description: Error Details.
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    Error:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of where the error occured.
+          example: mids
+        ReasonCode:
+          type: string
+          description: Code of the error.
+          example: USER_PROFILE_ID_NOT_FOUND
+        Description:
+          type: string
+          description: The cause of the error
+          example: The provided userProfileId does not exist
+        Recoverable:
+          type: boolean
+          description: Indiciates if the error can be recovered from.
+          example: false
+        Details:
+          type: string
+          description: Contains information about the error.
+          example: IOException Occured
+  headers:
+    X-Transaction-ID:
+      schema:
+        type: string
+        example: 2d077b9c-3c06-44ac-b00e-d78fe8cce606
+        description: A random 128-bit UUID representing the transaction.
+  responses:
+    FacematchResult:
+      description: Success
+      headers:
+        X-Transaction-ID:
+          $ref: '#/components/headers/X-Transaction-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FacematchSourceVerificationResult'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            BadRequestExampleUserConsent:
+              $ref: '#/components/examples/BadRequestExampleUserConsent'
+            BadRequestExampleCountryCode:
+              $ref: '#/components/examples/BadRequestExampleCountryCode'
+            BadRequestExamplePhoneNumber:
+              $ref: '#/components/examples/BadRequestExamplePhoneNumber'
+            BadRequestExampleIVPConnectionTimeout:
+              $ref: '#/components/examples/BadRequestExampleIVPConnectionTimeout'
+            BadRequestExampleIVPSystemError:
+              $ref: '#/components/examples/BadRequestExampleIVPSystemError'
+            BadRequestExampleMedicareExpireDate:
+              $ref: '#/components/examples/BadRequestExampleMedicareExpireDate'
+            BadRequestExampleMedicareName:
+              $ref: '#/components/examples/BadRequestExampleMedicareName'
+            BadRequestExampleMedicareIndividualReferenceNo:
+              $ref: '#/components/examples/BadRequestExampleMedicareIndividualReferenceNo'
+            BadRequestExampleMedicareMedicareNumber:
+              $ref: '#/components/examples/BadRequestExampleMedicareMedicareNumber'
+            BadRequestExampleMedicareCountryCode:
+              $ref: '#/components/examples/BadRequestExampleMedicareCountryCode'
+            BadRequestExampleMedicareUserConsent:
+              $ref: '#/components/examples/BadRequestExampleMedicareUserConsent'
+            BadRequestExampleDocumentMismatch:
+              $ref: '#/components/examples/BadRequestExampleDocumentMismatch'
+  parameters:
+    EncryptedPayloadParameter:
+      name: X-Encrypted-Payload
+      in: header
+      description: Whether the request payload is encrypted with the Encyption Key generated from the Developer Zone Portal.
+      example: true
+      required: false
+      schema:
+        type: boolean
+  requestBodies:
+    SelfieVerificationRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SelfieVerificationRequest'

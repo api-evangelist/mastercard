@@ -1,0 +1,480 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Aggregates API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Aggregates
+paths:
+  /payment-cards/transaction-footprints/aggregates:
+    post:
+      tags:
+      - Aggregates
+      summary: Fetches carbon score for payment cards and aggregates the same on a weekly and monthly basis. The result will be in descending order.
+      description: 'Allows a Service Provider to fetch aggregate carbon score for a single or multiple payment cards. A payment card has to be registered first using /service-providers/payment-cards endpoint before this endpoint can be called. The aggregate can be requested weekly, or monthly. Note that **ONLY** cleared transactions will be returned.
+
+
+        If any of the paymentCardIds is not valid or not registered, then the entire request will be rejected, and no aggregate will be returned.
+
+
+        If no transaction is found for a particular paymentCardId then the response will have an empty list against that paymentCardId.
+
+
+        The date range is valid for 26 weeks for weekly aggregate and 12 months for monthly aggregate.
+
+        '
+      operationId: GetPaymentCardAggregateTransactions
+      requestBody:
+        $ref: '#/components/requestBodies/AggregateSearchCriteria'
+      responses:
+        '200':
+          $ref: '#/components/responses/AggregateTransactionFootprints'
+        '400':
+          $ref: '#/components/responses/AggregateTransactionBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+        '415':
+          $ref: '#/components/responses/ServiceProviderUnsupportedMediaTypeError'
+components:
+  examples:
+    MonthlyAggregateTransactionFootprints:
+      value:
+        aggregateTransactionFootprint:
+        - paymentCardId: 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+          footprintAggregation:
+          - carbonEmissionInGrams: 616.35
+            carbonEmissionInOunces: 31.28
+            aggregateValue: October|2019
+          - carbonEmissionInGrams: 898.64
+            carbonEmissionInOunces: 32.54
+            aggregateValue: September|2019
+        - paymentCardId: 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+          footprintAggregation:
+          - carbonEmissionInGrams: 614.24
+            carbonEmissionInOunces: 32.21
+            aggregateValue: October|2019
+          - carbonEmissionInGrams: 612.24
+            carbonEmissionInOunces: 33.65
+            aggregateValue: September|2019
+        crossPANAggregation:
+        - carbonEmissionInGrams: 1230.59
+          carbonEmissionInOunces: 63.49
+          aggregateValue: October|2019
+        - carbonEmissionInGrams: 1510.88
+          carbonEmissionInOunces: 66.19
+          aggregateValue: September|2019
+    ServiceProviderUnsupportedMediaTypeError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: UNSUPPORTED_MEDIA_TYPE
+            Description: Requested media type is not supported, try again with the supported media type.
+            Recoverable: false
+            Details: ''
+    AggregateTransactionInvalidDateRangeError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_DATE_RANGE
+            Description: Requested date range is either invalid or exceeds supported limit (i.e. 26 weeks for weekly aggregate and 12 months for monthly aggregate).
+            Recoverable: false
+            Details: ''
+    ServiceProviderNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: ACCOUNT_NOT_FOUND
+            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
+            Recoverable: false
+            Details: ''
+    WeeklyAggregateTransactionFootprints:
+      value:
+        aggregateTransactionFootprint:
+        - paymentCardId: 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+          footprintAggregation:
+          - carbonEmissionInGrams: 140.52
+            carbonEmissionInOunces: 7.19
+            aggregateValue: Week-26|2019
+          - carbonEmissionInGrams: 142.67
+            carbonEmissionInOunces: 6.94
+            aggregateValue: Week-25|2019
+        - paymentCardId: 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+          footprintAggregation:
+          - carbonEmissionInGrams: 143.64
+            carbonEmissionInOunces: 6.97
+            aggregateValue: Week-26|2019
+          - carbonEmissionInGrams: 218.31
+            carbonEmissionInOunces: 7.19
+            aggregateValue: Week-25|2019
+        crossPANAggregation:
+        - carbonEmissionInGrams: 284.16
+          carbonEmissionInOunces: 14.16
+          aggregateValue: Week-26|2019
+        - carbonEmissionInGrams: 360.98
+          carbonEmissionInOunces: 14.13
+          aggregateValue: Week-25|2019
+    AggregateTransactionInvalidDateFormatError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: fromDate must match "^((?:19|20)[0-9][0-9])-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$"
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: fromDate size must be between 10 and 10
+    InvalidPaymentCardError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: Payment card id - [b86fd2ba-c095-4acb-b9df-f3805655ba24,d30f6223-b15d-4663-8e6a-247475c596dd ] is/are invalid or not found. Please try again with a valid payment card id.
+            Recoverable: false
+            Details: ''
+    MonthlyCategoryAggregateTransactionFootprints:
+      value:
+        aggregateTransactionFootprint:
+        - paymentCardId: 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+          footprintAggregation:
+          - carbonEmissionInGrams: 345.35
+            carbonEmissionInOunces: 15.28
+            aggregateValue: October|2019|Shopping
+          - carbonEmissionInGrams: 261.64
+            carbonEmissionInOunces: 16.54
+            aggregateValue: October|2019|Hospital
+          - carbonEmissionInGrams: 898.64
+            carbonEmissionInOunces: 32.54
+            aggregateValue: September|2019|Shopping
+        - paymentCardId: 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+          footprintAggregation:
+          - carbonEmissionInGrams: 614.24
+            carbonEmissionInOunces: 32.21
+            aggregateValue: October|2019|Foods
+          - carbonEmissionInGrams: 612.24
+            carbonEmissionInOunces: 33.65
+            aggregateValue: September|2019|Hospital
+        crossPANAggregation:
+        - carbonEmissionInGrams: 345.35
+          carbonEmissionInOunces: 15.28
+          aggregateValue: October|2019|Shopping
+        - carbonEmissionInGrams: 898.64
+          carbonEmissionInOunces: 32.54
+          aggregateValue: October|2019|Hospital
+        - carbonEmissionInGrams: 614.24
+          carbonEmissionInOunces: 32.21
+          aggregateValue: October|2019|Foods
+        - carbonEmissionInGrams: 898.64
+          carbonEmissionInOunces: 32.54
+          aggregateValue: September|2019|Shopping
+        - carbonEmissionInGrams: 612.24
+          carbonEmissionInOunces: 33.65
+          aggregateValue: September|2019|Hospital
+    AggregateTransactionInvalidAggregateTypeError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: aggregateType must be less than or equal to 3
+  requestBodies:
+    AggregateSearchCriteria:
+      description: "The request should contain a list of *paymentCardIds* for which aggregate carbon score needs to be retrieved and *aggregateType* as one of the following:\n<li> 1 = Weekly Transactions aggregated for last 26 weeks <li> 2 = Monthly transactions aggregated for last 12 months <li> 3 = Monthly category-wise transactions aggregated for last 12 months\n\n\n In order to retrieve aggregate for custom duration, please provide `fromDate` and `toDate`. Note that the duration should not exceed 26 weeks (for weekly aggregate) and 12 months (for monthly aggregate).\n"
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AggregateSearchCriteria'
+  schemas:
+    X-MC-Correlation-ID:
+      type: string
+      example: X-MC-Correlation-ID:5e4b7f904d2820f688c67ef9fc0035
+    AggregateSearchCriteria:
+      title: AggregateSearchCriteria
+      type: object
+      description: Request object which holds the criteria (that is, list of payment card IDs and aggregate type) for retrieving aggregate transactions.
+      required:
+      - paymentCardIds
+      - aggregateType
+      properties:
+        paymentCardIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentCardId'
+          minItems: 1
+          maxItems: 5
+          example: c5d88571-ac15-465a-a0d8-1ad1327b9a06
+          description: Unique ID provided in the response while registering a payment card.
+        aggregateType:
+          type: integer
+          minimum: 1
+          maximum: 3
+          example: 1
+          description: 'Aggregate type for which aggregate needs to be calculated. Supported values are:
+
+            <li> 1 = Weekly Transactions aggregated for last 26 weeks <li> 2 = Monthly transactions aggregated for last 12 months <li> 3 = Monthly category-wise transactions aggregated for last 12 months
+
+            '
+        crossPANAggregate:
+          type: string
+          minLength: 1
+          maxLength: 1
+          pattern: ^(?:Y|N|y|n)$
+          example: Y
+          description: 'Wheter to retrieve cross PAN aggregate carbon footprint or not. Supported values are:
+
+            <li> Y = Retrieve cross PAN aggregate. <li> N = Do not retrieve cross PAN aggregate. <br> If not provided then default will be considered as ''N''.
+
+            '
+        fromDate:
+          $ref: '#/components/schemas/Day'
+        toDate:
+          $ref: '#/components/schemas/Day'
+      example:
+        aggregateType: 1
+        crossPANAggregate: Y
+        paymentCardIds:
+        - 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+        - b86fd2ba-c095-4acb-b9df-f3805655ba24
+        fromDate: '2020-07-01'
+        toDate: '2020-08-30'
+    PaymentCardId:
+      type: string
+      minLength: 36
+      maxLength: 36
+      pattern: ^[0-9A-Fa-f\-]{36}
+      description: Unique ID provided in the response while registering a payment card.
+      example: c5d88571-ac15-465a-a0d8-1ad1327b9a06
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    CarbonUsage:
+      title: CarbonUsage
+      type: object
+      description: Object to hold carbon usage data.
+      properties:
+        carbonEmissionInGrams:
+          title: carbonEmissionInGrams
+          type: number
+          description: The transaction's CO2 emission in grams.
+          example: 48.52
+        carbonEmissionInOunces:
+          title: carbonEmissionInOunces
+          type: number
+          description: The transaction's CO2 emission in ounces.
+          example: 1.71
+    AggregateTransactionFootprints:
+      title: AggregateTransactionFootprints
+      type: object
+      description: List of AggregateTransactionFootprint.
+      required:
+      - aggregateTransactionFootprints
+      properties:
+        aggregateTransactionFootprints:
+          description: Array of `crossPANAggregations` based on given aggregation level.
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/AggregateTransactionFootprint'
+        crossPANAggregations:
+          description: Array of `crossPANAggregations` based on given aggregation level.
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/CrossPANAggregation'
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns a list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    AggregateTransactionFootprint:
+      title: AggregateTransactionFootprint
+      type: object
+      description: Aggregate transaction footprint for a single payment card ID.
+      required:
+      - paymentCardId
+      - footprintAggregations
+      properties:
+        paymentCardId:
+          $ref: '#/components/schemas/PaymentCardId'
+        footprintAggregations:
+          description: Array of FootprintAggregation based on given aggregation level.
+          type: array
+          minItems: 1
+          maxItems: 186
+          items:
+            $ref: '#/components/schemas/FootprintAggregation'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    CrossPANAggregation:
+      title: CrossPANAggregation
+      description: Cross PAN aggregated carbon footprint for given aggregate type.
+      properties:
+        aggregateValue:
+          type: string
+          minLength: 10
+          maxLength: 25
+          description: 'Aggregate duration for which aggregate has been calculated.
+
+            * Weekly = Week-26|2019 (i.e.,Starting from week 1 to week 26).
+
+            * Monthly = July|2019
+
+            '
+          example: Week-26|2019
+      allOf:
+      - $ref: '#/components/schemas/CarbonUsage'
+    Day:
+      type: string
+      minLength: 10
+      maxLength: 10
+      pattern: ^((?:19|20)[0-9][0-9])-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$
+      example: '2020-09-19'
+    FootprintAggregation:
+      title: FootprintAggregation
+      type: object
+      description: Aggregation of carbon score for a payment card ID and given aggregation level.
+      allOf:
+      - $ref: '#/components/schemas/CarbonUsage'
+      - type: object
+        properties:
+          aggregateValue:
+            type: string
+            minLength: 10
+            maxLength: 25
+            description: 'Aggregate duration for which aggregate has been calculated.
+
+              * Weekly = Week-22|2019 (i.e., Week of the year).
+
+              * Monthly = July|2019
+
+              '
+    Error:
+      title: Error
+      type: object
+      description: Error object which contains details about the error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error. Every error message that is generated and returned by the gateway will have this field equal to Gateway. Other possible values are 'Carbon-Calculator' and 'Service-Provider'.
+          minLength: 1
+          maxLength: 100
+          example: Service-Provider-Mgmt
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: INVALID_REQUEST_PARAMETER
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+  responses:
+    AggregateTransactionFootprints:
+      description: This response code is returned when a request is accepted and successfully processed.  A corresponding response will be returned for the API caller.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AggregateTransactionFootprints'
+          examples:
+            WeeklyAggregateTransactionFootprints:
+              $ref: '#/components/examples/WeeklyAggregateTransactionFootprints'
+            MonthlyAggregateTransactionFootprints:
+              $ref: '#/components/examples/MonthlyAggregateTransactionFootprints'
+            MonthlyCategoryAggregateTransactionFootprints:
+              $ref: '#/components/examples/MonthlyCategoryAggregateTransactionFootprints'
+    ServiceProviderUnsupportedMediaTypeError:
+      description: This response code is returned when the value of provided Content-Type parameter is other than expected.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderUnsupportedMediaTypeError:
+              $ref: '#/components/examples/ServiceProviderUnsupportedMediaTypeError'
+    AggregateTransactionBadRequestError:
+      description: This response code is returned when a request is invalid or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidPaymentCardError:
+              $ref: '#/components/examples/InvalidPaymentCardError'
+            AggregateTransactionInvalidDateFormatError:
+              $ref: '#/components/examples/AggregateTransactionInvalidDateFormatError'
+            AggregateTransactionInvalidDateRangeError:
+              $ref: '#/components/examples/AggregateTransactionInvalidDateRangeError'
+            AggregateTransactionInvalidAggregateTypeError:
+              $ref: '#/components/examples/AggregateTransactionInvalidAggregateTypeError'
+    ServiceProviderNotFoundError:
+      description: This response code is returned when the server cannot find the account which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+  headers:
+    X-MC-Correlation-ID:
+      description: This id is unique per request and is used to co-relate a request to its response. Customers must share this id while raising any incident for this API.
+      schema:
+        $ref: '#/components/schemas/X-MC-Correlation-ID'

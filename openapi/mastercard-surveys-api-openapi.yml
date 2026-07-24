@@ -1,0 +1,385 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Surveys API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Surveys
+paths:
+  /surveys:
+    get:
+      tags:
+      - Surveys
+      summary: A survey that can be answered by the user.
+      description: The Survey API offers essential features for seamless onboarding onto the Engagement Services platform, enabling integration with diverse surveys designed to fine-tune a climate profile. In response, the API furnishes a comprehensive set of survey questions, inviting user input to gather valuable insights and data.
+      operationId: getSurvey
+      responses:
+        '200':
+          $ref: '#/components/responses/Survey'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+components:
+  schemas:
+    SurveyJs:
+      description: SurveyJS compatible survey. See https://surveyjs.io/
+      properties:
+        pages:
+          description: Pages containing questions
+          items:
+            $ref: '#/components/schemas/Page'
+          type: array
+        showQuestionNumbers:
+          description: string to denote whether or not question number is diplayed
+          type: string
+          example: 'off'
+          minLength: 3
+          maxLength: 10
+        showProgressBar:
+          description: denotes position of progress bar
+          type: string
+          example: top
+          minLength: 3
+          maxLength: 20
+      required:
+      - pages
+      type: object
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns a list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    SurveyData:
+      title: surveys
+      type: object
+      description: List of survey questions.
+      properties:
+        id:
+          description: Id of survey
+          type: string
+          example: onboarding
+          minLength: 10
+          maxLength: 15
+        language:
+          description: language of user
+          type: string
+          example: en
+          minLength: 2
+          maxLength: 10
+        type:
+          description: The type of survey
+          type: string
+          example: survey
+          minLength: 6
+          maxLength: 20
+        survey:
+          $ref: '#/components/schemas/SurveyJs'
+        version:
+          description: Survey version number
+          type: string
+          example: '1.0'
+          minLength: 2
+          maxLength: 10
+      required:
+      - id
+      - survey
+      - version
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    Option:
+      properties:
+        text:
+          type: string
+          example: What kind of car is it?
+          description: The survey question
+        value:
+          type: string
+          example: Diesel
+          description: The survey answer
+      required:
+      - text
+      - value
+      type: object
+    Question:
+      properties:
+        choices:
+          description: dropdown or choice
+          items:
+            $ref: '#/components/schemas/Option'
+          type: array
+        description:
+          description: Question asked as a part of survey
+          type: string
+          example: I am curious about my own carbon footprint and how I personally contribute to climate change
+        name:
+          type: string
+          example: interest
+          description: name given to the question
+        title:
+          description: title for survey question
+          type: string
+          example: I am curious about my own carbon footprint and how I personally contribute to climate change
+        type:
+          description: denotes input type of the choices
+          type: string
+          example: radiogroup
+      required:
+      - description
+      - name
+      - title
+      - type
+      type: object
+    Surveys:
+      type: object
+      properties:
+        surveysPayload:
+          $ref: '#/components/schemas/SurveyData'
+    Page:
+      properties:
+        questions:
+          description: Array containing the questions for this page
+          items:
+            $ref: '#/components/schemas/Question'
+          type: array
+        name:
+          description: 'Name of this page default: `pageNN` ex `page3`'
+          type: string
+          example: page1
+          minLength: 5
+          maxLength: 20
+        visibleIf:
+          description: to denote if the page will be visible or not. This will only be displayed in the response if a particular page is to be displayed based on a certain condition.
+          type: boolean
+          example: '{haveCar} = ''transport.hasCar'''
+      required:
+      - questions
+      - name
+      type: object
+    Error:
+      title: Error
+      type: object
+      description: Error object which contains details about the error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error. Every error message that is generated and returned by the gateway will have this field equal to Gateway. Other possible values are 'Carbon-Calculator' and 'Service-Provider'.
+          minLength: 1
+          maxLength: 100
+          example: Service-Provider-Mgmt
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: INVALID_REQUEST_PARAMETER
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+  examples:
+    ServiceProviderNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: ACCOUNT_NOT_FOUND
+            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
+            Recoverable: false
+            Details: ''
+    SurveyResponseData:
+      value:
+      - surveysPayload:
+          language: en
+          type: survey
+          id: onboarding
+          version: '1.1'
+          survey:
+            showQuestionNumber: 'off'
+            showProgressBar: top
+            pages:
+            - name: page1
+              questions:
+              - type: radiogroup
+                name: sex
+                title: What do you identify as?
+                description: ''
+                choices:
+                - value: demo.m
+                  text: Male
+                - value: demo.f
+                  text: Female
+            - name: page2
+              questions:
+              - type: dropdown
+                name: age
+                title: What age range are you in?
+                description: ''
+                choices:
+                - value: demo.lt10
+                  text: 0-9
+                - value: demo.lt20
+                  text: 10-19
+                - value: demo.lt30
+                  text: 20-29
+            - name: page3
+              questions:
+              - type: dropdown
+                name: country
+                title: Which is your country of residence?
+                description: ''
+                choices:
+                - value: AF
+                  text: Afghanistan
+                - value: AX
+                  text: �land Islands
+                - value: AL
+                  text: Albania
+            - name: page4
+              questions:
+              - type: radiogroup
+                name: interest
+                title: I am curious about my own carbon footprint and how I personally contribute to climate change
+                description: ''
+                choices:
+                - value: stronglyAgree
+                  text: Strongly agree
+                - value: somewhatAgree
+                  text: Somewhat agree
+                - value: neutral
+                  text: Neutral
+            - name: page5
+              questions:
+              - type: radiogroup
+                name: knowledge
+                title: I have good knowledge about climate change and its effects
+                description: ''
+                choices:
+                - value: stronglyAgree
+                  text: Strongly agree
+                - value: somewhatAgree
+                  text: Somewhat agree
+                - value: neutral
+                  text: Neutral
+            - name: page6
+              questions:
+              - type: radiogroup
+                name: diet
+                title: What best describes your diet?
+                description: ''
+                choices:
+                - value: diet.all
+                  text: I eat everything
+                - value: diet.meatlessDay
+                  text: One meatless day a week
+                - value: diet.avoidRed
+                  text: I try to avoid eating red meat
+                - value: diet.noRed
+                  text: I don't eat red meat
+            - name: page7
+              questions:
+              - type: radiogroup
+                name: renewableElectricity
+                title: Does your household use renewable electricity?
+                description: (e.g. solar, wind or hydro)
+                choices:
+                - value: energy.renewable
+                  text: Yes, we use a supplier of renewable electricity
+                - value: energy.selfProduced
+                  text: Yes, we produce our own renewable electricity
+            - name: page8
+              questions:
+              - type: radiogroup
+                name: haveCar
+                title: Do you have a car?
+                description: This only refers to cars you drive for personal or family needs, not a company car that is exclusively used professionally.
+                choices:
+                - value: transport.hasCar
+                  text: 'Yes'
+                - value: transport.noCar
+                  text: 'No'
+            - name: page9
+              visibleIf: '{haveCar} = ''transport.hasCar'''
+              questions:
+              - type: radiogroup
+                name: carFuel
+                title: What kind of car is it?
+                description: ''
+                choices:
+                - value: transport.petrol
+                  text: Petrol
+                - value: transport.diesel
+                  text: Diesel
+                - value: transport.bio
+                  text: Bio-fuel or bio-gas
+            - name: page10
+              questions:
+              - type: radiogroup
+                name: flyFrequency
+                title: How often do you travel by plane for personal or leisure purposes?
+                description: Do not include business travels.
+                choices:
+                - value: transport.twice
+                  text: A couple of times a year
+  responses:
+    Survey:
+      description: Returns a survey compatible with the format supported by SurveyJS.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Surveys'
+          examples:
+            SurveyResponse:
+              $ref: '#/components/examples/SurveyResponseData'
+    ServiceProviderNotFoundError:
+      description: This response code is returned when the server cannot find the account which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'

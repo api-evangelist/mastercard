@@ -1,0 +1,630 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Rates API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Rates
+paths:
+  /summary-rates:
+    get:
+      tags:
+      - Rates
+      summary: getEnhancedConversionDetails
+      operationId: getEnhancedConversionDetailsUsingGET
+      description: Provides Mastercard currency conversion rate, calculated cardholder billing amount, the ECB reference rate and the calculated percentage difference between Mastercard and ECB rate for the provided currency pair.
+      parameters:
+      - name: rate_date
+        in: query
+        description: Date of the requested FX rates
+        required: true
+        schema:
+          type: string
+        example: '2023-02-27'
+      - name: trans_curr
+        in: query
+        description: Currency of the transaction
+        required: true
+        schema:
+          type: string
+        example: GBP
+      - name: trans_amt
+        in: query
+        description: Amount in the transaction currency
+        required: true
+        schema:
+          type: number
+        example: '100'
+      - name: crdhld_bill_curr
+        in: query
+        description: Cardholder billing currency
+        required: true
+        schema:
+          type: string
+        example: EUR
+      - name: bank_fee_pct
+        in: query
+        description: Percentage mark-up/fee (if applicable) an issuer would assess a cardholder on the cross-border/cross-currency transaction
+        required: false
+        schema:
+          type: number
+        example: '1.6754'
+      - name: bank_fee_fixed
+        in: query
+        description: Fixed mark-up/fee (if applicable) an issuer would assess a cardholder on the cross-border/cross-currency transaction (amount in cardholder billing currency)
+        required: false
+        schema:
+          type: number
+        example: '0.5'
+      responses:
+        '200':
+          description: Rates Summary is successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnhancedCurrencyConversionWrapper'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                BadRequestResponse:
+                  $ref: '#/components/examples/BadRequestResponse'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                UnauthorizedResponse:
+                  $ref: '#/components/examples/UnauthorizedResponse'
+        '403':
+          description: Mastercard and ECB rates are not accessible for selected date
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                ForbiddenResponse:
+                  $ref: '#/components/examples/ForbiddenResponse'
+        '404':
+          description: Rates are not available for selected date
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                NotFoundResponse:
+                  $ref: '#/components/examples/NotFoundResponse'
+  /rate-statuses:
+    get:
+      tags:
+      - Rates
+      summary: isEcbMcRateIssued
+      operationId: isEcbMcRateIssuedUsingGET
+      description: Helps determine if the present days Mastercard and ECB conversion rates are available. Refer the Support section for more information on the Mastercard and ECB rate publication schedule.
+      parameters:
+      - name: request_date
+        in: query
+        description: Rate issued date (YYYY-mm-dd)
+        required: false
+        schema:
+          type: string
+        example: '2023-02-27'
+      responses:
+        '200':
+          description: Rates status is successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnhancedSettlementRateIssuedWrapper'
+        '400':
+          description: Date format is invalid (Expected date format yyyy-MM-DD).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                BadRequestResponse:
+                  $ref: '#/components/examples/BadRequestResponse'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                UnauthorizedResponse:
+                  $ref: '#/components/examples/UnauthorizedResponse'
+        '403':
+          description: 'Mastercard and ECB rates are not accessible for selected date '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                RateIssuedForbiddenResponse:
+                  $ref: '#/components/examples/RateIssuedForbiddenResponse'
+        '404':
+          description: Rates are not available for selected date
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                RateIssuedNotFoundResponse:
+                  $ref: '#/components/examples/RateIssuedNotFoundResponse'
+  /conversion-rate:
+    get:
+      tags:
+      - Rates
+      summary: Mastercard Get the Currency Conversion Rate Details.
+      description: Provides transaction details including date, transaction currency and amount, cardholder billing currency and issuer specific mark up to determine the applicable currency conversion rate and cardholder billing amount.
+      operationId: getConversionDetailUsingGET
+      parameters:
+      - name: fxDate
+        in: query
+        description: Date of the requested FX rates.
+        required: true
+        schema:
+          type: string
+        example: '2023-02-27'
+      - name: transCurr
+        in: query
+        description: Currency of the transaction.
+        required: true
+        schema:
+          type: string
+        example: ALL
+      - name: crdhldBillCurr
+        in: query
+        description: Cardholder billing currency.
+        required: true
+        schema:
+          type: string
+        example: DZD
+      - name: bankFee
+        in: query
+        description: Additional fees imposed by the bank.
+        required: false
+        schema:
+          type: number
+          format: number
+        example: 5
+      - name: transAmt
+        in: query
+        description: Amount in the transaction currency.
+        required: true
+        schema:
+          type: number
+          format: number
+        example: 23
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversionRateWrapper'
+              examples:
+                Getconversiondetailusingget200Example:
+                  summary: Default getConversionDetailUsingGET 200 response
+                  x-microcks-default: true
+                  value:
+                    name: Example Title
+                    description: A sample description.
+                    date: example_value
+                    type: example_value
+                    data:
+                      conversionRate: 42.5
+                      crdhldBillAmt: 42.5
+                      fxDate: example_value
+                      transCurr: example_value
+                      crdhldBillCurr: example_value
+                      transAmt: 42.5
+                      bankFee: 42.5
+                      errorCode: example_value
+                      errorMessage: example_value
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /conversion-rate-issued:
+    get:
+      tags:
+      - Rates
+      summary: Mastercard Determine if the Settlement Rate Has Been Issued.
+      description: Provides status update if the present day Mastercard currency conversion rates are issued. Mastercard rates are published daily and effective for 24 hours.
+      operationId: isRateIssuedUsingGET
+      parameters:
+      - name: date
+        in: query
+        description: The date by which the rate would have been issued.
+        required: false
+        schema:
+          type: string
+        example: '2023-02-27'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettlementRateIssuedWrapper'
+              examples:
+                Israteissuedusingget200Example:
+                  summary: Default isRateIssuedUsingGET 200 response
+                  x-microcks-default: true
+                  value:
+                    name: Example Title
+                    description: A sample description.
+                    date: example_value
+                    data:
+                      rateIssued: example_value
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  schemas:
+    Errors:
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          type: array
+          description: if an errorhas occurred
+          items:
+            $ref: '#/components/schemas/EcbError'
+    EnhancedSettlementRateIssuedWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the service being requested
+          example: mastercard-and-ecb-rate-status-service
+        description:
+          type: string
+          description: The description of the API being called
+          example: Determine if mastercard and ecb conversion rates are issued for the given date
+        requestDate:
+          type: string
+          description: The date and time the API is being called in GMT
+          example: '2019-11-17T00:00:00.000Z'
+        data:
+          $ref: '#/components/schemas/EnhancedSettlementRateIssued'
+    MastercardConversionObject:
+      type: object
+      properties:
+        mastercardFxRateDate:
+          type: string
+          description: Date of Mastercard issued conversion rates. The date can differ to the requested rate date if no new rates are published for the requested date or if the user requests for a historical date
+          example: '2021-02-16T00:00:00.000Z'
+        mastercardConvRateInclPctFee:
+          type: number
+          description: Mastercard exchange rate for the requested currency pair including issuer-to-cardholder percentage rate fee as provided by the issuer in the API call
+          example: 1.2250048
+        mastercardConvRateExclAllFees:
+          type: number
+          description: Mastercard exchange rate for the requested currency pair excluding any issuer-to-cardholder fees
+          example: 1.2048193
+        crdhldBillAmtInclAllFees:
+          type: number
+          description: Cardholder Billing Amount as calculated by applying the Mastercard Conversion Rate, including any applicable issuer-to-cardholder fees (percentage and fixed)
+          example: 123.00048
+        crdhldBillAmtExclAllFees:
+          type: number
+          description: Cardholder billing amount calculated by using the Mastercard conversion rate, excluding any applicable issuer-to-cardholder fees
+          example: 120.48193
+        message:
+          type: string
+          description: User friendly message (if applicable)
+          example: Conversion rate is not available for this currency pair, Please refer to the Support section for a complete list of MCI reference rates available via the Enhanced Currency Conversion Calculator - https://developer.mastercard.com/documentation/enhanced-currency-conversion-calculator
+        reasonCode:
+          type: string
+          description: User friendly reason code (if applicable)
+          example: NOT_APPLICABLE
+    EnhancedSettlementRateIssued:
+      type: object
+      properties:
+        rateDate:
+          type: string
+          description: The date of the requested rates
+          example: '2021-02-16T00:00:00.000Z'
+        mastercardRateIssued:
+          $ref: '#/components/schemas/EcbMcRateIssued'
+        ecbRateIssued:
+          $ref: '#/components/schemas/EcbMcRateIssued'
+    EcbMcRateIssued:
+      type: object
+      properties:
+        message:
+          type: string
+          description: User friendly message (if applicable)
+          example: Rate issuance for requested date not supported.  Resubmit for a non-weekend or non-holiday date.
+        reasonCode:
+          type: string
+          description: User friendly reason code (if applicable)
+          example: NOT_AVAILABLE
+        status:
+          type: string
+          description: Provides rate status as yes/No
+          example: 'yes'
+    EcbError:
+      type: object
+      properties:
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Not Found
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about data received and calculated during request processing, to help the user with diagnosing errors.
+          example: Mastercard and ECB rates are not available for this date. Resubmit for a date within the last 365 days inclusive of current day.
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during transaction processing. For example, INVALID_SIGNATURE is used when the request signature does not match the expected one.
+          example: NOT_FOUND
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome. For example, if the request contains an invalid   signature, retrying will never result in a success. However, if the error is related to some unexpected timeout with the service, retrying the call could result in a successful response.
+          example: false
+        Source:
+          type: string
+          description: The name of the application that generated this error
+          example: Gateway
+    ErrorResponse:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    EnhancedCurrencyConversionData:
+      type: object
+      properties:
+        transCurr:
+          type: string
+          description: Currency of the transaction as provided in the API request
+          example: GBP
+        crdhldBillCurr:
+          type: string
+          description: Cardholder billing currency as provided in the API request
+          example: EUR
+        rateDate:
+          type: string
+          description: The date of the requested rates
+          example: '2021-02-16T00:00:00.000Z'
+        transAmt:
+          type: number
+          description: Amount in transaction currency as provided in the API request
+          example: '100'
+        bankFeePct:
+          type: number
+          description: Percentage bank fee as provided in the API request
+          example: '1.6754'
+        bankFeeFixed:
+          type: number
+          description: Fixed bank fee as provided in the API request
+          example: '0.5'
+        mastercard:
+          $ref: '#/components/schemas/MastercardConversionObject'
+        ecb:
+          $ref: '#/components/schemas/ECBConversionObject'
+        effectiveConversionRate:
+          type: number
+          description: Calculated effective exchange rate for the requested currency pair including all issuer-to-cardholder fees. This is calculated by dividing cardholder billing amount including all fees divided by the transaction amount (crdhldBillAmtInclAllFees / transAmount)
+          example: 1.2300048
+        pctDifferenceMastercardExclAllFeesAndEcb:
+          type: number
+          description: Calculated percentage difference between Mastercard Conversion Rate excluding all issuer-to-cardholder fees for the selected currency pair and the ECB Reference Rate
+          example: 0.2506058
+        pctDifferenceMastercardInclAllFeesAndEcb:
+          type: number
+          description: Calculated percentage difference between Mastercard Conversion Rate Including all issuer-to-cardholder fees (fixed and percentage) for the selected currency pair and the ECB Reference Rate ([effectiveConversionRate/ecbReferenceRateDate]-1*100)
+          example: 2.3462409
+    EnhancedCurrencyConversionWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the service being requested
+          example: mastercard-and-ecb-currency-conversion-rates
+        description:
+          type: string
+          description: The description of the API being called
+          example: Provides Mastercard currency conversion rate, calculated cardholder billing amount, the ECB reference rates and the calculated percentage difference between Mastercard and ECB rates for a provided currency pair
+        requestDate:
+          type: string
+          description: The date and time the API is being called in GMT
+          example: '2020-01-17T18:04:18.000Z'
+        data:
+          $ref: '#/components/schemas/EnhancedCurrencyConversionData'
+    ECBConversionObject:
+      type: object
+      properties:
+        ecbReferenceRateDate:
+          type: string
+          description: Date of reference rates issued by the European Central Bank (ECB).
+          example: '2021-02-16T00:00:00.000Z'
+        ecbReferenceRate:
+          type: number
+          description: Euro foreign exchange reference rates issued by the European Central Bank (ECB). When neither the transaction currency nor the cardholder billing currency is equal to Euro, a calculated reference rate is derived from the two ECB rates
+          example: 1.2018075
+        message:
+          type: string
+          description: User friendly message (if applicable)
+          example: Rate issuance for requested date not supported.  Resubmit for a non-weekend or non-holiday date.
+        reasonCode:
+          type: string
+          description: User friendly reason code (if applicable)
+          example: NOT_AVAILABLE
+    Conversion:
+      type: object
+      properties:
+        conversionRate:
+          type: number
+          format: number
+          example: 0.943078
+          description: Rate applied to the transaction to convert from Transaction Currency to Cardholder Billing Currency.
+        crdhldBillAmt:
+          type: number
+          format: number
+          example: 21.690798
+          description: Amount in the cardholder billing currency.
+        fxDate:
+          type: string
+          example: '2016-09-30'
+          description: Date of the requested FX rates.
+        transCurr:
+          type: string
+          example: ALL
+          description: Currency of the transaction.
+        crdhldBillCurr:
+          type: string
+          example: DZD
+          description: Cardholder billing currency.
+        transAmt:
+          type: number
+          format: number
+          example: 23
+          description: Amount in the transaction currency.
+        bankFee:
+          type: number
+          format: number
+          example: 5
+          description: Additional fees imposed by the bank.
+        errorCode:
+          type: string
+          example: 104
+          description: The error code associated with the error being returned.
+        errorMessage:
+          type: string
+          example: Not Found , The calculated cross rates for the selected date is not available.
+          description: The reason for the error.
+    SettlementRateIssued:
+      type: object
+      properties:
+        rateIssued:
+          type: string
+          example: 'NO'
+          description: The requested foreign exchange rate.
+    ConversionRateWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          example: settlement-conversion-rate
+          description: The name of the service being requested.
+        description:
+          type: string
+          example: Settlement conversion rate and billing amount
+          description: The description of the API being called.
+        date:
+          type: string
+          example: '2019-08-08 16:43:27'
+          description: The date and time the API is being called in GMT.
+        type:
+          type: string
+          example: error
+          description: The type of response being returned by the API.
+        data:
+          $ref: '#/components/schemas/Conversion'
+    SettlementRateIssuedWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          example: settlement-conversion-rate-issued
+          description: The name of the service being requested.
+        description:
+          type: string
+          example: Is settlement conversion rate issued
+          description: The description of the API being called.
+        date:
+          type: string
+          example: '2019-08-08 16:22:31'
+          description: The date and time the API is being called in GMT.
+        data:
+          $ref: '#/components/schemas/SettlementRateIssued'
+  examples:
+    NotFoundResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: NOT_FOUND
+            Description: Data not available
+            Recoverable: false
+            Details: Mastercard and ECB rates are not available for this date. Resubmit for a date within the last 365 days inclusive of current day.
+    RateIssuedForbiddenResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: FORBIDDEN
+            Description: Data is not accesssible
+            Recoverable: false
+            Details: Rate issuance for requested date not supported - Please use a date within the last 365 days inclusive of current day.
+    RateIssuedNotFoundResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: NOT_FOUND
+            Description: Data not available
+            Recoverable: false
+            Details: Rate issuance for future date not supported.
+    ForbiddenResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: FORBIDDEN
+            Description: Data is not accesssible
+            Recoverable: false
+            Details: Rate is not accessible for this date - Please use a date within the last 365 days inclusive of current day.
+    BadRequestResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: BAD_REQUEST
+            Description: Invalid input
+            Recoverable: false
+            Details: Date format is invalid (Expected date format yyyy-MM-dd)
+    UnauthorizedResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: UNAUTHORIZED
+            Description: Invalid Client ID
+            Recoverable: false
+            Details: You do not have access to this service. Please visit the Enhanced Currency Conversion Calculator page for details.

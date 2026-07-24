@@ -1,0 +1,1843 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Profiles API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Profiles
+paths:
+  /profiles:
+    put:
+      operationId: updateUserProfile
+      description: The Profile Service employs a sophisticated algorithm to compute a detailed climate profile, drawing upon the responses gathered through a survey obtained from the Surveys Service. This process involves a meticulous analysis of user-provided answers to generate a comprehensive and nuanced representation of their climate preferences and perspectives. See (https://surveyjs.io/survey-creator)
+      summary: Calculates a climate profile based on the answers from a survey obtained from the Surveys Service.
+      tags:
+      - Profiles
+      requestBody:
+        $ref: '#/components/requestBodies/ProfileRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/Profile'
+        '400':
+          $ref: '#/components/responses/ProfilePayloadBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+  /user-profiles/identity-searches:
+    post:
+      tags:
+      - Profiles
+      responses:
+        '200':
+          $ref: '#/components/responses/IdentitySearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: "Retrieve decrypted identities along with rotated PDS to present the user\nwith the registered identity in the TP app. Does not require a minimum authentication standard.   \n**This API is mandatory.**\n"
+      summary: View an Identity
+      operationId: retrieveIdentities
+      parameters:
+      - $ref: '#/components/parameters/XUserIdentityParameter'
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/IdentitySearchRequest'
+  /user-profiles:
+    post:
+      tags:
+      - Profiles
+      responses:
+        '201':
+          $ref: '#/components/responses/UserProfilesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+      description: "- This endpoint registers a user profile using the given\n`user profile ID`.\n\n- An error will be returned if the user profile already exists.   \n**This API is mandatory.**\n"
+      summary: Create a new user.
+      operationId: createUserProfile
+      requestBody:
+        $ref: '#/components/requestBodies/UserProfilesRequest'
+    delete:
+      tags:
+      - Profiles
+      responses:
+        '200':
+          $ref: '#/components/responses/UserProfilesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: "Enable TP app to mark user account as deleted on Mastercard ID Network. Requires GPA authentication.   \n**This API is mandatory.**\n"
+      summary: Delete an Identity.
+      operationId: deleteUserProfile
+      parameters:
+      - $ref: '#/components/parameters/UserProfileIdParameter'
+      - $ref: '#/components/parameters/UserConsentParameter'
+  /user-profiles/identity-attribute-deletions:
+    post:
+      tags:
+      - Profiles
+      responses:
+        '200':
+          $ref: '#/components/responses/IdentityAttributeDeletionsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: "Delete an identity attribute from a PDS and update the affected assurance levels. Requires GPA authentication.   \n**This API is mandatory.**\n"
+      summary: Delete Document.
+      operationId: deleteIdentityAttribute
+      parameters:
+      - $ref: '#/components/parameters/XUserIdentityParameter'
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/IdentityAttributeDeletionsRequest'
+  /alerts/merchants/org-profiles:
+    get:
+      tags:
+      - Profiles
+      summary: Mastercard Get Details of Organization Profiles.
+      description: Returns organization profile details containing member name, id and type.
+      operationId: getAlertsOrgProfiles
+      parameters:
+      - $ref: '#/components/parameters/UserIdParam'
+      - $ref: '#/components/parameters/SubmitterFirstNameParam'
+      - $ref: '#/components/parameters/SubmitterLastNameParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/AlertsOrgProfilesSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/PermissionDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Default'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  schemas:
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns a list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Profiles:
+      title: profiles
+      type: object
+      description: Climate Profile of the user.
+      properties:
+        profilesPayload:
+          properties:
+            id:
+              type: string
+              description: id of survey
+              example: onboarding
+            surveyioResults:
+              type: object
+              properties:
+                sex:
+                  type: string
+                  description: '''demo.m'' stands for Male, ''demo.f'' stands for Female, ''demo.other'' stands for other'
+                  example: demo.m
+                age:
+                  type: string
+                  description: '''demo.lt10'' for age in range 0-9, ''demo.lt20'' for age in the range 10-19, ''demo.lt30'' for age in the range 20-29, ''demo.lt40'' for age in the range 30-39, ''demo.lt50'' for age in the range 40-49, ''demo.lt60'' for age in the range 50-59, ''demo.lt70'' for age in the range 60-69, ''demo.lt80'' for age in the range 70-79, ''demo.lt90'' for age in the range 80-89, ''demo.gt90'' for age greater than 90'
+                  example: demo.lt30
+                country:
+                  type: string
+                  description: 2 letter country code of country of residence. For example, 'IN' stands for India, 'US' stands for United States of America, 'BH' stands for Bahrain
+                  example: IN
+                interest:
+                  type: string
+                  description: '''stronglyAgree'' stands for ''Strongly Agree'', ''somewhatAgree'' stands for ''Somewhat Agree'', ''Neutral'' stands for ''Neutral'', ''somewhatDisagree'' stands for ''Somewhat Disagree'' and ''stronglyDisagree'' stands for ''Strongly Disagree'''
+                  example: Neutral
+                knowledge:
+                  type: string
+                  description: '''stronglyAgree'' stands for ''Strongly Agree'', ''somewhatAgree'' stands for ''Somewhat Agree'', ''Neutral'' stands for ''Neutral'', ''somewhatDisagree'' stands for ''Somewhat Disagree'' and ''stronglyDisagree'' stands for ''Strongly Disagree'''
+                  example: Neutral
+                diet:
+                  type: string
+                  description: '''diet.all'' stands for "I eat everything", ''diet.meatlessDay'' stands for "One meatless day a week", ''diet.avoidRed'' stands for "I try to avoid eating red meat", ''diet.noRed'' stands for "I don''t eat red meat", ''diet.pescetarian'' stands for "Pescetarian(I don''t eat meat except fish)", ''diet.vegetarian'' stands for "Vegetarian", ''diet.vegan'' stands for "Vegan"'
+                  example: diet.noRed
+                renewableElectricity:
+                  type: string
+                  description: '''energy.renewable'' stands for "Yes, we use a supplier of renewable electricity", ''energy.selfProduced'' stands for "Yes, we produce our own renewable electricity", ''energy.not'' stands for "No", ''energy.idk'' stands for "I don''t know"'
+                  example: energy.renewable
+                haveCar:
+                  type: string
+                  description: '''transport.hasCar'' stands for "Yes" and ''transport.noCar'' stands for "No"'
+                  example: transport.hasCar
+                carFuel:
+                  type: string
+                  description: '''transport.petrol'' stands for "Petrol", ''transport.diesel'' stands for "Diesel", ''transport.bio'' stands for "Bio-fuel or bio-gas", ''transport.hybrid'' stands for "Hybrid", ''transport.phev'' stands for "Plug-in hybrid", ''transport.electric'' stands for "Electric", ''transport.idk'' stands for "I don''t know"'
+                  example: transport.petrol
+                flyFrequency:
+                  type: string
+                  description: '''transport.everyMonth'' stands for "Every month or more", ''transport.secondMonth'' stands for "Every second month", ''transport.twice'' stands for "A couple of times a year", ''transport.once'' stands for "Once a year or less", ''transport.Never'' stands for "Never"'
+                  example: transport.twice
+                shopFrequency:
+                  type: string
+                  description: '''lifestyle.shopVeryOften'' stands for "Every week or more often", ''lifestyle.shopOften'' stands for "2-3 times every month", ''lifestyle.shopSometimes'' stands for "Once a month", ''lifestyle.shopSeldom'' stands for "1-2 times every 3 months", ''lifestyle.shopRarely'' stands for "Less often or not at all"'
+                  example: once a month
+                difference:
+                  type: string
+                  description: '''stronglyAgree'' stands for ''Strongly Agree'', ''somewhatAgree'' stands for ''Somewhat Agree'', ''Neutral'' stands for ''Neutral'', ''somewhatDisagree'' stands for ''Somewhat Disagree'' and ''stronglyDisagree'' stands for ''Strongly Disagree'''
+                  example: somewhatAgree
+                consciousPurchasingDecision:
+                  type: string
+                  description: '''stronglyAgree'' stands for ''Strongly Agree'', ''somewhatAgree'' stands for ''Somewhat Agree'', ''Neutral'' stands for ''Neutral'', ''somewhatDisagree'' stands for ''Somewhat Disagree'' and ''stronglyDisagree'' stands for ''Strongly Disagree'''
+                  example: Neutral
+                explainCarbonFootprint:
+                  type: string
+                  description: '''stronglyAgree'' stands for ''Strongly Agree'', ''somewhatAgree'' stands for ''Somewhat Agree'', ''Neutral'' stands for ''Neutral'', ''somewhatDisagree'' stands for ''Somewhat Disagree'' and ''stronglyDisagree'' stands for ''Strongly Disagree'''
+                  example: stronglyDisagree
+              required:
+              - sex
+              - age
+              - country
+              - interest
+              - knowledge
+              - diet
+              - renewableElectricity
+              - haveCar
+              - flyFrequency
+              - shopFrequency
+              - difference
+              - consciousPurchasingDecision
+              - explainCarbonFootprint
+              additionalProperties: false
+            version:
+              type: string
+              example: '1'
+              description: version of survey
+          required:
+          - id
+          - surveyioResults
+          - version
+          type: object
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
+      required:
+      - profilesPayload
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    ClimateProfile:
+      description: Represents a Climate Profile for a User. Always use updated profile present in the response, which might include benchmarks, comparisons, insights and surveys.
+      properties:
+        userAttributes:
+          description: Attributes defining this profile
+          properties:
+            country:
+              type: string
+              description: country of issuer
+              example: IN
+              minLength: 2
+              maxLength: 3
+            demo:
+              type: number
+              description: demo of user / score for user demo
+              example: 65
+            diet:
+              type: number
+              description: diet type of user
+              example: 512
+            energy:
+              type: number
+              description: energy consumption type of user
+              example: 12288
+            lifestyle:
+              type: number
+              description: lifestyle type of user
+              example: 1
+            transport:
+              type: number
+              description: transport type of user
+              example: 12357
+          required:
+          - country
+          - demo
+          - diet
+          - energy
+          - lifestyle
+          - transport
+          type: object
+        benchmarks:
+          description: Tracks benchmarks data. This value is sourced from benchmarks API.
+          type: object
+          additionalProperties: true
+          example:
+            key1:
+              key2: 1
+              key3: 2
+        comparisons:
+          description: Tracks comparison data. This value is sourced from comparisons by id API.
+          type: object
+          additionalProperties: true
+          example:
+            key1:
+              key2: 1
+              key3: 2
+        insights:
+          description: Tracks which insights have been displayed. This value is sourced from insights by id API.
+          type: object
+          additionalProperties: true
+          example:
+            key1:
+              key2: 1
+              key3: 2
+        created:
+          description: represents creation date of user profile
+          type: string
+          format: date-time
+          example: '2023-08-07T12:39:35.087Z'
+        persona:
+          description: Representation of user persona type
+          type: string
+          example: '5'
+          minLength: 1
+          maxLength: 1
+        surveys:
+          description: Tracks surveys data. This value is sourced from /surveys API.
+          type: object
+          additionalProperties: true
+          example:
+            key1:
+              key2: 1
+              key3: 2
+        traits:
+          description: Scores for knowledge, lifestyle, and motivation
+          properties:
+            knowledge:
+              type: number
+              example: 0.575
+              description: score for user knowledge
+              minLength: 1
+            lifestyle:
+              type: number
+              example: 0.324
+              description: score for user lifestyle
+              minLength: 1
+            motivated:
+              type: number
+              example: 0.617
+              description: score for user motivation
+              minLength: 1
+          required:
+          - knowledge
+          - lifestyle
+          - motivated
+          type: object
+        version:
+          description: Version for this profile
+          type: string
+          example: 1
+      required:
+      - userAttributes
+      - created
+      - persona
+      - traits
+      - version
+      type: object
+    Profile:
+      type: object
+      properties:
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
+      required:
+      - profileResponsePayload
+    Error:
+      title: Error
+      type: object
+      description: Error object which contains details about the error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error. Every error message that is generated and returned by the gateway will have this field equal to Gateway. Other possible values are 'Carbon-Calculator' and 'Service-Provider'.
+          minLength: 1
+          maxLength: 100
+          example: Service-Provider-Mgmt
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: INVALID_REQUEST_PARAMETER
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+    TpAuditMetadata:
+      required:
+      - sessionId
+      - transactionGroupId
+      type: object
+      description: Object containing metadata related to the request.
+      properties:
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+    AddressData:
+      type: object
+      properties:
+        addressLine1:
+          type: string
+          description: Address line 1.
+          minLength: 1
+          maxLength: 255
+          example: 36271 GrandRiver Ave
+        addressLine2:
+          type: string
+          description: Address line 2.
+          minLength: 1
+          maxLength: 255
+          example: Building no 2
+        addressZipCode:
+          type: string
+          description: Zip code.
+          minLength: 1
+          maxLength: 255
+          example: 48335
+        addressCity:
+          type: string
+          description: City.
+          minLength: 1
+          maxLength: 255
+          example: Farmington
+        addressSubdivision:
+          type: string
+          description: Subdivision of the user address, possible values include county, state, province, and municipality.
+          minLength: 2
+          maxLength: 2
+          example: MO
+        addressCountry:
+          type: string
+          description: Country provided in the address from the scanned document.
+          minLength: 1
+          maxLength: 255
+          example: USA
+    Selfie:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          example: U29tZSBTdHJpbmc=
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    GovtIdDetails:
+      oneOf:
+      - $ref: '#/components/schemas/PassportDetails'
+      - $ref: '#/components/schemas/DriverLicenseDetails'
+    PDS:
+      type: string
+      description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
+      pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+      minLength: 1
+      example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    DateOfBirth:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: '1996-07-10T00:00:00.000Z'
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    MothersName:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: Jane Doe
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    Phone:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: 11234567890
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    DriverLicenseCardNumber:
+      type: string
+      description: Document number.
+      minLength: 1
+      maxLength: 255
+      example: 7435675436
+    PassportIdentity:
+      type: object
+      properties:
+        lastName:
+          type: string
+          description: Last name.
+          minLength: 1
+          maxLength: 255
+          example: Doe
+        firstName:
+          type: string
+          description: First name.
+          minLength: 1
+          maxLength: 255
+          example: John
+        dateOfBirth:
+          type: string
+          description: Date of birth.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+    IdentityAttributesByName:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/IdentityAttributesById'
+      description: Identity attributes keyed by IdentitySearch.scopedFields enum.
+      minLength: 1
+      example:
+        dateOfBirth:
+          e95b7c68-ebcb-4a88-9978-c33d78cde128:
+            value: '1980-01-01'
+            lastVerifiedDate: '2022-04-04T02:49:27.915Z'
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      description: The error response model used by all the API endpoints.
+      properties:
+        Errors:
+          required:
+          - Error
+          type: object
+          description: The error response model used by all the API endpoints.
+          properties:
+            Error:
+              type: array
+              description: A list of Error objects.
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The source of the problem. That is where the error occurred.
+                    example: mids
+                  ReasonCode:
+                    type: string
+                    description: A code defining the error, as defined in documentation.
+                    example: USER_PROFILE_ID_NOT_FOUND
+                  Description:
+                    type: string
+                    description: A description of this specific occurrence of the Reason code.
+                    example: The provided user profile ID does not exist.
+                  Recoverable:
+                    type: boolean
+                    description: Whether or not retrying this request could result in a successful response.
+                    example: false
+                  Details:
+                    type: string
+                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+                    example: User X was not found
+                  redirectUri:
+                    type: string
+                    description: TP will use this URI to redirect to RP.
+                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    IdentitySearch:
+      required:
+      - pds
+      - scopedFields
+      - userConsent
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        scopedFields:
+          type: array
+          description: 'Array of enums representing the identity attributes which the TP is requesting access to.
+
+            The acceptable values are any/all of: ''all'', ''legalName'', ''email'', ''phone'', ''dateOfBirth'', ''driverLicense'', ''passport'', ''address''
+
+            '
+          minItems: 1
+          items:
+            enum:
+            - all - legalName - email - phone - dateOfBirth - selfie - address - ageOver - ageUnder - city - postalCode - subDivision - govtId - govtIdDetails - govtIdImage - passportIdentity - passportDetails - passportImage - driverLicenseIdentity - driverLicenseCardNumber - driverLicenseDetails - driverLicenseImage - driverLicenseIssuingState - visaMatched - cpf - rgNumber - cnh - mothersName - fathersName
+            type: string
+            example: all
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    IdentityAttributeDeletions:
+      required:
+      - pds
+      - attributeName
+      - userConsent
+      - attributeId
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        attributeName:
+          type: string
+          description: The name of the attribute to be deleted.
+          enum:
+          - PASSPORT
+          - DRIVER_LICENSE
+          example: PASSPORT
+        attributeId:
+          type: string
+          description: The identifier of the attribute being queried. This can be retrieved from a call to either the authentication-decisions API, or the user-profiles/identity-searches API.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 1
+          example: cf11bb8d-b1b1-49c7-90ed-c63134cd1008
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    AuditEventsItem:
+      type: object
+      properties:
+        dateTime:
+          type: string
+          description: Date and time at which the event is created.
+          minLength: 1
+          maxLength: 29
+          example: '2020-01-28T13:16:01.714-05:00'
+        softwareVersion:
+          type: string
+          description: Software version.
+          minLength: 1
+          maxLength: 30
+          example: 1.0.0
+        userProfileId:
+          type: string
+          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 123ae1aa-6744-433e-879d-7da48d631234
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 28eae1aa-6744-433e-879d-7da48d63e89a
+        logRequestFlow:
+          type: string
+          description: Log Request Flow.
+          minLength: 1
+          maxLength: 255
+          example: CoreSDK-TP
+        logEvent:
+          type: string
+          description: Log Event.
+          minLength: 0
+          maxLength: 255
+          example: ID Enrollment
+        logEventType:
+          type: string
+          description: Log Event Type.
+          minLength: 1
+          maxLength: 255
+          example: User Profile Creation
+        osVersion:
+          type: string
+          description: OS version.
+          minLength: 1
+          maxLength: 255
+          example: Android 5.0
+        deviceMake:
+          type: string
+          description: Device make.
+          minLength: 1
+          maxLength: 255
+          example: Samsung S10
+        type:
+          type: string
+          description: Type of the event.
+          minLength: 1
+          maxLength: 255
+          example: audit
+        audit:
+          type: object
+          description: Represents the audit event.
+          properties:
+            privacyPolicy:
+              type: string
+              description: Version user confirmed.
+              minLength: 1
+              maxLength: 20
+              example: 1.0.0
+            userBiometricConsent:
+              type: string
+              description: User consent to capture details.
+              enum:
+              - 'TRUE'
+              - 'FALSE'
+              - NA
+              minLength: 4
+              maxLength: 5
+              example: 'TRUE'
+            event:
+              type: string
+              description: Event.
+              minLength: 1
+              maxLength: 255
+              example: Document Scan
+            eventType:
+              type: string
+              description: EventType.
+              minLength: 1
+              maxLength: 255
+              example: Enrollment
+            result:
+              type: string
+              description: API Call result.
+              enum:
+              - 'TRUE'
+              - 'FALSE'
+              - FAIL
+              minLength: 4
+              maxLength: 5
+              example: 'TRUE'
+            eventGeneratedSource:
+              type: string
+              description: Event generated source.
+              minLength: 1
+              maxLength: 50
+              example: CoreSDK
+            owner:
+              type: string
+              description: Owner.
+              minLength: 2
+              maxLength: 4
+              example: TP
+            requestDetails:
+              type: object
+              description: Request Details.
+              example: Request URL
+            responseDetails:
+              type: object
+              description: Response Details.
+              example: Response Data
+    Cnh:
+      allOf:
+      - $ref: '#/components/schemas/DriverLicenseCardNumber'
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
+    GovtId:
+      oneOf:
+      - $ref: '#/components/schemas/PassportIdentity'
+      - $ref: '#/components/schemas/DriverLicenseIdentity'
+    MobileIdEligibility:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: boolean
+          description: Value of whether user is eligible for mobile id enrollment.
+          example: true
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    UserConsent:
+      enum:
+      - ACCEPT
+      - DECLINE
+      - REVOKE
+      - EXPIRE
+      type: string
+      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
+      pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+      minLength: 6
+      maxLength: 7
+      example: ACCEPT
+    DriverLicenseDetails:
+      properties:
+        expiryDate:
+          type: string
+          description: Expiry date.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        issuingCountry:
+          type: string
+          description: Country code.
+          minLength: 1
+          maxLength: 255
+          example: USA
+        documentNumber:
+          type: string
+          description: Passport number.
+          minLength: 1
+          maxLength: 255
+          example: 1234567890
+    IdentityAttributeDeleted:
+      required:
+      - pds
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+    IdentityAttributesById:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/IdentityAttribute'
+      description: Identity attributes are keyed by attribute IDs.
+      minLength: 1
+    UserProfile:
+      required:
+      - countryCode
+      - userProfileId
+      type: object
+      properties:
+        userProfileId:
+          type: string
+          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: c908bc7c-9917-48fd-b862-d901a0880fef
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    VisaMatched:
+      type: boolean
+      description: Flag indicating if the documentDetails are to be checked against a visa for a particular country.
+      example: false
+    Email:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: person@mastercard.com
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    ARID:
+      type: string
+      description: A unique identifier for any activity being executed arising out of a Claim Share request. This value is passed as a parameter in the URL redirecting a User to the TP Flow during a Claim Share.
+      format: uuid
+      pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+      minLength: 36
+      maxLength: 36
+      example: a15fa6de-b199-11eb-8529-0242ac130003
+    IdentityAttribute:
+      allOf:
+      - {}
+      - oneOf:
+        - $ref: '#/components/schemas/Address'
+        - $ref: '#/components/schemas/DateOfBirth'
+        - $ref: '#/components/schemas/Email'
+        - $ref: '#/components/schemas/FathersName'
+        - $ref: '#/components/schemas/MothersName'
+        - $ref: '#/components/schemas/LegalName'
+        - $ref: '#/components/schemas/Phone'
+        - $ref: '#/components/schemas/Selfie'
+        - $ref: '#/components/schemas/MobileIdEligibility'
+        - $ref: '#/components/schemas/GovtId'
+        - $ref: '#/components/schemas/GovtIdDetails'
+        - $ref: '#/components/schemas/GovtIdImage'
+        - $ref: '#/components/schemas/PassportIdentity'
+        - $ref: '#/components/schemas/PassportDetails'
+        - $ref: '#/components/schemas/PassportImage'
+        - $ref: '#/components/schemas/DriverLicenseIdentity'
+        - $ref: '#/components/schemas/DriverLicenseCardNumber'
+        - $ref: '#/components/schemas/DriverLicenseDetails'
+        - $ref: '#/components/schemas/DriverLicenseImage'
+        - $ref: '#/components/schemas/VisaMatched'
+        - $ref: '#/components/schemas/Cnh'
+        - $ref: '#/components/schemas/Cpf'
+        - $ref: '#/components/schemas/Rg'
+    Cpf:
+      type: string
+      description: CPF Number. This will only be available when the Brazilian DL is scanned.
+      minLength: 1
+      maxLength: 255
+      example: 12345
+    GovtIdImage:
+      oneOf:
+      - $ref: '#/components/schemas/PassportImage'
+      - $ref: '#/components/schemas/DriverLicenseImage'
+    Rg:
+      type: string
+      description: RG Number. This will only be available when the Brazilian DL is scanned.
+      minLength: 1
+      maxLength: 255
+      example: 12345
+    LegalName:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: John Doe
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    ClientIdentities:
+      required:
+      - attributes
+      type: object
+      properties:
+        rotatedPds:
+          type: string
+          description: A rotated PDS is created and returned when the encryption key expires and a new key is generated.
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          minLength: 1
+          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        attributes:
+          $ref: '#/components/schemas/IdentityAttributesByName'
+    CountryCode:
+      type: string
+      description: The country code of the country where the transaction originates from.
+      pattern: ^[a-zA-Z]{2}$
+      example: US
+    Address:
+      required:
+      - lastVerifiedDate
+      allOf:
+      - $ref: '#/components/schemas/AddressData'
+      - type: object
+        properties:
+          value:
+            type: string
+            description: Formatted address.
+            minLength: 1
+            maxLength: 255
+            example: 36271 GrandRiver Ave Building no 2 48335 Farmington MI USA
+          lastVerifiedDate:
+            type: string
+            description: Last verified date and time.
+            format: date-time
+            example: '2021-02-19T10:55:58.165Z'
+    DriverLicenseIdentity:
+      type: object
+      properties:
+        lastName:
+          type: string
+          description: Last name.
+          minLength: 1
+          maxLength: 255
+          example: Doe
+        firstName:
+          type: string
+          description: First name.
+          minLength: 1
+          maxLength: 255
+          example: John
+        dateOfBirth:
+          type: string
+          description: Date of birth.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+    PassportDetails:
+      type: object
+      properties:
+        expiryDate:
+          type: string
+          description: Expiry date.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        issuingCountry:
+          type: string
+          description: Country code.
+          minLength: 1
+          maxLength: 255
+          example: USA
+        passportNumber:
+          type: string
+          description: Passport number.
+          minLength: 1
+          maxLength: 255
+          example: 1234567890
+    DriverLicenseImage:
+      type: object
+      description: Driver License Images.
+      properties:
+        front:
+          type: string
+          description: Value.
+          minLength: 1
+          example: U29tZSBTdHJpbmc=
+        back:
+          type: string
+          description: Value.
+          minLength: 1
+          example: YGS75JHSljhs86K=
+    FathersName:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: Josh Doe
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    PassportImage:
+      type: object
+      description: Passport License Images.
+      properties:
+        front:
+          type: string
+          description: Value.
+          minLength: 1
+          example: JH65ghKHG76KS=
+    UserId:
+      title: User Id
+      maxLength: 300
+      minLength: 1
+      type: string
+      description: The user id of the submitter/technical contact.
+      example: princess.diana
+    Error_2:
+      type: object
+      properties:
+        Source:
+          maxLength: 100
+          minLength: 0
+          type: string
+          description: Source of the error
+          example: Service
+          nullable: true
+        ReasonCode:
+          maxLength: 100
+          minLength: 0
+          type: string
+          description: A unique constant identifying the error
+          example: format.invalid
+          nullable: true
+        Description:
+          maxLength: 1000
+          minLength: 0
+          type: string
+          description: Short description of the error
+          example: Short description of the error
+          nullable: true
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+          example: false
+          default: false
+          nullable: true
+        Details:
+          maxLength: 1000
+          minLength: 0
+          type: string
+          description: Optional detailed description of the issue
+          example: Detailed description of the error
+          nullable: true
+      description: Error object
+    AlertsMerchantMemberId:
+      title: Unique identifier for merchants
+      description: Internal Universally Unique Identifier (UUID) which uniquely identifies the merchants
+      type: string
+      format: uuid
+      example: 99ca4b15-72a6-41dd-8127-573d4b07669c
+    ErrorResponse_2:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors_2'
+      description: Error Response object
+    FirstName:
+      title: First Name
+      maxLength: 30
+      minLength: 1
+      type: string
+      description: The individual's first name
+      example: Michael
+      nullable: true
+    AlertsOrgProfile:
+      description: Details of organization profiles containing member name, id and type
+      type: object
+      properties:
+        memberId:
+          $ref: '#/components/schemas/AlertsMerchantMemberId'
+        name:
+          $ref: '#/components/schemas/MerchantName'
+        merchantType:
+          $ref: '#/components/schemas/MerchantType'
+        status:
+          $ref: '#/components/schemas/MerchantStatus'
+        subOrgProfiles:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertsSubOrgProfile'
+          example: []
+    MerchantStatus:
+      title: Merchant's Status
+      type: string
+      description: Merchant Status must be one of - ACTIVATED, DEACTIVATED
+      minLength: 1
+      maxLength: 50
+      example: ACTIVATED
+    MerchantType:
+      title: Merchant's Type
+      description: Merchant Type must be one of - PARTNER, ACQUIRER, SUBMERCHANT
+      type: string
+      minLength: 1
+      maxLength: 50
+      example: SUBMERCHANT
+    Errors_2:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: List of error objects
+          items:
+            $ref: '#/components/schemas/Error_2'
+          example: []
+      description: Errors object
+    LastName:
+      title: Last Name
+      maxLength: 30
+      minLength: 1
+      type: string
+      description: The individual's last name
+      example: Fox
+      nullable: true
+    MerchantName:
+      title: Merchant's Name
+      maxLength: 200
+      minLength: 3
+      type: string
+      description: Merchant's partial or full name.
+      example: Merchant 1
+    AlertsSubOrgProfile:
+      description: Sub organization member details containing member name, id and type
+      type: object
+      properties:
+        memberId:
+          $ref: '#/components/schemas/AlertsMerchantMemberId'
+        name:
+          $ref: '#/components/schemas/MerchantName'
+        merchantType:
+          $ref: '#/components/schemas/MerchantType'
+        status:
+          $ref: '#/components/schemas/MerchantStatus'
+  responses:
+    Profile:
+      description: The resulting profile.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Profile'
+          examples:
+            ProfileResponse:
+              $ref: '#/components/examples/ProfileResponseData'
+    ProfilePayloadBadRequestError:
+      description: This response code is returned when one or more request parameters is either missing or is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestError:
+              $ref: '#/components/examples/ProfilePayloadBadRequestError'
+    ServiceProviderNotFoundError:
+      description: This response code is returned when the server cannot find the account which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+    UnauthorizedError:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    NotFoundError:
+      description: The request didn't match an existing resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
+    IdentitySearchResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClientIdentities'
+          examples:
+            ClientIdentitiesSuccessfulExampleUnencrypted:
+              $ref: '#/components/examples/ClientIdentitiesSuccessfulExample'
+            ClientIdentitiesSuccessfulExampleEncrypted:
+              $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    IdentityAttributeDeletionsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentityAttributeDeleted'
+    UserProfilesResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
+    Default:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_2'
+          examples:
+            ServerError:
+              $ref: '#/components/examples/ServerError'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_2'
+          examples:
+            ResourceNotFound:
+              $ref: '#/components/examples/ResourceNotFound'
+            EntityNotFound:
+              $ref: '#/components/examples/EntityNotFound'
+            AlertsEntityNotFound:
+              $ref: '#/components/examples/AlertsEntityNotFound'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_2'
+          examples:
+            InvalidData:
+              $ref: '#/components/examples/InvalidData'
+            AlertsInvalidData:
+              $ref: '#/components/examples/AlertsInvalidData'
+            InvalidParameterSet:
+              $ref: '#/components/examples/InvalidParameterSet'
+            FormatInvalid:
+              $ref: '#/components/examples/FormatInvalid'
+            AlertsFormatInvalid:
+              $ref: '#/components/examples/AlertsFormatInvalid'
+            MissingRequiredHeader:
+              $ref: '#/components/examples/MissingRequiredHeader'
+    PermissionDenied:
+      description: Permission Denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_2'
+          examples:
+            PermissionDenied:
+              $ref: '#/components/examples/PermissionDenied'
+    AlertsOrgProfilesSuccess:
+      description: Details of organization profiles for members such as Partners and Acquirers
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsOrgProfile'
+          examples:
+            AlertsOrgProfilePartner:
+              $ref: '#/components/examples/AlertsOrgProfilePartner'
+            AlertsOrgProfileAcquirer:
+              $ref: '#/components/examples/AlertsOrgProfileAcquirer'
+  examples:
+    ServiceProviderNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: ACCOUNT_NOT_FOUND
+            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
+            Recoverable: false
+            Details: ''
+    ProfileRequest:
+      value:
+        profilesPayload:
+          id: onboarding
+          version: '1.1'
+          surveyioResults:
+            sex: demo.f
+            age: demo.lt20
+            country: AX
+            interest: stronglyDisagree
+            knowledge: stronglyDisagree
+            diet: diet.vegan
+            renewableElectricity: energy.idk
+            haveCar: transport.noCar
+            flyFrequency: transport.never
+            shopFrequency: lifestyle.shopRarely
+            difference: stronglyDisagree
+            consciousPurchasingDecisions: stronglyDisagree
+            explainCarbonFootprint: stronglyDisagree
+        profile:
+          traits:
+            knowledge: 0.65
+            lifestyle: 0.445
+            motivated: 0.683
+          userAttributes:
+            demo: 66
+            diet: 256
+            lifestyle: 4
+            energy: 12288
+            transport: 36933
+            country: AX
+          created: '2024-01-31T10:57:36.161Z'
+          surveys:
+            key1:
+              key2: 1
+              key3: 2
+          persona: '3'
+          benchmarks:
+            key1:
+              key2: 1
+              key3: 2
+          comparisons:
+            key1:
+              key2: 1
+              key3: 2
+          insights:
+            key1:
+              key2: 1
+              key3: 2
+          version: '1.0'
+    ProfileResponseData:
+      value:
+      - profile:
+          traits:
+            knowledge: 0
+            lifestyle: 0.683
+            motivated: 0.3
+          userAttributes:
+            demo: 34
+            diet: 16399
+            lifestyle: 16
+            energy: 0
+            transport: 0
+            country: AF
+          created: '2024-01-19T09:31:08.065Z'
+          surveys:
+            key1:
+              key2: 1
+              key3: 2
+          persona: '5'
+          benchmarks:
+            key1:
+              key2: 1
+              key3: 2
+          comparisons:
+            key1:
+              key2: 1
+              key3: 2
+          insights:
+            key1:
+              key2: 1
+              key3: 2
+          version: '1.0'
+    ProfilePayloadBadRequestError:
+      value:
+        Errors:
+          Error:
+          - Source: Carbon-Calculator
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: payload.id must not be null
+          - Source: Carbon-Calculator
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: payload.version must not be null
+    ClientIdentitiesSuccessfulExample:
+      value:
+        attributes:
+          dateOfBirth:
+            e95b7c68-ebcb-4a88-9978-c33d78cde128:
+              value: '1980-01-01'
+              lastVerifiedDate: '2022-04-04T02:49:27.915Z'
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
+            Recoverable: false
+    EncryptedPayloadWithRotatedPDSExample:
+      value:
+        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IoxNTE2MjM5MDIyf
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+    UserProfileDeletedErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_DELETED
+            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
+            Recoverable: false
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided user profile ID does not exist.
+            Recoverable: false
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+    AlertsEntityNotFound:
+      summary: Entity Not Found Error Response For Alerts
+      description: If a requested entity(e.g. Sub-Merchant or Card Acceptor ID or Card Acceptor Name) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: subMerchantId'
+            Description: Sub-Merchant 99ca4b15-72a6-41dd-8127-573d4b07669c not found
+            Recoverable: false
+            Details: ''
+    MissingRequiredHeader:
+      summary: Missing Required Header Error Response
+      description: If a required request header is missing or null, then MissingRequiredHeader error response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: missing required header
+            Description: Submitter-First-Name
+            Recoverable: false
+            Details: ''
+    ResourceNotFound:
+      summary: Resource Not Found Error Response
+      description: If request URI doesn't match with any available endpoints, then ResourceNotFound error response is returned the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: resource.not.found
+            Description: Not Found
+            Recoverable: false
+            Details: /merchant-self-services/sub-merchantTs/
+    AlertsOrgProfilePartner:
+      summary: Alerts Organization Profile for Partners
+      value:
+        memberId: 99ca4b15-72a6-41dd-8127-573d4b07669c
+        name: Partner Merchant 1
+        merchantType: PARTNER
+        status: ACTIVATED
+        subOrgProfiles:
+        - memberId: 11ab4b15-72a6-41dd-8127-573d4b07669c
+          name: Acquirer Merchant 1
+          merchantType: ACQUIRER
+          status: ACTIVATED
+        - memberId: 22de5c10-72a6-41dd-8127-573d4b07660c
+          name: Acquirer Merchant 2
+          merchantType: ACQUIRER
+          status: DEACTIVATED
+    ServerError:
+      summary: Server Error Response
+      description: If an unexpected internal server error occurs, then ServerError response is returned to the caller with HTTP Status code 500.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: server.error
+            Description: Internal Server Error
+            Recoverable: false
+            Details: ''
+    FormatInvalid:
+      summary: Format Invalid Error Response For Consumer Clarity
+      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: format.invalid
+            Description: orderHistoryMonths
+            Recoverable: false
+            Details: ''
+    AlertsFormatInvalid:
+      summary: Format Invalid Error Response For Alerts
+      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: merchantCategoryCode'
+            Description: must match \"^[0-9]*$\"
+            Recoverable: false
+            Details: ''
+    EntityNotFound:
+      summary: Entity Not Found Error Response For Consumer Clarity
+      description: If a requested entity(e.g. Merchant or Logo) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: GUID'
+            Description: Merchant 1E37M8VSX1D28QYX not found
+            Recoverable: false
+            Details: ''
+    PermissionDenied:
+      summary: Permission Denied Error Response
+      description: If the client id in the request doesn't correspond to any member in the system, then PermissionDenied error response is returned to the caller with HTTP Status code 401.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: permission.denied
+            Description: Member does not have permission to perform any operation
+            Recoverable: false
+            Details: ''
+    InvalidParameterSet:
+      summary: Invalid Parameter Set Error Response
+      description: If request body is malformed or missing, then InvalidParameterSet error response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: invalid.parameter.set
+            Description: request body is malformed
+            Recoverable: false
+            Details: ''
+    InvalidData:
+      summary: Invalid Data Error Response For Consumer Clarity
+      description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: merchantType'
+            Description: must not be blank
+            Recoverable: false
+            Details: ''
+    AlertsInvalidData:
+      summary: Invalid Data Field Error Response For Alerts
+      description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: name'
+            Description: size must be between 3 and 200
+            Recoverable: false
+            Details: ''
+    AlertsOrgProfileAcquirer:
+      summary: Alerts Organization Profile for Acquirers
+      value:
+        memberId: 11ab4b15-72a6-41dd-8127-573d4b07669c
+        name: Acquirer Merchant 1
+        merchantType: ACQUIRER
+        status: ACTIVATED
+        subOrgProfiles: []
+  requestBodies:
+    ProfileRequest:
+      description: List of payment transactions which needs to be scored.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Profiles'
+          examples:
+            ProfileRequest:
+              $ref: '#/components/examples/ProfileRequest'
+      required: true
+    UserProfilesRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserProfile'
+      required: true
+    IdentitySearchRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentitySearch'
+      required: true
+    IdentityAttributeDeletionsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentityAttributeDeletions'
+      required: true
+  parameters:
+    UserProfileIdParameter:
+      name: user_profile_id
+      in: query
+      description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+      example: ee13a7ec-5a5a-4618-a55d-5e1ed016ccd5
+      required: true
+      schema:
+        type: string
+        pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+    XEncryptedPayload:
+      in: header
+      name: X-Encrypted-Payload
+      type: boolean
+      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
+
+        '
+      example: true
+      schema: null
+    XUserIdentityParameter:
+      in: header
+      name: X-User-Identity
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      description: 'JWT token for session validation. Returned as response header in previous API calls with key X-User-Identity.
+
+        '
+      schema:
+        type: string
+    UserConsentParameter:
+      name: user_consent
+      in: query
+      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
+      example: ACCEPT
+      required: true
+      schema:
+        type: string
+        pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+    SubmitterFirstNameParam:
+      name: Submitter-First-Name
+      in: header
+      required: true
+      example: Diana
+      description: The first name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/FirstName'
+    SubmitterLastNameParam:
+      name: Submitter-Last-Name
+      in: header
+      required: true
+      example: Princess
+      description: The last name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/LastName'
+    UserIdParam:
+      name: User-Id
+      in: header
+      required: true
+      example: princess.diana
+      description: The user id of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/UserId'

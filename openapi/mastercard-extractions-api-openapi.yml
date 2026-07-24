@@ -1,0 +1,1398 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Extractions API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Extractions
+paths:
+  /claims/user-data-extractions:
+    post:
+      tags:
+      - Extractions
+      responses:
+        '200':
+          $ref: '#/components/responses/RPClaimsDataResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorClaimSharing'
+        '404':
+          $ref: '#/components/responses/NotFoundErrorClaimSharing'
+      description: 'Returns the user information from the PDS that is requested by the
+
+        Relying Party based on the ARID. Does not require a minimum authentication standard.
+
+        **This API is mandatory.**
+
+        '
+      summary: Share an Identity with an External RP - Provide the PDS to enable ID for TP to determine if these satisfy an RPs scope request.
+      operationId: extractClaimsUserData
+      parameters:
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/RPClaimsDataRequestData'
+  /data-extractions/access-tokens:
+    post:
+      x-mastercard-api-encrypted: true
+      tags:
+      - Extractions
+      responses:
+        '200':
+          $ref: '#/components/responses/AccessTokenSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+      description: Return a provider token to be passed to the MIDS Liveness SDK module.
+      summary: The provider token is retrieved by country code and SDK version
+      operationId: retrieveDataExtractionAccessToken
+      requestBody:
+        $ref: '#/components/requestBodies/AccessTokenRequest'
+      parameters:
+      - $ref: '#/components/parameters/EncryptedPayloadParameter'
+  /data-extractions/facematch:
+    post:
+      summary: Verifies the details of a selfie with an identity verification provider
+      tags:
+      - Extractions
+      responses:
+        '200':
+          $ref: '#/components/responses/FacematchResult'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+      description: Returns the Status of the Source Verification that has been processed by a trusted IVP.
+      operationId: facematchVerification
+      parameters:
+      - $ref: '#/components/parameters/EncryptedPayloadParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/SelfieVerificationRequest'
+  /data-extractions/scans/{scan_id}:
+    get:
+      x-mastercard-api-encrypted: true
+      summary: Returns the status of the document verification.
+      tags:
+      - Extractions
+      responses:
+        '200':
+          $ref: '#/components/responses/DataExtractionSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: Returns the status of the document verification as it's being processed by the vendor.
+      operationId: extractScannedDocumentData
+      parameters:
+      - $ref: '#/components/parameters/ScanIdParameter'
+      - $ref: '#/components/parameters/UserConsentParameter'
+      - $ref: '#/components/parameters/RetrieveSelfieParameter'
+      - $ref: '#/components/parameters/RetrieveDocumentImagesParameter'
+      - $ref: '#/components/parameters/RetrieveFacemapParameter'
+      - $ref: '#/components/parameters/DocumentTypeParameter'
+      - $ref: '#/components/parameters/CountryParameter'
+      - $ref: '#/components/parameters/EncryptedPayloadParameter'
+components:
+  schemas:
+    Locale:
+      type: string
+      description: IETF BCP 47 code which identifies the language to be used in any dialogs being shown to the user during the flow.  The default value is "en-US".
+      pattern: ^[a-z]{2}-[a-zA-Z]{2}$
+      example: en-US
+    TpAuditMetadata:
+      required:
+      - sessionId
+      - transactionGroupId
+      type: object
+      description: Object containing metadata related to the request.
+      properties:
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+    RPClaimsUserData:
+      required:
+      - transactionId
+      - rpName
+      - rpLogoUrl
+      - claimsData
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: A random 128-bit. UUID represents the MIDS transaction.
+          minLength: 36
+          maxLength: 36
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+        rpName:
+          type: string
+          description: The display name of the RP.
+          minLength: 1
+          maxLength: 255
+          example: RP Name
+        rpLogoUrl:
+          type: string
+          description: The URL of the logo of the RP.
+          pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+          minLength: 1
+          example: https://www.rpsite.com/logo.jpg
+        claimsData:
+          $ref: '#/components/schemas/ClaimsData'
+        redirectUri:
+          type: string
+          description: TP will use this URI to redirect to RP.
+          pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+          minLength: 1
+          example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+        rotatedPds:
+          type: string
+          description: A rotated PDS is created and returned when the encryption key expires and a new key is generated.
+          minLength: 1
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    PDS:
+      type: string
+      description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
+      pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+      minLength: 1
+      example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    RPClaimsUserDetails:
+      required:
+      - arid
+      - pds
+      type: object
+      properties:
+        arid:
+          $ref: '#/components/schemas/ARID'
+        pds:
+          $ref: '#/components/schemas/PDS'
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+        locale:
+          $ref: '#/components/schemas/Locale'
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      description: The error response model used by all the API endpoints.
+      properties:
+        Errors:
+          required:
+          - Error
+          type: object
+          description: The error response model used by all the API endpoints.
+          properties:
+            Error:
+              type: array
+              description: A list of Error objects.
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The source of the problem. That is where the error occurred.
+                    example: mids
+                  ReasonCode:
+                    type: string
+                    description: A code defining the error, as defined in documentation.
+                    example: USER_PROFILE_ID_NOT_FOUND
+                  Description:
+                    type: string
+                    description: A description of this specific occurrence of the Reason code.
+                    example: The provided user profile ID does not exist.
+                  Recoverable:
+                    type: boolean
+                    description: Whether or not retrying this request could result in a successful response.
+                    example: false
+                  Details:
+                    type: string
+                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+                    example: User X was not found
+                  redirectUri:
+                    type: string
+                    description: TP will use this URI to redirect to RP.
+                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    AuditEventsItem:
+      type: object
+      properties:
+        dateTime:
+          type: string
+          description: Date and time at which the event is created.
+          minLength: 1
+          maxLength: 29
+          example: '2020-01-28T13:16:01.714-05:00'
+        softwareVersion:
+          type: string
+          description: Software version.
+          minLength: 1
+          maxLength: 30
+          example: 1.0.0
+        userProfileId:
+          type: string
+          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 123ae1aa-6744-433e-879d-7da48d631234
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 28eae1aa-6744-433e-879d-7da48d63e89a
+        logRequestFlow:
+          type: string
+          description: Log Request Flow.
+          minLength: 1
+          maxLength: 255
+          example: CoreSDK-TP
+        logEvent:
+          type: string
+          description: Log Event.
+          minLength: 0
+          maxLength: 255
+          example: ID Enrollment
+        logEventType:
+          type: string
+          description: Log Event Type.
+          minLength: 1
+          maxLength: 255
+          example: User Profile Creation
+        osVersion:
+          type: string
+          description: OS version.
+          minLength: 1
+          maxLength: 255
+          example: Android 5.0
+        deviceMake:
+          type: string
+          description: Device make.
+          minLength: 1
+          maxLength: 255
+          example: Samsung S10
+        type:
+          type: string
+          description: Type of the event.
+          minLength: 1
+          maxLength: 255
+          example: audit
+        audit:
+          type: object
+          description: Represents the audit event.
+          properties:
+            privacyPolicy:
+              type: string
+              description: Version user confirmed.
+              minLength: 1
+              maxLength: 20
+              example: 1.0.0
+            userBiometricConsent:
+              type: string
+              description: User consent to capture details.
+              enum:
+              - 'TRUE'
+              - 'FALSE'
+              - NA
+              minLength: 4
+              maxLength: 5
+              example: 'TRUE'
+            event:
+              type: string
+              description: Event.
+              minLength: 1
+              maxLength: 255
+              example: Document Scan
+            eventType:
+              type: string
+              description: EventType.
+              minLength: 1
+              maxLength: 255
+              example: Enrollment
+            result:
+              type: string
+              description: API Call result.
+              enum:
+              - 'TRUE'
+              - 'FALSE'
+              - FAIL
+              minLength: 4
+              maxLength: 5
+              example: 'TRUE'
+            eventGeneratedSource:
+              type: string
+              description: Event generated source.
+              minLength: 1
+              maxLength: 50
+              example: CoreSDK
+            owner:
+              type: string
+              description: Owner.
+              minLength: 2
+              maxLength: 4
+              example: TP
+            requestDetails:
+              type: object
+              description: Request Details.
+              example: Request URL
+            responseDetails:
+              type: object
+              description: Response Details.
+              example: Response Data
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
+    ARID:
+      type: string
+      description: A unique identifier for any activity being executed arising out of a Claim Share request. This value is passed as a parameter in the URL redirecting a User to the TP Flow during a Claim Share.
+      format: uuid
+      pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+      minLength: 36
+      maxLength: 36
+      example: a15fa6de-b199-11eb-8529-0242ac130003
+    ClaimsData:
+      type: object
+      properties:
+        dataMatch:
+          type: string
+          description: The overall data match the status result of the claim sharing request. Possible values are FULL or PARTIAL.
+          minLength: 4
+          maxLength: 7
+          example: FULL
+        claimsAttributes:
+          type: object
+          description: An object that represents the claims data.
+          example:
+            claims:
+              legalName: John
+            dataMatch: FULL
+          additionalProperties:
+            $ref: '#/components/schemas/Scopes'
+    Scopes:
+      type: object
+      description: An object that represents a list of requested scopes and values.
+      properties:
+        claims:
+          type: object
+          description: The keys will be the scopes that come as part of the request and the data structure will be the data object named after the key.
+          example:
+            legalName: John
+          additionalProperties:
+            type: string
+        dataMatch:
+          description: The data match the status result of the individual scope.
+          type: string
+          minLength: 4
+          maxLength: 7
+          example: FULL
+    CountryCode:
+      type: string
+      description: The country code of the country where the transaction originates from.
+      pattern: ^[a-zA-Z]{2}$
+      example: US
+    ApiError:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    SelfieVerificationRequest:
+      required:
+      - accountId
+      - selfie
+      - channelType
+      - livenessType
+      type: object
+      properties:
+        accountId:
+          description: User account ID
+          example: 14c01794-926a-426f-ad72-c45f8fbf78a4
+          type: string
+        selfie:
+          description: Base 64 selfie
+          example: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          type: string
+        livenessType:
+          type: string
+          example: GPA
+          description: liveness type, GPA takes longer and provides more accuracy, LA is faster
+          enum:
+          - GPA
+          - LA
+        channelType:
+          type: string
+          example: WEB
+          description: the platform of enrollment process
+          enum:
+          - WEB
+          - SDK
+    FacematchSourceVerificationResult:
+      required:
+      - verificationResult
+      - accountId
+      - workflowId
+      type: object
+      properties:
+        verificationResult:
+          type: string
+          example: DOCUMENT_VERIFIED
+          description: 'Verification Results, following: DOCUMENT_VERIFIED - Document matches with the IVP registered document, DOCUMENT_NOT_VERIFIED - Document does not match with any of the IVP registered document, DOCUMENT_INVALID - Document is invalid or not electronically captured'
+        workflowId:
+          description: The workflowId is the identifier for the scan on the identity verification provider used by ID Verification.
+          type: string
+          example: 5226539e-78e7-45ac-a924-072d1301c24c
+          minLength: 36
+          maxLength: 36
+        accountId:
+          description: The accountId is an identifier for the client's account on the identity verification provider used by ID Verification.
+          type: string
+          example: 14c01794-926a-426f-ad72-c45f8fbf78a4
+          minLength: 36
+          maxLength: 36
+    Error:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of where the error occured.
+          example: mids
+        ReasonCode:
+          type: string
+          description: Code of the error.
+          example: USER_PROFILE_ID_NOT_FOUND
+        Description:
+          type: string
+          description: The cause of the error
+          example: The provided userProfileId does not exist
+        Recoverable:
+          type: boolean
+          description: Indiciates if the error can be recovered from.
+          example: false
+        Details:
+          type: string
+          description: Contains information about the error.
+          example: IOException Occured
+    AccessToken:
+      required:
+      - apiDataCenter
+      - sdkToken
+      - transactionId
+      type: object
+      properties:
+        transactionId:
+          description: The transaction ID provided in the API response must be logged by the Relying Party. The Relying Party is required to provide the transaction ID when contacting the Mastercard customer support team.
+          type: string
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+          minLength: 36
+          maxLength: 36
+        accountId:
+          description: The accountId is an identifier for the client's account on the identity verification provider used by ID Verification.
+          type: string
+          example: 14c01794-926a-426f-ad72-c45f8fbf78a4
+          minLength: 36
+          maxLength: 36
+        workflowId:
+          description: The workflowId is the identifier for the scan on the identity verification provider used by ID Verification.
+          type: string
+          example: 5226539e-78e7-45ac-a924-072d1301c24c
+          minLength: 36
+          maxLength: 36
+        sdkToken:
+          description: Token to initialize the SDK.
+          type: string
+          example: eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAB3NQQpCMQwE0Lt0baBJ0yZ159KtN0jTBgTBjYgg3t3__3KGN8w3rc_llc4JG6KUhrmoYjolc7_OvWfPKJ2hUzNgagE2hcC5hsYIUeOdH7gStVr6AtElwNUcrBNDFppYMjqxb9hvKzb9fNzfa4_HVkORomdoggsYp8HgPqAWF43VtsOcfn_stx4UsAAAAA.tDRVowYYcpQ03Vlt7D3MiovleiyRFQMv4qzXb7Lf_6CarphRrlWXan8-jE-YesNiAiT8tk0b-i8TKHGrcgT1VQ
+          minLength: 1
+          maxLength: 328
+        apiDataCenter:
+          description: API Data Center. The accepted values are US, EU or SG.
+          type: string
+          example: US
+          minLength: 1
+          maxLength: 2
+        documentVerificationUrl:
+          description: Web url to display in iframe.
+          type: string
+          example: https://mastercard.web.apac-1.jumio.link/web/v4/app?authorizationToken=eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAJXOQQ5CIQxF0b0wtkmBFqgzh07_Dkp_iWM10cS4d0FX4PTm5OW9gj9P93AMsaRaS845CVM4BDU776sLi5JGiM06UGGDLiUCRaLa0rDR6uJf7FH6mBwYtUyCBcSywBznbmMfGdPEj-H_cNt8TL35zfVql1V-12o0SZ3AGysQ1wKNFCGbsjlyUsTw_gANOZ5b4gAAAA.2bo6KfOvGIswNRNTXv6QtoGvHyNYp_j3LwHia9DtuWna3y_LLI1VgPZle46Q5cFHuuMJB7g7y4wHbtogBX2HfQ&locale=en-US
+    DocumentVerificationExtractedDataDocumentData:
+      description: Document Data.
+      required:
+      - dateOfBirth
+      - documentNumber
+      - documentStatus
+      - documentType
+      - expiryDate
+      - firstName
+      - gender
+      - issuingCountry
+      - issuingDate
+      - lastName
+      type: object
+      properties:
+        documentNumber:
+          description: Document Number.
+          example: N1234567
+          type: string
+          minLength: 1
+          maxLength: 255
+        documentStatus:
+          description: Document Status. SUCCESS OR PENDING.
+          example: SUCCESS
+          type: string
+          minLength: 1
+          maxLength: 7
+        documentType:
+          description: Document Type. PASSPORT OR DRIVER_LICENSE OR ID_CARD.
+          example: PASSPORT
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^(DRIVING_LICENSE|PASSPORT|ID_CARD)$
+        dateOfBirth:
+          description: YYYY-MM-DD format.
+          example: '2020-09-09'
+          type: string
+          minLength: 10
+          maxLength: 10
+        firstName:
+          description: Users First Name.
+          example: John
+          type: string
+          minLength: 1
+          maxLength: 255
+        lastName:
+          description: Users Last Name.
+          example: Smith
+          type: string
+          minLength: 1
+          maxLength: 255
+        expiryDate:
+          description: Document expiration date in YYYY-MM-DD format.
+          example: '2020-10-10'
+          type: string
+          format: date
+          minLength: 10
+          maxLength: 10
+        gender:
+          description: M/F.
+          example: M
+          type: string
+          minLength: 1
+          maxLength: 1
+        issuingCountry:
+          description: Document issuing country.
+          example: AUS
+          type: string
+          minLength: 3
+          maxLength: 3
+        issuingDate:
+          description: Document issuing date.
+          example: '2020-09-09'
+          type: string
+          format: date
+          minLength: 10
+          maxLength: 10
+        issuingPlace:
+          description: Document issuing place.
+          example: New York
+          type: string
+          minLength: 1
+          maxLength: 50
+        issuingAuthority:
+          description: Document issuing authority.
+          example: United States
+          type: string
+          minLength: 1
+          maxLength: 50
+        placeOfBirth:
+          description: Users place of birth.
+          example: Boston
+          type: string
+          minLength: 1
+          maxLength: 255
+        addressLine1:
+          description: Users Address Line 1.
+          example: 123 Main St.
+          type: string
+          minLength: 1
+          maxLength: 255
+        addressLine2:
+          description: Users Address Line 2.
+          example: New York
+          type: string
+          minLength: 1
+          maxLength: 255
+        addressZipCode:
+          description: Users zip code.
+          example: '10021'
+          type: string
+          minLength: 1
+          maxLength: 50
+        addressCity:
+          description: Users City.
+          example: New York
+          type: string
+          minLength: 1
+          maxLength: 100
+        addressCountry:
+          description: Users Country.
+          example: USA
+          type: string
+          minLength: 2
+          maxLength: 3
+        addressSubdivision:
+          description: Users Subdivision.
+          example: MO
+          type: string
+          minLength: 2
+          maxLength: 100
+        issuingState:
+          description: Users State.
+          example: MO
+          type: string
+          minLength: 2
+          maxLength: 100
+        formattedAddress:
+          description: Users formatted Address.
+          example: 220 BLVD O FALLON MO
+          type: string
+          minLength: 1
+          maxLength: 200
+        selfie:
+          description: Users Selfie Binary data, Base64 encoded.
+          example: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          type: string
+          minLength: 1
+        documentImageFront:
+          description: Users document front binary data, Base64 encoded.
+          example: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          type: string
+          minLength: 1
+        documentImageBack:
+          description: Users document back binary data, Base64 encoded.
+          example: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          type: string
+          minLength: 1
+        facemap:
+          description: Users document facemap binary data, Base64 encoded.
+          example: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          type: string
+          minLength: 1
+        rgNumber:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: RG Number.
+          example: 12345
+        cpf:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: CPF Number.
+          example: 12345
+        fathersName:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Father's Name.
+          example: John Smith
+        mothersName:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Mother's Name.
+          example: Paula Smith
+    DocumentVerificationExtractedData:
+      required:
+      - status
+      - transactionId
+      type: object
+      properties:
+        documentData:
+          $ref: '#/components/schemas/DocumentVerificationExtractedDataDocumentData'
+        status:
+          description: The status of the Status API, possible values are SUCCESS / PENDING.
+          example: SUCCESS
+          type: string
+          minLength: 1
+          maxLength: 7
+        transactionId:
+          description: The transaction ID provided in the API response must be logged by the Relying Party. The Relying Party is required to provide the transaction ID when contacting the Mastercard customer support team.
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+          type: string
+          minLength: 36
+          maxLength: 36
+    RetrieveAccessToken:
+      required:
+      - countryCode
+      - channelType
+      type: object
+      properties:
+        countryCode:
+          type: string
+          example: US
+          pattern: ^[a-zA-Z]{2}$
+          description: The ISO 3166-1 alpha2 code which corresponds to the country from where the request to ID is originating from.
+        channelType:
+          type: string
+          example: WEB
+          description: The platform where the request is generated from.
+          enum:
+          - WEB
+          - SDK
+          minLength: 3
+          maxLength: 3
+        sdkVersion:
+          type: string
+          example: 1.0.0
+          pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+          description: The SDK's version that the application is using. Required if the channelType is `SDK`.
+        livenessType:
+          type: string
+          example: GPA
+          description: The preferred liveness type to be applied; Liveness Assurance (LA) or Genuine Presence Assurance (GPA), where GPA provides LA capability and also additional checks that ensure the user is genuinely present.
+          enum:
+          - GPA
+          - LA
+          minLength: 2
+          maxLength: 3
+        successUrl:
+          type: string
+          example: https://www.rp.com/success
+          description: The URL to be redirected to if the token request is successful. Must be present if the channelType is WEB.
+          pattern: ^((https):\/\/)([-\w.])+(:[0-9]+)?\/?(\/[-.\w]*)*((\?|\&)([^=]+)\=([^&]*))*$
+        errorUrl:
+          type: string
+          example: https://www.rp.com/error
+          description: The URL to be redirected to if the token request is not successful. Must be present if the channelType is WEB.
+          pattern: ^((https):\/\/)([-\w.])+(:[0-9]+)?\/?(\/[-.\w]*)*((\?|\&)([^=]+)\=([^&]*))*$
+        locale:
+          description: The IETF BCP 47 value which determines the language variant to be applied in the subsequent scanning dialogs accessed via the token.
+          type: string
+          default: en-US
+          example: en-GB
+          pattern: ^[a-z]{2}-[a-zA-Z]{2}$
+        document:
+          type: object
+          description: An optional object which allows the Relying Party to limit the country and type of document which can be submitted, by not displaying a document selection screen within the user journey. If only one of the document type or issuing country fields is populated, then the associated dialog option on the document selection screen will continue be displayed.
+          properties:
+            issuingCountry:
+              type: string
+              example: USA
+              pattern: ^[A-Z]{3}$
+              description: Element used to restrict the issuing country of the document that can be uploaded by the user. Inclusion of a value for this element will result in the issuing country option being removed from the Document Selection screen. If a value is also included for the documentType element, then the Document Selection screen will not be displayed at all. The value submitted needs to comply to the ISO 3166-1 Alpha 3 standard.
+            documentType:
+              type: string
+              example: DRIVING_LICENSE
+              description: Element used to restrict the type of document that can be uploaded by the user. Inclusion of a value for this element will result in the document type option being removed from the Document Selection screen. If a value is also included for the issuingCountry element, then the Document Selection screen will not be displayed at all. The value submitted must be one of the following enum values.
+              enum:
+              - DRIVING_LICENSE
+              - ID_CARD
+              - PASSPORT
+        workflowDefinition:
+          type: String
+          example: DOCUMENT_EXTRACTION_FACEMATCH_LIVENESS
+          description: 'Value which indicates the capabilities which are to be executed within the flow: <br/> <ul> <li> Document Extraction  Verifies a document is genuine and provides an extract of the details contained in that document.</li> <li> Document Extraction, Facematch and Liveness  Verifies a document is genuine, provides an extract of the details contained in that document, and verifies the user is live and is the subject of that document.</li> <li> Facematch  Matches a user to a previously verified document.</li> </ul> If no value is supplied then the full document extraction, liveness and face matching capability will be enacted by default.'
+          enum:
+          - DOCUMENT_EXTRACTION
+          - DOCUMENT_EXTRACTION_FACEMATCH_LIVENESS
+          - FACEMATCH
+        accountId:
+          type: string
+          example: 14c01794-926a-426f-ad72-c45f8fbf78a4
+          pattern: ^[a-zA-Z][0-9][-]{*}$
+          description: Required only when the FACEMATCH enum is specified in the workflowDefinition field.<br/> The accountId value returned to the client in a previous access token call for the document which is to form the basis for the face-match.
+        workflowId:
+          type: string
+          example: 5226539e-78e7-45ac-a924-072d1301c24c
+          pattern: ^[a-zA-Z][0-9][-]{*}$
+          description: Required only when the FACEMATCH enum is specified in the workflowDefinition field.<br/> The workflowId value returned to the client in a previous access token call for the document which is to form the basis for the face-match.
+    Errors:
+      description: List of Errors.
+      example:
+        $ref: '#/components/examples/NotFoundExample'
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorList:
+      description: Error Details.
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+  examples:
+    BadRequestARIDErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value null for ARID.
+            Recoverable: false
+            Details: Must not be null.
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    NotFoundExampleARIDnotExists:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CLAIM_SHARING_ARID_DOES_NOT_EXIST
+            Description: 'CLAIM_SHARING_ARID_DOES_NOT_EXIST: ARID does not Exist'
+            Recoverable: false
+            Details: ARID does not exist.
+            redirectUri: https://sample-rp-redirect-uri.com/?arid=b6990018-73bb-4e8c-9658-556012c22a25&state=random%20string&error=server_error
+    EncryptedPayloadWithRotatedPDSExample:
+      value:
+        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IoxNTE2MjM5MDIyf
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    BadRequestPDSErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value null for PDS.
+            Recoverable: false
+            Details: Must not be null.
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    RPClaimsUserDataExampleClaimsNotSatisfied:
+      value:
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+        rpName: RP Name
+        rpLogoUrl: https://www.rpsite.com/logo.jpg
+        claimsData: null
+        redirectUri: https://sample-rp-redirect-uri.com/?arid=c00dc42f-fb5c-49a0-80c7-69faa65ac2af&error_description=scope_data_not_available&state=random%20string&error=invalid_scope
+        rotatedPds: null
+    RPClaimsUserDataSuccessExample:
+      value:
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+        rpName: RP Name
+        rpLogoUrl: https://www.rpsite.com/logo.jpg
+        claimsData:
+          claimsAttributes:
+            postalCode:
+              claims:
+                postalCode: '63368'
+              dataMatch: FULL
+          dataMatch: FULL
+        redirectUri: null
+        rotatedPds: null
+    DocumentDataExamplePassport:
+      value:
+        status: PENDING
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+        documentData:
+          documentNumber: N1234567
+          documentStatus: PENDING
+          documentType: PASSPORT
+          dateOfBirth: '2020-09-09'
+          firstName: John
+          lastName: Smith
+          expiryDate: '2020-10-10'
+          gender: F
+          issuingCountry: USA
+          issuingDate: '2020-09-09'
+          issuingPlace: New York
+          issuingAuthority: United States
+          placeOfBirth: Boston
+          addressLine1: 123 Main St.
+          addressLine2: New York
+          addressZipCode: '10021'
+          addressCity: New York
+          addressCountry: Users Country
+          addressSubdivision: MO
+          issuingState: MO
+          formattedAddress: 220 BLVD O FALLON
+          selfie: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          documentImageFront: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          documentImageBack: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          facemap: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+    DocumentDataExampleDriverLicense:
+      value:
+        status: SUCCESS
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+        documentData:
+          documentNumber: AB001234567
+          documentStatus: SUCCESS
+          documentType: DRIVER_LICENSE
+          dateOfBirth: '2020-09-09'
+          firstName: MIRIAM
+          lastName: Smith
+          expiryDate: '2020-10-10'
+          gender: F
+          cardNumber: '1234567890'
+          issuingCountry: AUS
+          issuingDate: '2020-09-09'
+          issuingPlace: Sydney
+          issuingAuthority: Australia
+          placeOfBirth: Sydney
+          addressLine1: 10 Boronia Street
+          addressLine2: 09 Boronia Street
+          addressZipCode: '10021'
+          addressCity: SYDNEY
+          addressCountry: Users Country
+          addressSubdivision: NSW
+          issuingState: NSW
+          formattedAddress: 22 Melville Street, Hobart 7000
+          selfie: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          documentImageFront: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          documentImageBack: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          facemap: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+    BadRequestExampleIVPConnectionTimeout:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: IVP_CONNECTION_TIMEOUT
+            Description: Connection timeout when trying to connect with the Identity Verification Provider. Please look at 'details' for additional information.
+            Recoverable: false
+            Details: Received Connection TimeOut Exception
+    BadRequestExampleCountryCode:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value US4 for 'countryCode'.
+            Recoverable: false
+            Details: null
+    BadRequestExampleIVPSystemError:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: IVP_SYSTEM_ERROR
+            Description: Received system error from the Identity Verification Provider. Please look at 'details' for additional information.
+            Recoverable: false
+            Details: System Error Received
+    BadRequestExampleMedicareName:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'nameLine' field OR value exceeds allowed max characters.
+            Recoverable: false
+            Details: null
+    BadRequestExampleUserConsent:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Unexpected value 'Invalid' for enumerate field.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareCountryCode:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'Country code'.
+            Recoverable: false
+            Details: null
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+            Details: null
+    BadRequestExampleDocumentMismatch:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: BAD_REQUEST
+            Description: The document uploaded by the User does not comply to the document type/country specified by the client in the originating access-token request.
+            Recoverable: false
+            Details: null
+    EncryptedPayloadExample:
+      value:
+        encryptedData: eyJraWQiOiIwMTQyNmRhY2JlMmRjYzA3NmQ1OWU1NDQ5N2NiNjBiMjdjZmQwMDE0ZjZmMGQyYTJiN2FmNjExNDg2NjYyMj...
+    BadRequestExampleMedicareIndividualReferenceNo:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'INDIVIDUAL_REFERENCE_NO'.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareExpireDate:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'expiry date'.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareUserConsent:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: User consent not given.
+            Recoverable: false
+            Details: null
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided userProfileId does not exist.
+            Recoverable: false
+    BadRequestExampleMedicareMedicareNumber:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'Medicare card number'.
+            Recoverable: false
+            Details: null
+    BadRequestExamplePhoneNumber:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value ASD for 'phoneNumber'.
+            Recoverable: false
+            Details: null
+    AccessTokensResponsePayload:
+      value:
+        transactionId: f64d44f8-3b0c-449c-8b79-9e2bbe0b2f3b
+        sdkToken: eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAJXNQWsCMRAF4P-Scwcym0km8eahVKGwthRtT5JkZlFBLKKuWPrf3fUfeH18770_o9fpyUwMBscWPZOLMZkXk2udy5AXSkoePWCoCKTeQkIXgS1JQ2IpqIz8gVNmYVECT64AZRcgDrPQZBz3Uy4BB9x3-gyvn9oNelFu6_d9uz0f3w69NnPys1nbL1_bjy9cXX7P37tNt1vVH8oq0Wocm4-b3ChJSAyWWIFcEEgqBYpnRsZcXULzfwdxCwYuCgEAAA.KaJPW0KH5yL5xFBcyxGIQnUsW895RPc1ohRXyx_JaIMrAlpIRga7WH6SyIylCBKHxSYd4gW9f-O5qabYPzQE7g
+        accountId: 14c01794-926a-426f-ad72-c45f8fbf78a4
+        workflowId: 5226539e-78e7-45ac-a924-072d1301c24c
+        apiDataCenter: US
+        documentVerificationUrl: https://mastercard.web.apac-1.jumio.link/web/v4/app?authorizationToken=eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAJXOQQ5CIQxF0b0wtkmBFqgzh07_Dkp_iWM10cS4d0FX4PTm5OW9gj9P93AMsaRaS845CVM4BDU776sLi5JGiM06UGGDLiUCRaLa0rDR6uJf7FH6mBwYtUyCBcSywBznbmMfGdPEj-H_cNt8TL35zfVql1V-12o0SZ3AGysQ1wKNFCGbsjlyUsTw_gANOZ5b4gAAAA.2bo6KfOvGIswNRNTXv6QtoGvHyNYp_j3LwHia9DtuWna3y_LLI1VgPZle46Q5cFHuuMJB7g7y4wHbtogBX2HfQ&locale=en-US
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+    DocumentDataExampleIDCard:
+      value:
+        status: SUCCESS
+        transactionId: 5f4b0b79-8f7a-4731-b828-5e9db6e39e5a
+        documentData:
+          lastName: SMITH
+          gender: M
+          fathersName: WILLIAM SMITH
+          documentType: ID_CARD
+          issuingDate: '2010-01-01'
+          documentNumber: C204050123
+          expiryDate: '2030-12-31T00:00:00.000Z'
+          issuingPlace: null
+          formattedAddress: null
+          cpf: 000.000.000-00
+          addressLine1: null
+          documentStatus: SUCCESS
+          addressLine2: null
+          addressCity: null
+          addressZipCode: null
+          addressCountry: null
+          placeOfBirth: null
+          dateOfBirth: '1980-01-01'
+          issuingState: null
+          firstName: JOHN
+          issuingAuthority: null
+          issuingCountry: BRA
+          mothersName: JANE SMITH
+          addressSubdivision: null
+          rgNumber: F204050123
+          selfie: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          documentImageFront: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          documentImageBack: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          facemap: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+  responses:
+    NotFoundErrorClaimSharing:
+      description: The request didn't match an existing resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            NotFoundExampleARIDnotExists:
+              $ref: '#/components/examples/NotFoundExampleARIDnotExists'
+    BadRequestErrorClaimSharing:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BadRequestARIDErrorExample:
+              $ref: '#/components/examples/BadRequestARIDErrorExample'
+            BadRequestPDSErrorExample:
+              $ref: '#/components/examples/BadRequestPDSErrorExample'
+    RPClaimsDataResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RPClaimsUserData'
+          examples:
+            RPClaimsUserDataUnencryptedSuccess:
+              $ref: '#/components/examples/RPClaimsUserDataSuccessExample'
+            RPClaimsUserDataEncryptedSuccess:
+              $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
+            RPClaimsUserDataClaimsNotSatisfied:
+              $ref: '#/components/examples/RPClaimsUserDataExampleClaimsNotSatisfied'
+    DataExtractionSuccessResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          $ref: '#/components/headers/X-Transaction-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DocumentVerificationExtractedData'
+          examples:
+            DocumentDataDriverLicense:
+              $ref: '#/components/examples/DocumentDataExampleDriverLicense'
+            DocumentDataPassaport:
+              $ref: '#/components/examples/DocumentDataExamplePassport'
+            DocumentDataExampleIDCard:
+              $ref: '#/components/examples/DocumentDataExampleIDCard'
+    NotFoundError:
+      description: Request didn't match an existing resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
+    FacematchResult:
+      description: Success
+      headers:
+        X-Transaction-ID:
+          $ref: '#/components/headers/X-Transaction-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FacematchSourceVerificationResult'
+    AccessTokenSuccessResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          $ref: '#/components/headers/X-Transaction-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccessToken'
+          examples:
+            AccessTokensResponsePayload:
+              $ref: '#/components/examples/AccessTokensResponsePayload'
+            EncryptedPayloadExample:
+              $ref: '#/components/examples/EncryptedPayloadExample'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            BadRequestExampleUserConsent:
+              $ref: '#/components/examples/BadRequestExampleUserConsent'
+            BadRequestExampleCountryCode:
+              $ref: '#/components/examples/BadRequestExampleCountryCode'
+            BadRequestExamplePhoneNumber:
+              $ref: '#/components/examples/BadRequestExamplePhoneNumber'
+            BadRequestExampleIVPConnectionTimeout:
+              $ref: '#/components/examples/BadRequestExampleIVPConnectionTimeout'
+            BadRequestExampleIVPSystemError:
+              $ref: '#/components/examples/BadRequestExampleIVPSystemError'
+            BadRequestExampleMedicareExpireDate:
+              $ref: '#/components/examples/BadRequestExampleMedicareExpireDate'
+            BadRequestExampleMedicareName:
+              $ref: '#/components/examples/BadRequestExampleMedicareName'
+            BadRequestExampleMedicareIndividualReferenceNo:
+              $ref: '#/components/examples/BadRequestExampleMedicareIndividualReferenceNo'
+            BadRequestExampleMedicareMedicareNumber:
+              $ref: '#/components/examples/BadRequestExampleMedicareMedicareNumber'
+            BadRequestExampleMedicareCountryCode:
+              $ref: '#/components/examples/BadRequestExampleMedicareCountryCode'
+            BadRequestExampleMedicareUserConsent:
+              $ref: '#/components/examples/BadRequestExampleMedicareUserConsent'
+            BadRequestExampleDocumentMismatch:
+              $ref: '#/components/examples/BadRequestExampleDocumentMismatch'
+  requestBodies:
+    RPClaimsDataRequestData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RPClaimsUserDetails'
+      required: true
+    AccessTokenRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RetrieveAccessToken'
+      required: true
+    SelfieVerificationRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SelfieVerificationRequest'
+  parameters:
+    XEncryptedPayload:
+      in: header
+      name: X-Encrypted-Payload
+      type: boolean
+      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
+
+        '
+      example: true
+      schema: null
+    RetrieveFacemapParameter:
+      name: retrieve_facemap
+      in: query
+      description: Flag indicating if the facemap needs to be retrieved.
+      example: 'true'
+      required: true
+      schema:
+        type: string
+        pattern: ^(true|false)$
+    RetrieveDocumentImagesParameter:
+      name: retrieve_document_images
+      in: query
+      description: Flag indicating if the document images needs to be retrieved.
+      example: 'true'
+      required: true
+      schema:
+        type: string
+        pattern: ^(true|false)$
+    CountryParameter:
+      name: user_selected_country
+      in: query
+      description: The ISO 3166-1 alpha3 code which corresponds to the country from where the request to ID is originating from.
+      example: USA
+      nullable: true
+      schema:
+        type: string
+        pattern: ^[A-Z]{3}
+    DocumentTypeParameter:
+      name: document_type
+      in: query
+      description: The type of document scanned (DRIVING_LICENSE, PASSPORT, ID_CARD).
+      example: DRIVING_LICENSE
+      nullable: true
+      schema:
+        type: string
+        pattern: ^(DRIVING_LICENSE|PASSPORT|ID_CARD)$
+    ScanIdParameter:
+      name: scan_id
+      in: path
+      description: UUID returned to the application/webpage on completion of the users interactions with the ID-V SDK.
+      example: 5226539e-78e7-45ac-a924-072d1301c24c
+      required: true
+      schema:
+        maxLength: 36
+        minLength: 36
+        type: string
+        pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+    RetrieveSelfieParameter:
+      name: retrieve_selfie
+      in: query
+      description: Flag indicating if the selfie needs to be retrieved.
+      example: 'true'
+      required: true
+      schema:
+        type: string
+        pattern: ^(true|false)$
+    UserConsentParameter:
+      name: user_consent
+      in: query
+      description: The value which best reflects the input of the User with regard to Consent to use their data (ACCEPT, DECLINE, REVOKE, EXPIRE).
+      example: ACCEPT
+      required: true
+      schema:
+        type: string
+        pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+    EncryptedPayloadParameter:
+      name: X-Encrypted-Payload
+      in: header
+      description: Whether the request payload is encrypted with the Encyption Key generated from the Developer Zone Portal.
+      example: true
+      required: false
+      schema:
+        type: boolean
+  headers:
+    X-Transaction-ID:
+      schema:
+        type: string
+        example: 2d077b9c-3c06-44ac-b00e-d78fe8cce606
+        description: A random 128-bit UUID representing the transaction.

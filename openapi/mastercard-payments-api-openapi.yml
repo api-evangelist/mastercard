@@ -1,0 +1,3764 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Payments API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Payments
+paths:
+  /service-providers/payment-cards:
+    post:
+      tags:
+      - Payments
+      summary: Bulk Registration of Payment Cards
+      description: Allows a registered service provider to add a list of new payment cards to its profile.This endpoint uses [Mastercard payload encryption](https://mstr.cd/2UPfda0). Refer to the [Payload Encryption](https://developer.mastercard.com/carbon-calculator/documentation/tutorials-and-guides/payload-encryption/) page for implementation details.
+      operationId: BulkRegisterPaymentCards
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentCards'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentCardEnrolments'
+        '400':
+          $ref: '#/components/responses/PaymentCardEnrolmentsBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+  /service-providers/payment-cards/{payment_card_id}:
+    delete:
+      tags:
+      - Payments
+      summary: Delete a Payment Card
+      description: 'Allows a registered Service Provider to delete single Payment Card at a time from its profile. Any data associated with a requested paymentCardId will also be deleted permanently.
+
+
+        On the successful response from the server, a Service Provider should remove all the requested paymentCardIds from the system.
+
+
+        Once a request has been received from a Service Provider, data deletion will happen immediately.'
+      operationId: PaymentCardDeletion
+      parameters:
+      - $ref: '#/components/parameters/PaymentCardId'
+      responses:
+        '202':
+          $ref: '#/components/responses/Accepted'
+        '400':
+          $ref: '#/components/responses/PaymentCardDeletionsBadRequestError'
+        '404':
+          $ref: '#/components/responses/PaymentCardByIdNotFoundError'
+  /payment-cards/{payment_card_id}/transaction-footprints:
+    get:
+      tags:
+      - Payments
+      summary: Fetches Historical Transactions and its Transaction Footprints
+      description: Allows a Service Provider to fetch historical transactions for a payment card. Note that a maximum of one year of transactions can be retrieved using this API. Also, the payment card has to be registered first using /payment-cards service.
+      operationId: GetPaymentCardTransactionHistory
+      parameters:
+      - $ref: '#/components/parameters/PaymentCardId'
+      - $ref: '#/components/parameters/FromDate'
+      - $ref: '#/components/parameters/ToDate'
+      - $ref: '#/components/parameters/Offset'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          $ref: '#/components/responses/HistoricalTransactionFootprints'
+        '400':
+          $ref: '#/components/responses/TransactionHistoryBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+  /payment-cards/transaction-footprints/aggregates:
+    post:
+      tags:
+      - Payments
+      summary: Fetches carbon score for payment cards and aggregates the same on a weekly and monthly basis. The result will be in descending order.
+      description: 'Allows a Service Provider to fetch aggregate carbon score for a single or multiple payment cards. A payment card has to be registered first using /service-providers/payment-cards endpoint before this endpoint can be called. The aggregate can be requested weekly, or monthly. Note that **ONLY** cleared transactions will be returned.
+
+
+        If any of the paymentCardIds is not valid or not registered, then the entire request will be rejected, and no aggregate will be returned.
+
+
+        If no transaction is found for a particular paymentCardId then the response will have an empty list against that paymentCardId.
+
+
+        The date range is valid for 26 weeks for weekly aggregate and 12 months for monthly aggregate.
+
+        '
+      operationId: GetPaymentCardAggregateTransactions
+      requestBody:
+        $ref: '#/components/requestBodies/AggregateSearchCriteria'
+      responses:
+        '200':
+          $ref: '#/components/responses/AggregateTransactionFootprints'
+        '400':
+          $ref: '#/components/responses/AggregateTransactionBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+        '415':
+          $ref: '#/components/responses/ServiceProviderUnsupportedMediaTypeError'
+  /payment-cards:
+    post:
+      tags:
+      - Payments
+      summary: Register a Payment Card (to be deprecated)
+      description: Allows a registered Service Provider to add a new Payment Card to its profile. This endpoint uses [Mastercard payload encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/#mastercard-encryption). Refer to the [Payload Encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/) section for implementation details.
+      operationId: RegisterPaymentCard
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentCard'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentCardReference'
+        '400':
+          $ref: '#/components/responses/RegisterPaymentCardBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+        '415':
+          $ref: '#/components/responses/ServiceProviderUnsupportedMediaTypeError'
+  /payment-card-enrolments:
+    post:
+      tags:
+      - Payments
+      summary: Batch Registration of Payment Cards (to be deprecated)
+      description: Allows a registered Service Provider to add a list of new Payment Cards **(at most maximum of 100 payment cards)** to its profile. This endpoint uses [Mastercard payload encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/#mastercard-encryption). Refer to the [Payload Encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/) section for implementation details.
+      operationId: BatchRegisterPaymentCards
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentCards'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentCardEnrolments'
+        '400':
+          $ref: '#/components/responses/PaymentCardEnrolmentsBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+        '415':
+          $ref: '#/components/responses/ServiceProviderUnsupportedMediaTypeError'
+  /payment-card-deletions:
+    post:
+      tags:
+      - Payments
+      summary: Delete one or more Payment Cards (to be deprecated)
+      description: 'Allows a registered Service Provider to delete one or more Payment Cards from its profile. Any data associated with a requested paymentCardId will also be deleted permanently.
+
+
+        On the successful response from the server, a Service Provider should remove all the requested paymentCardIds from the system.
+
+
+        Once a request has been received from a Service Provider, data deletion will happen immediately.
+
+        '
+      operationId: PaymentCardDeletions
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentCardIds'
+      responses:
+        '202':
+          $ref: '#/components/responses/Accepted'
+        '400':
+          $ref: '#/components/responses/PaymentCardDeletionsBadRequestError'
+        '404':
+          $ref: '#/components/responses/PaymentCardDeletionsNotFoundError'
+        '415':
+          $ref: '#/components/responses/ServiceProviderUnsupportedMediaTypeError'
+  /payments/guests:
+    post:
+      tags:
+      - Payments
+      summary: Guest Donation
+      description: This API is used to process One Time Donation for a Guest Donor. Entire request body should be encrypted.
+      operationId: guestDonationUsingPOST
+      parameters:
+      - $ref: '#/components/parameters/ClientId'
+      - name: x-correlation-id
+        in: header
+        description: CorrelationId is a unique donation request ID. It is recommended to pass the x-correlation-id by the customer and to use the format "bankname_UUID" (bank name can be indicated using the first 4 digits). Maximum length of this field should be 100 alphanumeric characters. If not passed, Mastercard will generate it. ***Note:*** If there is a timeout when doing the guest api call, it is important to redo the same api call with same x-correlation-id to get the status of the previous api call
+        required: false
+        schema:
+          type: string
+          example: 03f8c4e8-8bdc-4a30-a2b4-b6f989e96ca3
+      - $ref: '#/components/parameters/ProgramId'
+      requestBody:
+        $ref: '#/components/requestBodies/GuestDonate'
+      responses:
+        '200':
+          $ref: '#/components/responses/GuestDonation'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/Unsupported'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      deprecated: false
+  /payments:
+    post:
+      tags:
+      - Payments
+      summary: One Time Donation API
+      description: This API is used to process One Time Donation for a Registered Donor. The donor can either use an already added card or a new card for the payment. The field 'cardId' will be present only for the existing card flow, the card details (PAN, cvc, expiry info) are not required in this scenario hence shouldn't be part of the request body. In case of the new card flow, the request body will not be having a cardId field only the card details will be present. Entire request body should be encrypted.
+      operationId: oneTimePaymentUsingPOST
+      parameters:
+      - $ref: '#/components/parameters/ClientId'
+      - name: x-correlation-id
+        in: header
+        description: CorrelationId is a unique donation request ID. It is recommended to pass the x-correlation-id by the customer and to use the format "bankname_UUID" (bank name can be indicated using the first 4 digits). Maximum length of this field should be 100 alphanumeric characters. If not passed, Mastercard will generate it. ***Note:*** If there is a timeout when doing the one time api call, it is important to redo the same api call with same x-correlation-id to get the status of the previous api call
+        required: false
+        schema:
+          type: string
+          example: 03f8c4e8-8bdc-4a30-a2b4-b6f989e96ca3
+      - $ref: '#/components/parameters/ProgramId'
+      requestBody:
+        $ref: '#/components/requestBodies/RealTimePayment'
+      responses:
+        '200':
+          $ref: '#/components/responses/OneTimePayment'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/Unsupported'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      deprecated: false
+  /payment-requests:
+    post:
+      tags:
+      - Payments
+      summary: Mastercard Payment Request Creation.
+      description: Enables the presentment of request for payment (with or without agreement) by a CSP on behalf of its Creditor.
+      operationId: createPaymentRequest
+      parameters:
+      - $ref: '#/components/parameters/X-Request-ID'
+      - $ref: '#/components/parameters/X-Product-ID'
+      - $ref: '#/components/parameters/X-Participant-ID'
+      - $ref: '#/components/parameters/X-JWS-Signature'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentRequestCreationRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentRequestCreationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorisedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /payment-requests/{payment_request_lifecycle_id}/status-retrievals:
+    post:
+      tags:
+      - Payments
+      summary: Mastercard Payment Request Status Retrieval Request.
+      description: Enables Mastercard to retrieve payment request status from DSP.
+      operationId: retrievePaymentRequestStatus
+      parameters:
+      - $ref: '#/components/parameters/X-Request-ID'
+      - $ref: '#/components/parameters/X-Product-ID'
+      - $ref: '#/components/parameters/X-Participant-ID'
+      - $ref: '#/components/parameters/X-JWS-Signature'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      - $ref: '#/components/parameters/payment_request_lifecycle_id'
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentRequestStatusRetrievalRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentRequestStatusRetrievalResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorisedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /payment-requests/{payment_request_lifecycle_id}/refunds:
+    post:
+      tags:
+      - Payments
+      summary: Mastercard Refund Account Request.
+      description: A CSP can request refund account details from a Debtor Service Provider(DSP) on behalf of a Creditor. They can use these details to refund the Debtor.
+      operationId: retrieveRefundAccount
+      parameters:
+      - $ref: '#/components/parameters/X-Request-ID'
+      - $ref: '#/components/parameters/X-Product-ID'
+      - $ref: '#/components/parameters/X-Participant-ID'
+      - $ref: '#/components/parameters/X-JWS-Signature'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      - $ref: '#/components/parameters/payment_request_lifecycle_id'
+      requestBody:
+        $ref: '#/components/requestBodies/RefundAccountRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/RefundAccountResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorisedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /payment-requests/{payment_request_lifecycle_id}/refunds/{refund_request_lifecycle_id}/payment-confirmations:
+    post:
+      tags:
+      - Payments
+      summary: Mastercard Refund Payment Confirmation.
+      description: Enables CSP to notify DSP of a refund payment confirmation.
+      operationId: confirmRefundPayment
+      parameters:
+      - $ref: '#/components/parameters/X-Request-ID'
+      - $ref: '#/components/parameters/X-Product-ID'
+      - $ref: '#/components/parameters/X-Participant-ID'
+      - $ref: '#/components/parameters/X-JWS-Signature'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      - $ref: '#/components/parameters/payment_request_lifecycle_id'
+      - $ref: '#/components/parameters/refund_request_lifecycle_id'
+      requestBody:
+        $ref: '#/components/requestBodies/RefundPaymentConfirmationRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/RefundPaymentConfirmationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorisedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /payment-request-retrievals:
+    post:
+      tags:
+      - Payments
+      summary: Mastercard Retrieve Payment Request Details.
+      description: Enables DSP to retrieve request for payment using either paymentRequestLifecycleId or paymentRequestReferenceNumber to present it to the debtor and obtain consent for funds transfer.
+      operationId: retrievePaymentRequest
+      parameters:
+      - $ref: '#/components/parameters/X-Request-ID'
+      - $ref: '#/components/parameters/X-Product-ID_2'
+      - $ref: '#/components/parameters/X-Participant-ID'
+      - $ref: '#/components/parameters/X-JWS-Signature'
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentRequestDetailRetrievalRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentRequestDetailRetrievalResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorisedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /payment-requests/{payment_request_lifecycle_id}/payment-confirmation-advices:
+    post:
+      tags:
+      - Payments
+      summary: Mastercard Confirm Payment
+      description: Enables DSP to send payment status information for the request for payment message.
+      operationId: confirmPaymentAdvice
+      parameters:
+      - $ref: '#/components/parameters/X-Request-ID'
+      - $ref: '#/components/parameters/X-Product-ID_2'
+      - $ref: '#/components/parameters/X-Participant-ID'
+      - $ref: '#/components/parameters/X-JWS-Signature'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      - $ref: '#/components/parameters/payment_request_lifecycle_id'
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentConfirmationAdviceRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentConfirmationAdviceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorisedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /payment-requests/{payment_request_lifecycle_id}/step-up-advices:
+    post:
+      tags:
+      - Payments
+      summary: Mastercard Step-up Advice
+      description: Enables DSP to send step-up advice to CSP through Mastercard.
+      operationId: createStepUpAdvice
+      parameters:
+      - $ref: '#/components/parameters/X-Request-ID'
+      - $ref: '#/components/parameters/X-Product-ID_2'
+      - $ref: '#/components/parameters/X-Participant-ID'
+      - $ref: '#/components/parameters/X-JWS-Signature'
+      - $ref: '#/components/parameters/payment_request_lifecycle_id'
+      requestBody:
+        $ref: '#/components/requestBodies/StepUpNotificationRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/StepUpNotificationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorisedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /payment-requests/{payment_request_lifecycle_id}/refunds/{refund_request_lifecycle_id}/status-retrievals:
+    post:
+      tags:
+      - Payments
+      summary: Mastercard Refund Request Status Retrieval Request
+      description: Enables DSP to enquire about the status of Refund Request.
+      operationId: retrieveRefundStatus
+      parameters:
+      - $ref: '#/components/parameters/X-Request-ID'
+      - $ref: '#/components/parameters/X-Product-ID_2'
+      - $ref: '#/components/parameters/X-Participant-ID'
+      - $ref: '#/components/parameters/X-JWS-Signature'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      - $ref: '#/components/parameters/refund_request_lifecycle_id'
+      - $ref: '#/components/parameters/payment_request_lifecycle_id'
+      requestBody:
+        $ref: '#/components/requestBodies/RefundRequestStatusRetrievalRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/RefundRequestStatusRetrievalResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorisedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  responses:
+    TransactionHistoryBadRequestError:
+      description: This response code is returned when a request is invalid or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            TransactionHistoryPaymentCardNotFoundError:
+              $ref: '#/components/examples/TransactionHistoryPaymentCardNotFoundError'
+            TransactionHistoryInvalidDateRangeError:
+              $ref: '#/components/examples/TransactionHistoryInvalidDateRangeError'
+            TransactionHistoryInvalidDateFormatError:
+              $ref: '#/components/examples/TransactionHistoryInvalidDateFormatError'
+    RegisterPaymentCardBadRequestError:
+      description: This response code is returned when a request is invalid or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            RegisterPaymentCardRequestValidationError:
+              $ref: '#/components/examples/RegisterPaymentCardRequestValidationError'
+            RegisterPaymentCardUnsupportedCardCurrencyError:
+              $ref: '#/components/examples/RegisterPaymentCardUnsupportedCardCurrencyError'
+            RegisterPaymentCardInvalidFPANError:
+              $ref: '#/components/examples/RegisterPaymentCardInvalidFPANError'
+            RegisterPaymentCardRequestDecryptionError:
+              $ref: '#/components/examples/RegisterPaymentCardRequestDecryptionError'
+    Accepted:
+      description: Accepted
+      headers:
+        Location:
+          $ref: '#/components/headers/Location'
+    PaymentCardReference:
+      description: The response object that contains Payment Card information after a successful registration.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentCardReference'
+          examples:
+            PaymentCardReference:
+              $ref: '#/components/examples/PaymentCardReference'
+    PaymentCardByIdNotFoundError:
+      description: This response code is returned when the server cannot find the paymentcard which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            PaymentCardByIdNotFoundError:
+              $ref: '#/components/examples/PaymentCardByIdNotFoundError'
+    AggregateTransactionFootprints:
+      description: This response code is returned when a request is accepted and successfully processed.  A corresponding response will be returned for the API caller.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AggregateTransactionFootprints'
+          examples:
+            WeeklyAggregateTransactionFootprints:
+              $ref: '#/components/examples/WeeklyAggregateTransactionFootprints'
+            MonthlyAggregateTransactionFootprints:
+              $ref: '#/components/examples/MonthlyAggregateTransactionFootprints'
+            MonthlyCategoryAggregateTransactionFootprints:
+              $ref: '#/components/examples/MonthlyCategoryAggregateTransactionFootprints'
+    PaymentCardEnrolmentsBadRequestError:
+      description: This response code is returned when a request is invalid, or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            PaymentCardEnrolmentsRequestValidationError:
+              $ref: '#/components/examples/RegisterPaymentCardRequestValidationError'
+            PaymentCardEnrolmentsRequestDecryptionError:
+              $ref: '#/components/examples/RegisterPaymentCardRequestDecryptionError'
+    PaymentCardDeletionsBadRequestError:
+      description: This response code is returned when either a request is invalid or one or more paymentCardIds are invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            PaymentCardDeletionsRequestValidationError:
+              $ref: '#/components/examples/PaymentCardDeletionsRequestValidationError'
+            PaymentCardDeletionsInvalidCardIdError:
+              $ref: '#/components/examples/PaymentCardDeletionsInvalidCardIdError'
+    HistoricalTransactionFootprints:
+      description: This response code is returned when a request is accepted and successfully processed. A corresponding response will be returned for the API caller.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HistoricalTransactionFootprints'
+          examples:
+            HistoricalTransactionFootprints:
+              $ref: '#/components/examples/HistoricalTransactionFootprints'
+    PaymentCardDeletionsNotFoundError:
+      description: This response code is returned when the server cannot find the account or one or more paymentcards which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+            PaymentCardNotFoundError:
+              $ref: '#/components/examples/PaymentCardNotFoundError'
+    PaymentCardEnrolments:
+      description: The response object that contains the list of payment cards information after batch registration.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentCardEnrolments'
+          examples:
+            PaymentCardEnrolments:
+              $ref: '#/components/examples/PaymentCardEnrolments'
+    ServiceProviderUnsupportedMediaTypeError:
+      description: This response code is returned when the value of provided Content-Type parameter is other than expected.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderUnsupportedMediaTypeError:
+              $ref: '#/components/examples/ServiceProviderUnsupportedMediaTypeError'
+    AggregateTransactionBadRequestError:
+      description: This response code is returned when a request is invalid or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidPaymentCardError:
+              $ref: '#/components/examples/InvalidPaymentCardError'
+            AggregateTransactionInvalidDateFormatError:
+              $ref: '#/components/examples/AggregateTransactionInvalidDateFormatError'
+            AggregateTransactionInvalidDateRangeError:
+              $ref: '#/components/examples/AggregateTransactionInvalidDateRangeError'
+            AggregateTransactionInvalidAggregateTypeError:
+              $ref: '#/components/examples/AggregateTransactionInvalidAggregateTypeError'
+    ServiceProviderNotFoundError:
+      description: This response code is returned when the server cannot find the account which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-403'
+    OneTimePayment:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OneTimePaymentSuccess'
+          examples:
+            SUCCESS:
+              $ref: '#/components/examples/oneTimePaymentSuccess'
+            FAILURE:
+              $ref: '#/components/examples/oneTimePaymentFail'
+    Created:
+      description: The specified resource was created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-201'
+    Unauthorized:
+      description: Unauthorised
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-401'
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-500'
+    Unsupported:
+      description: Unsupported Content Type
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-415'
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-404'
+    GuestDonation:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GuestDonation'
+          examples:
+            SUCCESS:
+              $ref: '#/components/examples/oneTimePaymentSuccess'
+            FAILURE:
+              $ref: '#/components/examples/oneTimePaymentFail'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_2'
+    RefundAccountResponse:
+      description: Refund account request creation successful.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+        X-JWS-Signature:
+          $ref: '#/components/headers/X-JWS-Signature'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RefundAccount'
+    RefundRequestStatusRetrievalResponse:
+      description: Refund Request Status Retrieval Request was successfully received by Mastercard.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID_2'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID_2'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RefundRequestStatusRetrievalAck'
+    BadRequestErrorResponse:
+      description: 'Invalid structure: The header or payload fails syntax or structural validation.'
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            BadRequestErrorExample:
+              $ref: '#/components/examples/BadRequestErrorExample'
+    PaymentRequestCreationResponse:
+      description: Payment request creation successful.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+        X-JWS-Signature:
+          $ref: '#/components/headers/X-JWS-Signature'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentRequest'
+    PaymentRequestStatusRetrievalResponse:
+      description: Payment request Status Retrieval Request was successfully received by Mastercard.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentRequestStatusRetrievalAck'
+    PaymentConfirmationAdviceResponse:
+      description: Payment Request Status update successful.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID_2'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID_2'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+        X-JWS-Signature:
+          $ref: '#/components/headers/X-JWS-Signature'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentConfirmationAdvice'
+    PaymentRequestDetailRetrievalResponse:
+      description: Payment Request creation successful.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID_2'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID_2'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+        X-JWS-Signature:
+          $ref: '#/components/headers/X-JWS-Signature'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentRequestDetailRetrieval'
+    RefundPaymentConfirmationResponse:
+      description: Refund payment confirmation successful.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+        X-JWS-Signature:
+          $ref: '#/components/headers/X-JWS-Signature'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RefundPaymentAdviseConfirmation'
+    StepUpNotificationResponse:
+      description: Step Up Notification Request creation successful.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID_2'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID_2'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+        X-JWS-Signature:
+          $ref: '#/components/headers/X-JWS-Signature'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StepUpNotification'
+    UnauthorisedErrorResponse:
+      description: Invalid signature. The service fails signature validation.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/UnauthorisedExample'
+  examples:
+    TransactionHistoryInvalidDateRangeError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_DATE_RANGE
+            Description: Requested date range is either invalid or exceeds one year limits. Try again with a valid date range.
+            Recoverable: false
+            Details: ''
+    MonthlyAggregateTransactionFootprints:
+      value:
+        aggregateTransactionFootprint:
+        - paymentCardId: 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+          footprintAggregation:
+          - carbonEmissionInGrams: 616.35
+            carbonEmissionInOunces: 31.28
+            aggregateValue: October|2019
+          - carbonEmissionInGrams: 898.64
+            carbonEmissionInOunces: 32.54
+            aggregateValue: September|2019
+        - paymentCardId: 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+          footprintAggregation:
+          - carbonEmissionInGrams: 614.24
+            carbonEmissionInOunces: 32.21
+            aggregateValue: October|2019
+          - carbonEmissionInGrams: 612.24
+            carbonEmissionInOunces: 33.65
+            aggregateValue: September|2019
+        crossPANAggregation:
+        - carbonEmissionInGrams: 1230.59
+          carbonEmissionInOunces: 63.49
+          aggregateValue: October|2019
+        - carbonEmissionInGrams: 1510.88
+          carbonEmissionInOunces: 66.19
+          aggregateValue: September|2019
+    ServiceProviderUnsupportedMediaTypeError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: UNSUPPORTED_MEDIA_TYPE
+            Description: Requested media type is not supported, try again with the supported media type.
+            Recoverable: false
+            Details: ''
+    RegisterPaymentCardRequestDecryptionError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: CRYPTO_ERROR
+            Description: We are unable to decipher your request, kindly verify your request before trying again. If the problem persists then reach out to your Mastercard associate.
+            Recoverable: false
+            Details: ''
+    PaymentCardNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: PAYMENT_CARD_NOT_FOUND
+            Description: Paymentcards not found for the given payment card ids.
+            Recoverable: false
+            Details: ''
+    RegisterPaymentCardInvalidFPANError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_FPAN
+            Description: The card number in the request is either invalid or it does not match with your currently supported account range. Try again with a valid card number or update the supported account range.
+            Recoverable: false
+            Details: ''
+    PaymentCardReference:
+      value:
+        paymentCardId: c5d88571-ac15-465a-a0d8-1ad1327b9a06
+        bin: '534403'
+        last4fpan: '9750'
+        status: ACTIVE
+    RegisterPaymentCardUnsupportedCardCurrencyError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: UNSUPPORTED_CURRENCY
+            Description: The currency in the request is not supported, try again with a different one.
+            Recoverable: false
+            Details: ''
+    AggregateTransactionInvalidDateRangeError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_DATE_RANGE
+            Description: Requested date range is either invalid or exceeds supported limit (i.e. 26 weeks for weekly aggregate and 12 months for monthly aggregate).
+            Recoverable: false
+            Details: ''
+    PaymentCardDeletionsInvalidCardIdError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One or more payment card IDs in the request are invalid, try again by sending valid Ids.
+            Recoverable: false
+            Details: paymentCardId must match "^[0-9A-Fa-f\-]{36}"
+    PaymentCardDeletionsRequestValidationError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with the correct request.
+            Recoverable: false
+            Details: ''
+    ServiceProviderNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: ACCOUNT_NOT_FOUND
+            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
+            Recoverable: false
+            Details: ''
+    WeeklyAggregateTransactionFootprints:
+      value:
+        aggregateTransactionFootprint:
+        - paymentCardId: 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+          footprintAggregation:
+          - carbonEmissionInGrams: 140.52
+            carbonEmissionInOunces: 7.19
+            aggregateValue: Week-26|2019
+          - carbonEmissionInGrams: 142.67
+            carbonEmissionInOunces: 6.94
+            aggregateValue: Week-25|2019
+        - paymentCardId: 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+          footprintAggregation:
+          - carbonEmissionInGrams: 143.64
+            carbonEmissionInOunces: 6.97
+            aggregateValue: Week-26|2019
+          - carbonEmissionInGrams: 218.31
+            carbonEmissionInOunces: 7.19
+            aggregateValue: Week-25|2019
+        crossPANAggregation:
+        - carbonEmissionInGrams: 284.16
+          carbonEmissionInOunces: 14.16
+          aggregateValue: Week-26|2019
+        - carbonEmissionInGrams: 360.98
+          carbonEmissionInOunces: 14.13
+          aggregateValue: Week-25|2019
+    PaymentCardByIdNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider
+            ReasonCode: PAYMENT_CARD_NOT_FOUND
+            Description: Paymentcard Not Found for the given payment card id in the path.
+            Recoverable: false
+            Details: ''
+    HistoricalTransactionFootprints:
+      value:
+        count: 2
+        offset: 1
+        limit: 5
+        total: 5
+        items:
+        - transactionMetadata:
+            id: ee421c25-f928-4bf6-b884-3600b76b860d
+            traceId: 9f52386ce297173ecfeb9120aabb0805bbeeb1350ce1de640864852e800bd206
+            banknetReferenceNumber: MPL0R6B2R
+            banknetDate: '0525'
+            retrievalRefNumber: MCC000100
+            processingCode: '00'
+            authCode: 52717Z
+            dateAndTime: 2018-07-02T00:00+00:00
+            merchantName: ABC Store
+            acquiringInstitutionCountryCode: USA
+            acquiringInstitutionCode: '12312312312'
+            amount: '25.50'
+            currencyCode: USD
+            indicator: CL
+          transactionFootPrint:
+            mcc: 3997
+            carbonEmissionInGrams: 48.52
+            carbonEmissionInOunces: 1.71
+            category:
+              mainCategory: Leisure & Entertainment
+              subCategory: Hotels & Vacation
+              sector: Hotels, Motels & Resorts
+              sectorCode: '604'
+            scoreReference: MCC
+        - transactionMetadata:
+            id: fdc4626c-f51e-4ba6-9728-c79ac1d9aec8
+            traceId: gf55386ce297173ecfeb9120aabb0805bbeeb1350ce1de640864852e8002343
+            banknetReferenceNumber: MPL0B6B23
+            banknetDate: '0725'
+            retrievalRefNumber: MCC000480
+            processingCode: '01'
+            authCode: K3C161
+            dateAndTime: 2019-12-25T00:00+00:00
+            merchantName: ABC Store
+            acquiringInstitutionCountryCode: USA
+            acquiringInstitutionCode: '23423423423'
+            amount: '30.00'
+            currencyCode: USD
+            indicator: CL
+          transactionFootPrint:
+            mcc: 5962
+            carbonEmissionInGrams: 27.98
+            carbonEmissionInOunces: 0.99
+            category:
+              mainCategory: Shopping
+              subCategory: Department Store
+              sector: Specialty Retail & Services
+              sectorCode: '302'
+            scoreReference: MCC
+        - transactionMetadata:
+            id: '9000010131662'
+            traceId: af55386ce297173ecfeb9120aabb0805bbeeb1350ce1de640864852e800bd854
+            banknetReferenceNumber: MPL0R8C2A
+            banknetDate: '0624'
+            retrievalRefNumber: '801220'
+            processingCode: '00'
+            authCode: '16'
+            dateAndTime: 2022-01-26T00:00+00:00
+            merchantName: Test Sandbox Merchant
+            acquiringInstitutionCountryCode: USA
+            acquiringInstitutionCode: '12311878333'
+            amount: 20
+            currencyCode: GBP
+            indicator: RFT
+          transactionFootprint:
+            carbonEmissionInGrams: -3398.54
+            carbonEmissionInOunces: -119.88
+            transactionId: '9000010131662'
+            mcc: '9311'
+            category:
+              mainCategory: Government Services
+              subCategory: Public Services
+              sector: Government Services
+              sectorCode: '801'
+            scoreReference: MCC
+    TransactionHistoryInvalidDateFormatError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: 'getPaymentCardTransactionHistory.fromDate: must match "^((?:19|20)[0-9][0-9])-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$"'
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request..
+            Recoverable: false
+            Details: 'getPaymentCardTransactionHistory.fromDate: size must be between 10 and 10'
+    AggregateTransactionInvalidDateFormatError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: fromDate must match "^((?:19|20)[0-9][0-9])-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$"
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: fromDate size must be between 10 and 10
+    InvalidPaymentCardError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: Payment card id - [b86fd2ba-c095-4acb-b9df-f3805655ba24,d30f6223-b15d-4663-8e6a-247475c596dd ] is/are invalid or not found. Please try again with a valid payment card id.
+            Recoverable: false
+            Details: ''
+    MonthlyCategoryAggregateTransactionFootprints:
+      value:
+        aggregateTransactionFootprint:
+        - paymentCardId: 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+          footprintAggregation:
+          - carbonEmissionInGrams: 345.35
+            carbonEmissionInOunces: 15.28
+            aggregateValue: October|2019|Shopping
+          - carbonEmissionInGrams: 261.64
+            carbonEmissionInOunces: 16.54
+            aggregateValue: October|2019|Hospital
+          - carbonEmissionInGrams: 898.64
+            carbonEmissionInOunces: 32.54
+            aggregateValue: September|2019|Shopping
+        - paymentCardId: 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+          footprintAggregation:
+          - carbonEmissionInGrams: 614.24
+            carbonEmissionInOunces: 32.21
+            aggregateValue: October|2019|Foods
+          - carbonEmissionInGrams: 612.24
+            carbonEmissionInOunces: 33.65
+            aggregateValue: September|2019|Hospital
+        crossPANAggregation:
+        - carbonEmissionInGrams: 345.35
+          carbonEmissionInOunces: 15.28
+          aggregateValue: October|2019|Shopping
+        - carbonEmissionInGrams: 898.64
+          carbonEmissionInOunces: 32.54
+          aggregateValue: October|2019|Hospital
+        - carbonEmissionInGrams: 614.24
+          carbonEmissionInOunces: 32.21
+          aggregateValue: October|2019|Foods
+        - carbonEmissionInGrams: 898.64
+          carbonEmissionInOunces: 32.54
+          aggregateValue: September|2019|Shopping
+        - carbonEmissionInGrams: 612.24
+          carbonEmissionInOunces: 33.65
+          aggregateValue: September|2019|Hospital
+    AggregateTransactionInvalidAggregateTypeError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: aggregateType must be less than or equal to 3
+    TransactionHistoryPaymentCardNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: Payment card id - c2c76ec0-4056-44ba-b14f-6654c9ba5722 is/are invalid or not found. Please try again with valid payment card id.
+            Recoverable: false
+            Details: ''
+    PaymentCardEnrolments:
+      value:
+      - bin: '545502'
+        last4fpan: '8351'
+        status: ACTIVE
+        paymentCardId: 9f12f385-0b47-4cca-9e9d-baced21bca63
+      - bin: '545502'
+        last4fpan: '0762'
+        status: ACTIVE
+        paymentCardId: f506521c-38c6-4e87-bf1a-14023ce10d4e
+      - bin: '545502'
+        last4fpan: '2834'
+        status: PENDING
+        paymentCardId: 2da9571f-0cf2-458d-bc4b-9218578ce50d
+      - bin: '520402'
+        last4fpan: '2824'
+        errorCode: INVALID_FPAN
+    RegisterPaymentCardRequestValidationError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with the correct request.
+            Recoverable: false
+            Details: ''
+    oneTimePaymentSuccess:
+      summary: Payment success
+      value:
+        transactionId: OTBVMrlAQa6Ecl7PlKSDyw
+        transactionStatus: SUCCESS
+        transactionMessage: Transaction APPROVED
+    oneTimePaymentFail:
+      summary: Payment failure
+      value:
+        transactionId: OTbB0kCkRxC7tu1itsIN8Q
+        transactionStatus: FAILURE
+        transactionMessage: Transaction declined
+        reasonCode: DECLINE
+        reasonMessage: Your payment was declined.  Please use a different card or contact your issuer for more information.
+    BadRequestErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: ZAPP
+            ReasonCode: STVL-9999
+            Description: Invalid structure
+            Recoverable: false
+            Details: Invalid structure
+    UnauthorisedExample:
+      value:
+        Errors:
+          Error:
+          - Source: ZAPP
+            ReasonCode: SECU-9999
+            Description: Invalid signature
+            Recoverable: false
+            Details: Invalid signature
+  requestBodies:
+    AggregateSearchCriteria:
+      description: "The request should contain a list of *paymentCardIds* for which aggregate carbon score needs to be retrieved and *aggregateType* as one of the following:\n<li> 1 = Weekly Transactions aggregated for last 26 weeks <li> 2 = Monthly transactions aggregated for last 12 months <li> 3 = Monthly category-wise transactions aggregated for last 12 months\n\n\n In order to retrieve aggregate for custom duration, please provide `fromDate` and `toDate`. Note that the duration should not exceed 26 weeks (for weekly aggregate) and 12 months (for monthly aggregate).\n"
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AggregateSearchCriteria'
+    PaymentCards:
+      required: true
+      description: List of payment cards to be enroled.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PaymentCard'
+            minItems: 1
+            maxItems: 100
+            example:
+            - fpan: '5455029300268351'
+              cardBaseCurrency: EUR
+            - fpan: '5455023979760762'
+              cardBaseCurrency: USD
+            - fpan: '5455023979762834'
+              cardBaseCurrency: USD
+            - fpan: '5455023979762824'
+              cardBaseCurrency: USD
+    PaymentCardIds:
+      description: List of paymentCardIds for which all associated data needs to be deleted.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PaymentCardId'
+            minItems: 1
+            maxItems: 100
+          example:
+          - c5d88571-ac15-465a-a0d8-1ad1327b9a06
+          - 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+          - 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+          - b86fd2ba-c095-4acb-b9df-f3805655ba24
+    PaymentCard:
+      description: Payment card to be enroled.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentCard'
+    GuestDonate:
+      description: guestDonateRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GuestDonate'
+      required: false
+    RealTimePayment:
+      description: realTimePaymentRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RealTimePayment'
+      required: false
+    StepUpNotificationRequest:
+      required: true
+      description: Step Up Notification.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewStepUpNotification'
+    PaymentRequestCreationRequest:
+      required: true
+      description: Payment request order.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewPaymentRequest'
+    RefundRequestStatusRetrievalRequest:
+      required: true
+      description: Refund Request Status Retrieval Request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewRefundRequestStatusRetrieval'
+    RefundAccountRequest:
+      required: true
+      description: Refund account request order.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewRefundAccount'
+    RefundPaymentConfirmationRequest:
+      required: true
+      description: Refund payment confirmation request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewRefundPaymentConfirmation'
+    PaymentRequestDetailRetrievalRequest:
+      required: true
+      description: Retrieve Payment Request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewPaymentRequestDetailRetrieval'
+    PaymentRequestStatusRetrievalRequest:
+      required: true
+      description: Payment request status retrieval request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewPaymentRequestStatusRetrieval'
+    PaymentConfirmationAdviceRequest:
+      required: true
+      description: Payment Request Confirmation Advice.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewPaymentConfirmationAdvice'
+  schemas:
+    TransactionId:
+      type: string
+      description: A unique ID associated with a payment transaction, For example, original payment transaction ID. The same ID will be returned in the response corresponding to its payment transaction.
+      minLength: 1
+      maxLength: 100
+      pattern: ^[\w\-\_]{1,100}
+    X-MC-Correlation-ID:
+      type: string
+      example: X-MC-Correlation-ID:5e4b7f904d2820f688c67ef9fc0035
+    AggregateSearchCriteria:
+      title: AggregateSearchCriteria
+      type: object
+      description: Request object which holds the criteria (that is, list of payment card IDs and aggregate type) for retrieving aggregate transactions.
+      required:
+      - paymentCardIds
+      - aggregateType
+      properties:
+        paymentCardIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentCardId'
+          minItems: 1
+          maxItems: 5
+          example: c5d88571-ac15-465a-a0d8-1ad1327b9a06
+          description: Unique ID provided in the response while registering a payment card.
+        aggregateType:
+          type: integer
+          minimum: 1
+          maximum: 3
+          example: 1
+          description: 'Aggregate type for which aggregate needs to be calculated. Supported values are:
+
+            <li> 1 = Weekly Transactions aggregated for last 26 weeks <li> 2 = Monthly transactions aggregated for last 12 months <li> 3 = Monthly category-wise transactions aggregated for last 12 months
+
+            '
+        crossPANAggregate:
+          type: string
+          minLength: 1
+          maxLength: 1
+          pattern: ^(?:Y|N|y|n)$
+          example: Y
+          description: 'Wheter to retrieve cross PAN aggregate carbon footprint or not. Supported values are:
+
+            <li> Y = Retrieve cross PAN aggregate. <li> N = Do not retrieve cross PAN aggregate. <br> If not provided then default will be considered as ''N''.
+
+            '
+        fromDate:
+          $ref: '#/components/schemas/Day'
+        toDate:
+          $ref: '#/components/schemas/Day'
+      example:
+        aggregateType: 1
+        crossPANAggregate: Y
+        paymentCardIds:
+        - 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+        - b86fd2ba-c095-4acb-b9df-f3805655ba24
+        fromDate: '2020-07-01'
+        toDate: '2020-08-30'
+    PaymentCard:
+      title: PaymentCard
+      type: object
+      description: The request object for registering a new Payment Card. This object will be encrypted before sending it to the server.
+      required:
+      - fpan
+      - cardBaseCurrency
+      properties:
+        fpan:
+          type: string
+          minLength: 16
+          maxLength: 16
+          pattern: ^\d{16}
+          description: Original payment card number in full.
+          example: '5344035171229750'
+        cardBaseCurrency:
+          $ref: '#/components/schemas/CurrencyCode'
+      example:
+        fpan: '5344035171229750'
+        cardBaseCurrency: EUR
+    TransactionMetadata:
+      title: TransactionMetadata
+      type: object
+      description: Metadata about a transaction.
+      required:
+      - id
+      - retrievalRefNumber
+      - processingCode
+      - dateAndTime
+      - merchantName
+      - acquiringInstitutionCountryCode
+      - acquiringInstitutionCode
+      - amount
+      - currencyCode
+      - indicator
+      properties:
+        id:
+          title: id
+          type: string
+          description: A unique ID associated with a transaction.
+          maxLength: 100
+          minLength: 1
+          pattern: ^[\w\-\_]{1,100}
+          example: ee421c25-f928-4bf6-b884-3600b76b860d
+        traceId:
+          title: traceId
+          type: string
+          description: A unique ID associated with a transaction.
+          maxLength: 100
+          minLength: 65
+          pattern: ([A-Za-z0-9]{10,100})
+          example: 9A52386ce297173Ecfeb9120aabb0805bbeeb1350ce1de640864852e800bd2067
+        banknetReferenceNumber:
+          title: banknetReferenceNumber
+          type: string
+          description: DE 63, subfield 2 (Banknet Reference Number) is generated by the Authorization Platform for each originating message it routes. The reference number is guaranteed to be a unique value for any transaction within the specified financial network on any processing day.
+          maxLength: 13
+          minLength: 6
+          pattern: ([A-Za-z0-9]{6,13})
+          example: MPL0R6B2R
+        banknetDate:
+          title: banknetDate
+          type: string
+          description: DE 7 subelement 1 (POS_BANKNET_DATE) is a date when transaction message enters into Mastercard network.
+          maxLength: 4
+          minLength: 4
+          pattern: ([0-9]{4})
+          example: '0525'
+        retrievalRefNumber:
+          title: retrievalRefNumber
+          type: string
+          description: DE 37 (Retrieval Reference Number) is a document reference number supplied by the system retaining the original source document of the transaction and assists in locating that source document or a copy thereof. DE 37 is made available for use by automated merchant POS systems that may be interconnected into the interchange system. Merchant POS systems may assign a unique receipt or sales document ID to be used to satisfy regulatory or legal requirements when the merchant performs source document capture and truncation. DE 37 may be used to relay source document reference numbers to the issuer at the time each transaction is processed. Number assigned by the acquirer. When present, DE 37 must contain a value other than all zeros or all spaces. DE 37 can have trailing spaces if the transaction is not a Visa or EMV chip transaction.
+          maxLength: 12
+          minLength: 12
+          example: MCC000100120
+        processingCode:
+          title: processingCode
+          type: string
+          description: DE 3, subfield 1 (Cardholder Transaction Type Code) describes the specific transaction type.
+          maxLength: 2
+          minLength: 2
+          example: '00'
+        authCode:
+          title: authCode
+          type: string
+          description: DE 38 (Authorization ID Response) is a transaction response ID code that the authorizing institution assigns. DE 38 is used to transmit a card issuers authorization code for Authorization transactions.
+          maxLength: 6
+          minLength: 1
+          example: 01423Z
+        dateAndTime:
+          title: dateAndTime
+          type: string
+          description: This is the date and time when transaction acquire at the Merchant. (For example, YYYY-MM-DDThh:mmTZD).
+          maxLength: 25
+          minLength: 22
+          example: 2018-07-02T00:00+00:00
+        merchantName:
+          title: merchantName
+          type: string
+          description: DE 43 (Card Acceptor Name/Location for All Transactions), subfield 1 (Card Acceptor Name) is the merchant doing business as name.
+          maxLength: 25
+          minLength: 1
+          example: ABC Store
+        acquiringInstitutionCountryCode:
+          title: acquiringInstitutionCountryCode
+          type: string
+          description: DE 19 (Acquiring Institution Country Code) is the code of the country where the acquiring institution is located. Refer to the ISO 3166 specification for more information.
+          maxLength: 3
+          minLength: 3
+          example: USA
+        acquiringInstitutionCode:
+          title: acquiringInstitutionCode
+          type: string
+          description: DE 32 (Acquiring Institution ID Code) identifies the acquiring institution (for example, merchant bank) or its agent.
+          maxLength: 11
+          minLength: 11
+          example: '12312312312'
+        amount:
+          title: amount
+          type: number
+          description: Transaction amount for the given transaction.
+          maxLength: 10
+          minLength: 1
+          example: 25.5
+        currencyCode:
+          $ref: '#/components/schemas/CurrencyCode'
+        indicator:
+          title: indicator
+          type: string
+          description: Transaction type (CLEAR = CL or REFUND = RFT).
+          maxLength: 8
+          minLength: 2
+          example: CL
+    PaymentCardEnrolment:
+      title: PaymentCardEnrolment
+      type: object
+      description: The response object which contains Payment Card information.
+      properties:
+        paymentCardId:
+          $ref: '#/components/schemas/PaymentCardId'
+        bin:
+          type: string
+          minLength: 4
+          maxLength: 8
+          pattern: ^\d{4,8}
+          description: First 4 to 8 digits of BIN will be present in response only in case of success already exists card and if valid supported FPAN bin range.
+          example: '545502'
+        last4fpan:
+          type: string
+          minLength: 4
+          maxLength: 4
+          pattern: ^\d{4}
+          description: Last 4 digits of a payment card number will be present only if the card number in the request is valid.
+          example: '8351'
+        status:
+          type: string
+          minLength: 6
+          maxLength: 7
+          description: Status of a Payment Card on the server. Possible values are ACTIVE & PENDING. The cards that are in PENDING state will move to ACTIVE state in background as soon as their enrolment is complete. The paymentCardId will remain same.
+          example: ACTIVE
+        errorCode:
+          title: errorCode
+          type: string
+          minLength: 10
+          maxLength: 30
+          example: INVALID_FPAN
+          description: 'Error code in case of registration failed. Possible values are,
+
+            * INVALID_FPAN = The card number in the request is either invalid or does not match with your currently supported account range. Try again with a valid card number or update the supported account range.
+
+            * INVALID_CARD_BASE_CURRENCY = The card base currency in the request is either invalid or does not match with your currently supported card base currency range. Try again with a valid card base currency.
+
+            * UNSUPPORTED_CURRENCY = The currency in the request is not supported, try again with a different one.'
+    PaymentCardId:
+      type: string
+      minLength: 36
+      maxLength: 36
+      pattern: ^[0-9A-Fa-f\-]{36}
+      description: Unique ID provided in the response while registering a payment card.
+      example: c5d88571-ac15-465a-a0d8-1ad1327b9a06
+    PaymentCardReference:
+      title: PaymentCardReference
+      type: object
+      description: Reference information for a Payment Card generated after a successful registration. This information should be used to perform the further operation for that card.
+      required:
+      - paymentCardId
+      - status
+      - bin
+      - last4fpan
+      properties:
+        paymentCardId:
+          $ref: '#/components/schemas/PaymentCardId'
+        bin:
+          type: string
+          minLength: 4
+          maxLength: 8
+          pattern: ^\d{4,8}
+          description: First 4 to 8 digits of a payment card number.
+          example: '534403'
+        last4fpan:
+          type: string
+          minLength: 4
+          maxLength: 4
+          pattern: ^\d{4}
+          description: Last 4 digits of a payment card number.
+          example: '9750'
+        status:
+          type: string
+          minLength: 6
+          maxLength: 7
+          description: Status of a Payment Card on the server. Possible values are ACTIVE & PENDING. The cards that are in PENDING state will move to ACTIVE state in background as soon as their enrolment is complete. The paymentCardId will remain same.
+          example: ACTIVE
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    HistoricalTransactionFootprint:
+      title: HistoricalTransactionFootprint
+      type: object
+      description: A single transaction footprint along with transaction info for a corresponding payment transaction.
+      required:
+      - transactionMetadata
+      - transactionFootprint
+      properties:
+        transactionMetadata:
+          $ref: '#/components/schemas/TransactionMetadata'
+        transactionFootprint:
+          $ref: '#/components/schemas/TransactionFootprint'
+    TransactionFootprint:
+      title: TransactionFootprint
+      type: object
+      description: A single transaction footprint calculated for a corresponding payment transaction.
+      required:
+      - transactionId
+      - mcc
+      allOf:
+      - $ref: '#/components/schemas/CarbonUsage'
+      - type: object
+        properties:
+          transactionId:
+            $ref: '#/components/schemas/TransactionId'
+          mcc:
+            type: string
+            description: Merchant category code of a payment transaction that uniquely defines a merchant business (same as in request).
+            minLength: 1
+            maxLength: 4
+            pattern: ^\d{1,4}
+          category:
+            $ref: '#/components/schemas/Category'
+          scoreReference:
+            type: string
+            description: Score Reference defines transaction scoring type, based on which score has been generated. Possible values are MCC or AIIA.
+            minLength: 3
+            maxLength: 4
+    Category:
+      title: Category
+      type: object
+      description: User understandable information about an MCC categorization.
+      properties:
+        mainCategory:
+          title: mainCategory
+          type: string
+          description: Main category to which an MCC belongs.
+          minLength: 5
+          maxLength: 100
+          pattern: ^[\w\-\_\&\,]+[\w\-\_\&\,\ ]{5,100}
+          example: Shopping
+        subCategory:
+          title: subCategory
+          type: string
+          description: Sub-category of a category to which an MCC belongs.
+          minLength: 5
+          maxLength: 100
+          pattern: ^[\w\-\_\&\,]+[\w\-\_\&\,\ ]{5,100}
+          example: Department Store
+        sector:
+          title: sector
+          type: string
+          description: Sector of a category to which an MCC belongs.
+          minLength: 5
+          maxLength: 100
+          pattern: ^[\w\-\_\&\,]+[\w\-\_\&\,\ ]{5,100}
+          example: Specialty Retail & Services
+        sectorCode:
+          title: sectorCode
+          type: string
+          description: Unique code assigned to each sector.
+          minLength: 3
+          maxLength: 3
+          pattern: ^\d{3}
+          example: '302'
+    HistoricalTransactionFootprints:
+      title: HistoricalTransactionFootprints
+      description: Response object which holds all the transaction footprints for historical transactions.
+      properties:
+        count:
+          description: The number of items in this batch (the size of the item array).
+          type: integer
+          example: 2
+        offset:
+          description: The number of items you asked the start of the list to be offset from.
+          type: integer
+          minimum: 0
+          example: 1
+        limit:
+          description: The number of items you asked the list to be limited to.
+          type: integer
+          minimum: 5
+          maximum: 50
+          example: 5
+        total:
+          description: The total number of items in the collection.
+          type: integer
+          example: 5
+        items:
+          description: 'List of `HistoricalTransactionFootprint` objects.
+
+            '
+          type: array
+          minItems: 1
+          maxItems: 5000
+          items:
+            $ref: '#/components/schemas/HistoricalTransactionFootprint'
+    CarbonUsage:
+      title: CarbonUsage
+      type: object
+      description: Object to hold carbon usage data.
+      properties:
+        carbonEmissionInGrams:
+          title: carbonEmissionInGrams
+          type: number
+          description: The transaction's CO2 emission in grams.
+          example: 48.52
+        carbonEmissionInOunces:
+          title: carbonEmissionInOunces
+          type: number
+          description: The transaction's CO2 emission in ounces.
+          example: 1.71
+    AggregateTransactionFootprints:
+      title: AggregateTransactionFootprints
+      type: object
+      description: List of AggregateTransactionFootprint.
+      required:
+      - aggregateTransactionFootprints
+      properties:
+        aggregateTransactionFootprints:
+          description: Array of `crossPANAggregations` based on given aggregation level.
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/AggregateTransactionFootprint'
+        crossPANAggregations:
+          description: Array of `crossPANAggregations` based on given aggregation level.
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/CrossPANAggregation'
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns a list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    AggregateTransactionFootprint:
+      title: AggregateTransactionFootprint
+      type: object
+      description: Aggregate transaction footprint for a single payment card ID.
+      required:
+      - paymentCardId
+      - footprintAggregations
+      properties:
+        paymentCardId:
+          $ref: '#/components/schemas/PaymentCardId'
+        footprintAggregations:
+          description: Array of FootprintAggregation based on given aggregation level.
+          type: array
+          minItems: 1
+          maxItems: 186
+          items:
+            $ref: '#/components/schemas/FootprintAggregation'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    CrossPANAggregation:
+      title: CrossPANAggregation
+      description: Cross PAN aggregated carbon footprint for given aggregate type.
+      properties:
+        aggregateValue:
+          type: string
+          minLength: 10
+          maxLength: 25
+          description: 'Aggregate duration for which aggregate has been calculated.
+
+            * Weekly = Week-26|2019 (i.e.,Starting from week 1 to week 26).
+
+            * Monthly = July|2019
+
+            '
+          example: Week-26|2019
+      allOf:
+      - $ref: '#/components/schemas/CarbonUsage'
+    Day:
+      type: string
+      minLength: 10
+      maxLength: 10
+      pattern: ^((?:19|20)[0-9][0-9])-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$
+      example: '2020-09-19'
+    PaymentCardEnrolments:
+      title: PaymentCardEnrolments
+      type: array
+      minItems: 1
+      maxItems: 500
+      description: List of payment card enrolments corresponding to each of the payment cards. This information should be used to identify the success and failure enrolments and take appropriate next steps.
+      items:
+        $ref: '#/components/schemas/PaymentCardEnrolment'
+    FootprintAggregation:
+      title: FootprintAggregation
+      type: object
+      description: Aggregation of carbon score for a payment card ID and given aggregation level.
+      allOf:
+      - $ref: '#/components/schemas/CarbonUsage'
+      - type: object
+        properties:
+          aggregateValue:
+            type: string
+            minLength: 10
+            maxLength: 25
+            description: 'Aggregate duration for which aggregate has been calculated.
+
+              * Weekly = Week-22|2019 (i.e., Week of the year).
+
+              * Monthly = July|2019
+
+              '
+    CurrencyCode:
+      type: string
+      description: Currency code as per ISO 4217
+      minLength: 3
+      maxLength: 3
+      pattern: ^[A-Za-z]{3}$
+    Error:
+      title: Error
+      type: object
+      description: Error object which contains details about the error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error. Every error message that is generated and returned by the gateway will have this field equal to Gateway. Other possible values are 'Carbon-Calculator' and 'Service-Provider'.
+          minLength: 1
+          maxLength: 100
+          example: Service-Provider-Mgmt
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: INVALID_REQUEST_PARAMETER
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+    CardCvcGuest:
+      type: object
+      properties:
+        cvc:
+          type: string
+          example: 100
+          minLength: 3
+          maxLength: 4
+          description: CVC
+        expiryInfo:
+          $ref: '#/components/schemas/cardExpiry'
+        primaryAccountNumber:
+          type: string
+          example: 5450985888403538
+          minLength: 12
+          maxLength: 19
+          description: The Primary Account Number (PAN).
+      title: Card
+    Error-415:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: UNSUPPORTED_CONTENT_TYPE
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The request Content-Type (<request content-type value>) is not supported for this service
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    3ds2:
+      type: object
+      required:
+      - transactionStatus
+      properties:
+        transactionStatus:
+          type: string
+          example: Y
+          minLength: 1
+          maxLength: 1
+          description: Status of Transaction (recommended - Y)
+        protocolVersion:
+          type: string
+          example: 2.2.2
+          minLength: 5
+          maxLength: 20
+          description: Protocol Version
+      description: Required If authPayerResponse object is passed, only for MPGS.
+    User:
+      type: object
+      required:
+      - email
+      - firstName
+      properties:
+        email:
+          type: string
+          example: John.Doe@mail.com
+          minLength: 8
+          maxLength: 30
+          description: Email
+        firstName:
+          type: string
+          example: John
+          minLength: 3
+          maxLength: 30
+          description: First Name
+        lastName:
+          type: string
+          example: Doe
+          minLength: 3
+          maxLength: 30
+          description: Last Name
+      title: User
+    Error-401:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to authorization failure
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: AUTHENTICATION_FAILED
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: OAuth signatures did not match.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Authentication:
+      type: object
+      properties:
+        3ds:
+          $ref: '#/components/schemas/3ds'
+        3ds2:
+          $ref: '#/components/schemas/3ds2'
+    Error-403:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to forbidden requests
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of forbidden request.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: INVALID_KEY
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The signing certificate is not valid.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error-201:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: CREATED
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: OAuth signatures did not match.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    OneTimePaymentSuccess:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          minLength: 13
+          maxLength: 36
+          description: Transaction Id
+        transactionMessage:
+          type: string
+          minLength: 3
+          maxLength: 30
+          description: Transaction Message
+        transactionStatus:
+          type: string
+          minLength: 5
+          maxLength: 20
+          description: Transaction Status
+      title: OneTimePaymentSuccess
+    GuestDonate:
+      type: object
+      required:
+      - card
+      - donation
+      - user
+      properties:
+        card:
+          $ref: '#/components/schemas/CardCvcGuest'
+        donation:
+          $ref: '#/components/schemas/Donation'
+        user:
+          $ref: '#/components/schemas/User'
+        sessionDetails:
+          $ref: '#/components/schemas/SessionDetails'
+        authPayerResponse:
+          $ref: '#/components/schemas/AuthPayerResponse'
+      title: GuestDonateRequest
+    AuthPayerResponse:
+      type: object
+      properties:
+        authentication:
+          $ref: '#/components/schemas/Authentication'
+    cardExpiry:
+      type: object
+      properties:
+        month:
+          type: string
+          example: 10
+          minLength: 2
+          maxLength: 2
+          description: Month
+        year:
+          type: string
+          example: 2025
+          minLength: 4
+          maxLength: 4
+          description: Year
+      title: Card Expiry Details
+    Donation:
+      type: object
+      required:
+      - amount
+      - charityId
+      - donationType
+      properties:
+        amount:
+          type: string
+          example: '11'
+          minLength: 1
+          maxLength: 20
+          description: Amount
+        charityId:
+          type: string
+          example: ae3c5f35-084a-4df9-a2af-7e0efd512fc0
+          minLength: 36
+          maxLength: 36
+          description: Charity Id (UUID)
+        donationType:
+          type: string
+          example: ONE-TIME
+          minLength: 5
+          maxLength: 20
+          description: Donation Type
+      title: Donation
+    GuestDonation:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          minLength: 13
+          maxLength: 36
+          description: Transaction Id
+        transactionMessage:
+          type: string
+          minLength: 3
+          maxLength: 30
+          description: Transaction Message
+        transactionStatus:
+          type: string
+          minLength: 5
+          maxLength: 20
+          description: Transaction Status
+      title: GuestDonationResponse
+    CardCVC:
+      type: object
+      description: Cvc is a unique number.***NOTE*** In case of card not added already then primaryAccountNumber and cardExpiry are required and cardCvc is conditional, optional for Stripe and MPGS payment gateways and required by other payment gateways.
+      properties:
+        primaryAccountNumber:
+          type: string
+          example: 5450985888403538
+          minLength: 12
+          maxLength: 19
+          description: The Primary Account Number (PAN).
+        expiryInfo:
+          $ref: '#/components/schemas/cardExpiry'
+        cvc:
+          type: string
+          example: 100
+          minLength: 3
+          maxLength: 4
+          description: CVC
+      title: CardCVC
+    Error-404:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to resource not found
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an resource not found.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: NOT_FOUND
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The signing certificate is not valid.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    3ds:
+      type: object
+      required:
+      - authenticationToken
+      - transactionId
+      - version
+      properties:
+        acsEci:
+          type: string
+          example: 2
+          minLength: 1
+          maxLength: 2
+          description: ascEci
+        authenticationToken:
+          type: string
+          example: kHyn+7YFi1EUAREAAAAvNUe6Hv8=
+          minLength: 28
+          maxLength: 32
+          description: Authentication Token
+        transactionId:
+          type: string
+          example: 9f343e5d-fc28-4818-88d4-17a35fb7dea9
+          minLength: 36
+          maxLength: 36
+          description: transaction ID (UUID)
+        version:
+          type: string
+          example: 1.0.2
+          minLength: 5
+          maxLength: 20
+          description: version
+      description: Required If authPayerResponse object is passed.
+    Error-500:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to server error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an server issue.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: PROGRAM_ID_NOT_FOUND
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Program id is required as this client is mapped to multiple programs.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    RealTimePayment:
+      type: object
+      required:
+      - donorId
+      - donation
+      properties:
+        cardId:
+          type: string
+          example: ebee3d81-18d4-409a-8330-73db083f2cfc
+          minLength: 36
+          maxLength: 36
+          description: 'Either Card Object (In case of card not added already) or cardId (In case of card added already) must be provided in this request.
+
+            '
+        card:
+          $ref: '#/components/schemas/CardCVC'
+        donation:
+          $ref: '#/components/schemas/Donation'
+        donorId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          example: 652ce9ff-fa5f-4e9f-8151-c73fa20088f7
+          format: uuid
+          description: Valid UUID.
+        pspVersion:
+          type: string
+          minLength: 2
+          maxLength: 2
+          example: '51'
+          description: PSP Version
+        source:
+          type: string
+          minLength: 3
+          maxLength: 20
+          example: Widget
+          description: Source
+        authPayerResponse:
+          $ref: '#/components/schemas/AuthPayerResponse'
+    SessionDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          example: SESSION0002692172456I23783337L2
+          minLength: 31
+          maxLength: 35
+          description: Id
+      title: SessionDetails
+    Error_2:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an error condition.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: DONOR_ID_INVALID
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Invalid donorId, it must be a valid UUID.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: Provided donorId is not valid, Please check and provide valid Unique Id.
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    CreditorAckForPaymentRetrieval:
+      type: object
+      required:
+      - creditorId
+      - creditorServiceProviderId
+      - creditorTradeName
+      - creditorCategoryCode
+      properties:
+        creditorId:
+          type: string
+          example: VerizonoMobile000588
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the Creditor by the CSP.
+        creditorServiceProviderId:
+          type: string
+          example: '000645'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the CSP during Mastercard onboarding.
+        creditorCategoryCode:
+          type: string
+          example: '0742'
+          minLength: 4
+          maxLength: 4
+          description: The category code of the Creditor, also known as Merchant Category Code (MCC). Enables the classification of Creditors into specific categories based on the type of business, trade or services supplied.
+        creditorTradeName:
+          type: string
+          example: VerizonoMobileLtd
+          minLength: 1
+          maxLength: 35
+          description: Name used by the Creditor in dealing with customers, which may not be the same as the one it uses for legal purposes.
+        creditorReturnString:
+          type: string
+          example: https://www.creditor.com/creditorreturnstring
+          minLength: 1
+          maxLength: 512
+          description: Return string (in URL encoded format) that is passed to the DSP to return the Debtor back to the Creditor's page.
+        creditorLogoUrl:
+          type: string
+          example: https://www.cdn.com/creditorlogourl
+          minLength: 1
+          maxLength: 512
+          description: Creditor's Logo (in URL encoded format). Can be used by the Debtor to display the Creditor's Logo.
+        creditorAccount:
+          type: object
+          required:
+          - accountNumber
+          description: Creditor's Account Information. Either the IBAN or account number should be used. This is provided only for Me-to-Me payments.
+          properties:
+            accountNumber:
+              type: string
+              x-guarded-string: 'true'
+              example: '45122351223323'
+              minLength: 1
+              maxLength: 35
+              description: Unique identifier for each account assigned by a financial institution or wallet provider. For example, IBAN. If sort code or routing number is 451223 and account number is 51223323, then after concatenation, the account number will be 45122351223323.
+            clearingSystem:
+              type: string
+              example: FPS
+              minLength: 1
+              maxLength: 35
+              description: Creditor or CSP requested real-time settlement method. * Refer to Codes and Formats section for more details.
+          example: example_value
+        creditorAccounts:
+          type: array
+          deprecated: true
+          description: Creditor's Account Information. Either of the IBAN or Other account should be used. (This "creditorAccounts" block is deprecated, use "creditorAccount" block)
+          items:
+            type: object
+            properties:
+              iban:
+                type: string
+                x-guarded-string: 'true'
+                example: GB54HBUK60161331926819
+                minLength: 1
+                maxLength: 35
+                description: International Bank Account Number to uniquely identify the account.
+              other:
+                type: object
+                description: Unique identification of an account.
+                required:
+                - accountNumber
+                properties:
+                  accountNumber:
+                    type: string
+                    x-guarded-string: 'true'
+                    example: '45122351223323'
+                    minLength: 1
+                    maxLength: 35
+                    description: Unique Identifier for each account assigned by a financial institution. For example, if sort code or routing number is 451223 and account number is 51223323, then after concatenation the account number will be 45122351223323.
+              clearingSystems:
+                type: array
+                items:
+                  type: string
+                example:
+                - FPS
+                description: Creditor or CSP requested real-time settlement method. * Refer to Codes and Formats section for more details.
+          example: []
+    NewPaymentRequestDetailRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - transaction
+        properties:
+          transaction:
+            $ref: '#/components/schemas/TransactionForPaymentRetrieval'
+    Status:
+      type: object
+      required:
+      - transactionStatus
+      properties:
+        transactionStatus:
+          type: string
+          example: RJCT
+          maxLength: 4
+          minLength: 4
+          description: Status of the transaction. * Refer to Codes and Formats section for more details.
+        transactionStatusReason:
+          type: string
+          example: FRDS
+          maxLength: 4
+          minLength: 4
+          description: Reason for declined transaction. * Refer to Codes and Formats section for more details.
+    Refund:
+      type: object
+      required:
+      - paymentRequestLifecycleId
+      - refundAmount
+      - refundReason
+      - refundMethod
+      properties:
+        paymentRequestLifecycleId:
+          type: string
+          example: '923123123123123100'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+        creditorRefundReference:
+          type: string
+          example: '454647894521236'
+          minLength: 1
+          maxLength: 35
+          description: Identifier assigned for the refund transaction by the Creditor or CSP.
+        caseReferenceId:
+          type: string
+          example: '2324252627'
+          minLength: 1
+          maxLength: 35
+          description: CaseReferenceId generated by Dispute Management System to be  Populated when the refund is a result of a dispute. This should be  populated only when the value for refundReason is DISPUTES.
+        refundAmount:
+          $ref: '#/components/schemas/Amount'
+        refundReason:
+          type: string
+          example: DUPLICATEORDER
+          minLength: 1
+          maxLength: 25
+          description: Identifies the reason for the refund, such as whether a refund is the result of a query or a dispute case. * Refer to Codes and Formats section for more details.
+        refundMethod:
+          type: string
+          example: FPS
+          minLength: 1
+          maxLength: 20
+          description: The method of refund that Creditor or CSP will use when they receive account details from DSP. * Refer to Codes and Formats section for more details.
+    ErrorList_2:
+      description: The list of errors
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error_3'
+    CreditorForPAL:
+      type: object
+      required:
+      - creditorId
+      - creditorServiceProviderId
+      properties:
+        creditorId:
+          type: string
+          example: VerizonoMobile000588
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the Creditor by the CSP.
+        creditorServiceProviderId:
+          type: string
+          example: '000645'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the CSP during Mastercard onboarding.
+        creditorReturnString:
+          type: string
+          example: https://www.creditor.com/creditorreturnstring
+          minLength: 1
+          maxLength: 512
+          description: Return string (in URL encoded format) that is passed to the DSP to return the Debtor back to the Creditor's checkout page.
+        ultimateCreditorId:
+          type: string
+          example: VerizonoMobile000123
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by the CSP of the ultimateCreditor to which the Payment is requested. When this value is populated, ultimateCreditor's Trade name is returned in creditorTradeName to DSP, which is displayed on the Mobile Banking App.
+        creditorAccount:
+          type: object
+          required:
+          - accountNumber
+          description: Creditor's Account Information. Either the IBAN or account number should be used. This is provided only for Me-to-Me payments.
+          properties:
+            accountNumber:
+              type: string
+              x-guarded-string: 'true'
+              example: '45122351223323'
+              minLength: 1
+              maxLength: 35
+              description: Unique identifier for each account assigned by a financial institution or wallet provider. For example, IBAN. If sort code or routing number is 451223 and account number is 51223323, then after concatenation, the account number will be 45122351223323.
+            clearingSystem:
+              type: string
+              example: FPS
+              minLength: 1
+              maxLength: 35
+              description: Creditor or CSP requested real-time settlement method. * Refer to Codes and Formats section for more details.
+          example: example_value
+    TransactionForPaymentRetrieval:
+      type: object
+      required:
+      - debtorServiceProviderId
+      - debtorId
+      - retrieveInitMethod
+      properties:
+        paymentRequestLifecycleId:
+          type: string
+          example: '923123123123123100'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+        debtorId:
+          type: string
+          example: Fxrsi5345
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the Debtor provided to Mastercard by the DSP.
+        debtorServiceProviderId:
+          type: string
+          example: 000369
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the DSP during Mastercard onboarding.
+        retrieveInitMethod:
+          type: string
+          example: INTENT
+          minLength: 1
+          maxLength: 30
+          description: Set by DSP to specify Payment Request retrieval initiation method. * Refer to Codes and Formats section for more details.
+        paymentRequestReferenceNumber:
+          type: string
+          example: '789563'
+          minLength: 6
+          maxLength: 6
+          description: Unique 6 character reference provided by Mastercard to the CSP to be conveyed to the Debtor to make a payment.
+    NewRefundRequestStatusRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - refundRequestLifecycleId
+        - paymentRequestLifecycleId
+        - debtor
+        properties:
+          paymentRequestLifecycleId:
+            type: string
+            minLength: 1
+            maxLength: 35
+            example: '923123123123123100'
+            description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+          refundRequestLifecycleId:
+            type: string
+            example: 0123901239100
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the refund request in subsequent transactions or services.
+          debtor:
+            $ref: '#/components/schemas/DebtorForSRR'
+    NewPaymentRequest:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - transaction
+        - creditor
+        properties:
+          creditor:
+            $ref: '#/components/schemas/CreditorForPAL'
+          agreementId:
+            type: string
+            example: a3e2a749088440eab8b40c926efe2931
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard to the agreement. Agreement Id is mandatory for payment with agreement request.
+          transaction:
+            $ref: '#/components/schemas/TransactionForPAL'
+          agreementType:
+            type: string
+            example: AOF
+            minLength: 1
+            maxLength: 4
+            description: Creditor requesting DSP to display to Debtor to setup Agreement during payment confirmation. * Refer to Codes and Formats section for more details.
+    PaymentConfirmationAdvice:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock_2'
+      - type: object
+        required:
+        - paymentRequestLifecycleId
+        - requestStatus
+        properties:
+          paymentRequestLifecycleId:
+            type: string
+            minLength: 1
+            maxLength: 35
+            example: '923123123123123100'
+            description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+          requestStatus:
+            $ref: '#/components/schemas/RequestStatus'
+          agreementStatus:
+            $ref: '#/components/schemas/AgreementStatus'
+    AgreementStatus:
+      type: object
+      required:
+      - agreementId
+      - agreementStatus
+      properties:
+        agreementId:
+          type: string
+          example: a3e2a749088440eab8b40c926efe2931
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard to the agreement.
+        agreementStatus:
+          type: string
+          example: APPR
+          minLength: 4
+          maxLength: 4
+          description: Status of the Agreement updated by DSP to either Approved or Rejected or Deleted. * Refer to Codes and Formats section for more details.
+    NewRefundAccount:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - refund
+        - creditor
+        properties:
+          creditor:
+            $ref: '#/components/schemas/CreditorForRefund'
+          refund:
+            $ref: '#/components/schemas/Refund'
+    PaymentRequest:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock'
+      - type: object
+        required:
+        - transaction
+        properties:
+          transaction:
+            $ref: '#/components/schemas/TransactionAckForPAL'
+          agreement:
+            $ref: '#/components/schemas/AgreementAcknowledgement'
+    RefundAccount:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock'
+      - type: object
+        required:
+        - refund
+        properties:
+          refund:
+            $ref: '#/components/schemas/RefundAcknowledgement'
+    NewPaymentConfirmationAdvice:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - paymentRequestLifecycleId
+        - status
+        - debtor
+        - acceptanceDateTime
+        properties:
+          paymentRequestLifecycleId:
+            type: string
+            minLength: 1
+            maxLength: 35
+            example: '923123123123123100'
+            description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+          acceptanceDateTime:
+            type: string
+            format: date-time
+            example: '2020-11-20T06:57:24.465Z'
+            description: ISO 8601 format date and time in Coordinated Universal Time (UTC) on when the Debtor has accepted or rejected the request.
+          creditAccountUsed:
+            type: boolean
+            example: true
+            description: Indicator to specify when a Credit account is used for the payment.
+          authorisedByDebtor:
+            type: boolean
+            example: false
+            description: Indicator whether the Consumer authorised the account on file transaction which was stepped up.
+          paymentRequestStatusRetrievalLifecycleId:
+            type: string
+            example: '111123123123123111'
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the Payment Request Status Retrieval request in subsequent transactions or services.
+          debtor:
+            $ref: '#/components/schemas/Debtor'
+          status:
+            $ref: '#/components/schemas/Status'
+          payment:
+            $ref: '#/components/schemas/Payment'
+          agreementConfirmation:
+            $ref: '#/components/schemas/AgreementConForPaymentAdvice'
+    StepUpNotification:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock_2'
+    PaymentRequestDetailRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock_2'
+      - type: object
+        required:
+        - creditor
+        - debtor
+        - transaction
+        properties:
+          debtor:
+            $ref: '#/components/schemas/DebtorAckForPaymentRetrieval'
+          creditor:
+            $ref: '#/components/schemas/CreditorAckForPaymentRetrieval'
+          transaction:
+            $ref: '#/components/schemas/TransactionAcknowledgement'
+          agreementType:
+            type: string
+            example: AOF
+            minLength: 1
+            maxLength: 4
+            description: Creditor requesting DSP to display to Debtor to setup Agreement during payment confirmation. * Refer to Codes and Formats section for more details.
+    Errors_2:
+      description: Object that contains the list of errors
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList_2'
+    RequestStatus:
+      type: object
+      required:
+      - paymentRequestStatus
+      properties:
+        paymentRequestStatus:
+          type: string
+          example: RJCT
+          maxLength: 4
+          minLength: 4
+          description: Status of the Payment Request returned by Mastercard. * Refer to Codes and Formats section for more details.
+    DebtorForSRR:
+      type: object
+      required:
+      - debtorId
+      - debtorServiceProviderId
+      properties:
+        debtorId:
+          type: string
+          example: Fxrsi5345
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the Debtor provided to Mastercard by the DSP.
+        debtorServiceProviderId:
+          type: string
+          example: 000369
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the DSP during Mastercard onboarding.
+    MessageRequestBlock:
+      type: object
+      required:
+      - messageId
+      - creationDateTime
+      - initiatingPartyId
+      - businessType
+      properties:
+        initiatingPartyId:
+          type: string
+          example: '000545'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the message sender.
+        messageId:
+          type: string
+          example: 7eab4eab35a542e085add0363a49c035
+          minLength: 1
+          maxLength: 35
+          description: A point-to-point unique identifier is assigned to every message by the message initiator.
+        creationDateTime:
+          type: string
+          format: date-time
+          example: '2020-11-20T06:57:24.465Z'
+          description: ISO 8601 format date and time in Coordinated Universal Time (UTC) when this message was created.
+        businessType:
+          type: number
+          example: 3
+          minimum: 1
+          maximum: 999
+          description: Unique identifier assigned by Mastercard to define the commercial product construct. * Refer to Codes and Formats section for more details.
+    TransactionForPAL:
+      type: object
+      required:
+      - instructionId
+      - endToEndId
+      - instructedAmount
+      - paymentRequestType
+      - transactionCreationDateTime
+      - purpose
+      - categoryPurpose
+      properties:
+        endToEndId:
+          type: string
+          example: 7jhg5eab35a542e085add0363a4423o6
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Creditor to identify Payment Request in their system.
+        instructionId:
+          type: string
+          example: 98dj4eab35a542e085add0363a40jk564
+          minLength: 1
+          maxLength: 60
+          description: Unique identifier for the transaction assigned by the transaction initiator (CSP).
+        paymentRequestType:
+          type: string
+          example: IMDT
+          minLength: 4
+          maxLength: 4
+          description: Set by the Creditor/CSP to define the settlement type of the Payment Request. * Refer to Codes and Formats section for more details.
+        transactionCreationDateTime:
+          type: string
+          format: date-time
+          example: '2020-11-20T06:57:24.465Z'
+          description: ISO 8601 format date and time in Coordinated Universal Time (UTC) the Payment Request was created.
+        instructedAmount:
+          description: The total amount of the payment request, as specified by the Creditor.
+          allOf:
+          - $ref: '#/components/schemas/Amount'
+          example: example_value
+        purpose:
+          type: string
+          example: ONLN
+          minLength: 1
+          maxLength: 35
+          description: Set by Creditor/CSP to indicate the Payment Request type. * Refer to Codes and Formats section for more details.
+        categoryPurpose:
+          type: string
+          example: PYMT
+          minLength: 1
+          maxLength: 35
+          description: Set by the Creditor/CSP to offer specific transaction processing. * Refer to Codes and Formats section for more details.
+        restriction:
+          type: string
+          example: 18PLUS
+          minLength: 1
+          maxLength: 30
+          description: Set by the Creditor/CSP to communicate any restrictions to be verified by DSP before payment authorization. * Refer to Codes and Formats section for more details.
+        creditAccountAllowed:
+          type: boolean
+          example: true
+          description: Indicator to specify Credit account can be used for the payment.
+        strongCustomerAuthentication:
+          type: boolean
+          example: true
+          description: Indicates a request from Creditor to DSP to step-up authentication for the transaction.
+    Payment:
+      type: object
+      required:
+      - paymentReference
+      - clearingSystem
+      - paymentDateTime
+      - paymentAmount
+      properties:
+        paymentReference:
+          type: string
+          minLength: 1
+          maxLength: 42
+          example: y18dvGsj3GJ57Tt
+          description: Unique Payment Reference of the real time settlement method provided by DSP.
+        clearingSystem:
+          type: string
+          minLength: 1
+          maxLength: 35
+          example: FPS
+          description: Creditor or CSP requested real-time settlement method. * Refer to Codes and Formats section for more details.
+        paymentDateTime:
+          type: string
+          format: date-time
+          example: '2020-11-20T06:57:24.465Z'
+          description: ISO 8601 format date and time in Coordinated Universal Time (UTC), when real time settlement is initiated.
+        paymentAmount:
+          description: The actual amount that has been transferred from the Debtor to the Creditor.
+          allOf:
+          - $ref: '#/components/schemas/Amount'
+          example: example_value
+    status:
+      type: object
+      required:
+      - refundStatus
+      properties:
+        refundStatus:
+          type: string
+          example: APPR
+          maxLength: 4
+          minLength: 4
+          description: Status of the transaction. * Refer to Codes and Formats section for more details.
+        refundStatusReason:
+          type: string
+          example: SYSM
+          maxLength: 4
+          minLength: 4
+          description: Reason for declined transaction. * Refer to Codes and Formats section for more details.
+    NewStepUpNotification:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - transaction
+        - debtorServiceProviderId
+        properties:
+          debtorServiceProviderId:
+            type: string
+            example: 000369
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned to the DSP during Mastercard onboarding.
+          transaction:
+            $ref: '#/components/schemas/TransactionForStepUpNotification'
+    TransactionAckForPAL:
+      type: object
+      required:
+      - paymentRequestLifecycleId
+      - confirmationExpiryTimeInterval
+      - paymentRequestStatus
+      properties:
+        paymentRequestLifecycleId:
+          type: string
+          example: '923123123123123100'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+        paymentRequestReferenceNumber:
+          type: string
+          example: '789563'
+          minLength: 6
+          maxLength: 6
+          description: Unique 6 character reference provided by Mastercard to the CSP to be conveyed to the Debtor in order to make a payment. This value is only returned for payment request without agreement.
+        accountServicerReference:
+          type: string
+          example: '12254935976349875'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard, to identify a particular payment (also referred to as settlement identifier) associated with a Payment Request.
+        confirmationExpiryTimeInterval:
+          type: number
+          example: 430
+          description: Time window given in seconds within which the Payment Confirmation must be received by the Creditor.
+        reconId:
+          type: string
+          example: RECON1201202201
+          minLength: 1
+          maxLength: 15
+          description: Reconciliation identifier assigned by Mastercard to the transaction.
+        paymentRequestStatus:
+          type: string
+          example: INPR
+          minLength: 4
+          maxLength: 4
+          description: Status of the Payment Request returned by Mastercard. * Refer to Codes and Formats section for more details.
+    CreditorForSRR:
+      type: object
+      required:
+      - creditorId
+      - creditorServiceProviderId
+      properties:
+        creditorId:
+          type: string
+          example: VerizonoMobile000588
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the Creditor by the CSP.
+        creditorServiceProviderId:
+          type: string
+          example: '000645'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the CSP during Mastercard onboarding.
+    RefundPaymentAdviseConfirmation:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock'
+    PaymentRequestStatusRetrievalAck:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock'
+      - type: object
+        required:
+        - paymentRequestStatusRetrievalLifecycleId
+        - retrievalRequestStatus
+        properties:
+          paymentRequestStatusRetrievalLifecycleId:
+            type: string
+            example: '111123123123123111'
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the Payment Request Status Retrieval request in subsequent transactions or services.
+          retrievalRequestStatus:
+            type: string
+            example: WFPC
+            minLength: 1
+            maxLength: 35
+            description: Informs the status of the Retrieval Request. * Refer to Codes and Formats section for more details.
+    NewRefundPaymentConfirmation:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - paymentRequestLifecycleId
+        - refundRequestLifecycleId
+        - creditor
+        - status
+        properties:
+          paymentRequestLifecycleId:
+            type: string
+            example: '923123123123123100'
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+          refundRequestLifecycleId:
+            type: string
+            example: 0123901239100
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the refund request in subsequent transactions or services.
+          creditor:
+            $ref: '#/components/schemas/CreditorForRefund'
+          status:
+            $ref: '#/components/schemas/status'
+          refundPaymentConfirmation:
+            $ref: '#/components/schemas/refundPayment'
+          refundRequestStatusRetrievalLifecycleId:
+            type: string
+            example: '111123123123123111'
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the Refund Request Status Retrieval request in subsequent transactions or services.
+    NewPaymentRequestStatusRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - paymentRequestLifecycleId
+        - creditor
+        properties:
+          paymentRequestLifecycleId:
+            type: string
+            example: '923123123123123100'
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+          creditor:
+            $ref: '#/components/schemas/CreditorForSRR'
+    TransactionForStepUpNotification:
+      type: object
+      required:
+      - paymentRequestLifecycleId
+      - stepUpMessage
+      properties:
+        paymentRequestLifecycleId:
+          type: string
+          example: '923123123123123100'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+        stepUpMessage:
+          type: string
+          example: Please go to your Banking App and Authorise the transaction
+          minLength: 1
+          maxLength: 250
+          description: Text message that DSP will be providing to display to the Debtor on Creditor website or application.
+        applicationUrl:
+          type: string
+          example: zapp://812768758639876189746
+          minLength: 1
+          maxLength: 512
+          description: URL that will be used by the Debtor to open the banking app from Creditor's website or application on a single device journey. Creditor should only use this when it's a single device journey.
+    CreditorForRefund:
+      type: object
+      required:
+      - creditorId
+      - creditorServiceProviderId
+      properties:
+        creditorId:
+          type: string
+          example: VerizonoMobile000588
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the Creditor by the CSP.
+        creditorServiceProviderId:
+          type: string
+          example: '000645'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the CSP during Mastercard onboarding.
+    RefundAcknowledgement:
+      type: object
+      required:
+      - refundRequestLifecycleId
+      - refundRequestStatus
+      properties:
+        refundRequestLifecycleId:
+          type: string
+          example: 0123901239100
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard, to identify the refund request in subsequent transactions or services.
+        refundRequestStatus:
+          type: string
+          example: INPR
+          minLength: 4
+          maxLength: 4
+          description: Refund Status returned to Mastercard. * Refer to Codes and Formats section for more details.
+    RefundRequestStatusRetrievalAck:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock_2'
+      - type: object
+        required:
+        - refundRequestStatusRetrievalLifecycleId
+        - retrievalRequestStatus
+        properties:
+          refundRequestStatusRetrievalLifecycleId:
+            type: string
+            example: '111123123123123111'
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the Refund Request Status Retrieval request in subsequent transactions or services.
+          retrievalRequestStatus:
+            type: string
+            example: WFPC
+            minLength: 1
+            maxLength: 35
+            description: Informs the status of the Retrieval Request. * Refer to Codes and Formats section for more details.
+    refundPayment:
+      type: object
+      required:
+      - refundpaymentReference
+      - clearingSystem
+      - refundAmount
+      properties:
+        refundpaymentReference:
+          type: string
+          minLength: 1
+          maxLength: 42
+          example: y18dvGsj3GJ57Tt
+          description: Unique refund payment Reference of the real time settlement method provided by CSP.
+        clearingSystem:
+          type: string
+          minLength: 1
+          maxLength: 35
+          example: FPS
+          description: Creditor or CSP requested real-time settlement method. * Refer to Codes and Formats section for more details.
+        refundAmount:
+          allOf:
+          - $ref: '#/components/schemas/Amount'
+          example: example_value
+    DebtorAckForPaymentRetrieval:
+      type: object
+      required:
+      - debtorId
+      - debtorServiceProviderId
+      properties:
+        debtorId:
+          type: string
+          example: Fxrsi5345
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the Debtor provided to Mastercard by the DSP.
+        debtorServiceProviderId:
+          type: string
+          example: 000369
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the DSP during Mastercard onboarding.
+    MessageResponseBlock:
+      type: object
+      required:
+      - messageId
+      - creationDateTime
+      - initiatingPartyId
+      - originalMessageId
+      properties:
+        initiatingPartyId:
+          type: string
+          example: ZAPP
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the message sender.
+        messageId:
+          type: string
+          example: 3bef00e542ec4be583b1b5d449799084
+          minLength: 1
+          maxLength: 35
+          description: A point-to-point unique identifier is assigned to every message by the message initiator.
+        creationDateTime:
+          type: string
+          example: '2020-11-20T06:57:24.465Z'
+          format: date-time
+          description: ISO 8601 format date and time in Coordinated Universal Time (UTC) when this message was created.
+        originalMessageId:
+          type: string
+          example: 7eab4eab35a542e085add0363a49c035
+          minLength: 1
+          maxLength: 35
+          description: "Original message identifier generated and sent by the initiator of\n the request message."
+    TransactionAcknowledgement:
+      type: object
+      required:
+      - endToEndId
+      - instructedAmount
+      - paymentRequestLifecycleId
+      - categoryPurpose
+      - confirmationExpiryTimeInterval
+      - paymentRequestType
+      - instructionId
+      - transactionCreationDateTime
+      - purpose
+      properties:
+        paymentRequestLifecycleId:
+          type: string
+          example: '923123123123123100'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+        endToEndId:
+          type: string
+          example: 7jhg5eab35a542e085add0363a4423o6
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Creditor to identify Payment Request in their system.
+        instructionId:
+          type: string
+          example: 98dj4eab35a542e085add0363a40jk564
+          minLength: 1
+          maxLength: 60
+          description: Unique identifier for the transaction assigned by the transaction initiator (CSP).
+        accountServicerReference:
+          type: string
+          example: '12254935976349875'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard, to identify a particular payment (also referred to as settlement identifier) associated with a Payment Request.
+        reconId:
+          type: string
+          example: RECON1201202201
+          minLength: 1
+          maxLength: 15
+          description: Reconciliation identifier assigned by Mastercard to the transaction.
+        confirmationExpiryTimeInterval:
+          type: number
+          example: 150
+          description: Time window given in seconds within which the Payment Confirmation must be received by the Mastercard.
+        paymentRequestType:
+          type: string
+          example: IMDT
+          minLength: 4
+          maxLength: 4
+          description: Set by the Creditor/CSP to define the settlement type of the Payment Request. * Refer to Codes and Formats section for more details.
+        transactionCreationDateTime:
+          type: string
+          format: date-time
+          example: '2020-11-20T06:57:24.465Z'
+          description: ISO 8601 format date and time in Coordinated Universal Time (UTC) the Payment Request was created.
+        instructedAmount:
+          description: The total amount of the payment request, as specified by the Creditor.
+          allOf:
+          - $ref: '#/components/schemas/Amount'
+          example: example_value
+        purpose:
+          type: string
+          example: ONLN
+          minLength: 1
+          maxLength: 35
+          description: Set by Creditor/CSP to indicate the Payment Request type. * Refer to Codes and Formats section for more details.
+        categoryPurpose:
+          type: string
+          example: PYMT
+          minLength: 1
+          maxLength: 35
+          description: Set by the Creditor/CSP to offer specific transaction processing. * Refer to Codes and Formats section for more details.
+        restriction:
+          type: string
+          example: 18PLUS
+          minLength: 1
+          maxLength: 30
+          description: Set by the Creditor/CSP to communicate any restrictions to be verified by DSP before payment authorization. * Refer to Codes and Formats section for more details.
+        creditAccountAllowed:
+          type: boolean
+          example: true
+          description: Indicator to specify Credit account can be used for the payment.
+        strongCustomerAuthentication:
+          type: boolean
+          example: true
+          description: Indicates a request from Creditor to DSP to step-up authentication for the transaction.
+    Debtor:
+      type: object
+      required:
+      - debtorId
+      - debtorServiceProviderId
+      properties:
+        debtorId:
+          type: string
+          example: Fxrsi5345
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the Debtor provided to Mastercard by the DSP.
+        debtorServiceProviderId:
+          type: string
+          example: 000369
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the DSP during Mastercard onboarding.
+    AgreementConForPaymentAdvice:
+      description: Agreement Confirmation from DSP
+      type: object
+      required:
+      - agreementConfirmed
+      properties:
+        agreementConfirmed:
+          type: boolean
+          example: true
+          description: Indicates true whether Agreement was confirmed by Debtor. False for any other reasons.
+        agreementStatusReason:
+          type: string
+          example: SYSP
+          maxLength: 4
+          minLength: 4
+          description: Reason for declined agreement. * Refer to Codes and Formats section for more details.
+        accountNickname:
+          type: string
+          x-guarded-string: 'true'
+          example: bankname_account
+          minLength: 1
+          maxLength: 35
+          description: Nickname of the account is passed when agreementConfirmed is true.
+    ErrorWrapper_2:
+      description: A top level object for errors
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors_2'
+    Amount:
+      required:
+      - currency
+      - value
+      type: object
+      properties:
+        currency:
+          type: string
+          example: GBP
+          maxLength: 3
+          minLength: 3
+          description: ISO 4217 code for Currency.
+        value:
+          type: number
+          example: 100.25
+          description: Amount value.
+    MessageResponseBlock_2:
+      type: object
+      required:
+      - messageId
+      - creationDateTime
+      - initiatingPartyId
+      - originalMessageId
+      properties:
+        initiatingPartyId:
+          type: string
+          example: ZAPP
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the message sender.
+        messageId:
+          type: string
+          example: 3bef00e542ec4be583b1b5d449799084
+          minLength: 1
+          maxLength: 35
+          description: A point-to-point unique identifier is assigned to every message by the message initiator.
+        creationDateTime:
+          type: string
+          example: '2020-11-20T06:57:24.465Z'
+          format: date-time
+          description: ISO 8601 format date and time in Coordinated Universal Time (UTC) when this message was created.
+        originalMessageId:
+          type: string
+          example: 7eab4eab35a542e085add0363a49c035
+          minLength: 1
+          maxLength: 35
+          description: Original message identifier generated and sent by the initiator of the request message.
+    AgreementAcknowledgement:
+      type: object
+      required:
+      - agreementId
+      - agreementStatus
+      properties:
+        agreementId:
+          type: string
+          example: a3e2a749088440eab8b40c926efe2931
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard to the agreement.
+        agreementStatus:
+          type: string
+          example: INPR
+          minLength: 4
+          maxLength: 4
+          description: Agreement Status returned by Mastercard. * Refer to Codes and Formats section for more details.
+    Error_3:
+      description: A single error
+      type: object
+      properties:
+        Source:
+          type: string
+          example: ZAPP
+          description: Source of the error
+        ReasonCode:
+          type: string
+          example: STVL-9999
+          description: Error Code
+        Description:
+          type: string
+          example: Invalid structure
+          description: Error Description
+        Recoverable:
+          type: boolean
+          example: false
+          description: Boolean value to specify if error is recoverable or not
+        Details:
+          type: string
+          example: Invalid structure
+          description: Optional details of the error
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      description: The number of items you asked the list to be limited to.
+      required: false
+      example: 50
+      schema:
+        type: integer
+        default: 50
+        minimum: 5
+        maximum: 50
+    PaymentCardId:
+      name: payment_card_id
+      in: path
+      description: Unique ID provided in the response while registering a payment card.
+      required: true
+      example: 83c0711e-1851-4771-950a-055dded7f168
+      schema:
+        $ref: '#/components/schemas/PaymentCardId'
+    Offset:
+      name: offset
+      in: query
+      description: The number of items you need the start of the list to be offset from.
+      required: false
+      example: 50
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+    ToDate:
+      name: to_date
+      in: query
+      description: End date for searching transaction (Format- YYYY-MM-DD).
+      required: true
+      example: '2021-05-07'
+      schema:
+        $ref: '#/components/schemas/Day'
+    FromDate:
+      name: from_date
+      in: query
+      description: Start date for searching transaction (Format- YYYY-MM-DD).
+      required: true
+      example: '2018-05-07'
+      schema:
+        $ref: '#/components/schemas/Day'
+    ClientId:
+      name: x-openapi-clientid
+      in: header
+      description: ClientId is a unique and a mandatory ID shared while creating a project on Mastercard Developers Portal.
+      required: true
+      schema:
+        type: string
+        example: 0a7e433a-63fc-4557-8cf4
+    ProgramId:
+      name: ProgramId
+      in: header
+      description: ProgramId is an optional field, but if a client has more than one program associated to it, then this field becomes mandatory.
+      required: false
+      schema:
+        type: string
+        example: 80380ef2-5037-4e57-86bf-1bdd1efb0ae2
+    X-Product-ID_2:
+      name: X-Product-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product by Mastercard and given to the participant.
+    X-Participant-ID:
+      name: X-Participant-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        example: '000545'
+        minLength: 1
+        maxLength: 50
+      description: Unique identifier assigned to the participant by Mastercard during onboarding.
+    X-Product-ID:
+      name: X-Product-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        example: PBARFP
+        minLength: 1
+        maxLength: 50
+      description: Unique identifier assigned to the product construct by Mastercard and given to the participant.
+    payment_request_lifecycle_id:
+      name: payment_request_lifecycle_id
+      in: path
+      required: true
+      description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+      schema:
+        type: string
+        example: '128361739311340082'
+        minLength: 1
+        maxLength: 35
+    X-Request-ID:
+      name: X-Request-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        example: 7eab4eab35a542e085add0363a49c035
+        minLength: 1
+        maxLength: 50
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and used for tracing, troubleshooting and analysis purposes.
+    Idempotency-Key:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Unique identifier generated by the participant. Mastercard uses this identifier to recognize subsequent retries of the same request and ensure idempotent behaviour by sending the same response without repeating the operation again.
+      schema:
+        type: string
+        format: uuid
+        example: 7da7a728-f910-11e6-942a-68f728c1ba70
+        minLength: 1
+        maxLength: 36
+    X-JWS-Signature:
+      name: X-JWS-Signature
+      in: header
+      required: true
+      description: JWS detached signature is applied to ensure data integrity.
+      schema:
+        type: string
+        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
+        minLength: 1
+        maxLength: 512
+    refund_request_lifecycle_id:
+      name: refund_request_lifecycle_id
+      in: path
+      required: true
+      description: Unique identifier assigned by Mastercard, to identify the refund request in subsequent transactions or services.
+      schema:
+        type: string
+        example: '245566173931134008'
+        minLength: 1
+        maxLength: 35
+  headers:
+    Location:
+      description: The URL to check on status of resource
+      schema:
+        type: string
+    X-MC-Correlation-ID:
+      description: This id is unique per request and is used to co-relate a request to its response. Customers must share this id while raising any incident for this API.
+      schema:
+        $ref: '#/components/schemas/X-MC-Correlation-ID'
+    X-Product-ID_2:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product by Mastercard and given to the participant.
+    X-JWS-Signature:
+      required: true
+      description: JWS detached signature is applied to ensure data integrity.
+      schema:
+        type: string
+        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
+        minLength: 1
+        maxLength: 512
+    X-Participant-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: '000545'
+      description: Unique identifier assigned to the participant by Mastercard during onboarding.
+    X-Request-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: 7eab4eab35a542e085add0363a49c035
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and used for tracing, troubleshooting and analysis purposes.
+    X-Product-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product construct by Mastercard and given to the participant.
+    X-Request-ID_2:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: 7eab4eab35a542e085add0363a49c035
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and for tracing, troubleshooting and analysis purposes.

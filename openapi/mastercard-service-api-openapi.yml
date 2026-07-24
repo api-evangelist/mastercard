@@ -1,0 +1,578 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Service API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Service
+paths:
+  /service-providers:
+    get:
+      tags:
+      - Service
+      summary: Fetches an existing Service Provider
+      description: Allows a registered Service Provider to fetch its information from the server.
+      operationId: GetServiceProviderById
+      responses:
+        '200':
+          $ref: '#/components/responses/ServiceProvider'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+    put:
+      tags:
+      - Service
+      summary: Updates an existing Service Provider details
+      description: Allows a registered Service Provider to update its configuration on the server. A Service Provider should call this API first after the successful creation of the project on Mastercard Developers before they call other APIs.
+      operationId: UpdateServiceProvider
+      requestBody:
+        $ref: '#/components/requestBodies/ServiceProviderConfig'
+      responses:
+        '200':
+          $ref: '#/components/responses/ServiceProvider'
+        '400':
+          $ref: '#/components/responses/ServiceProviderBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+        '415':
+          $ref: '#/components/responses/ServiceProviderUnsupportedMediaTypeError'
+  /service-providers/payment-cards:
+    post:
+      tags:
+      - Service
+      summary: Bulk Registration of Payment Cards
+      description: Allows a registered service provider to add a list of new payment cards to its profile.This endpoint uses [Mastercard payload encryption](https://mstr.cd/2UPfda0). Refer to the [Payload Encryption](https://developer.mastercard.com/carbon-calculator/documentation/tutorials-and-guides/payload-encryption/) page for implementation details.
+      operationId: BulkRegisterPaymentCards
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentCards'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentCardEnrolments'
+        '400':
+          $ref: '#/components/responses/PaymentCardEnrolmentsBadRequestError'
+        '404':
+          $ref: '#/components/responses/ServiceProviderNotFoundError'
+  /service-providers/payment-cards/{payment_card_id}:
+    delete:
+      tags:
+      - Service
+      summary: Delete a Payment Card
+      description: 'Allows a registered Service Provider to delete single Payment Card at a time from its profile. Any data associated with a requested paymentCardId will also be deleted permanently.
+
+
+        On the successful response from the server, a Service Provider should remove all the requested paymentCardIds from the system.
+
+
+        Once a request has been received from a Service Provider, data deletion will happen immediately.'
+      operationId: PaymentCardDeletion
+      parameters:
+      - $ref: '#/components/parameters/PaymentCardId'
+      responses:
+        '202':
+          $ref: '#/components/responses/Accepted'
+        '400':
+          $ref: '#/components/responses/PaymentCardDeletionsBadRequestError'
+        '404':
+          $ref: '#/components/responses/PaymentCardByIdNotFoundError'
+components:
+  examples:
+    ServiceProviderUnsupportedMediaTypeError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: UNSUPPORTED_MEDIA_TYPE
+            Description: Requested media type is not supported, try again with the supported media type.
+            Recoverable: false
+            Details: ''
+    RegisterPaymentCardRequestDecryptionError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: CRYPTO_ERROR
+            Description: We are unable to decipher your request, kindly verify your request before trying again. If the problem persists then reach out to your Mastercard associate.
+            Recoverable: false
+            Details: ''
+    ServiceProviderInvalidRequestParameterError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is either invalid or is missing, try again with the correct request.
+            Recoverable: false
+            Details: supportedAccountRange must match "^[\d\,]{1,}"
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is either invalid or is missing, try again with the correct request.
+            Recoverable: false
+            Details: customerName must match "^[\w\s]{1,200}"
+    PaymentCardDeletionsRequestValidationError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with the correct request.
+            Recoverable: false
+            Details: ''
+    PaymentCardDeletionsInvalidCardIdError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One or more payment card IDs in the request are invalid, try again by sending valid Ids.
+            Recoverable: false
+            Details: paymentCardId must match "^[0-9A-Fa-f\-]{36}"
+    ServiceProviderNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: ACCOUNT_NOT_FOUND
+            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
+            Recoverable: false
+            Details: ''
+    PaymentCardByIdNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider
+            ReasonCode: PAYMENT_CARD_NOT_FOUND
+            Description: Paymentcard Not Found for the given payment card id in the path.
+            Recoverable: false
+            Details: ''
+    PaymentCardEnrolments:
+      value:
+      - bin: '545502'
+        last4fpan: '8351'
+        status: ACTIVE
+        paymentCardId: 9f12f385-0b47-4cca-9e9d-baced21bca63
+      - bin: '545502'
+        last4fpan: '0762'
+        status: ACTIVE
+        paymentCardId: f506521c-38c6-4e87-bf1a-14023ce10d4e
+      - bin: '545502'
+        last4fpan: '2834'
+        status: PENDING
+        paymentCardId: 2da9571f-0cf2-458d-bc4b-9218578ce50d
+      - bin: '520402'
+        last4fpan: '2824'
+        errorCode: INVALID_FPAN
+    DuplicateSenderIdError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: SENDER_ID_ALREADY_EXISTS
+            Description: The sender id in the request is already registered on the server, try again with a different one.
+            Recoverable: false
+            Details: ''
+    RegisterPaymentCardRequestValidationError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with the correct request.
+            Recoverable: false
+            Details: ''
+    ServiceProviderDetails:
+      value:
+        clientId: fjl2fxzsYl1OpvxkBItC9nVw1PSQc_b-eQMcmQFg011ab4b5
+        customerId: ''
+        customerName: ABC Bank
+        supportedAccountRange: 534403, 518145, 518152, 5403, 5424
+        email: John.Doe@mail.com
+        status: ACTIVE
+        senderId: cc-fp@anz
+        ica: '24528'
+        cardHolderBase: '9900000'
+  responses:
+    Accepted:
+      description: Accepted
+      headers:
+        Location:
+          $ref: '#/components/headers/Location'
+    ServiceProvider:
+      description: The response object that contains the latest information of a Service Provider as available on the server.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServiceProvider'
+          examples:
+            ServiceProviderDetails:
+              $ref: '#/components/examples/ServiceProviderDetails'
+    PaymentCardByIdNotFoundError:
+      description: This response code is returned when the server cannot find the paymentcard which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            PaymentCardByIdNotFoundError:
+              $ref: '#/components/examples/PaymentCardByIdNotFoundError'
+    PaymentCardEnrolmentsBadRequestError:
+      description: This response code is returned when a request is invalid, or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            PaymentCardEnrolmentsRequestValidationError:
+              $ref: '#/components/examples/RegisterPaymentCardRequestValidationError'
+            PaymentCardEnrolmentsRequestDecryptionError:
+              $ref: '#/components/examples/RegisterPaymentCardRequestDecryptionError'
+    PaymentCardDeletionsBadRequestError:
+      description: This response code is returned when either a request is invalid or one or more paymentCardIds are invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            PaymentCardDeletionsRequestValidationError:
+              $ref: '#/components/examples/PaymentCardDeletionsRequestValidationError'
+            PaymentCardDeletionsInvalidCardIdError:
+              $ref: '#/components/examples/PaymentCardDeletionsInvalidCardIdError'
+    ServiceProviderBadRequestError:
+      description: This response code is returned when either a request is invalid or data provided in the request is in invalid format.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderInvalidRequestParameterError:
+              $ref: '#/components/examples/ServiceProviderInvalidRequestParameterError'
+            ServiceProviderDupicateSenderIdError:
+              $ref: '#/components/examples/DuplicateSenderIdError'
+    PaymentCardEnrolments:
+      description: The response object that contains the list of payment cards information after batch registration.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentCardEnrolments'
+          examples:
+            PaymentCardEnrolments:
+              $ref: '#/components/examples/PaymentCardEnrolments'
+    ServiceProviderUnsupportedMediaTypeError:
+      description: This response code is returned when the value of provided Content-Type parameter is other than expected.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderUnsupportedMediaTypeError:
+              $ref: '#/components/examples/ServiceProviderUnsupportedMediaTypeError'
+    ServiceProviderNotFoundError:
+      description: This response code is returned when the server cannot find the account which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+  schemas:
+    X-MC-Correlation-ID:
+      type: string
+      example: X-MC-Correlation-ID:5e4b7f904d2820f688c67ef9fc0035
+    ServiceProvider:
+      title: ServiceProvider
+      type: object
+      description: Information about a Service Provider as available on the server.
+      required:
+      - clientId
+      - customerName
+      - supportedAccountRange
+      - status
+      properties:
+        clientId:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: ^[\w\d\-\_]{1,200}
+          description: Unique Service Provider identifier from the Mastercard Developer Portal.
+          example: fjl2fxzsYl1OpvxkBItC9nVw1PSQc_b-eQMcmQFg011ab4b5
+        customerId:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: ^[\w\d]{1,200}
+          description: Unique Service Provider identifier assigned by Mastercard which remains same across all Mastercard systems.
+          example: customerid1
+        customerName:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: ^[\w\s]{1,200}
+          description: Name of a Service Provider as registered on the server. This doesn't have to be a legal name.
+          example: ABC Bank
+        supportedAccountRange:
+          type: string
+          minLength: 4
+          maxLength: 1000
+          pattern: ^[\d\,]{4,1000}
+          description: Comma separated account range supported by a Service Provider as available on the server.
+          example: 534403,518145,518152,5403,5424
+        email:
+          type: string
+          description: Email address of a Service Provider as registered on the server.
+          minLength: 5
+          maxLength: 100
+          example: John.Doe@mail.com
+        status:
+          type: string
+          minLength: 6
+          maxLength: 9
+          description: Status of a Service Provider on the server. Possible values are ACTIVE, INACTIVE & TERMINATED.
+          example: ACTIVE
+        senderId:
+          type: string
+          description: Logical address of the service provider which has been configured in NGFT(Next Gen File Transfer).
+          example: cc-fp@anz
+        ica:
+          type: string
+          description: Activity ICA value of the customer.
+          example: '24528'
+        cardHolderBase:
+          type: string
+          description: Total cardholder base of the service provider.
+          example: '9900000'
+    ServiceProviderConfig:
+      title: ServiceProviderConfig
+      type: object
+      description: Configuration details for a Service Provider
+      properties:
+        customerName:
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: ^[\w\s]{1,200}
+          description: Name with which a Service Provider is registered and will be identified on the server. This doesn't have to be a legal name.
+          example: ABC Bank
+        supportedAccountRange:
+          type: string
+          minLength: 1
+          pattern: ^[\d\,]{1,}
+          description: Comma separated account range supported by a Service Provider.
+          example: 534403,518145,518152,5403,5424
+        senderId:
+          type: string
+          description: Logical address of the service provider which has been configured in NGFT(Next Gen File Transfer).
+          example: cc-fp@anz
+        cardHolderBase:
+          type: string
+          pattern: ^\d+
+          minimum: 1
+          maximum: 999999999999999
+          exclusiveMinimum: false
+          description: Total card holder base details of service provider.
+          example: '9900000'
+    PaymentCard:
+      title: PaymentCard
+      type: object
+      description: The request object for registering a new Payment Card. This object will be encrypted before sending it to the server.
+      required:
+      - fpan
+      - cardBaseCurrency
+      properties:
+        fpan:
+          type: string
+          minLength: 16
+          maxLength: 16
+          pattern: ^\d{16}
+          description: Original payment card number in full.
+          example: '5344035171229750'
+        cardBaseCurrency:
+          $ref: '#/components/schemas/CurrencyCode'
+      example:
+        fpan: '5344035171229750'
+        cardBaseCurrency: EUR
+    PaymentCardEnrolment:
+      title: PaymentCardEnrolment
+      type: object
+      description: The response object which contains Payment Card information.
+      properties:
+        paymentCardId:
+          $ref: '#/components/schemas/PaymentCardId'
+        bin:
+          type: string
+          minLength: 4
+          maxLength: 8
+          pattern: ^\d{4,8}
+          description: First 4 to 8 digits of BIN will be present in response only in case of success already exists card and if valid supported FPAN bin range.
+          example: '545502'
+        last4fpan:
+          type: string
+          minLength: 4
+          maxLength: 4
+          pattern: ^\d{4}
+          description: Last 4 digits of a payment card number will be present only if the card number in the request is valid.
+          example: '8351'
+        status:
+          type: string
+          minLength: 6
+          maxLength: 7
+          description: Status of a Payment Card on the server. Possible values are ACTIVE & PENDING. The cards that are in PENDING state will move to ACTIVE state in background as soon as their enrolment is complete. The paymentCardId will remain same.
+          example: ACTIVE
+        errorCode:
+          title: errorCode
+          type: string
+          minLength: 10
+          maxLength: 30
+          example: INVALID_FPAN
+          description: 'Error code in case of registration failed. Possible values are,
+
+            * INVALID_FPAN = The card number in the request is either invalid or does not match with your currently supported account range. Try again with a valid card number or update the supported account range.
+
+            * INVALID_CARD_BASE_CURRENCY = The card base currency in the request is either invalid or does not match with your currently supported card base currency range. Try again with a valid card base currency.
+
+            * UNSUPPORTED_CURRENCY = The currency in the request is not supported, try again with a different one.'
+    PaymentCardId:
+      type: string
+      minLength: 36
+      maxLength: 36
+      pattern: ^[0-9A-Fa-f\-]{36}
+      description: Unique ID provided in the response while registering a payment card.
+      example: c5d88571-ac15-465a-a0d8-1ad1327b9a06
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns a list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    PaymentCardEnrolments:
+      title: PaymentCardEnrolments
+      type: array
+      minItems: 1
+      maxItems: 500
+      description: List of payment card enrolments corresponding to each of the payment cards. This information should be used to identify the success and failure enrolments and take appropriate next steps.
+      items:
+        $ref: '#/components/schemas/PaymentCardEnrolment'
+    CurrencyCode:
+      type: string
+      description: Currency code as per ISO 4217
+      minLength: 3
+      maxLength: 3
+      pattern: ^[A-Za-z]{3}$
+    Error:
+      title: Error
+      type: object
+      description: Error object which contains details about the error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error. Every error message that is generated and returned by the gateway will have this field equal to Gateway. Other possible values are 'Carbon-Calculator' and 'Service-Provider'.
+          minLength: 1
+          maxLength: 100
+          example: Service-Provider-Mgmt
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: INVALID_REQUEST_PARAMETER
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+  headers:
+    Location:
+      description: The URL to check on status of resource
+      schema:
+        type: string
+    X-MC-Correlation-ID:
+      description: This id is unique per request and is used to co-relate a request to its response. Customers must share this id while raising any incident for this API.
+      schema:
+        $ref: '#/components/schemas/X-MC-Correlation-ID'
+  requestBodies:
+    PaymentCards:
+      required: true
+      description: List of payment cards to be enroled.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PaymentCard'
+            minItems: 1
+            maxItems: 100
+            example:
+            - fpan: '5455029300268351'
+              cardBaseCurrency: EUR
+            - fpan: '5455023979760762'
+              cardBaseCurrency: USD
+            - fpan: '5455023979762834'
+              cardBaseCurrency: USD
+            - fpan: '5455023979762824'
+              cardBaseCurrency: USD
+    ServiceProviderConfig:
+      description: Configuration details for service provider which needs to be update. It should contain only those parameters which you want to update. If you are calling this API for the first time then it is recommended to send all the parameters.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServiceProviderConfig'
+  parameters:
+    PaymentCardId:
+      name: payment_card_id
+      in: path
+      description: Unique ID provided in the response while registering a payment card.
+      required: true
+      example: 83c0711e-1851-4771-950a-055dded7f168
+      schema:
+        $ref: '#/components/schemas/PaymentCardId'

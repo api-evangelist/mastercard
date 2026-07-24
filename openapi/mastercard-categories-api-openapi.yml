@@ -1,0 +1,378 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Categories API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Categories
+paths:
+  /supported-merchant-categories:
+    get:
+      tags:
+      - Categories
+      summary: Provide Supported MCCs
+      description: Provides a list of merchant category codes supported by the application. While sending transaction data in the Transaction object, 'mcc' should be from one of the supported merchant categories. It is recommended to cache this list and use it for checking before sending transactions for footprint calculation. Generally this list doesn't change that often, but it is recommended to refresh this data every 24-hours.
+      operationId: GetSupportedMerchantCategories
+      responses:
+        '200':
+          $ref: '#/components/responses/SupportedMerchantCategories'
+  /categories:
+    get:
+      tags:
+      - Categories
+      summary: Mastercard Get a List of Merchant Categories
+      description: Returns a list of merchant categories
+      operationId: getMerchantCategories
+      responses:
+        '200':
+          $ref: '#/components/responses/Categories'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  responses:
+    SupportedMerchantCategories:
+      description: This response code is returned when a request is accepted and successfully processed. A corresponding response will be returned for the API caller.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SupportedMerchantCategories'
+          examples:
+            SupportedMerchantCategories:
+              $ref: '#/components/examples/SupportedMerchantCategories'
+    UnauthorizedError:
+      description: Authentication information was missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            Errors:
+            - Error:
+                Source: locations-merchants-api
+                ReasonCode: UNAUTHORIZED
+                Description: We couldn't recognize you
+                Recoverable: false
+                Details: Full authentication is required to access this resource
+    MCSupportedMerchantCategories:
+      description: This response code is returned when a request is accepted and successfuly processed. A corresponding response will be returned for the API caller.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MCSupportedMerchantCategories'
+          examples:
+            MCSupportedMerchantCategories:
+              $ref: '#/components/examples/MCSupportedMerchantCategories'
+    Categories:
+      description: List of Merchant Categories
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Categories'
+    ForbiddenError:
+      description: Insufficient permissions for interacting with the resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            Errors:
+            - Error:
+                Source: locations-merchants-api
+                ReasonCode: PERMISSION_DENIED
+                Description: You don't seem authorized to do that
+                Recoverable: false
+                Details: Reading merchant information requires read-only permissions
+  schemas:
+    MerchantCategory:
+      title: MerchantCategory
+      type: object
+      description: Information for a supported merchant category.
+      required:
+      - mcc
+      - category
+      properties:
+        mcc:
+          type: string
+          maxLength: 4
+          minLength: 1
+          pattern: ^\d{1,4}
+          description: Merchant category code of a payment transaction that uniquely defines a merchant business.
+          example: '3862'
+        category:
+          $ref: '#/components/schemas/Category'
+    X-MC-Correlation-ID:
+      type: string
+      example: X-MC-Correlation-ID:5e4b7f904d2820f688c67ef9fc0035
+    SupportedMerchantCategories:
+      title: SupportedMerchantCategories
+      type: array
+      description: List of supported merchant categories.
+      minItems: 1
+      maxItems: 5000
+      items:
+        $ref: '#/components/schemas/MerchantCategory'
+    Category:
+      title: Category
+      type: object
+      description: User understandable information about an MCC categorization.
+      properties:
+        mainCategory:
+          title: mainCategory
+          type: string
+          description: Main category to which an MCC belongs.
+          minLength: 5
+          maxLength: 100
+          pattern: ^[\w\-\_\&\,]+[\w\-\_\&\,\ ]{5,100}
+          example: Shopping
+        subCategory:
+          title: subCategory
+          type: string
+          description: Sub-category of a category to which an MCC belongs.
+          minLength: 5
+          maxLength: 100
+          pattern: ^[\w\-\_\&\,]+[\w\-\_\&\,\ ]{5,100}
+          example: Department Store
+        sector:
+          title: sector
+          type: string
+          description: Sector of a category to which an MCC belongs.
+          minLength: 5
+          maxLength: 100
+          pattern: ^[\w\-\_\&\,]+[\w\-\_\&\,\ ]{5,100}
+          example: Specialty Retail & Services
+        sectorCode:
+          title: sectorCode
+          type: string
+          description: Unique code assigned to each sector.
+          minLength: 3
+          maxLength: 3
+          pattern: ^\d{3}
+          example: '302'
+    Errors:
+      description: Only returned in the event of an error condition
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+          description: An error object
+          example:
+          - Error:
+              Source: latitude
+              ReasonCode: INVALID_INPUT_VALUE
+              Description: Latitude is missing, invalid, or could not be determined from address fields.
+              Recoverable: false
+              Details: null
+      example:
+        Errors:
+        - Error:
+            Source: latitude
+            ReasonCode: INVALID_INPUT_VALUE
+            Description: Latitude is missing, invalid, or could not be determined from address fields.
+            Recoverable: false
+            Details: null
+    MCMerchantCategory:
+      title: MerchantCategory
+      type: object
+      description: This object represents one merchant category information.
+      required:
+      - mcc
+      properties:
+        mcc:
+          type: string
+          maxLength: 4
+          minLength: 1
+          pattern: ^\d{1,4}
+          description: Merchant category code of a payment transaction that uniquely defines a merchant business.
+          example: 3997
+    ErrorResponse:
+      description: Only returned in the event of an error condition
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    MCSupportedMerchantCategories:
+      title: SupportedMerchantCategories
+      type: object
+      description: The response object that contains a list of supported merchant categories.
+      required:
+      - merchantCategories
+      properties:
+        merchantCategories:
+          minItems: 1
+          maxItems: 5000
+          type: array
+          items:
+            $ref: '#/components/schemas/MCMerchantCategory'
+          example: []
+    Category_2:
+      description: Merchant Category Name and id
+      type: object
+      properties:
+        categoryId:
+          type: string
+          minLength: 1
+          maxLength: 2
+          description: ' The Merchant Category Id'
+          example: '1'
+        categoryName:
+          type: string
+          description: Name of the category
+          example: Apparel
+      example:
+        Category:
+          categoryName: Apparel
+          categoryId: '1'
+    Error:
+      description: Details of the error condition such as the source of the error, reason code for the error, if the error is recoverable, and details about the error
+      required:
+      - Description
+      - ReasonCode
+      - Recoverable
+      - Source
+      type: object
+      properties:
+        Source:
+          description: The application that generated this error
+          type: string
+          minLength: 0
+          maxLength: 150
+          example: latitude
+        ReasonCode:
+          description: A unique constant identifying the error case encountered during transaction processing
+          type: string
+          minLength: 0
+          maxLength: 150
+          example: INVALID_INPUT_VALUE
+        Description:
+          description: Short description of the ReasonCode field
+          type: string
+          minLength: 0
+          maxLength: 150
+          example: Latitude is missing, invalid, or could not be determined from address fields.
+        Recoverable:
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+          type: boolean
+          example: 'false'
+        Details:
+          description: Description of the issue
+          example: Latitude is missing, invalid, or could not be determined from address fields.
+          type: string
+          minLength: 0
+          maxLength: 150
+          nullable: true
+    Categories:
+      description: List of merchant categories
+      type: object
+      properties:
+        categories:
+          type: array
+          description: categories
+          items:
+            $ref: '#/components/schemas/Category_2'
+          example:
+          - categoryName: Apparel
+            categoryId: 1
+  headers:
+    X-MC-Correlation-ID:
+      description: This id is unique per request and is used to co-relate a request to its response. Customers must share this id while raising any incident for this API.
+      schema:
+        $ref: '#/components/schemas/X-MC-Correlation-ID'
+  examples:
+    SupportedMerchantCategories:
+      value:
+      - mcc: 10
+        category:
+          mainCategory: Shopping
+          subCategory: Department Store
+          sector: Department Stores
+          sectorCode: '201'
+      - mcc: 11
+        category:
+          mainCategory: Shopping
+          subCategory: Clothes & Fashion
+          sector: Variety Stores
+          sectorCode: '305'
+      - mcc: 12
+        category:
+          mainCategory: Food & Beverages
+          subCategory: Groceries
+          sector: Grocery Stores & Supermarkets
+          sectorCode: '101'
+      - mcc: 3860
+        category:
+          mainCategory: Leisure & Entertainment
+          subCategory: Hotels & Vacation
+          sector: Hotels, Motels & Resorts
+          sectorCode: '604'
+      - mcc: 3861
+        category:
+          mainCategory: Leisure & Entertainment
+          subCategory: Hotels & Vacation
+          sector: Hotels, Motels & Resorts
+          sectorCode: '604'
+      - mcc: 3620
+        category:
+          mainCategory: Leisure & Entertainment
+          subCategory: Hotels & Vacation
+          sector: Hotels, Motels & Resorts
+          sectorCode: '604'
+      - mcc: 3862
+        category:
+          mainCategory: Leisure & Entertainment
+          subCategory: Hotels & Vacation
+          sector: Hotels, Motels & Resorts
+          sectorCode: '604'
+      - mcc: 3621
+        category:
+          mainCategory: Leisure & Entertainment
+          subCategory: Hotels & Vacation
+          sector: Hotels, Motels & Resorts
+          sectorCode: '604'
+      - mcc: 3863
+        category:
+          mainCategory: Leisure & Entertainment
+          subCategory: Hotels & Vacation
+          sector: Hotels, Motels & Resorts
+          sectorCode: '604'
+      - mcc: 5800
+        category:
+          mainCategory: Shopping
+          subCategory: Department Store
+          sector: Specialty Retail & Services
+          sectorCode: '302'
+    MCSupportedMerchantCategories:
+      value:
+        merchantCategories:
+        - mcc: 3860
+        - mcc: 3861
+        - mcc: 3620
+        - mcc: 3862
+        - mcc: 3621
+        - mcc: 3863
+        - mcc: 5800

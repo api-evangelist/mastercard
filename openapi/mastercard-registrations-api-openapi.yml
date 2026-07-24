@@ -1,0 +1,610 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Registrations API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Registrations
+paths:
+  /consumers/pans/registrations:
+    post:
+      tags:
+      - Registrations
+      summary: Create a list of Primary Account Numbers(PAN's) or add Primary Account Numbers to an existing list.
+      description: 'This endpoint allows Issuers to create a new PAN List by providing the name of the PAN List, Account Range details, and a set of PANs. The same endpoint can also be used to add more PANs to a previously created list. Refer to request examples to understand different scenarios.
+
+        - This endpoint requires partial request and response payload encryption to encrypt the ''sensitiveData'' as part of encryptedValue field. Please refer to request and response specification for more details. The encryption needs to be performed using  [JWE payload encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/#jwe-encryption). Please refer to the [Securing Sensitive Data Using Payload Encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/) sections for implementation details.'
+      x-mastercard-api-encrypted: true
+      operationId: registerPans
+      requestBody:
+        $ref: '#/components/requestBodies/PanRegistrationBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/Registration'
+        '400':
+          $ref: '#/components/responses/BadRequestPanRegistrationError'
+        '401':
+          $ref: '#/components/responses/ConsumerUnauthorized'
+        '403':
+          $ref: '#/components/responses/ConsumerForbiddenError'
+components:
+  examples:
+    FullFailurePansRegistration:
+      description: Registration response with pan list information and encryptedValue (encrypted sensitiveData object) to review unregistered pans. Counts fields showcase the number of pans processed successfully and unsuccessfully. In case of the pan list registration failure response object, successfulCount will be '0' and  failureCount will have the count of the failure pans. The encryptedValue will have the (encrypted sensitiveData object) with the corresponding error details like reasonCode and description.
+      value:
+        successfulCount: '0'
+        failureCount: '1'
+        panList:
+          panListId: '230417253818957824'
+          panListName: Christmas Offers PanList 135
+        accountRange:
+          cid: '242666'
+          ica: '19246'
+          country: USA
+          accountRangeLow: '5110920004100000000'
+          accountRangeHigh: '5110920004199999999'
+        encryptedValue: eyJraWQiOiI3NjFiMDAzYzFlYWRlM(...).Y+oPYKZEMTKyYcSIVEgtQw
+    PanRegistrationWithEncryptedValueRequest:
+      description: Request showing creation of a new pan list with only name of the list and list of PANs without account range specification. Since account range isn't present, PANs will be validated against the first valid account range found for the pans provided. Please note that the client needs to encrypt sensitiveData field using Mastercard provided JWE encryption libraries and populate encryptedValue field before calling the API. Refer to the example, PAN Registration with PAN and Account Range (Only for reference), to understand how the resulting payload should look like after performing encryption.
+      value:
+        panListName: Christmas Offers panList 135
+        sensitiveData:
+          pans:
+          - pan: '5110923494472279'
+          - pan: '5110922275884793'
+    BadRequestPanListIdNotFoundValidationError:
+      description: Error when provided pan list id is not present in the system.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-consumer-api
+            ReasonCode: invalid.request.parameter
+            Description: Pan list not found for id 289152609766342651
+            Recoverable: false
+            Details: ''
+    ExistingPanListIdRegistrationRequest:
+      description: Request showing how to update an existing PAN list to add more PANs. Since the pans are getting added to the already existing pan list, pans will be validated against the account range associated to the existing pan list. Please note that the client needs to encrypt sensitiveData field using Mastercard provided JWE encryption libraries and populate sensitiveData field before calling the API. Refer to the example, PAN Registration with PAN and Account Range (Only for reference), to understand how the resulting payload should look like after performing encryption.
+      value:
+        panListId: '282575947176083456'
+        sensitiveData:
+          pans:
+          - pan: '5110923494472279'
+          - pan: '5110922275884793'
+    UnencryptedPanRegistrationWithBothPanAndAccountRangeRequest:
+      description: Registration request showing creation of a new pan list by specifying name of PAN list, account range and list of PANs. Please note that the client needs to encrypt sensitiveData field using Mastercard provided JWE encryption libraries and populate encryptedValue field before calling the API. Refer to the example, PAN Registration with PAN and Account Range (Only for reference), to understand how the resulting payload should look like after performing encryption.
+      value:
+        panListName: Christmas Offers PanList 135
+        sensitiveData:
+          pans:
+          - pan: '5110923494472279'
+          - pan: '5110922275884793'
+        accountRange:
+          accountRangeLow: '5110920004100000000'
+          accountRangeHigh: '5110920004199999999'
+    UnauthorizedError:
+      description: Unauthorized to access the resource.
+      value:
+        Errors:
+          Error:
+          - Source: Gateway
+            ReasonCode: DECLINED
+            Description: Unauthorized - Access Not Granted
+            Recoverable: false
+            Details: null
+    ConsumerForbiddenError:
+      description: Account not approved to access Mastercard Installments APIs
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-consumer-api
+            ReasonCode: forbidden
+            Description: Your account is not approved to access the API or resource, kindly contact your Mastercard associate to get approval.
+            Recoverable: false
+            Details: ''
+    SuccessPanListWithPansRegistration:
+      description: Registration response with pan list information and all pans successfully registered. Counts fields showcase the number of pans processed successfully and unsuccessfully. In case of the full success response successfulCount will have the count of successful pans and failureCount will have '0'. Since there are no failed PANs, the encryptedValue parameter will not be present.
+      value:
+        successfulCount: '2'
+        failureCount: '0'
+        panList:
+          panListId: '28236583293000499'
+          panListName: Christmas Offers PanList 135
+        accountRange:
+          cid: '242666'
+          ica: '19246'
+          country: USA
+          accountRangeLow: '5110920004100000000'
+          accountRangeHigh: '5110920004199999999'
+    BadRequestPansNotPresentUpdateRequestValidationError:
+      description: Error when encryptedValue (pans) object is not present or empty in update request.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-consumer-api
+            ReasonCode: invalid.pan
+            Description: To update pan list at least one pan should be present
+            Recoverable: false
+            Details: ''
+    UnencryptedPartialSuccessPanRegistration:
+      description: This Unencrypted registration response with pans object containing list of pans error details is just for reference . Counts fields showcase the number of pans processed successfully and unsuccessfully.
+      value:
+        successfulCount: '2'
+        failureCount: '4'
+        panList:
+          panListId: '282365832930004992'
+          panListName: Christmas Offers PanList 135
+        accountRange:
+          cid: '242666'
+          ica: '19246'
+          country: USA
+          accountRangeLow: '5110920004100000000'
+          accountRangeHigh: '5110920004199999999'
+        sensitiveData:
+          pans:
+          - pan: '5110923494472279'
+            error:
+              reasonCode: Invalid.pan
+              description: pan already present in list
+          - pan: '5110923494472278'
+            error:
+              reasonCode: Invalid.pan
+              description: pan failed for Luhn check
+          - pan: '23037'
+            error:
+              reasonCode: Invalid.pan
+              description: pan doesn't have required 11-19 digits
+          - pan: '5555552292032404'
+            error:
+              reasonCode: Invalid.pan
+              description: pan failed for account range validation
+    BadRequestInvalidAccountRangeForNewPanListValidationError:
+      description: Error when provided accountRange is not present in the system. This response applies for new pan list only.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-consumer-api
+            ReasonCode: invalid.accountRange
+            Description: Account range not valid
+            Recoverable: false
+            Details: ''
+    BadRequestPanListNameRegexValidationError:
+      description: Error when provided pan list name doesn't align with regex.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-consumer-api
+            ReasonCode: 'invalid.data: panListName'
+            Description: must match "^[a-zA-Z0-9\s-]{1,64}$"
+            Recoverable: false
+            Details: ''
+    BadRequestInvalidAccountRangeRegexValidationError:
+      description: Error when accountRange properties don't align with regex.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-consumer-api
+            ReasonCode: 'invalid.data: accountRange.accountRangeLow'
+            Description: must match "^[0-9]{11,19}$"
+            Recoverable: false
+            Details: ''
+          - Source: mci-installments-consumer-api
+            ReasonCode: 'invalid.data: accountRange.accountRangeHigh'
+            Description: must match "^[0-9]{11,19}$"
+            Recoverable: false
+            Details: ''
+    FailurePanListRegistration:
+      description: Registration response without pan list created and encryptedValue (encrypted sensitiveData object) to review unregistered pans. Counts fields showcase the number of pans processed successfully and unsuccessfully. In case of the pan list registration failure in creating the pan list response object, successfulCount will be '0' and  failureCount will have the count of the failure pans. The encryptedValue will have the (encrypted sensitiveData object) with the corresponding error details like reasonCode and description.
+      value:
+        successfulCount: '0'
+        failureCount: '1'
+        encryptedValue: eyJraWQiOiI3NjFiMDAzYzFlYWRlM(...).Y+oPYKZEMTKyYcSIVEgtQw
+    SuccessEmptyPanListRegistration:
+      description: Registration response with pan list created only. Counts fields showcase the number of pans processed successfully and unsuccessfully. In case of the success empty pan list response both successfulCount, failureCount will have '0'. Since there are not failed pans the encryptedValue will not be present.
+      value:
+        successfulCount: '0'
+        failureCount: '0'
+        panList:
+          panListId: '230417253818957824'
+          panListName: Christmas Offers PanList 135
+        accountRange:
+          cid: '242666'
+          ica: '19246'
+          country: USA
+          accountRangeLow: '5110920004100000000'
+          accountRangeHigh: '5110920004199999999'
+    BadRequestInvalidAccountRangeForExistingPanListValidationError:
+      description: Error when provided accountRange doesn't match with the one of the existing list. This response applies for existing pan list only.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-consumer-api
+            ReasonCode: invalid.accountRange
+            Description: Invalid account range for pan list
+            Recoverable: false
+            Details: ''
+    BadRequestPanListNameValidationError:
+      description: Error when pan list name is not present in registration request.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-consumer-api
+            ReasonCode: 'invalid.data: panListName'
+            Description: must not be null or empty
+            Recoverable: false
+            Details: ''
+    BadRequestInvalidEncryptedValueOrAccountRangesValidationError:
+      description: Error when registration request doesn't have accountRange nor encryptedValue.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-consumer-api
+            ReasonCode: 'invalid.data: Either encryptedValue or Account Range'
+            Description: must not be null or empty
+            Recoverable: false
+            Details: ''
+    BadRequestPanListIdRegexValidationError:
+      description: Error when pan list id does not align with regex.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-consumer-api
+            ReasonCode: 'invalid.data: panListId'
+            Description: must match "^[0-9]{18}$"
+            Recoverable: false
+            Details: ''
+    PanRegistrationWithEncryptedValueAndAccountRangeRequest:
+      description: Typical registration request for showing indicative payload after performing JWE encryption on sensitiveData' field and assigning to encryptedValue field.
+      value:
+        panListName: Christmas Offers panList 135
+        accountRange:
+          accountRangeLow: '5110920004100000000'
+          accountRangeHigh: '5110920004199999999'
+        encryptedValue: eyJraWQiOiI3NjFiMDAzYzFlYWRlM(...).Y+oPYKZEMTKyYcSIVEgtQw
+    PanRegistrationWithAccountRangeRequest:
+      description: Registration request to create pan list only with account range. The new pan list will not have any pans linked to it. In this case panListName, accountRange are required in the request.
+      value:
+        panListName: Christmas Offers panList 135
+        accountRange:
+          accountRangeLow: '5110920004100000000'
+          accountRangeHigh: '5110920004199999999'
+    PartialSuccessPansRegistration:
+      description: Registration response with pan list created/updated and encryptedValue (encrypted sensitiveData object) to review registered pans. Counts fields showcase the number of pans processed successfully and unsuccessfully. In case of the partial success response both successfulCount and failureCount will have the corresponding counts of the pans whether they are successful or failed. The encryptedValue will have the (encrypted sensitiveData object) with the corresponding error details like reasonCode and description.
+      value:
+        successfulCount: '1'
+        failureCount: '1'
+        panList:
+          panListId: '230417253818957824'
+          panListName: Christmas Offers PanList 135
+        accountRange:
+          cid: '242666'
+          ica: '19246'
+          country: USA
+          accountRangeLow: '5110920004100000000'
+          accountRangeHigh: '5110920004199999999'
+        encryptedValue: eyJraWQiOiI3NjFiMDAzYzFlYWRlM(...).Y+oPYKZEMTKyYcSIVEgtQw
+  schemas:
+    ViewPan:
+      title: ViewPan
+      type: object
+      description: pan to be registered
+      properties:
+        pan:
+          type: string
+          description: The PAN (Primary Account Number) of an individual.
+          example: '5110923494472279'
+        error:
+          $ref: '#/components/schemas/PanError'
+    Registration:
+      type: object
+      description: pan encrypted registration object
+      properties:
+        successfulCount:
+          type: string
+          description: Count of the successful pans
+          example: '1'
+        failureCount:
+          type: string
+          description: Count of the failed pans
+          example: '1'
+        panList:
+          $ref: '#/components/schemas/ViewPanList'
+        accountRange:
+          $ref: '#/components/schemas/AccountRange'
+        sensitiveData:
+          $ref: '#/components/schemas/sensitiveConsumerResData'
+    AccountRange:
+      type: object
+      description: Information about the account range
+      properties:
+        cid:
+          type: string
+          description: Customer ID associated with the account range
+          maxLength: 10
+          example: '202020'
+        ica:
+          type: string
+          description: Issuing ICA of the account range
+          maxLength: 11
+          example: '7432'
+        country:
+          type: string
+          description: Country associated with the account range
+          maxLength: 3
+          example: USA
+        accountRangeLow:
+          type: string
+          description: Lower bound of the account range
+          maxLength: 25
+          example: '5110920000000000'
+        accountRangeHigh:
+          type: string
+          description: Upper bound of the account range
+          maxLength: 25
+          example: '5110929999999999'
+    Pans:
+      title: Pans
+      type: array
+      description: An array of pan objects (Unencrypted encryptedValue).
+      items:
+        $ref: '#/components/schemas/Pan'
+    Pan:
+      title: Pan
+      type: object
+      description: Pan to be registered
+      properties:
+        pan:
+          type: string
+          pattern: ^[0-9]{11,19}$
+          description: The PAN (Primary Account Number) of an individual. Every pan is validated against Luhn algorithm.
+          example: '5110923494472279'
+    PanRegistrationBody:
+      type: object
+      description: Request object for pan registration
+      properties:
+        panListName:
+          type: string
+          example: Christmas Offers panList
+          pattern: ^[a-zA-Z0-9\s-]{1,64}$
+          description: The name of the panList.
+        panListId:
+          type: string
+          description: The unique identifier for the panList.
+          pattern: ^[0-9]{18}$
+          example: '230417253818957824'
+        accountRange:
+          $ref: '#/components/schemas/AccountRequestRange'
+        sensitiveData:
+          $ref: '#/components/schemas/sensitiveConsumerReqData'
+    sensitiveConsumerReqData:
+      title: sensitiveData
+      type: object
+      description: This object explains the definition of the Highly Sensitive and Special handling data fields, which will be obtained when Mastercard decrypts the 'encryptedValue' field using JWE decryption using Mastercard provided client decryption libraries.
+      properties:
+        pans:
+          $ref: '#/components/schemas/Pans'
+    sensitiveConsumerResData:
+      title: sensitiveData
+      type: object
+      description: This object explains the definition of the Highly Sensitive and Special handling data fields, which will be obtained when Mastercard decrypts the 'encryptedValue' field using JWE decryption using Mastercard provided client decryption libraries.
+      properties:
+        pans:
+          $ref: '#/components/schemas/ViewPans'
+    ViewPanList:
+      type: object
+      description: Information about the associated panList
+      properties:
+        panListId:
+          type: string
+          description: The unique identifier for the panList.
+          maxLength: 18
+          example: '230417253818957824'
+        panListName:
+          type: string
+          description: The name of the panList.
+          maxLength: 64
+          example: Christmas Offers panList
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object which gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    PanError:
+      title: PanError
+      type: object
+      description: This contains the error description and reason about why the pan failed during registration/deregistration
+      properties:
+        reasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: invalid.request.parameter
+        description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with correct request.
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns the list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ViewPans:
+      title: View panLists
+      type: array
+      description: List of failed pans associated with the request (Decrypted encryptedValue)
+      items:
+        $ref: '#/components/schemas/ViewPan'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    AccountRequestRange:
+      type: object
+      description: An object representing an account range.
+      required:
+      - accountRangeLow
+      - accountRangeHigh
+      properties:
+        accountRangeLow:
+          type: string
+          description: The lower boundary of the account range.
+          example: '5110920000000000'
+          pattern: ^[0-9]{11,19}$
+        accountRangeHigh:
+          type: string
+          description: The upper boundary of the account range.
+          example: '5110929999999999'
+          pattern: ^[0-9]{11,19}$
+    Error:
+      title: Error
+      type: object
+      description: Error object which contains details about the Error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error.
+          minLength: 1
+          maxLength: 100
+          example: Mastercard Installments APIs
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: invalid.request.parameter
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with the correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+  responses:
+    Registration:
+      description: Response object for pan registration.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Registration'
+          examples:
+            SuccessEmptyPanListRegistration:
+              $ref: '#/components/examples/SuccessEmptyPanListRegistration'
+            SuccessPanListWithPansRegistration:
+              $ref: '#/components/examples/SuccessPanListWithPansRegistration'
+            PartialSuccessListWithPansRegistration:
+              $ref: '#/components/examples/PartialSuccessPansRegistration'
+            FullFailurePansRegistration:
+              $ref: '#/components/examples/FullFailurePansRegistration'
+            FailurePanListRegistration:
+              $ref: '#/components/examples/FailurePanListRegistration'
+            UnencryptedPartialSuccessPanRegistration(For reference):
+              $ref: '#/components/examples/UnencryptedPartialSuccessPanRegistration'
+    ConsumerForbiddenError:
+      description: This response code is returned when API or resource access is not approved for the client.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ForbiddenError:
+              $ref: '#/components/examples/ConsumerForbiddenError'
+    BadRequestPanRegistrationError:
+      description: This response code is returned when a request is invalid, or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            PanListName:
+              $ref: '#/components/examples/BadRequestPanListNameValidationError'
+            PanListNameRegex:
+              $ref: '#/components/examples/BadRequestPanListNameRegexValidationError'
+            PansNotPresentUpdateRequest:
+              $ref: '#/components/examples/BadRequestPansNotPresentUpdateRequestValidationError'
+            PanListIdRegex:
+              $ref: '#/components/examples/BadRequestPanListIdRegexValidationError'
+            InvalidEncryptedValueOrAccountRanges:
+              $ref: '#/components/examples/BadRequestInvalidEncryptedValueOrAccountRangesValidationError'
+            InvalidAccountRangeRegex:
+              $ref: '#/components/examples/BadRequestInvalidAccountRangeRegexValidationError'
+            InvalidAccountRangeForNewPanList:
+              $ref: '#/components/examples/BadRequestInvalidAccountRangeForNewPanListValidationError'
+            InvalidAccountRangeForExistingPanList:
+              $ref: '#/components/examples/BadRequestInvalidAccountRangeForExistingPanListValidationError'
+            PanListIdNotFound:
+              $ref: '#/components/examples/BadRequestPanListIdNotFoundValidationError'
+    ConsumerUnauthorized:
+      description: Authorization information is missing or invalid.
+      headers:
+        Correlation-Id:
+          $ref: '#/components/headers/Correlation-Id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            Unauthorized:
+              $ref: '#/components/examples/UnauthorizedError'
+  headers:
+    Correlation-Id:
+      description: Correlation-Id response header to trace the request.
+      schema:
+        type: string
+      required: true
+      example: 44dc28d6-cf59-11ec-9d64-0242ac120002
+  requestBodies:
+    PanRegistrationBody:
+      description: Request object for pans registration.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PanRegistrationBody'
+          examples:
+            PAN Registration with PAN and Account Range Encrypted (Only for reference):
+              $ref: '#/components/examples/PanRegistrationWithEncryptedValueAndAccountRangeRequest'
+            PAN Registration with PANs Plain:
+              $ref: '#/components/examples/PanRegistrationWithEncryptedValueRequest'
+            PAN Registration with Account Range Plain:
+              $ref: '#/components/examples/PanRegistrationWithAccountRangeRequest'
+            Update Existing PAN List Plain:
+              $ref: '#/components/examples/ExistingPanListIdRegistrationRequest'
+            PAN Registration with PAN and Account Range Plain:
+              $ref: '#/components/examples/UnencryptedPanRegistrationWithBothPanAndAccountRangeRequest'

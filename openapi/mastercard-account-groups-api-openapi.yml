@@ -1,0 +1,123 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Account Groups API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Account Groups
+  description: Operations related to Account Groups.
+paths:
+  /account-groups:
+    put:
+      tags:
+      - Account Groups
+      summary: Allows modification of account group information for one or more accounts in a household.
+      description: Depending upon the action code provided, will move an account or accounts to another existing account group and/or remove an account or accounts from its current account group. Account Groups is also known as Householding in the rewards system.
+      operationId: UpdateAccountGroup
+      requestBody:
+        $ref: '#/components/requestBodies/AccountGroupUpdateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountGroupUpdateResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+components:
+  requestBodies:
+    AccountGroupUpdateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountGroupDetails'
+  schemas:
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error Details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of the error
+          example: user-management
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during API request processing.
+          example: INVALID_FIELD_FORMAT
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Email Address must be in the valid format.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about the data received.
+          example: Invalid Details
+      description: Error Details
+    AccountGroupDetails:
+      required:
+      - actionCode
+      - sourceId
+      - sourceIdType
+      type: object
+      properties:
+        actionCode:
+          type: string
+          description: "Indicates the type of householding action that is to be performed by the request.\nValid values are:\n    \"   MH - Moves all accounts in account group to new target account group.\n    \"   MA - Moves an account to another existing account group.\n    \"   DH - Removes all accounts in account group to new target account group.\n    \"   DA - Removes an account from its current account group and update the token."
+          example: MA
+        sourceId:
+          maxLength: 30
+          type: string
+          description: The unique identifier for the given account. This will always be a RANAC value.
+          example: '268810378058708149455458707247'
+        sourceIdType:
+          type: string
+          description: Identifier type for the source account. The static value of RANAC should be used for this field.
+          example: RANAC
+        targetId:
+          maxLength: 140
+          type: string
+          description: Specifies the household that the account(s) will be joining. Depending on the actionCode that is specified, this value will either be an existing Household ID or a household token. When using actionCode MH or MA, this field is required and will always contain an existing Household ID. When using actionCode DH or DA, this field is only required when the Program is using a token-based householding scheme. This value will be used as the household token for the new household that the account(s) are being placed into. If a token is provided in this field, it must be unique and not currently being used.
+          example: 02925999
+        targetIdType:
+          type: string
+          description: Identifier type that will be used to identify the reference to the target household. When using actionCode MH or MA, this field is should contain the static value of HHID. When using actionCode DH or DA, in a Program with a token-based householding scheme, this field is should contain the static value of HHT if the target household created by the operation needs to assign a household token to the new household.
+          example: HHID
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+  responses:
+    AccountGroupUpdateResponse:
+      description: Ok
+    ErrorsResponse:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'

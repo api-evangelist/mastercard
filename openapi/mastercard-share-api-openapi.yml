@@ -1,0 +1,228 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Share API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Share
+paths:
+  /claim-share-insights/{arid}:
+    post:
+      summary: To send user interaction data to MIDs so MIDs and RPs have insight into the usage of the Claim Share API.
+      parameters:
+      - $ref: '#/components/parameters/AridParameter'
+      tags:
+      - Share
+      responses:
+        '201':
+          $ref: '#/components/responses/IDPClaimShareInsightsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+      operationId: processClaimShareInsights
+      description: To give insights on user interaction with the Claim Share API to MIDs and RPs.
+      requestBody:
+        $ref: '#/components/requestBodies/IDPClaimShareInsightsRequest'
+components:
+  responses:
+    UnauthorizedError:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    IDPClaimShareInsightsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          $ref: '#/components/headers/X-Transaction-ID'
+    BadRequestError:
+      description: The server cannot process the request due to bad request. client should consider correcting the request before retrying again.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorWrapper'
+          examples:
+            BadRequestClaimsEmptyExample:
+              $ref: '#/components/examples/BadRequestClaimsEmptyExample'
+            BadRequestInvalidFormatExample:
+              $ref: '#/components/examples/BadRequestInvalidFormatExample'
+            BadRequestInvalidClaimsExample:
+              $ref: '#/components/examples/BadRequestInvalidClaimsExample'
+  examples:
+    BadRequestInvalidFormatExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: BAD_REQUEST
+            Description: Claims in the request are empty.
+            Recoverable: false
+            Details: Invalid Date format. Valid format expected is 'YYYY-MM-DD'
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
+            Recoverable: false
+    BadRequestInvalidClaimsExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: INVALID_CLAIMS
+            Description: Provided claims are invalid.
+            Recoverable: false
+            Details: Claims are invalid. System defined claims for a mandatory scope 'ageOver' can't be empty
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CLAIM_SHARING_ARID_DOES_NOT_EXIST
+            Description: ARID does not exist.
+            Recoverable: false
+    BadRequestClaimsEmptyExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: BAD_REQUEST
+            Description: Claims in the request are empty.
+            Recoverable: false
+  headers:
+    X-Transaction-ID:
+      schema:
+        type: string
+      description: A random 128-bit UUID represents the transaction.
+  parameters:
+    AridParameter:
+      name: arid
+      in: path
+      description: UUID represents the ARID.
+      example: df52649e-4096-456a-bca0-751ee470009f
+      required: true
+      schema:
+        maxLength: 36
+        minLength: 36
+        type: string
+        pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+  schemas:
+    ApiError:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of where the error occurred.
+          minLength: 3
+          maxLength: 50
+          example: mids
+        ReasonCode:
+          type: string
+          description: Code of the error.
+          minLength: 5
+          maxLength: 100
+          example: BAD_REQUEST
+        Description:
+          type: string
+          description: The cause of the error.
+          minLength: 10
+          maxLength: 250
+          example: Claims in the request are empty
+        Recoverable:
+          type: boolean
+          description: Indicates if the error can be recovered from.
+          example: false
+        Details:
+          type: string
+          description: Contains information about the error.
+          minLength: 10
+          maxLength: 1000
+          example: IOException Occurred
+    ApiErrors:
+      description: List of errors.
+      example:
+        $ref: '#/components/examples/NotFoundExample'
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          $ref: '#/components/schemas/ApiErrorList'
+    IDPClaimShareInsights:
+      type: object
+      required:
+      - claimShareDuration
+      - deviceMake
+      - userActivity
+      - userActivityOutcome
+      properties:
+        claimShareDuration:
+          description: The length of the claim sharing journey in seconds.
+          type: integer
+          maximum: 900
+          example: 30
+        deviceMake:
+          description: Device type descriptor.
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: SGH-N045
+        userActivity:
+          description: The type of the user activity.
+          type: string
+          example: NEW_ID_ENROLLED
+          pattern: ^NEW_ID_ENROLLED|NEW_ID_ENROLLED_AND_ADDITIONAL_ATTRIBUTES_ADDED|EXISTING_ID_REUSED|EXISTING_ID_REUSED_AND_ATTRIBUTES_ADDED|EXISTING_ID_REUSED_AND_ATTRIBUTES_ADDED$
+        userActivityOutcome:
+          description: A description of the results of the user activity.
+          type: object
+          required:
+          - outcome
+          properties:
+            outcome:
+              description: The result of the user activity.
+              type: string
+              example: ABANDONED_BY_USER
+              pattern: ^SUCCESSFUL|DECLINED_BY_USER|ABANDONED_BY_USER|TERMINATED_DUE_TO_ERROR|DECLINED_BY_SYSTEM_OTHER|DECLINED_BY_SYSTEM_FRAUD$
+            reason:
+              description: A description of the outcome field.
+              type: string
+              example: SUSPICIOUS_DATA
+              pattern: ^SUSPICIOUS_DEVICE|SUSPICIOUS_NETWORK|SUSPICIOUS_DATA|SUSPICIOUS_USER|UNDETERMINED_LIVENESS|BIOMETRIC_MATCH_FAILURE|OTHER$
+    ApiErrorWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/ApiErrors'
+    ApiErrorList:
+      description: Error Details.
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/ApiError'
+  requestBodies:
+    IDPClaimShareInsightsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IDPClaimShareInsights'

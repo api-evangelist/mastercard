@@ -1,0 +1,1082 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Merchant  Participation API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Merchant  Participation
+paths:
+  /merchants/participations:
+    post:
+      tags:
+      - Merchant  Participation
+      summary: Allows a registered partner to create or update merchant participation details
+      description: 'This endpoint enables registered partners to manage merchant participation details, indicating whether a merchant has opted into or out of Buy Now Pay Later. A unique MAID-based merchant is identified by a combination of acquirerICA, merchantLegalName, and countryCode. <br><br> It facilitates the creation of a merchant with participation and allows updates to existing participation information, such as adding more MIDs, toggling opt-in flags, modifying address fields, and updating wallet information. <br><br> Additionally, this API supports the submission of MAID-based merchant participation,Identification of existing MID based merchants relies on acquirerICA, merchantLegalName, and countryCode and MAID based merchants relies merchantLegalName, and countryCode <br><br> If a merchant already exists, the provided MIDs will be appended to the current set.Once a MAID is entered into the system, it becomes immutable. Certain fields, namely duns cannot be modified; they must either be null, empty, or match existing values, or a 400 bad request error will be thrown. This API also allows for updating MAID base participation submitted by other acquirers. <br><br> Various markets can utilize this API to submit MAID or MID participation. For further information, please contact the Product team. <br><br> Upon successful validation and acceptance of a request, the API returns the request ID in the ''request_id'' response header, and processing occurs asynchronously. Use the GET /merchants/participation endpoint to monitor request status via the request ID. When initiating participation requests, ensure that the total payload size remains under 700 KB to avoid errors. <br><br> The field `nonMerchantNegotiatedParticipation` will be deprecated. It is recommended to utilize the `optIn` flag instead. In cases where both fields are provided, the `optIn` field will take precedence over `nonMerchantNegotiatedParticipation`. <br><br> We have introduced a new field called `merchantGroup` which is optional for other market but mandatory for markets like Australia. <br><br> Please see the table below for market/operation wise field validation: <table> <tr> <td>Market</td> <td>Mandatory In Add Operation</td> <td>Mandatory In Update Operation</td> </tr> <tr> <td>MID Market</td> <td><b>merchantLegalName</b>, <b>countryCode</b>, <b>acquirerICA</b>, <b>dbaNames</b>, <b>mids</b>, <b>optIn(or nonMerchantNegotiatedParticipation for previously onboarded customers to API)</b>  </td> <td><b>merchantLegalName</b>, <b>countryCode</b>, <b>acquirerICA</b>, <b>optIn(or nonMerchantNegotiatedParticipation for previously onboarded customers to API)</b></td> </tr> <tr> <td>Australia MID Market</td> <td><b>merchantLegalName</b>, <b>merchantGroup</b>, <b>countryCode</b>, <b>acquirerICA</b>, <b>dbaNames</b>, <b>mids</b>, <b>optIn</b>  </td> <td><b>merchantLegalName</b>, <b>countryCode</b>, <b>acquirerICA</b>, <b>optIn</b></td> </tr> <tr> <td>MAID Market</td> <td><b>merchantLegalName</b>, <b>countryCode</b>, <b>acquirerICA</b>, <b>dbaNames</b>, <b>maid</b>, <b>maidType</b>, <b>optIn</b>  </td> <td><b>merchantLegalName</b>, <b>countryCode</b>, <b>acquirerICA</b>, <b>maid</b>, <b>maidType</b>, <b>optIn</b> </td> </tr> </table>
+
+        '
+      operationId: postMerchantParticipations
+      requestBody:
+        $ref: '#/components/requestBodies/MerchantParticipations'
+      responses:
+        '202':
+          $ref: '#/components/responses/MerchantParticipationReference'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/AccountNotRegisteredError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '406':
+          $ref: '#/components/responses/NotAcceptableHeader'
+    get:
+      tags:
+      - Merchant  Participation
+      summary: Provides status of merchant participation updates
+      description: 'Allows registered partners to fetch a list of merchants with participation details whose participation request is completed successfully. If query parameter ''request_id'' is supplied then the response will be limited to only those merchant objects with any status (PENDING, COMPLETED) that were part of that particular request. <br><br> For details on mandatory fields in response, please consult the description section of the POST: /merchants/participations endpoint. <br><br> In case of request failed error response contain `requestEndpoint`, `requestId`, `httpErrorStatusCode`, `errors.source`, `errors.reasonCode`, `errors.description` and `errors.recoverable` mandatory fields. <br><br> For previously onboarded customers to API both `nonMerchantNegotiatedParticipation` and  `optIn` will be visible. The field `nonMerchantNegotiatedParticipation` will be deprecated. <br><br> For previously onboarded customers to API both `acceptorIds` and  `maids` will be visible. The field `acceptorIds` will be deprecated.
+
+        '
+      operationId: getMerchantParticipations
+      parameters:
+      - $ref: '#/components/parameters/request_id'
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          $ref: '#/components/responses/Merchants'
+        '400':
+          $ref: '#/components/responses/InvalidRequestIdError'
+        '401':
+          $ref: '#/components/responses/AccountNotRegisteredError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+        '406':
+          $ref: '#/components/responses/NotAcceptableHeader'
+components:
+  schemas:
+    acquirerICA:
+      type: string
+      pattern: ^(?:[0-9]{6}|[0-9]{9}|[0-9]{11})$
+      description: ICA of acquirer which will be part of auth transaction. Insert leading zeros to ensure that the acquirerICA is either 6, 9, or 11 characters in length.
+      example: 00689425761
+    duns:
+      type: string
+      minLength: 1
+      maxLength: 9
+      description: A unique identifier assigned by Dun and Bradstreet is used to identify a business.
+      example: '879847426'
+    merchantGroup:
+      type: string
+      pattern: ^[A-Z0-9]{1,2}$
+      description: Merchant Group. An identifier used to determine the merchant category type to qualify for the right MAID (MAID is assigned internally by Mastercard). It is imperative for a country such as Australia, For others it is optional.
+      example: A1
+    wallet:
+      title: wallet
+      type: object
+      description: Contains merchant wallet information.
+      required:
+      - walletId
+      - walletAcceptance
+      properties:
+        walletId:
+          $ref: '#/components/schemas/walletId'
+        walletAcceptance:
+          $ref: '#/components/schemas/walletAcceptance'
+        walletMerchantId:
+          $ref: '#/components/schemas/walletMerchantId'
+    status:
+      type: string
+      minLength: 1
+      maxLength: 10
+      pattern: ^(?:PENDING|COMPLETED|ERROR)$
+      description: Status of request
+      example: COMPLETED
+    limit:
+      description: The number of items you asked the list to be limited to.
+      type: integer
+      example: 2
+    submitterICA:
+      type: string
+      pattern: ^(?!,)(( \| )?(?:[\d]{6}|[\d]{9}|[\d]{11})\b)*$
+      description: ICA(s) of partner(s) institution(s) who submitted this merchant participation.
+      example: '14689425761'
+    requestId:
+      type: integer
+      format: int64
+      minimum: 0
+      maximum: 9223372036854776000
+      description: The request ID is obtained by calling POST /merchants/participations API.
+      example: 7223372036854776000
+    httpErrorStatusCode:
+      type: integer
+      minimum: 400
+      maximum: 599
+      description: HTTP error code of original POST /merchants/participations API.
+      example: 400
+    MerchantParticipations:
+      title: MerchantParticipations
+      type: array
+      minItems: 1
+      maxItems: 30
+      description: List of merchant participation reference objects.
+      items:
+        $ref: '#/components/schemas/MerchantParticipation'
+    errors:
+      title: errors
+      type: array
+      minItems: 1
+      description: Error object which contains a list of error objects.
+      required:
+      - error
+      items:
+        $ref: '#/components/schemas/Error'
+    errorReason:
+      type: string
+      minLength: 1
+      maxLength: 30
+      pattern: ^(?:INVALID_ACQUIRER_ICA|UNKNOWN)$
+      description: Reason for error.
+      example: INVALID_ACQUIRER_ICA
+    websiteUrl:
+      type: string
+      minLength: 1
+      maxLength: 100
+      pattern: ^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]
+      description: The URL of the merchant website.
+      example: https://www.acme-company.com
+    countryCode:
+      type: string
+      minLength: 3
+      maxLength: 3
+      pattern: ^[A-Za-z]{3}$
+      description: Legally registered country code of merchant. Refer to (https://www.iso.org/obp/ui/#search) for ISO 3166 alpha 3 code values.
+      example: USA
+    Merchants:
+      type: array
+      minItems: 1
+      maxItems: 100
+      description: List of Merchant objects
+      items:
+        $ref: '#/components/schemas/Merchant'
+    offset:
+      description: The number of items you asked for at the start of the list to be offset from.
+      type: integer
+      example: 1
+    acceptorIds:
+      type: array
+      minItems: 1
+      description: MAID IDs assigned by Mastercard.
+      items:
+        $ref: '#/components/schemas/acceptorId'
+      deprecated: true
+    dbaNames:
+      type: array
+      minItems: 1
+      maxItems: 1000
+      items:
+        $ref: '#/components/schemas/dbaName'
+    maids:
+      type: array
+      minItems: 1
+      maxItems: 2
+      description: Mastercard Assigned ID (MAID). Adding a MAID based merchant object requires the mandatory provision of `maids`, while updating a merchant does not necessitate it.
+      items:
+        $ref: '#/components/schemas/maid'
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object which gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    mids:
+      type: array
+      minItems: 1
+      maxItems: 5000
+      description: Merchant IDs assigned by the acquirer.
+      items:
+        $ref: '#/components/schemas/mid'
+    MerchantParticipation:
+      title: MerchantParticipation
+      type: object
+      description: Merchant participation reference
+      required:
+      - merchantLegalName
+      - countryCode
+      - acquirerICA
+      properties:
+        merchantLegalName:
+          $ref: '#/components/schemas/merchantLegalName'
+        merchantGroup:
+          $ref: '#/components/schemas/merchantGroup'
+        countryCode:
+          $ref: '#/components/schemas/countryCode'
+        acquirerICA:
+          $ref: '#/components/schemas/acquirerICA'
+        dbaNames:
+          $ref: '#/components/schemas/dbaNames'
+        mids:
+          $ref: '#/components/schemas/mids'
+        maid:
+          $ref: '#/components/schemas/maid'
+        maidType:
+          $ref: '#/components/schemas/maidType'
+        nonMerchantNegotiatedParticipation:
+          $ref: '#/components/schemas/nonMerchantNegotiatedParticipation'
+        optIn:
+          $ref: '#/components/schemas/optIn'
+        duns:
+          $ref: '#/components/schemas/duns'
+        websiteUrl:
+          $ref: '#/components/schemas/websiteUrl'
+        wallets:
+          $ref: '#/components/schemas/wallets'
+        address:
+          $ref: '#/components/schemas/Address'
+    mid:
+      type: string
+      pattern: ^[A-Za-z0-9]{1,15}
+      description: Merchant ID assigned by the acquirer.
+      example: '235157567121214'
+    dbaName:
+      type: string
+      minLength: 1
+      maxLength: 256
+      description: Trade name used by merchant to conduct business and is known to the consumer.
+      example: ACME
+    walletMerchantId:
+      type: string
+      minLength: 1
+      maxLength: 300
+      description: One or more wallet merchant IDs separated by the pipe symbol.
+      example: 235346356234 | 125346356236 | 125446356237
+    walletId:
+      type: integer
+      minimum: 1
+      maximum: 3
+      description: Indicates the wallet, 1 for ApplePay, 2 for GooglePay, and 3 for SamsungPay.
+      example: 1
+    Merchant:
+      title: Merchant
+      type: object
+      description: Merchant object
+      properties:
+        merchantLegalName:
+          $ref: '#/components/schemas/merchantLegalName'
+        merchantGroup:
+          $ref: '#/components/schemas/merchantGroup'
+        countryCode:
+          $ref: '#/components/schemas/countryCode'
+        acquirerICA:
+          $ref: '#/components/schemas/acquirerICA'
+        submitterICA:
+          $ref: '#/components/schemas/submitterICA'
+        dbaNames:
+          $ref: '#/components/schemas/dbaNames'
+        maids:
+          $ref: '#/components/schemas/maids'
+        maidType:
+          $ref: '#/components/schemas/searchMaidType'
+        acceptorIds:
+          $ref: '#/components/schemas/acceptorIds'
+        nonMerchantNegotiatedParticipation:
+          $ref: '#/components/schemas/nonMerchantNegotiatedParticipation'
+        optIn:
+          $ref: '#/components/schemas/optIn'
+        status:
+          $ref: '#/components/schemas/status'
+        errorReason:
+          $ref: '#/components/schemas/errorReason'
+        duns:
+          $ref: '#/components/schemas/duns'
+        websiteUrl:
+          $ref: '#/components/schemas/websiteUrl'
+        wallets:
+          $ref: '#/components/schemas/wallets'
+        address:
+          $ref: '#/components/schemas/Address'
+        requestEndpoint:
+          $ref: '#/components/schemas/requestEndpoint'
+        requestId:
+          $ref: '#/components/schemas/requestId'
+        httpErrorStatusCode:
+          $ref: '#/components/schemas/httpErrorStatusCode'
+        errors:
+          $ref: '#/components/schemas/errors'
+    requestEndpoint:
+      type: string
+      minLength: 25
+      maxLength: 25
+      description: original request endpoint
+      example: /merchants/participations
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns the list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    searchMaidType:
+      title: maidType
+      type: string
+      description: Flag to identify provided MAID type. This is mandatory for participation requests with MAID.
+      example: EXT
+    merchantLegalName:
+      type: string
+      minLength: 1
+      maxLength: 300
+      description: Legally registered name of the merchant.
+      pattern: ^.{1,300}
+      example: Wallmart
+    total:
+      description: The total number of items in the collection.
+      type: integer
+      example: 5
+    optIn:
+      type: string
+      maxLength: 1
+      minLength: 1
+      pattern: ^(?:Y|N)$
+      description: Merchant opt-in or opt-out preference for non-merchant negotiated product codes, such as, SPP, SPS, SBJ, and SBK or GCS.
+      example: Y
+    nonMerchantNegotiatedParticipation:
+      type: string
+      maxLength: 1
+      minLength: 1
+      pattern: ^(?:Y|N)$
+      description: Merchant opt-in or opt-out preference for non-merchant negotiated product codes, such as, SPP, SPS, SBJ, and SBK.
+      example: Y
+      deprecated: true
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    maidType:
+      type: string
+      description: Flag to identify provided MAID type. This is mandatory for participation requests with MAID.
+      enum:
+      - GRP
+      - EXT
+      example: GRP
+    Address:
+      title: Address
+      type: object
+      description: The address of the merchant.
+      properties:
+        addressLine1:
+          type: string
+          minLength: 1
+          maxLength: 300
+          description: Legally registered address of the merchant
+          example: 600 WEST
+        addressLine2:
+          type: string
+          minLength: 1
+          maxLength: 300
+          description: Second address for the merchant
+          example: SECTOR 5
+        addressLine3:
+          type: string
+          minLength: 1
+          maxLength: 300
+          description: Third address line
+          example: SUITE 775
+        city:
+          type: string
+          minLength: 1
+          maxLength: 30
+          description: Legally registered address city. The City field is mandatory when adding a merchant but not when updating a merchant.
+          example: St Peters
+        state:
+          type: string
+          minLength: 2
+          maxLength: 3
+          description: Legally registered address state or province. Refer to (https://www.iso.org/obp/ui/#search) for ISO 3166-2 code values.
+          example: QLD
+        postalCode:
+          type: string
+          minLength: 1
+          maxLength: 20
+          description: Legally registered address postal code. Provide a postal code to submit MID-based merchants via API if the country has a postal code.
+          example: 85001
+    count:
+      type: integer
+      description: The number of items in this batch (the size of the item array).
+      example: 2
+    wallets:
+      title: wallets
+      type: array
+      minItems: 1
+      maxItems: 3
+      description: Merchant wallets.
+      items:
+        $ref: '#/components/schemas/wallet'
+    walletAcceptance:
+      type: string
+      maxLength: 1
+      minLength: 1
+      pattern: ^(?:Y|N)$
+      description: States whether the merchant accepts the wallet or not.
+      example: Y
+    acceptorId:
+      type: string
+      maxLength: 20
+      description: Mastercard assigned ID.
+      example: '531567'
+    maid:
+      type: string
+      pattern: ^[A-Za-z0-9]{1,6}
+      description: Mastercard Assigned ID (MAID) as specified in Customer Interface Specification for ISO data element DE48 SE32.
+      example: '321765'
+    Error:
+      title: Error
+      type: object
+      description: Error object which contains details about the Error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error.
+          minLength: 1
+          maxLength: 100
+          example: Mastercard Installments APIs
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: invalid.request.parameter
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with the correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+  responses:
+    InvalidRequestIdError:
+      description: This response code is returned when a request is invalid, or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidRequestIdError:
+              $ref: '#/components/examples/InvalidRequestIdError'
+    Merchants:
+      description: The response object that contains the list of merchant objects.
+      headers:
+        Count:
+          schema:
+            $ref: '#/components/schemas/count'
+        Offset:
+          schema:
+            $ref: '#/components/schemas/offset'
+        Limit:
+          schema:
+            $ref: '#/components/schemas/limit'
+        Total:
+          schema:
+            $ref: '#/components/schemas/total'
+        Request-Status:
+          schema:
+            $ref: '#/components/schemas/status'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Merchants'
+          examples:
+            MID Merchant Participations:
+              $ref: '#/components/examples/Merchants'
+            MAID Merchant Participations:
+              $ref: '#/components/examples/MaidMerchants'
+            MID Merchant Participations For Australia:
+              $ref: '#/components/examples/Merchants-Australia'
+            RequestError:
+              $ref: '#/components/examples/RequestError'
+    AccountNotRegisteredError:
+      description: This response code is returned when the server cannot find the account used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            AccountNotRegisteredError:
+              $ref: '#/components/examples/AccountNotRegisteredError'
+    NotAcceptableHeader:
+      description: This response code is returned when a user enters anything except application/json in the Accept header.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            NotAcceptableHeader:
+              $ref: '#/components/examples/NotAcceptableHeader'
+    ResourceNotFoundError:
+      description: This response code is returned when the request resource is not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ForbiddenError:
+              $ref: '#/components/examples/ResourceNotFoundError'
+    ForbiddenError:
+      description: This response code is returned when API or resource access is not approved for the client.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ForbiddenError:
+              $ref: '#/components/examples/ForbiddenError'
+    MerchantParticipationReference:
+      description: Returns "Location" response header which contains the relative URL to get the status of this request.
+      headers:
+        Location:
+          schema:
+            type: string
+            description: Unique id generated for this request.
+            example: merchants/participations?request_id=7223372036854776000
+    BadRequestError:
+      description: This response code is returned when a request is invalid, or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidCardProductError:
+              $ref: '#/components/examples/InvalidCardProductError'
+            InvalidFieldFormat:
+              $ref: '#/components/examples/InvalidFieldFormat'
+            InvalidFieldLength:
+              $ref: '#/components/examples/InvalidFieldLength'
+            InvalidFieldValue:
+              $ref: '#/components/examples/InvalidFieldValue'
+            MissingRequiredField:
+              $ref: '#/components/examples/MissingRequiredField'
+  examples:
+    InvalidRequestIdError:
+      value:
+        Errors:
+          Error:
+          - Source: merchant-participation-api
+            ReasonCode: invalid.request.parameter
+            Description: One of the request parameters is invalid, try again with the correct request.
+            Recoverable: false
+            Details: request_id query param must be a positive integer less than 9223372036854775807.
+    AccountNotRegisteredError:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: account.not.registered
+            Description: We cannot find the account that you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
+            Recoverable: false
+            Details: ''
+    Merchants-Australia:
+      value:
+      - merchantLegalName: Example Mart2
+        merchantGroup: 1A
+        countryCode: AUS
+        acquirerICA: 00689425761
+        submitterICA: '12689425746'
+        dbaNames:
+        - ACME2
+        optIn: Y
+        status: COMPLETED
+        duns: '239847426'
+        websiteUrl: https://www.acmeexample.com
+        address:
+          addressLine1: 601 WEST
+          addressLine2: SECTOR 6
+          addressLine3: SUITE 776
+          city: St Peters 1
+          state: QLD
+          postalCode: '85001'
+        wallets:
+        - walletId: 1
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 2
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 3
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+      - merchantLegalName: Example Mart
+        merchantGroup: 2A
+        countryCode: AUS
+        acquirerICA: 00689425761
+        submitterICA: '12689425746'
+        dbaNames:
+        - ACME
+        optIn: Y
+        status: COMPLETED
+        duns: '239847426'
+        websiteUrl: https://www.acmeexample.com
+        address:
+          addressLine1: 600 WEST
+          addressLine2: SECTOR 5
+          addressLine3: SUITE 775
+          city: St Peters
+          state: QLD
+          postalCode: '85001'
+    MerchantParticipations:
+      value:
+      - merchantLegalName: Example Mart
+        countryCode: USA
+        acquirerICA: 00689425761
+        dbaNames:
+        - ACME
+        mids:
+        - '987123456789124'
+        - '123123456789124'
+        - '567123456789124'
+        optIn: Y
+        duns: '879847426'
+        websiteUrl: https://www.example.com
+        wallets:
+        - walletId: 1
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 2
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 3
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        address:
+          addressLine1: 600 WEST
+          addressLine2: SECTOR 5
+          addressLine3: SUITE 775
+          city: St Peters
+          state: QLD
+          postalCode: '85001'
+      - merchantLegalName: Example Mart 1
+        countryCode: USA
+        acquirerICA: 00689425762
+        dbaNames:
+        - ACME
+        mids:
+        - '387123456789124'
+        - '223123456789124'
+        - '167123456789124'
+        optIn: Y
+        duns: '879847421'
+        websiteUrl: https://www.example2.com
+        wallets:
+        - walletId: 1
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 2
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 3
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        address:
+          addressLine1: 600 WEST
+          addressLine2: SECTOR 5
+          addressLine3: SUITE 775
+          city: St Peters
+          state: QLD
+          postalCode: '85001'
+    MerchantParticipationsMAID:
+      value:
+      - merchantLegalName: Example Mart
+        countryCode: USA
+        acquirerICA: 00689425761
+        dbaNames:
+        - ACME
+        maid: '321765'
+        maidType: EXT
+        optIn: Y
+        duns: '879847426'
+        websiteUrl: https://www.example.com
+        wallets:
+        - walletId: 1
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 2
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 3
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        address:
+          addressLine1: 600 WEST
+          addressLine2: SECTOR 5
+          addressLine3: SUITE 775
+          city: St Peters
+          state: QLD
+          postalCode: '85001'
+      - merchantLegalName: Example Store
+        countryCode: USA
+        acquirerICA: 00689425762
+        dbaNames:
+        - ES
+        maid: '321755'
+        maidType: GRP
+        optIn: N
+        duns: '879847427'
+        websiteUrl: https://www.examplestore.com
+        wallets:
+        - walletId: 1
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 2
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 3
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        address:
+          addressLine1: 605 WEST
+          addressLine2: SECTOR 15
+          addressLine3: SUITE 779
+          city: St Peters
+          state: QLD
+          postalCode: '85001'
+    ResourceNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: merchant-participation-api
+            ReasonCode: notfound
+            Description: request id provided in the request does not exist.
+            Recoverable: false
+            Details: ''
+    InvalidFieldLength:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.body.parameter
+            Description: Field length is out of bound
+            Recoverable: false
+            Details: ''
+    Merchants:
+      value:
+      - merchantLegalName: Example Mart
+        countryCode: USA
+        acquirerICA: 00689425761
+        submitterICA: '12689425746'
+        dbaNames:
+        - ACME
+        optIn: Y
+        status: COMPLETED
+        duns: '879847426'
+        websiteUrl: https://www.example.com
+        wallets:
+        - walletId: 1
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 2
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 3
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        address:
+          addressLine1: 600 WEST
+          addressLine2: SECTOR 5
+          addressLine3: SUITE 775
+          city: St Peters
+          state: QLD
+          postalCode: '85001'
+      - merchantLegalName: Example Mart2
+        countryCode: USA
+        acquirerICA: 00689425761
+        submitterICA: '12689425746'
+        dbaNames:
+        - ACME2
+        optIn: Y
+        status: COMPLETED
+        duns: '879847436'
+        websiteUrl: https://www.example.com
+        wallets:
+        - walletId: 1
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 2
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 3
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        address:
+          addressLine1: 600 WEST
+          addressLine2: SECTOR 5
+          addressLine3: SUITE 775
+          city: St Peters
+          state: QLD
+          postalCode: '85001'
+    RequestError:
+      value:
+      - requestEndpoint: /merchants/participations
+        requestId: 9223372036854776000
+        httpErrorStatusCode: 400
+        errors:
+        - source: merchant-participation-api
+          reasonCode: invalid.request.parameter
+          description: One of the request parameters is invalid, try again with the correct request.
+          recoverable: false
+          details: Merchant legal name is invalid.
+    InvalidFieldFormat:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.body.parameter
+            Description: Field format or type is invalid
+            Recoverable: false
+            Details: ''
+    MerchantParticipationsForAustralia:
+      value:
+      - merchantLegalName: Example Mart2
+        merchantGroup: 1A
+        countryCode: AUS
+        acquirerICA: 00689425761
+        dbaNames:
+        - ACME2
+        mids:
+        - '987123456789124'
+        - '123123456789124'
+        - '567123456789124'
+        optIn: Y
+        duns: '879847426'
+        websiteUrl: https://www.example.com
+        address:
+          addressLine1: 601 WEST
+          addressLine2: SECTOR 6
+          addressLine3: SUITE 776
+          city: St Peters 1
+          state: QLD
+          postalCode: '85002'
+        wallets:
+        - walletId: 1
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 2
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 3
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+      - merchantLegalName: Example Mart2
+        merchantGroup: 2A
+        countryCode: AUS
+        acquirerICA: 00689425762
+        dbaNames:
+        - ACME2
+        mids:
+        - '987123456789125'
+        - '123123456789126'
+        - '567123456789127'
+        optIn: N
+        duns: '879847427'
+        websiteUrl: https://www.examplestore.com
+        address:
+          addressLine1: 601 WEST
+          addressLine2: SECTOR 6
+          addressLine3: SUITE 776
+          city: St Peters 1
+          state: QLD
+          postalCode: '85002'
+        wallets:
+        - walletId: 1
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 2
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 3
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+    MaidMerchants:
+      value:
+      - merchantLegalName: Example Mart
+        countryCode: USA
+        acquirerICA: 00689425761
+        submitterICA: '12689425746'
+        dbaNames:
+        - ACME
+        maids:
+        - '123456'
+        maidType: EXT
+        optIn: Y
+        status: COMPLETED
+        duns: '879847426'
+        websiteUrl: https://www.example.com
+        wallets:
+        - walletId: 1
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 2
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 3
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        address:
+          addressLine1: 600 WEST
+          addressLine2: SECTOR 5
+          addressLine3: SUITE 775
+          city: St Peters
+          state: QLD
+          postalCode: '85001'
+      - merchantLegalName: Example Mart2
+        countryCode: USA
+        acquirerICA: 00689425761
+        submitterICA: '12689425746'
+        dbaNames:
+        - ACME2
+        maids:
+        - '234567'
+        maidType: GRP
+        optIn: Y
+        status: COMPLETED
+        duns: '879847436'
+        websiteUrl: https://www.example.com
+        wallets:
+        - walletId: 1
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 2
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        - walletId: 3
+          walletAcceptance: Y
+          walletMerchantId: 235346356234 | 125346356236 | 125446356237
+        address:
+          addressLine1: 600 WEST
+          addressLine2: SECTOR 5
+          addressLine3: SUITE 775
+          city: St Peters
+          state: QLD
+          postalCode: '85001'
+    InvalidCardProductError:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.parameter
+            Description: Product SPP is not available for the IND country
+            Recoverable: false
+            Details: ''
+    NotAcceptableHeader:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: not.acceptable.header
+            Description: Accept header value is not application/json.
+            Recoverable: false
+            Details: ''
+    MissingRequiredField:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.body.parameter
+            Description: One or more of the required fields are missing
+            Recoverable: false
+            Details: ''
+    ForbiddenError:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: forbidden
+            Description: Your account is not approved to access the API or resource, kindly contact your Mastercard associate to get approval.
+            Recoverable: false
+            Details: ''
+    InvalidFieldValue:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.body.parameter
+            Description: Value doesn't exist / doesn't meet specified range
+            Recoverable: false
+            Details: ''
+  parameters:
+    offset:
+      in: query
+      name: offset
+      description: Determines the number of items needed in the start of the list, to retrieve the list starting from the offset.
+      required: false
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+      example: 100
+    limit:
+      in: query
+      name: limit
+      description: Controls the maximum number of items in the list.
+      required: false
+      schema:
+        type: integer
+        default: 500
+        minimum: 1
+        maximum: 500
+      example: 100
+    request_id:
+      in: query
+      name: request_id
+      description: The request ID is obtained by calling POST /merchants/participations API.
+      required: false
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
+        maximum: 9223372036854776000
+      example: 7223372036854776000
+  requestBodies:
+    MerchantParticipations:
+      description: The request object that contains a list of merchant participation reference objects.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MerchantParticipations'
+          examples:
+            MID Merchant Participations:
+              $ref: '#/components/examples/MerchantParticipations'
+            MAID Merchant Participations:
+              $ref: '#/components/examples/MerchantParticipationsMAID'
+            MID Merchant Participations For Australia:
+              $ref: '#/components/examples/MerchantParticipationsForAustralia'

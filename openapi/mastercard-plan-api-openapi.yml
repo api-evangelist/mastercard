@@ -1,0 +1,759 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Plan API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Plan
+paths:
+  /plans/{plan_id}:
+    get:
+      tags:
+      - Plan
+      summary: Retrieves Buy Now, Pay Later installment plan.
+      description: This operation returns a BNPL installment plan based on the selected plan ID provided in the request. The API response contains encrypted values of the consumer's email and phone, and the issuer needs to decrypt the response using the Mastercard client encryption key.
+      operationId: getPlan
+      parameters:
+      - $ref: '#/components/parameters/plan_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/InstallmentPlan'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+  /approvals/{plan_id}:
+    get:
+      tags:
+      - Plan
+      summary: Get the status of checkout and callback URL to PSP (Payment service provider).
+      description: This API will be used by the provider to get the status of checkout and callback URL to PSP (Payment service provider). This API should be used within 24 hours from the time the approval was posted.
+      operationId: getPlanApprovalStatus
+      parameters:
+      - $ref: '#/components/parameters/plan_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/CompletionPSPData'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptableHeader'
+components:
+  schemas:
+    TransactionOffers:
+      type: array
+      description: A list of offers presented to the consumer. This is a mandatory field for During Purchase use case of Mastercard Installments Payment Services.
+      items:
+        $ref: '#/components/schemas/TransactionOffer'
+      maxItems: 50
+    MerchantPlan:
+      type: object
+      properties:
+        acceptor:
+          type: string
+          description: Merchant acceptor identifier.
+          example: '100234'
+          maxLength: 100
+          minLength: 1
+        country:
+          type: string
+          description: Country code in ISO 3166 alpha 3 format.
+          example: USA
+          maxLength: 3
+          minLength: 3
+        mcc:
+          type: string
+          description: Merchant Category Code.
+          example: '1711'
+          maxLength: 4
+          minLength: 4
+        name:
+          type: string
+          description: Merchant name for plan.
+          example: Decor shop
+          maxLength: 100
+          minLength: 1
+      required:
+      - country
+      - mcc
+    StatusField:
+      type: string
+      description: 'Current status of a plan. One of: CREATED, APPROVED, DECLINED, TIMED_OUT.'
+      example: CREATED
+      maxLength: 12
+      minLength: 7
+    PlanIdField:
+      type: string
+      format: uuid
+      description: A unique identifier assigned to an installment plan.
+      example: 3d56f5a7-db48-41f0-875e-30920e8465f3
+      maxLength: 36
+      minLength: 36
+    InstallmentPlan:
+      type: object
+      properties:
+        consumer:
+          $ref: '#/components/schemas/Consumer'
+        merchant:
+          $ref: '#/components/schemas/MerchantPlan'
+        offerId:
+          $ref: '#/components/schemas/OfferIdField'
+        planId:
+          $ref: '#/components/schemas/PlanIdField'
+        planInstallmentInformation:
+          $ref: '#/components/schemas/PlanInstallmentInformation'
+        providerId:
+          $ref: '#/components/schemas/ProviderIdField'
+        rejectReasonCode:
+          type: string
+          description: Describes the reason for plan rejection. Mandatory for when status is DECLINED. Following are the reject reason codes:[ CONSUMER_AUTH_FAIL, CONSUMER_APPLICATION_FAIL, CONSUMER_CANCELLATION, LENDER_DRIVEN_REJECTION, LENDER_SYSTEM_ERROR, OTHER_REASON ]
+          example: CONSUMER_CANCELLATION
+          maxLength: 30
+          minLength: 12
+        rejectReasonDetail:
+          type: string
+          description: Indicates detailed information about reject reason.
+          example: Credit score is too low
+          maxLength: 5000
+          minLength: 0
+        scheduledRepayments:
+          $ref: '#/components/schemas/ScheduledRepayments'
+        status:
+          $ref: '#/components/schemas/StatusField'
+        transaction:
+          $ref: '#/components/schemas/Transaction'
+        transactionOffers:
+          $ref: '#/components/schemas/TransactionOffers'
+      required:
+      - merchant
+      - planId
+      - providerId
+      - status
+      - transaction
+    ScheduledRepayments:
+      type: array
+      description: This object will be populated only when consumer offer selection is enabled.
+      items:
+        $ref: '#/components/schemas/ScheduledRepayment'
+      maxItems: 99
+    PSPData:
+      type: object
+      properties:
+        callbackUrl:
+          description: PSP (Payment service provider) callback URL with checkout response. This URL will expire after 24 hours from the time the approval is posted.
+          type: string
+          example: https://src.mastercard.com#%7B%22action%22%3A%22COMPLETED%22%2C%22checkoutResponse%22%3AEncryptedData%7D
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object which gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    CompletionPSPData:
+      allOf:
+      - $ref: '#/components/schemas/PSPData'
+      - type: object
+        required:
+        - status
+        properties:
+          status:
+            description: Indicates the status of processing. It will be either IN_PROGRESS or COMPLETED.
+            type: string
+            example: IN_PROGRESS
+    PlanInstallmentInformation:
+      type: object
+      description: This object is mandatory for **Mastercard Installments Payment Services**.
+      properties:
+        apr:
+          type: number
+          format: double
+          description: Annual Percentage Rate (APR).
+          example: 25.03
+          exclusiveMaximum: false
+          exclusiveMinimum: false
+          maximum: 200
+          minimum: 0
+        currency:
+          type: string
+          description: Currency code according to ISO 4217.
+          example: USD
+          maxLength: 3
+          minLength: 3
+        frequency:
+          type: string
+          description: Frequency of installment (single installment time duration).It will be one of the [WEEKLY, BIWEEKLY, MONTHLY]
+          example: BIWEEKLY
+          maxLength: 20
+          minLength: 3
+        firstInstallmentAmount:
+          type: number
+          format: double
+          description: Amount to be paid for the first installment.
+          example: 100
+          exclusiveMaximum: false
+          exclusiveMinimum: false
+          maximum: 1000000000000000
+          minimum: 0
+        otherInstallmentAmount:
+          type: number
+          format: double
+          description: Subsequent Installment amount with minor unit according to ISO 4217.
+          example: 200
+          maximum: 1000000000000000
+          minimum: 0
+        feeValue:
+          type: number
+          format: double
+          description: Fees values based on type it can be either Fixed amount or Percentage to applied in transaction amount.
+          example: 2.05
+          exclusiveMaximum: false
+          exclusiveMinimum: false
+          maximum: 1000000000000000
+          minimum: 0
+        tenure:
+          type: integer
+          format: int32
+          description: Total number of installments for an offer. Offer tenure.
+          example: 2
+          maximum: 99
+          minimum: 2
+        totalAmount:
+          type: number
+          format: double
+          description: The total amount owed by the cardholder on an installment purchase inclusive of fees, tax and interest for the installment plan.
+          example: 200
+          exclusiveMaximum: false
+          exclusiveMinimum: false
+          maximum: 1000000000000000
+          minimum: 0
+      required:
+      - frequency
+      - tenure
+    Amount:
+      type: number
+      format: double
+      description: Amount to be paid in an installment.
+      example: 100
+      exclusiveMaximum: false
+      exclusiveMinimum: false
+      maximum: 9999999999999.99
+      minimum: 0
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns the list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    Transaction:
+      type: object
+      properties:
+        amount:
+          $ref: '#/components/schemas/Amount'
+        currency:
+          type: string
+          description: Currency code according to ISO 4217.
+          example: USD
+          maxLength: 3
+          minLength: 3
+      required:
+      - amount
+      - currency
+    ProviderIdField:
+      type: string
+      format: uuid
+      description: Provider ID is internal ID generated by Configuration API.
+      example: 3d56f5a7-db48-41f0-875e-30920e8465f3
+      maxLength: 36
+      minLength: 36
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    ScheduledRepayment:
+      type: object
+      properties:
+        amount:
+          $ref: '#/components/schemas/Amount'
+        dueDate:
+          type: string
+          description: Due date for an installment.
+          example: 2022-5-21
+          maxLength: 10
+          minLength: 8
+        installmentNumber:
+          type: integer
+          format: int32
+          description: Number of an installment.
+          example: 1
+          maximum: 99
+          minimum: 1
+    Consumer:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Consumer's email address. Hashed for pre-approved consumer, raw for consumer without pre-approval.
+          example: jane.doe@example.com
+          maxLength: 254
+          minLength: 5
+        isdCode:
+          type: string
+          description: ISD code of the consumer's mobile number.
+          example: '1'
+          maxLength: 5
+          minLength: 1
+        mobile:
+          type: string
+          description: Consumer's mobile number. Hashed for pre-approved consumer, raw for consumer without pre-approval.
+          example: '5550009999'
+          maxLength: 64
+          minLength: 4
+        providerConsumerId:
+          type: string
+          format: uuid
+          description: Unique user ID provided by the Installment Program Provider. This is specific to the provider. (External user/consumer id). Applicable only for pre-approved consumers.
+          example: 3d56f5a7-db48-41f0-875e-30920e8465f3
+          maxLength: 36
+          minLength: 36
+    OfferIdField:
+      type: string
+      description: Unique identifier for installment offers. This is mandatory for 'Mastercard Installments Payment Services product.
+      example: '24092019'
+      maxLength: 64
+      minLength: 8
+    TransactionOffer:
+      type: object
+      properties:
+        offerId:
+          type: string
+          description: unique identifier for installment offers.
+          example: '24092019'
+          maxLength: 64
+          minLength: 8
+      required:
+      - offerId
+    Error:
+      title: Error
+      type: object
+      description: Error object which contains details about the Error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error.
+          minLength: 1
+          maxLength: 100
+          example: Mastercard Installments APIs
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: invalid.request.parameter
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with the correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+  examples:
+    InitiatedPlanProviderSelected:
+      description: This example shows no offer selection by a consumer during checkout. Transaction Offers and ProviderId are specified instead. Lenders can view the consumer information, merchant information, and transaction information to determine installment eligibility.
+      value:
+        consumer:
+          email: doe.jane@example.com
+          isdCode: '1'
+          mobile: '5551231234'
+        merchant:
+          acceptor: '100234'
+          country: USA
+          mcc: '1711'
+          name: Decor shop
+        planId: 3d56f5a7-db48-41f0-875e-30920e8465f3
+        providerId: 218b9962-1355-44e4-8a16-f911363fd849
+        status: CREATED
+        transaction:
+          amount: 400.11
+          currency: USD
+        transactionOffers:
+        - offerId: '12345678'
+        - offerId: '87654321'
+    RejectedPlan:
+      description: This example shows a consumer-selected plan that has been declined by a lender. Lenders can view the status of the plan after the decline.
+      value:
+        consumer:
+          email: doe.jane@example.com
+          isdCode: '1'
+          mobile: '5551231234'
+        merchant:
+          acceptor: '100234'
+          country: USA
+          mcc: '1711'
+          name: Decor shop
+        offerId: '24092019'
+        transactionOffers:
+        - offerId: '24092019'
+        - offerId: '87654321'
+        planId: 3d56f5a7-db48-41f0-875e-30920e8465f3
+        planInstallmentInformation:
+          apr: 1.92
+          currency: USD
+          frequency: 15DAYS
+          installmentAmount: 166.79
+          installmentFee: 0
+          tenure: 3
+          totalAmount: 500.37
+        providerId: 218b9962-1355-44e4-8a16-f911363fd849
+        rejectReasonCode: LENDER_DRIVEN_REJECTION
+        rejectReasonDetail: Customer's credit score is insufficient.
+        scheduledRepayments:
+        - amount: 166.79
+          dueDate: '2022-05-30'
+          installmentNumber: 1
+        - amount: 166.79
+          dueDate: '2022-06-13'
+          installmentNumber: 2
+        - amount: 166.79
+          dueDate: '2022-06-27'
+          installmentNumber: 3
+        status: DECLINED
+        transaction:
+          amount: 400.11
+          currency: USD
+    ApprovedInProgress:
+      description: Approval processing is in progress.
+      value:
+        status: IN_PROGRESS
+    InitiatedPlanOfferSelected:
+      description: This example shows a consumer selected plan during checkout when OfferId is available. Lenders can view the plan information consumer information, merchant information, and transaction information to determine installment eligibility.
+      value:
+        consumer:
+          email: doe.jane@example.com
+          isdCode: '1'
+          mobile: '5551231234'
+        merchant:
+          acceptor: '100234'
+          country: USA
+          mcc: '1711'
+          name: Decor shop
+        offerId: '24092019'
+        transactionOffers:
+        - offerId: '24092019'
+        - offerId: '87654321'
+        planId: 3d56f5a7-db48-41f0-875e-30920e8465f3
+        planInstallmentInformation:
+          apr: 1.92
+          currency: USD
+          frequency: 15DAYS
+          installmentAmount: 166.79
+          installmentFee: 0
+          tenure: 3
+          totalAmount: 500.37
+        providerId: 218b9962-1355-44e4-8a16-f911363fd849
+        scheduledRepayments:
+        - amount: 166.79
+          dueDate: '2022-05-30'
+          installmentNumber: 1
+        - amount: 166.79
+          dueDate: '2022-06-13'
+          installmentNumber: 2
+        - amount: 166.79
+          dueDate: '2022-06-27'
+          installmentNumber: 3
+        status: CREATED
+        transaction:
+          amount: 400.11
+          currency: USD
+    ApprovedCompleted:
+      description: Approval processing is completed
+      value:
+        status: COMPLETED
+        callbackUrl: https://src.mastercard.com?action=COMPLETED&checkoutResponse=EncryptedData
+    ApprovedPlan:
+      description: This example shows a consumer-selected plan that has been approved by a lender. The lender can view the status of the plan after the approval.
+      value:
+        consumer:
+          email: doe.jane@example.com
+          isdCode: '1'
+          mobile: '5551231234'
+        merchant:
+          acceptor: '100234'
+          country: USA
+          mcc: '1711'
+          name: Decor shop
+        offerId: '24092019'
+        transactionOffers:
+        - offerId: '24092019'
+        - offerId: '87654321'
+        planId: 3d56f5a7-db48-41f0-875e-30920e8465f3
+        planInstallmentInformation:
+          apr: 1.92
+          currency: USD
+          frequency: 15DAYS
+          installmentAmount: 166.79
+          installmentFee: 0
+          tenure: 3
+          totalAmount: 500.37
+        providerId: 218b9962-1355-44e4-8a16-f911363fd849
+        scheduledRepayments:
+        - amount: 166.79
+          dueDate: '2022-05-30'
+          installmentNumber: 1
+        - amount: 166.79
+          dueDate: '2022-06-13'
+          installmentNumber: 2
+        - amount: 166.79
+          dueDate: '2022-06-27'
+          installmentNumber: 3
+        status: APPROVED
+        transaction:
+          amount: 400.11
+          currency: USD
+    Unauthorized:
+      description: Unauthorized to access the resource.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: unauthorized
+            Description: Unauthorized to access the resource.
+            Recoverable: false
+            Details: ''
+    InvalidFieldLength:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.body.parameter
+            Description: Field length is out of bound
+            Recoverable: false
+            Details: ''
+    NotFound:
+      description: URI/Resource not found.
+      value:
+        Errors:
+          Error:
+          - Source: mci-installments-offers-eligibilities-api
+            ReasonCode: not.found
+            Description: URI/Resource not found.
+            Recoverable: false
+            Details: ''
+    InvalidFieldFormat:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.body.parameter
+            Description: Field format or type is invalid
+            Recoverable: false
+            Details: ''
+    MethodNotAllowed:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: method.not.allowed
+            Description: Method is not allowed
+            Recoverable: false
+    InvalidCardProductError:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.parameter
+            Description: Product SPP is not available for the IND country
+            Recoverable: false
+            Details: ''
+    NotAcceptableHeader:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: not.acceptable.header
+            Description: Accept header value is not application/json.
+            Recoverable: false
+            Details: ''
+    MissingRequiredField:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.body.parameter
+            Description: One or more of the required fields are missing
+            Recoverable: false
+            Details: ''
+    ForbiddenError:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: forbidden
+            Description: Your account is not approved to access the API or resource, kindly contact your Mastercard associate to get approval.
+            Recoverable: false
+            Details: ''
+    InvalidFieldValue:
+      value:
+        Errors:
+          Error:
+          - Source: Mastercard Installments API's
+            ReasonCode: invalid.request.body.parameter
+            Description: Value doesn't exist / doesn't meet specified range
+            Recoverable: false
+            Details: ''
+  responses:
+    CompletionPSPData:
+      description: Success response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CompletionPSPData'
+          examples:
+            Completed:
+              $ref: '#/components/examples/ApprovedCompleted'
+            In Progress:
+              $ref: '#/components/examples/ApprovedInProgress'
+    MethodNotAllowed:
+      description: 'Method Not Allowed: Method used to request the resource is not allowed.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            MethodNotAllowed:
+              $ref: '#/components/examples/MethodNotAllowed'
+    Unauthorized:
+      description: Unauthorized to access the resource.
+      headers:
+        Correlation-Id:
+          $ref: '#/components/headers/Correlation-Id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            Unauthorized:
+              $ref: '#/components/examples/Unauthorized'
+    NotAcceptableHeader:
+      description: This response code is returned when a user enters anything except application/json in the Accept header.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            NotAcceptableHeader:
+              $ref: '#/components/examples/NotAcceptableHeader'
+    NotFound:
+      description: Not Found.
+      headers:
+        Correlation-Id:
+          $ref: '#/components/headers/Correlation-Id'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            NotFound:
+              $ref: '#/components/examples/NotFound'
+    InstallmentPlan:
+      content:
+        application/json:
+          examples:
+            Initiated Plan with Consumer Selected Offer:
+              $ref: '#/components/examples/InitiatedPlanOfferSelected'
+            Initiated Plan with Lender Selected Offer:
+              $ref: '#/components/examples/InitiatedPlanProviderSelected'
+            Approved Plan:
+              $ref: '#/components/examples/ApprovedPlan'
+            Rejected Plan:
+              $ref: '#/components/examples/RejectedPlan'
+          schema:
+            $ref: '#/components/schemas/InstallmentPlan'
+      description: 'The plan is found and returned based on plan ID.
+
+        '
+    ForbiddenError:
+      description: This response code is returned when API or resource access is not approved for the client.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ForbiddenError:
+              $ref: '#/components/examples/ForbiddenError'
+    BadRequestError:
+      description: This response code is returned when a request is invalid, or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidCardProductError:
+              $ref: '#/components/examples/InvalidCardProductError'
+            InvalidFieldFormat:
+              $ref: '#/components/examples/InvalidFieldFormat'
+            InvalidFieldLength:
+              $ref: '#/components/examples/InvalidFieldLength'
+            InvalidFieldValue:
+              $ref: '#/components/examples/InvalidFieldValue'
+            MissingRequiredField:
+              $ref: '#/components/examples/MissingRequiredField'
+  parameters:
+    plan_id:
+      description: Unique identifier for plan
+      in: path
+      name: plan_id
+      required: true
+      schema:
+        type: string
+        format: uuid
+      example: 3d56f5a7-db48-41f0-875e-30920e8465f3
+  headers:
+    Correlation-Id:
+      description: Correlation-Id response header to trace the request.
+      schema:
+        type: string
+      required: true
+      example: 44dc28d6-cf59-11ec-9d64-0242ac120002

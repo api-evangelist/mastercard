@@ -1,0 +1,1416 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Confirmations API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Confirmations
+paths:
+  /payment-requests/{payment_request_lifecycle_id}/payment-confirmation-advices:
+    post:
+      tags:
+      - Confirmations
+      summary: Mastercard Confirm Payment
+      description: Enables DSP to send payment status information for the request for payment message.
+      operationId: confirmPaymentAdvice
+      parameters:
+      - $ref: '#/components/parameters/X-Request-ID'
+      - $ref: '#/components/parameters/X-Product-ID'
+      - $ref: '#/components/parameters/X-Participant-ID'
+      - $ref: '#/components/parameters/X-JWS-Signature'
+      - $ref: '#/components/parameters/Idempotency-Key'
+      - $ref: '#/components/parameters/payment_request_lifecycle_id'
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentConfirmationAdviceRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaymentConfirmationAdviceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorisedErrorResponse'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /document-verifications/document-data-confirmations:
+    post:
+      tags:
+      - Confirmations
+      responses:
+        '200':
+          $ref: '#/components/responses/DocumentDataConfirmationsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: "- After the user verifies and checks if the data extracted from the\ndocuments match the current status (for example, Address).\n\n- The user sends data back to MIDS to confirm the details.\n\n- Perform verifications with IVPs and store the data into the PDS.   \n**This API is mandatory.**\n"
+      summary: Add and Validate a Document - Confirm the details of a document.
+      operationId: confirmDocumentData
+      parameters:
+      - $ref: '#/components/parameters/XUserIdentityParameter'
+      - $ref: '#/components/parameters/XEncryptedPayload'
+      requestBody:
+        $ref: '#/components/requestBodies/DocumentDataConfirmationsRequest'
+  /document-verifications/update-id-confirmations:
+    put:
+      tags:
+      - Confirmations
+      responses:
+        '200':
+          $ref: '#/components/responses/UpdateIdConfirmationsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      description: "Delete the document verification data on the Identity verification vendor\nonce the user confirms the PDS update.   \n**This API is mandatory.**\n"
+      summary: Add and Validate a Document - Confirm the identity was stored to the PDS.
+      operationId: updateIdConfirmation
+      parameters:
+      - $ref: '#/components/parameters/XUserIdentityParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateIdConfirmationsRequest'
+components:
+  schemas:
+    Payment:
+      type: object
+      required:
+      - paymentReference
+      - clearingSystem
+      - paymentDateTime
+      - paymentAmount
+      properties:
+        paymentReference:
+          type: string
+          minLength: 1
+          maxLength: 42
+          example: y18dvGsj3GJ57Tt
+          description: Unique Payment Reference of the real time settlement method provided by DSP.
+        clearingSystem:
+          type: string
+          minLength: 1
+          maxLength: 35
+          example: FPS
+          description: Creditor or CSP requested real-time settlement method. * Refer to Codes and Formats section for more details.
+        paymentDateTime:
+          type: string
+          format: date-time
+          example: '2020-11-20T06:57:24.465Z'
+          description: ISO 8601 format date and time in Coordinated Universal Time (UTC), when real time settlement is initiated.
+        paymentAmount:
+          description: The actual amount that has been transferred from the Debtor to the Creditor.
+          allOf:
+          - $ref: '#/components/schemas/Amount'
+          example: example_value
+    PaymentConfirmationAdvice:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock'
+      - type: object
+        required:
+        - paymentRequestLifecycleId
+        - requestStatus
+        properties:
+          paymentRequestLifecycleId:
+            type: string
+            minLength: 1
+            maxLength: 35
+            example: '923123123123123100'
+            description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+          requestStatus:
+            $ref: '#/components/schemas/RequestStatus'
+          agreementStatus:
+            $ref: '#/components/schemas/AgreementStatus'
+    AgreementStatus:
+      type: object
+      required:
+      - agreementId
+      - agreementStatus
+      properties:
+        agreementId:
+          type: string
+          example: a3e2a749088440eab8b40c926efe2931
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard to the agreement.
+        agreementStatus:
+          type: string
+          example: APPR
+          minLength: 4
+          maxLength: 4
+          description: Status of the Agreement updated by DSP to either Approved or Rejected or Deleted. * Refer to Codes and Formats section for more details.
+    Status:
+      type: object
+      required:
+      - transactionStatus
+      properties:
+        transactionStatus:
+          type: string
+          example: RJCT
+          maxLength: 4
+          minLength: 4
+          description: Status of the transaction. * Refer to Codes and Formats section for more details.
+        transactionStatusReason:
+          type: string
+          example: FRDS
+          maxLength: 4
+          minLength: 4
+          description: Reason for declined transaction. * Refer to Codes and Formats section for more details.
+    MessageResponseBlock:
+      type: object
+      required:
+      - messageId
+      - creationDateTime
+      - initiatingPartyId
+      - originalMessageId
+      properties:
+        initiatingPartyId:
+          type: string
+          example: ZAPP
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the message sender.
+        messageId:
+          type: string
+          example: 3bef00e542ec4be583b1b5d449799084
+          minLength: 1
+          maxLength: 35
+          description: A point-to-point unique identifier is assigned to every message by the message initiator.
+        creationDateTime:
+          type: string
+          example: '2020-11-20T06:57:24.465Z'
+          format: date-time
+          description: ISO 8601 format date and time in Coordinated Universal Time (UTC) when this message was created.
+        originalMessageId:
+          type: string
+          example: 7eab4eab35a542e085add0363a49c035
+          minLength: 1
+          maxLength: 35
+          description: Original message identifier generated and sent by the initiator of the request message.
+    NewPaymentConfirmationAdvice:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - paymentRequestLifecycleId
+        - status
+        - debtor
+        - acceptanceDateTime
+        properties:
+          paymentRequestLifecycleId:
+            type: string
+            minLength: 1
+            maxLength: 35
+            example: '923123123123123100'
+            description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+          acceptanceDateTime:
+            type: string
+            format: date-time
+            example: '2020-11-20T06:57:24.465Z'
+            description: ISO 8601 format date and time in Coordinated Universal Time (UTC) on when the Debtor has accepted or rejected the request.
+          creditAccountUsed:
+            type: boolean
+            example: true
+            description: Indicator to specify when a Credit account is used for the payment.
+          authorisedByDebtor:
+            type: boolean
+            example: false
+            description: Indicator whether the Consumer authorised the account on file transaction which was stepped up.
+          paymentRequestStatusRetrievalLifecycleId:
+            type: string
+            example: '111123123123123111'
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the Payment Request Status Retrieval request in subsequent transactions or services.
+          debtor:
+            $ref: '#/components/schemas/Debtor'
+          status:
+            $ref: '#/components/schemas/Status'
+          payment:
+            $ref: '#/components/schemas/Payment'
+          agreementConfirmation:
+            $ref: '#/components/schemas/AgreementConForPaymentAdvice'
+    Debtor:
+      type: object
+      required:
+      - debtorId
+      - debtorServiceProviderId
+      properties:
+        debtorId:
+          type: string
+          example: Fxrsi5345
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the Debtor provided to Mastercard by the DSP.
+        debtorServiceProviderId:
+          type: string
+          example: 000369
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the DSP during Mastercard onboarding.
+    AgreementConForPaymentAdvice:
+      description: Agreement Confirmation from DSP
+      type: object
+      required:
+      - agreementConfirmed
+      properties:
+        agreementConfirmed:
+          type: boolean
+          example: true
+          description: Indicates true whether Agreement was confirmed by Debtor. False for any other reasons.
+        agreementStatusReason:
+          type: string
+          example: SYSP
+          maxLength: 4
+          minLength: 4
+          description: Reason for declined agreement. * Refer to Codes and Formats section for more details.
+        accountNickname:
+          type: string
+          x-guarded-string: 'true'
+          example: bankname_account
+          minLength: 1
+          maxLength: 35
+          description: Nickname of the account is passed when agreementConfirmed is true.
+    ErrorWrapper:
+      description: A top level object for errors.
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Amount:
+      required:
+      - currency
+      - value
+      type: object
+      properties:
+        currency:
+          type: string
+          example: GBP
+          maxLength: 3
+          minLength: 3
+          description: ISO 4217 code for Currency.
+        value:
+          type: number
+          example: 100.25
+          description: Amount value.
+    Errors:
+      description: Object that contains the list of errors.
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    RequestStatus:
+      type: object
+      required:
+      - paymentRequestStatus
+      properties:
+        paymentRequestStatus:
+          type: string
+          example: RJCT
+          maxLength: 4
+          minLength: 4
+          description: Status of the Payment Request returned by Mastercard. * Refer to Codes and Formats section for more details.
+    ErrorList:
+      description: The list of errors.
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    MessageRequestBlock:
+      type: object
+      required:
+      - messageId
+      - creationDateTime
+      - initiatingPartyId
+      - businessType
+      properties:
+        initiatingPartyId:
+          type: string
+          example: '000545'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the message sender.
+        messageId:
+          type: string
+          example: 7eab4eab35a542e085add0363a49c035
+          minLength: 1
+          maxLength: 35
+          description: A point-to-point unique identifier is assigned to every message by the message initiator.
+        creationDateTime:
+          type: string
+          example: '2020-11-20T06:57:24.465Z'
+          format: date-time
+          description: ISO 8601 format date and time in Coordinated Universal Time (UTC) when this message was created.
+        businessType:
+          type: number
+          example: 3
+          minimum: 1
+          maximum: 999
+          description: Unique identifier assigned by Mastercard to define the commercial product construct. * Refer to Codes and Formats section for more details.
+    Error:
+      description: A single error.
+      type: object
+      properties:
+        Source:
+          type: string
+          example: ZAPP
+          description: Source of the error.
+        ReasonCode:
+          type: string
+          example: STVL-9999
+          description: Error Code
+        Description:
+          type: string
+          example: Invalid structure
+          description: Error Description.
+        Recoverable:
+          type: boolean
+          example: false
+          description: Boolean value to specify if error is recoverable or not.
+        Details:
+          type: string
+          example: Invalid structure
+          description: Optional details of the error.
+    Locale:
+      type: string
+      description: IETF BCP 47 code which identifies the language to be used in any dialogs being shown to the user during the flow.  The default value is "en-US".
+      pattern: ^[a-z]{2}-[a-zA-Z]{2}$
+      example: en-US
+    TpAuditMetadata:
+      required:
+      - sessionId
+      - transactionGroupId
+      type: object
+      description: Object containing metadata related to the request.
+      properties:
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+    ConfirmedPDS:
+      required:
+      - pds
+      - transactionId
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: 'UUID represents the MIDS transaction.
+
+            '
+          minLength: 36
+          maxLength: 36
+          example: 021fea3c-d17c-11ea-87d0-0242ac130003
+        pds:
+          $ref: '#/components/schemas/PDS'
+        fraudDetectionMeta:
+          $ref: '#/components/schemas/FraudDetectionMeta'
+        eligibleForMobileID:
+          type: boolean
+          description: Indicates whether user is eligible to enroll with Mobile ID.
+          example: false
+    AddressData:
+      type: object
+      properties:
+        addressLine1:
+          type: string
+          description: Address line 1.
+          minLength: 1
+          maxLength: 255
+          example: 36271 GrandRiver Ave
+        addressLine2:
+          type: string
+          description: Address line 2.
+          minLength: 1
+          maxLength: 255
+          example: Building no 2
+        addressZipCode:
+          type: string
+          description: Zip code.
+          minLength: 1
+          maxLength: 255
+          example: 48335
+        addressCity:
+          type: string
+          description: City.
+          minLength: 1
+          maxLength: 255
+          example: Farmington
+        addressSubdivision:
+          type: string
+          description: Subdivision of the user address, possible values include county, state, province, and municipality.
+          minLength: 2
+          maxLength: 2
+          example: MO
+        addressCountry:
+          type: string
+          description: Country provided in the address from the scanned document.
+          minLength: 1
+          maxLength: 255
+          example: USA
+    DocumentVerificationConfirmData:
+      required:
+      - documentData
+      - userConsent
+      - userProfileId
+      - countryCode
+      - locale
+      type: object
+      properties:
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+        documentData:
+          $ref: '#/components/schemas/ConfirmDocumentData'
+        userProfileId:
+          type: string
+          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: 1f52649e-4096-456a-bca0-751ee4703058
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        locale:
+          $ref: '#/components/schemas/Locale'
+        fraudDetection:
+          $ref: '#/components/schemas/FraudDetection'
+        deviceInfo:
+          $ref: '#/components/schemas/DeviceInfo'
+        visaMatched:
+          type: boolean
+          description: Flag indicating if the documentDetails are to be checked against a visa for a particular country.
+          example: false
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    BaseEvidenceData:
+      type: object
+      properties:
+        lastName:
+          type: string
+          description: Last name.
+          minLength: 1
+          maxLength: 255
+          example: Doe
+        firstName:
+          type: string
+          description: First name.
+          minLength: 1
+          maxLength: 255
+          example: John
+        dateOfBirth:
+          type: string
+          description: Date of birth.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        issuingCountry:
+          type: string
+          description: Country code.
+          minLength: 1
+          maxLength: 255
+          example: USA
+        issuingDate:
+          type: string
+          description: Issuing date.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        expiryDate:
+          type: string
+          description: Expiry date.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        gender:
+          type: string
+          description: M/F.
+          example: M
+          minLength: 1
+          maxLength: 1
+        fathersName:
+          type: string
+          description: Father's Name. This will only be available when the Brazilian DL is scanned. scanned.
+          minLength: 1
+          maxLength: 255
+          example: John Smith
+        mothersName:
+          type: string
+          description: Mother's Name. This will only be available when the Brazilian DL is scanned.
+          minLength: 1
+          maxLength: 255
+          example: Paula Smith
+    PDS:
+      type: string
+      description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
+      pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+      minLength: 1
+      example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    FraudDetection:
+      type: object
+      description: Object containing the signals from the device to be used for fraud detection.
+      properties:
+        nuDetectMeta:
+          description: The data retrieved from the MIDS Fraud Detection SDK which will be used to determine whether the device is trusted.
+          required:
+          - behaviourData
+          - remoteIp
+          - sessionId
+          - requestUrl
+          - userAgent
+          - xForwardedFor
+          type: object
+          properties:
+            behaviourData:
+              type: string
+              description: base64 encoded JSON generated by MIDS (nuDetect) SDK.
+              pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+              example: ewogICJuZHMtcG1kIiA6ICJ7XCJmdnFcIjpcIjBONjROOVAzLVBPM1ItNDcyNi04MDBPLTNQMzM2Mzg2Tk5RT1wiLFwianZxdHJnUW5nblwiOntcInp2cXNpXCI6XCJRUTYzOTc5Ny1OUFAyLTQ0OVItOVA0MS04UTM0NDdOODU5UzdcIixcInpjdlwiOlwidmJmXCIsXCJ6b3pzXCI6XCJOY2N5clwiLFwiemZ6XCI6MTcxNzk4NjkxODQsXCJqeGVcIjo0OTcwLFwiem9vXCI6XCJOY2N5clwiLFwienVmXCI6W1wienZ6Z1wiXSxcInF2cWdtXCI6NDIwLFwidmNlXCI6XCJhcHZjLDAsNXM5bzg0MXAsMywxO2ZnLDAsYXF2Y2V2YWNoZzAsMCxhcXZjZXZhY2hnMSwwO3NzLDAsYXF2Y2V2YWNoZzA7eHEsc3A7eHEsNG47eHEsNW87eHEsNjY7eHEsMjUzO3hxLDg1O3hxLHBxO3hxLDM4O3hxLDVuO3hxLDcyO3hxLDU2O3hxLDUyO3hxLDJwO3NvLG45LGFxdmNldmFjaGcwO3NzLDEsYXF2Y2V2YWNoZzE7eHEsMTI1O3hxLDQwO3hxLG82O3hxLDRyO3hxLG87Z3IscXMsNzcsMjM0LGFxdmNlcGJhZ2VieTBcIixcInpjemlcIjoxMixcInpvelwiOlwidkN1YmFyXCIsXCJ6Y3p2aVwiOjIsXCJ6ZmZcIjo0OTk5NjMxNzQ5MTIsXCJ6dW9wZlwiOi0xLFwiem9jXCI6XCJ2Q3ViYXIgS8qAXCIsXCJ6dmh2XCI6XCJjdWJhclwiLFwiZmVcIjpcIjE3OTJrODI4XCIsXCJoblwiOlwiMi4yLjEzODA2NVwiLFwiemh5XCI6XCJIRlwifSxcImpnXCI6XCIxLmotNDUxNjgwLjEuMi56U0dVQk56cHZNeUFoQjBOR2h2ZlRqLCwuM3hCRWhxSGhKZFREb1ZYY0hjYXJOSDUzVWFFS2t2amxNVF9RQTl5dUlYcWUwbV9iX0k0WWtBWGExUExTVXJzS1R4c0NFWHB2bkJjNkpEajhNTzhGZFVXMEcyaE9BWXZDRWZ5NXRLOHdJdVN4MzBnZmszZDF0MWhnc2NJODdFTG9MVlozNi1BcjhhV0pFSjJ1Ungza3RJYW5teDktOExZZmZsMWlFbVhSd1pqQ3FaQTVVMUZ1dzYzUERKZ2lIYzFUendFVjN3ak8yZDBrbUZIWUJaZTAxd0hnajVKQThTM0R6Z3FydE9pN1d3Q0VqZldZMHFITXFGT1g1d2RBYkl5LVNmOGVkYXBaeHNxaTItc0N6ejhRN2osLFwifSIsCiAgInNpZCIgOiAiMEE2NEE5QzMtQ0IzRS00NzI2LTgwMEItM0MzMzYzODZBQURCIgp9
+            remoteIp:
+              type: string
+              description: The IP of user app to TP backend.
+              minLength: 1
+              maxLength: 255
+              example: 127.0.0.1
+            sessionId:
+              type: string
+              description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+              minLength: 36
+              maxLength: 36
+              example: da3fe5be-2a8e-11eb-adc1-0242ac120002
+            userAgent:
+              type: string
+              description: The user-agent sent by the app to the TP backend.
+              minLength: 1
+              maxLength: 255
+              example: 'Mozilla: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.3 Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/43.4.'
+            xForwardedFor:
+              type: string
+              description: X-Forwarded-For header sent by the app to TP backend.
+              minLength: 1
+              maxLength: 255
+              example: 203.0.113.195,70.41.3.18,150.172.238.178
+            requestUrl:
+              type: string
+              description: The requested URL is hit by the app to the TP backend.
+              pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+              example: http://tp-backend.com/api/path
+    DocumentData:
+      description: Object containing the details of the document whose accuracy has been confirmed by the user.
+      required:
+      - dateOfBirth
+      - documentNumber
+      - documentStatus
+      - documentType
+      - expiryDate
+      - firstName
+      - gender
+      - issuingCountry
+      - issuingDate
+      - lastName
+      allOf:
+      - $ref: '#/components/schemas/AddressData'
+      - $ref: '#/components/schemas/BaseEvidenceData'
+      - type: object
+        properties:
+          documentNumber:
+            type: string
+            description: Document number.
+            minLength: 1
+            maxLength: 255
+            example: 1LViI488YkFZh8YjNlLf61BMn29cmQn
+          documentType:
+            type: string
+            description: The type of the document as specified by the user.
+            minLength: 1
+            maxLength: 50
+            example: passport
+          issuingPlace:
+            type: string
+            description: Issuing place.
+            minLength: 1
+            maxLength: 50
+            example: New York
+          issuingAuthority:
+            type: string
+            description: Issuing authority.
+            minLength: 1
+            maxLength: 50
+            example: United States
+          placeOfBirth:
+            type: string
+            description: Place of birth.
+            minLength: 1
+            maxLength: 255
+            example: Boston
+          issuingState:
+            type: string
+            description: State.
+            minLength: 2
+            maxLength: 100
+            example: MO
+          formattedAddress:
+            type: string
+            description: Formatted address.
+            minLength: 1
+            maxLength: 200
+            example: 220 BLVD O FALLON MO
+          rgNumber:
+            type: string
+            description: RG Number. This will only be available when the Brazilian DL is scanned.
+            minLength: 1
+            maxLength: 255
+            example: 12345
+          cpf:
+            type: string
+            description: CPF Number. This will only be available when the Brazilian DL is scanned.
+            minLength: 1
+            maxLength: 255
+            example: 12345
+          cardNumber:
+            type: string
+            description: The Driver's License card number was introduced to the Australian Driver's License as a verifiable field. It is currently only available for six Australian jurisdictions. This field is optional.
+            minLength: 1
+            maxLength: 255
+            example: C876687JK
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      description: The error response model used by all the API endpoints.
+      properties:
+        Errors:
+          required:
+          - Error
+          type: object
+          description: The error response model used by all the API endpoints.
+          properties:
+            Error:
+              type: array
+              description: A list of Error objects.
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The source of the problem. That is where the error occurred.
+                    example: mids
+                  ReasonCode:
+                    type: string
+                    description: A code defining the error, as defined in documentation.
+                    example: USER_PROFILE_ID_NOT_FOUND
+                  Description:
+                    type: string
+                    description: A description of this specific occurrence of the Reason code.
+                    example: The provided user profile ID does not exist.
+                  Recoverable:
+                    type: boolean
+                    description: Whether or not retrying this request could result in a successful response.
+                    example: false
+                  Details:
+                    type: string
+                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+                    example: User X was not found
+                  redirectUri:
+                    type: string
+                    description: TP will use this URI to redirect to RP.
+                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    AuditEventsItem:
+      type: object
+      properties:
+        dateTime:
+          type: string
+          description: Date and time at which the event is created.
+          minLength: 1
+          maxLength: 29
+          example: '2020-01-28T13:16:01.714-05:00'
+        softwareVersion:
+          type: string
+          description: Software version.
+          minLength: 1
+          maxLength: 30
+          example: 1.0.0
+        userProfileId:
+          type: string
+          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 123ae1aa-6744-433e-879d-7da48d631234
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 28eae1aa-6744-433e-879d-7da48d63e89a
+        logRequestFlow:
+          type: string
+          description: Log Request Flow.
+          minLength: 1
+          maxLength: 255
+          example: CoreSDK-TP
+        logEvent:
+          type: string
+          description: Log Event.
+          minLength: 0
+          maxLength: 255
+          example: ID Enrollment
+        logEventType:
+          type: string
+          description: Log Event Type.
+          minLength: 1
+          maxLength: 255
+          example: User Profile Creation
+        osVersion:
+          type: string
+          description: OS version.
+          minLength: 1
+          maxLength: 255
+          example: Android 5.0
+        deviceMake:
+          type: string
+          description: Device make.
+          minLength: 1
+          maxLength: 255
+          example: Samsung S10
+        type:
+          type: string
+          description: Type of the event.
+          minLength: 1
+          maxLength: 255
+          example: audit
+        audit:
+          type: object
+          description: Represents the audit event.
+          properties:
+            privacyPolicy:
+              type: string
+              description: Version user confirmed.
+              minLength: 1
+              maxLength: 20
+              example: 1.0.0
+            userBiometricConsent:
+              type: string
+              description: User consent to capture details.
+              enum:
+              - 'TRUE'
+              - 'FALSE'
+              - NA
+              minLength: 4
+              maxLength: 5
+              example: 'TRUE'
+            event:
+              type: string
+              description: Event.
+              minLength: 1
+              maxLength: 255
+              example: Document Scan
+            eventType:
+              type: string
+              description: EventType.
+              minLength: 1
+              maxLength: 255
+              example: Enrollment
+            result:
+              type: string
+              description: API Call result.
+              enum:
+              - 'TRUE'
+              - 'FALSE'
+              - FAIL
+              minLength: 4
+              maxLength: 5
+              example: 'TRUE'
+            eventGeneratedSource:
+              type: string
+              description: Event generated source.
+              minLength: 1
+              maxLength: 50
+              example: CoreSDK
+            owner:
+              type: string
+              description: Owner.
+              minLength: 2
+              maxLength: 4
+              example: TP
+            requestDetails:
+              type: object
+              description: Request Details.
+              example: Request URL
+            responseDetails:
+              type: object
+              description: Response Details.
+              example: Response Data
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
+    UserConsent:
+      enum:
+      - ACCEPT
+      - DECLINE
+      - REVOKE
+      - EXPIRE
+      type: string
+      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
+      pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+      minLength: 6
+      maxLength: 7
+      example: ACCEPT
+    ARID:
+      type: string
+      description: A unique identifier for any activity being executed arising out of a Claim Share request. This value is passed as a parameter in the URL redirecting a User to the TP Flow during a Claim Share.
+      format: uuid
+      pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+      minLength: 36
+      maxLength: 36
+      example: a15fa6de-b199-11eb-8529-0242ac130003
+    FraudDetectionMetaRequiredItem:
+      description: An item that is required from fraud detection meta.
+      type: object
+      properties:
+        field:
+          type: string
+          description: The property which is required.
+          minLength: 1
+          maxLength: 255
+          example: email
+        assuranceLevel:
+          type: integer
+          description: The assurance level required for the property.
+          minimum: 0
+          example: 1
+    DeviceInfo:
+      description: Object containing the details of the device from which the enrollment is being conducted.
+      required:
+      - deviceAppId
+      - make
+      - model
+      type: object
+      properties:
+        deviceAppId:
+          type: string
+          description: The device application ID is retrieved from the mobile SDK.
+          minLength: 1
+          maxLength: 255
+          example: 599F9C00-92DC-4B5C-9464-7971F01F8370
+        make:
+          type: string
+          description: The make of the mobile device.
+          minLength: 1
+          maxLength: 255
+          example: Samsung
+        model:
+          type: string
+          description: The model of the mobile device.
+          minLength: 1
+          maxLength: 255
+          example: S8
+    FraudDetectionMeta:
+      description: Fraud detection meta-data.
+      type: object
+      properties:
+        requiredAttributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/FraudDetectionMetaRequiredItem'
+    CountryCode:
+      type: string
+      description: The country code of the country where the transaction originates from.
+      pattern: ^[a-zA-Z]{2}$
+      example: US
+    ConfirmDocumentData:
+      required:
+      - dateOfBirth
+      - documentNumber
+      - documentType
+      - workflowId
+      - expiryDate
+      - firstName
+      - issuingCountry
+      - lastName
+      description: Document data to be verified.
+      allOf:
+      - $ref: '#/components/schemas/DocumentData'
+      - type: object
+        properties:
+          workflowId:
+            type: string
+            description: UUID returned to the TP after the initial enrollment / re-authentication is completed, which is used to return the outcome of the associated verification process.
+            pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+            example: be3ad617-04ad-43e1-a438-79425b6511b6
+    DocumentIdConfirmation:
+      required:
+      - countryCode
+      - workflowId
+      - userProfileId
+      - eventType
+      type: object
+      properties:
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        workflowId:
+          type: string
+          description: UUID returned to the TP after the initial enrollment / re-authentication is completed, which is used to return the outcome of the associated verification process.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          maxLength: 36
+          minLength: 36
+          example: df52649e-4096-456a-bca0-751ee470009f
+        userProfileId:
+          type: string
+          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          maxLength: 36
+          minLength: 36
+          example: df52649e-4096-456a-bca0-751ee470009f
+        eventType:
+          type: string
+          description: ENROLLMENT or AUTHENTICATION.
+          enum:
+          - ENROLLMENT
+          - AUTHENTICATION
+          minLength: 10
+          maxLength: 14
+          example: ENROLLMENT
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+  headers:
+    X-Participant-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: '000545'
+      description: Unique identifier assigned to the participant by Mastercard during onboarding.
+    X-JWS-Signature:
+      required: true
+      description: JWS detached signature is applied to ensure data integrity.
+      schema:
+        type: string
+        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
+        minLength: 1
+        maxLength: 512
+    X-Request-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: 7eab4eab35a542e085add0363a49c035
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and for tracing, troubleshooting and analysis purposes.
+    X-Product-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product by Mastercard and given to the participant.
+  examples:
+    BadRequestErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: ZAPP
+            ReasonCode: STVL-9999
+            Description: Invalid structure.
+            Recoverable: false
+            Details: Invalid structure
+    UnauthorisedExample:
+      value:
+        Errors:
+          Error:
+          - Source: ZAPP
+            ReasonCode: SECU-9999
+            Description: Invalid signature.
+            Recoverable: false
+            Details: Invalid signature
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
+            Recoverable: false
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+    DocumentVerificationConfirmDataExample:
+      value:
+        sdkAuditEvents:
+        - dateTime: '2020-01-28T13:16:01.714-05:00'
+          softwareVersion: 1.0.0
+          userProfileId: df52649e-4096-456a-bca0-751ee470009f
+          sessionId: 123ae1aa-6744-433e-879d-7da48d631234
+          transactionGroupId: 28eae1aa-6744-433e-879d-7da48d63e89a
+          logRequestFlow: CoreSDK-TP
+          logEvent: ID Enrollment
+          logEventType: User Profile Creation
+          osVersion: Android 5.0
+          deviceMake: Samsung S10
+          type: audit
+          audit:
+            privacyPolicy: 1.0.0
+            userBiometricConsent: 'TRUE'
+            event: Document Scan
+            eventType: Enrollment
+            result: 'TRUE'
+            eventGeneratedSource: CoreSDK
+            owner: TP
+        tpAuditMetadata:
+          sessionId: be3ad617-04ad-43e1-a438-79425b6511b6
+          transactionGroupId: be3ad617-04ad-43e1-a438-79425b6511b6
+        arid: a15fa6de-b199-11eb-8529-0242ac130003
+        documentData:
+          addressLine1: 36271 GrandRiver Ave
+          addressLine2: Building no 2
+          addressZipCode: '48335'
+          addressCity: Farmington
+          addressSubdivision: MO
+          addressCountry: USA
+          lastName: Doe
+          firstName: John
+          dateOfBirth: '1996-07-10'
+          issuingCountry: USA
+          issuingDate: '1996-07-10'
+          expiryDate: '1996-07-10'
+          gender: M
+          fathersName: John Smith
+          mothersName: Paula Smith
+          documentNumber: 1LViI488YkFZh8YjNlLf61BMn29cmQn
+          documentType: passport
+          issuingPlace: New York
+          issuingAuthority: United States
+          placeOfBirth: Boston
+          issuingState: MO
+          formattedAddress: 220 BLVD O FALLON MO
+          rgNumber: '12345'
+          cpf: '12345'
+          cardNumber: C876687JK
+          workflowId: be3ad617-04ad-43e1-a438-79425b6511b6
+        userProfileId: 1f52649e-4096-456a-bca0-751ee4703058
+        userConsent: ACCEPT
+        countryCode: US
+        locale: en-US
+        fraudDetection:
+          nuDetectMeta:
+            behaviourData: ewogICJuZHMtcG1kIiA6ICJ7XCJmdnFcIjpcIjBONjROOVAzLVBPM1ItNDcyNi04MDBPLTNQMzM2Mzg2Tk5RT1wiLFwianZxdHJnUW5nblwiOntcInp2cXNpXCI6XCJRUTYzOTc5Ny1OUFAyLTQ0OVItOVA0MS04UTM0NDdOODU5UzdcIixcInpjdlwiOlwidmJmXCIsXCJ6b3pzXCI6XCJOY2N5clwiLFwiemZ6XCI6MTcxNzk4NjkxODQsXCJqeGVcIjo0OTcwLFwiem9vXCI6XCJOY2N5clwiLFwienVmXCI6W1wienZ6Z1wiXSxcInF2cWdtXCI6NDIwLFwidmNlXCI6XCJhcHZjLDAsNXM5bzg0MXAsMywxO2ZnLDAsYXF2Y2V2YWNoZzAsMCxhcXZjZXZhY2hnMSwwO3NzLDAsYXF2Y2V2YWNoZzA7eHEsc3A7eHEsNG47eHEsNW87eHEsNjY7eHEsMjUzO3hxLDg1O3hxLHBxO3hxLDM4O3hxLDVuO3hxLDcyO3hxLDU2O3hxLDUyO3hxLDJwO3NvLG45LGFxdmNldmFjaGcwO3NzLDEsYXF2Y2V2YWNoZzE7eHEsMTI1O3hxLDQwO3hxLG82O3hxLDRyO3hxLG87Z3IscXMsNzcsMjM0LGFxdmNlcGJhZ2VieTBcIixcInpjemlcIjoxMixcInpvelwiOlwidkN1YmFyXCIsXCJ6Y3p2aVwiOjIsXCJ6ZmZcIjo0OTk5NjMxNzQ5MTIsXCJ6dW9wZlwiOi0xLFwiem9jXCI6XCJ2Q3ViYXIgS8qAXCIsXCJ6dmh2XCI6XCJjdWJhclwiLFwiZmVcIjpcIjE3OTJrODI4XCIsXCJoblwiOlwiMi4yLjEzODA2NVwiLFwiemh5XCI6XCJIRlwifSxcImpnXCI6XCIxLmotNDUxNjgwLjEuMi56U0dVQk56cHZNeUFoQjBOR2h2ZlRqLCwuM3hCRWhxSGhKZFREb1ZYY0hjYXJOSDUzVWFFS2t2amxNVF9RQTl5dUlYcWUwbV9iX0k0WWtBWGExUExTVXJzS1R4c0NFWHB2bkJjNkpEajhNTzhGZFVXMEcyaE9BWXZDRWZ5NXRLOHdJdVN4MzBnZmszZDF0MWhnc2NJODdFTG9MVlozNi1BcjhhV0pFSjJ1Ungza3RJYW5teDktOExZZmZsMWlFbVhSd1pqQ3FaQTVVMUZ1dzYzUERKZ2lIYzFUendFVjN3ak8yZDBrbUZIWUJaZTAxd0hnajVKQThTM0R6Z3FydE9pN1d3Q0VqZldZMHFITXFGT1g1d2RBYkl5LVNmOGVkYXBaeHNxaTItc0N6ejhRN2osLFwifSIsCiAgInNpZCIgOiAiMEE2NEE5QzMtQ0IzRS00NzI2LTgwMEItM0MzMzYzODZBQURCIgp9
+            remoteIp: 127.0.0.1
+            sessionId: da3fe5be-2a8e-11eb-adc1-0242ac120002
+            userAgent: 'Mozilla: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.3 Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/43.4.'
+            xForwardedFor: 203.0.113.195,70.41.3.18,150.172.238.178
+            requestUrl: http://tp-backend.com/api/path
+        deviceInfo: null
+        deviceAppId: 599F9C00-92DC-4B5C-9464-7971F01F8370
+        make: Samsung
+        model: S8
+        visaMatched: false
+        sdkVersion: 2.3.0
+    EncryptedPayloadNoPDSExample:
+      value:
+        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyf
+    UserProfileDeletedErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_DELETED
+            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
+            Recoverable: false
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided user profile ID does not exist.
+            Recoverable: false
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+  parameters:
+    X-JWS-Signature:
+      name: X-JWS-Signature
+      in: header
+      required: true
+      description: JWS detached signature is applied to ensure data integrity.
+      schema:
+        type: string
+        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
+        minLength: 1
+        maxLength: 512
+    X-Participant-ID:
+      name: X-Participant-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: '000545'
+      description: Unique identifier assigned to the participant by Mastercard during onboarding.
+    X-Product-ID:
+      name: X-Product-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product by Mastercard and given to the participant.
+    Idempotency-Key:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Unique identifier generated by the participant. Mastercard uses this identifier to recognize subsequent retries of the same request and ensure idempotent behaviour by sending the same response without repeating the operation again.
+      schema:
+        type: string
+        format: uuid
+        example: 7da7a728-f910-11e6-942a-68f728c1ba70
+        minLength: 1
+        maxLength: 36
+    payment_request_lifecycle_id:
+      name: payment_request_lifecycle_id
+      in: path
+      required: true
+      description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+      schema:
+        type: string
+        example: '128361739311340082'
+        minLength: 1
+        maxLength: 35
+    X-Request-ID:
+      name: X-Request-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: 7eab4eab35a542e085add0363a49c035
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and used for tracing, troubleshooting and analysis purposes.
+    XEncryptedPayload:
+      in: header
+      name: X-Encrypted-Payload
+      type: boolean
+      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
+
+        '
+      example: true
+      schema: null
+    XUserIdentityParameter:
+      in: header
+      name: X-User-Identity
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      description: 'JWT token for session validation. Returned as response header in previous API calls with key X-User-Identity.
+
+        '
+      schema:
+        type: string
+  responses:
+    PaymentConfirmationAdviceResponse:
+      description: Payment Request Status update successful.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+        X-JWS-Signature:
+          $ref: '#/components/headers/X-JWS-Signature'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentConfirmationAdvice'
+    BadRequestErrorResponse:
+      description: 'Invalid structure: The header or payload fails syntax or structural validation.'
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestErrorExample:
+              $ref: '#/components/examples/BadRequestErrorExample'
+    UnauthorisedErrorResponse:
+      description: Invalid signature. The service fails signature validation.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/UnauthorisedExample'
+    UnauthorizedError:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    NotFoundError:
+      description: The request didn't match an existing resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
+    UpdateIdConfirmationsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+    DocumentDataConfirmationsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConfirmedPDS'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
+  requestBodies:
+    PaymentConfirmationAdviceRequest:
+      required: true
+      description: Payment Request Confirmation Advice.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewPaymentConfirmationAdvice'
+    UpdateIdConfirmationsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DocumentIdConfirmation'
+      required: true
+    DocumentDataConfirmationsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DocumentVerificationConfirmData'
+          examples:
+            DocumentDataConfirmationsUnencryptedRequest:
+              $ref: '#/components/examples/DocumentVerificationConfirmDataExample'
+            DocumentDataConfirmationsEncryptedRequest:
+              $ref: '#/components/examples/EncryptedPayloadNoPDSExample'
+      required: true

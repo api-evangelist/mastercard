@@ -1,0 +1,659 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Setup API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Setup
+paths:
+  /donors/{donor_id}/setups/{donation_setup_id}:
+    get:
+      tags:
+      - Setup
+      summary: Get Recurring Donation
+      description: Retrieve donation setup details by setupid
+      operationId: retriveDonationSetupByIdUsingGET
+      parameters:
+      - $ref: '#/components/parameters/ClientId'
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/ProgramId'
+      - $ref: '#/components/parameters/DonationSetup'
+      - $ref: '#/components/parameters/Donor'
+      responses:
+        '200':
+          $ref: '#/components/responses/RetrieveDonateSetUpDetails'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      deprecated: false
+    put:
+      tags:
+      - Setup
+      summary: Update Recurring Donation
+      description: Update Monthly, Micro or Round-up donation for a registered user. Encrypting request body is not required.
+      operationId: updateDonationSetupUsingPUT
+      parameters:
+      - $ref: '#/components/parameters/ClientId'
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/ProgramId'
+      - $ref: '#/components/parameters/DonationSetup'
+      - $ref: '#/components/parameters/Donor'
+      requestBody:
+        $ref: '#/components/requestBodies/DonateSetupUpdate'
+      responses:
+        '200':
+          $ref: '#/components/responses/DonateSetup'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      deprecated: false
+    delete:
+      tags:
+      - Setup
+      summary: Delete Recurring Donation
+      description: Delete Monthly, Micro or Round-up donation for a registered user
+      operationId: deleteDonationSetupUsingDELETE
+      parameters:
+      - $ref: '#/components/parameters/ClientId'
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/ProgramId'
+      - $ref: '#/components/parameters/DonationSetup'
+      - $ref: '#/components/parameters/Donor'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      deprecated: false
+  /donations/non-ma/setup/cards:
+    get:
+      tags:
+      - Setup
+      summary: Get All Non Mastercard Brand Cards API
+      description: This API is used by the API consumer to download all their Non-Mastercard registered cards.
+      operationId: fetchDonationNonMA
+      parameters:
+      - $ref: '#/components/parameters/ClientId'
+      - name: x-correlation-id
+        in: header
+        description: CorrelationId is a unique donation request ID. It is recommended to pass the x-correlation-id by the customer and to use the format "bankname_UUID" (bank name can be indicated using the first 4 digits). Maximum length of this field should be 100 alphanumeric characters. If not passed, Mastercard will generate it. ***Note:*** If there is a timeout when doing the guest api call, it is important to redo the same api call with same x-correlation-id to get the status of the previous api call
+        required: false
+        schema:
+          type: string
+          example: 03f8c4e8-8bdc-4a30-a2b4-b6f989e96ca3
+      - $ref: '#/components/parameters/ProgramId'
+      responses:
+        '200':
+          $ref: '#/components/responses/RetrieveNonMABrandCards'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-InvalidProgramId'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error-InternalServerError'
+      deprecated: false
+components:
+  schemas:
+    RetrieveDonateSetUpDetails:
+      type: object
+      properties:
+        amount:
+          type: string
+          example: '11'
+          minLength: 1
+          maxLength: 10
+          description: Fixed amount incase of Monthly and Per Real-Transaction incase of Micro
+        cardId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          description: Card Id
+          example: ebee3d81-18d4-409a-8330-73db083f2cfc
+        charityId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          example: ae3c5f35-084a-4df9-a2af-7e0efd512fc0
+          format: uuid
+          description: Charity Id
+        donationSetupId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          example: 4a520af0-8e47-44cd-8925-9f3ecd09baff
+          format: uuid
+          description: Donation SetupId
+        donationType:
+          type: string
+          example: Micro
+          minLength: 3
+          maxLength: 20
+          description: Can be either Micro or Monthly
+        donorId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          example: 652ce9ff-fa5f-4e9f-8151-c73fa20088f7
+          format: uuid
+          description: Valid UUID.
+        maxCap:
+          type: string
+          example: '50'
+          minLength: 1
+          maxLength: 10
+          description: Max limit is applicable only for Micro Donations
+        setupStatus:
+          type: string
+          example: ACTIVE
+          minLength: 3
+          maxLength: 20
+          description: Can be ACTIVE / DELETED / INACTIVE
+      title: RetrieveDonateSetUpDetailsResponse
+    3ds2:
+      type: object
+      required:
+      - transactionStatus
+      properties:
+        transactionStatus:
+          type: string
+          example: Y
+          minLength: 1
+          maxLength: 1
+          description: Status of Transaction (recommended - Y)
+        protocolVersion:
+          type: string
+          example: 2.2.2
+          minLength: 5
+          maxLength: 20
+          description: Protocol Version
+      description: Required If authPayerResponse object is passed, only for MPGS.
+    Error-InternalServerError:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: INTERNAL_SERVER_ERROR
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: An error occurred on the server.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    CardItems:
+      type: object
+      properties:
+        card_id:
+          type: string
+          example: 908c0a3c-f258-4313-9f5b-83b6cc058692
+          minLength: 36
+          maxLength: 36
+          description: Card Id
+        pan:
+          type: string
+          example: 371449******8431
+          minLength: 16
+          maxLength: 16
+          description: The Masked Primary Account Number (PAN)
+      title: CardItems
+    Error-401:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to authorization failure
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: AUTHENTICATION_FAILED
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: OAuth signatures did not match.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Authentication:
+      type: object
+      properties:
+        3ds:
+          $ref: '#/components/schemas/3ds'
+        3ds2:
+          $ref: '#/components/schemas/3ds2'
+    Error-403:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to forbidden requests
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of forbidden request.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: INVALID_KEY
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The signing certificate is not valid.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    AuthPayerResponse:
+      type: object
+      properties:
+        authentication:
+          $ref: '#/components/schemas/Authentication'
+    DonateSetup:
+      type: object
+      properties:
+        donationSetupId:
+          type: string
+          example: 4a520af0-8e47-44cd-8925-9f3ecd09baff
+          format: uuid
+          minLength: 36
+          maxLength: 36
+          description: Donation SetupId
+        donorId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          example: 652ce9ff-fa5f-4e9f-8151-c73fa20088f7
+          format: uuid
+          description: Valid UUID.
+        setupStatus:
+          type: string
+          example: ACTIVE
+          minLength: 5
+          maxLength: 20
+          description: Can be ACTIVE / DELETED / INACTIVE
+        transactionId:
+          type: string
+          example: 3311e859-3ee4-4155-a640-8cae447c27ca
+          minLength: 36
+          maxLength: 36
+          description: Generated upon successful donation setup.
+        transactionMessage:
+          type: string
+          example: Transaction APPROVED.
+          minLength: 3
+          maxLength: 30
+          description: Message for donation setup transaction.
+        transactionStatus:
+          type: string
+          example: SUCCESS
+          minLength: 3
+          maxLength: 30
+          description: Status of transaction.
+      title: DonateSetupResponse
+    Error-InvalidProgramId:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an error condition.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: INVALID_PROGRAM_ID
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Invalid Program ID, it must be a valid UUID.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: null
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    RetrieveNonMABrandCards:
+      type: object
+      properties:
+        totalItems:
+          type: integer
+          example: 1
+          format: int64
+          minLength: 1
+          maxLength: 10
+          description: Total number of items
+        items:
+          type: array
+          description: Card items
+          items:
+            $ref: '#/components/schemas/CardItems'
+      title: RetrieveNonMABrandCards
+    DonateSetupUpdate:
+      type: object
+      required:
+      - amount
+      properties:
+        amount:
+          type: string
+          example: '5'
+          minLength: 1
+          maxLength: 20
+          description: Fixed amount incase of Monthly and Per Real-Transaction incase of Micro
+        maxCap:
+          type: string
+          example: '50'
+          minLength: 1
+          maxLength: 20
+          description: Max limit is applicable only for Micro Donations
+        authPayerResponse:
+          $ref: '#/components/schemas/AuthPayerResponse'
+      title: DonateSetupUpdateRequest
+    3ds:
+      type: object
+      required:
+      - authenticationToken
+      - transactionId
+      - version
+      properties:
+        acsEci:
+          type: string
+          example: 2
+          minLength: 1
+          maxLength: 2
+          description: ascEci
+        authenticationToken:
+          type: string
+          example: kHyn+7YFi1EUAREAAAAvNUe6Hv8=
+          minLength: 28
+          maxLength: 32
+          description: Authentication Token
+        transactionId:
+          type: string
+          example: 9f343e5d-fc28-4818-88d4-17a35fb7dea9
+          minLength: 36
+          maxLength: 36
+          description: transaction ID (UUID)
+        version:
+          type: string
+          example: 1.0.2
+          minLength: 5
+          maxLength: 20
+          description: version
+      description: Required If authPayerResponse object is passed.
+    Error-500:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to server error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an server issue.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: PROGRAM_ID_NOT_FOUND
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Program id is required as this client is mapped to multiple programs.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an error condition.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: DONOR_ID_INVALID
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Invalid donorId, it must be a valid UUID.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: Provided donorId is not valid, Please check and provide valid Unique Id.
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+  responses:
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-403'
+    DonateSetup:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DonateSetup'
+    RetrieveNonMABrandCards:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RetrieveNonMABrandCards'
+    Unauthorized:
+      description: Unauthorised
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-401'
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-500'
+    RetrieveDonateSetUpDetails:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RetrieveDonateSetUpDetails'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NoContent:
+      description: The Setup is successfully deleted.
+  parameters:
+    ClientId:
+      name: x-openapi-clientid
+      in: header
+      description: ClientId is a unique and a mandatory ID shared while creating a project on Mastercard Developers Portal.
+      required: true
+      schema:
+        type: string
+        example: 0a7e433a-63fc-4557-8cf4
+    ProgramId:
+      name: ProgramId
+      in: header
+      description: ProgramId is an optional field, but if a client has more than one program associated to it, then this field becomes mandatory.
+      required: false
+      schema:
+        type: string
+        example: 80380ef2-5037-4e57-86bf-1bdd1efb0ae2
+    Donor:
+      name: donor_id
+      in: path
+      description: donor_id
+      required: true
+      schema:
+        type: string
+        example: 652ce9ff-fa5f-4e9f-8151-c73fa20088f7
+    CorrelationId:
+      name: x-correlation-id
+      in: header
+      description: CorrelationId is a unique donation request ID. It is recommended to pass the x-correlation-id by the customer and to use the format "bankname_UUID" (bank name can be indicated using the first 4 digits). Maximum length of this field should be 100 alphanumeric characters. If not passed, Mastercard will generate it.
+      required: false
+      schema:
+        type: string
+        example: 03f8c4e8-8bdc-4a30-a2b4-b6f989e96ca3
+    DonationSetup:
+      name: donation_setup_id
+      in: path
+      description: donation_setup_id
+      required: true
+      schema:
+        type: string
+        example: 4a520af0-8e47-44cd-8925-9f3ecd09baff
+  requestBodies:
+    DonateSetupUpdate:
+      description: donateSetupUpdateRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DonateSetupUpdate'
+      required: false

@@ -1,0 +1,173 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Lookup Identifiers API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Lookup Identifiers
+  description: Operations related to Lookup Identifiers.
+paths:
+  /users/references/searches:
+    post:
+      tags:
+      - Lookup Identifiers
+      summary: Provides Opaque and real identifiers
+      description: Provides Opaque identifiers like RANAC, RANCU along with sensitive information like BAN, BCN.
+      operationId: getReferenceIds
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/UserReferencesSearchRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserReferencesSearchResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+components:
+  schemas:
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error Details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of the error
+          example: user-management
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during API request processing.
+          example: INVALID_FIELD_FORMAT
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Email Address must be in the valid format.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about the data received.
+          example: Invalid Details
+      description: Error Details
+    UserReferences:
+      required:
+      - userReference
+      type: object
+      properties:
+        userReferences:
+          type: array
+          description: User Reference
+          items:
+            $ref: '#/components/schemas/UserReference'
+    AccountDetails:
+      type: object
+      properties:
+        accountId:
+          type: string
+          description: RANAC corresponding to the input User ID.
+          example: '100000000051204586331247554878'
+        accountNumber:
+          type: string
+          description: BAN corresponding to the input User ID.
+          example: '5114000000005678'
+        accountFirstFour:
+          type: string
+          description: First four digits of the BAN.
+          example: '5114'
+        accountLastFour:
+          type: string
+          description: Last four digits of the BAN.
+          example: '5678'
+      description: Account Details
+    UserReference:
+      type: object
+      properties:
+        customerId:
+          type: string
+          description: RANCU corresponding to the input User ID.
+          example: '123456789120011421'
+        customerNumber:
+          type: string
+          description: BCN corresponding to the input User ID.
+          example: '5114000000005678'
+        accountDetails:
+          type: array
+          description: Account Details
+          items:
+            $ref: '#/components/schemas/AccountDetails'
+    UserSearch:
+      required:
+      - userId
+      - userIdType
+      type: object
+      properties:
+        userId:
+          maxLength: 50
+          minLength: 0
+          type: string
+          description: Unique identifier of the User.
+          example: '5444163200000015000'
+        userIdType:
+          type: string
+          description: Identifier type for the given user. Supported identifiers are BAN or BCN or RANCU or RANAC.
+          example: BAN
+        includeSensitiveIdentifiers:
+          type: boolean
+          description: When set to true, authorized clients will also receive sensitive identifiers in response.
+          example: true
+        programIdentifier:
+          type: string
+          description: Filter response to include only accounts that belong to the program.
+          example: PGM42051
+        includeOnlyPrimary:
+          type: boolean
+          description: When set to true, only primary accounts details are included in the response.
+          example: true
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+  responses:
+    UserReferencesSearchResponse:
+      description: Successfully retrieved account and customer Opaque and Real Identifiers depending upon request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserReferences'
+    ErrorsResponse:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+  requestBodies:
+    UserReferencesSearchRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserSearch'

@@ -1,0 +1,179 @@
+swagger: '2.0'
+info:
+  title: Mastercard Bill Payment Validator Account Opening Real  Card API
+  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
+  version: '1.0'
+  x-artifactId: billpay-api
+  contact:
+    name: Bill Pay Development Support
+    email: Bill_Pay_Development_Support@mastercard.com
+host: sandbox.api.mastercard.com
+basePath: /billpayAPI/v1
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- name: Real  Card
+paths:
+  /real-card-accounts/{account_guid}:
+    delete:
+      tags:
+      - Real  Card
+      summary: Delete all virtual cards linked to a real card
+      description: This endpoint allows users to delete all virtual cards linked to a real card account_guid
+      parameters:
+      - $ref: '#/components/parameters/accountGUID'
+      operationId: DeleteVcnsByRealCardAccountGuid
+      responses:
+        '204':
+          $ref: '#/components/responses/NOContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundError'
+components:
+  responses:
+    UnauthorizedError:
+      description: Authentication Required
+      headers:
+        WWW-Authenticate:
+          description: Method of authentication
+          schema:
+            type: string
+      content:
+        application/json:
+          examples:
+            Unauthorized:
+              $ref: '#/components/examples/AuthorizationError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+    ResourceNotFoundError:
+      description: Resource Not Found
+      content:
+        application/json:
+          examples:
+            ResourceNotFound:
+              $ref: '#/components/examples/NotFoundError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+    NOContentResponse:
+      description: No Content
+    BadRequestError:
+      description: Invalid Request
+      content:
+        application/json:
+          examples:
+            BadRequest:
+              $ref: '#/components/examples/BadRequestError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+    ForbiddenError:
+      description: Not Authorized
+      content:
+        application/json:
+          examples:
+            Forbidden:
+              $ref: '#/components/examples/ForbiddenError'
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+  parameters:
+    accountGUID:
+      name: account_guid
+      in: path
+      description: The globally unique identifier of the card being queried
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceIdentifier'
+      example: 8f242496-b71a-11eb-8529-0242ac130003
+  schemas:
+    Errors:
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorWrapper:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    ResourceIdentifier:
+      description: A UUID which uniquely identifies a resource
+      type: string
+      format: uuid
+      example: c63de020-a446-11eb-bcbc-0242ac130002
+    Error:
+      type: object
+      properties:
+        Source:
+          type: string
+          example: source
+          description: Source of error
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error
+          example: '123'
+        Description:
+          type: string
+          example: Error desc
+          description: Short description of the error
+        Recoverable:
+          type: boolean
+          example: true
+          description: Is recoverable error
+        Details:
+          type: string
+          example: Detail information
+          description: Optional detailed description of the issue
+  examples:
+    NotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: not.found
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    AuthorizationError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: authorization.missing
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    BadRequestError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: invalid.parameter
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    ForbiddenError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: authorization.forbidden
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
