@@ -1,0 +1,2696 @@
+openapi: 3.0.3
+info:
+  title: User Management API
+  description: API for user management.
+  contact:
+    name: API Support
+    url: https://developer.mastercard.com/support
+    email: apisupport@mastercard.com
+  version: 1.3.10
+servers:
+  - url: https://sandbox.api.mastercard.com/loyalty/mrs
+    description: Sandbox server
+  - url: https://api.mastercard.com/loyalty/mrs
+    description: Production server
+tags:
+  - name: Lookup Identifiers
+    description: Operations related to Lookup Identifiers.
+  - name: CLS Activations
+    description: Operations related to CLS activations.
+  - name: PAN Blocks
+    description: Operations related to PAN Blocks.
+  - name: Users
+    description: Operations related to Users.
+  - name: Accounts
+    description: Operations related to Accounts.
+  - name: Lost Stolen
+    description: Operations related to Lost Stolen.
+  - name: Account Groups
+    description: Operations related to Account Groups.
+paths:
+  /users:
+    put:
+      tags:
+        - Users
+      summary: >
+        Updates personal information for currently enrolled users (cardholders),
+        including their name, contact information, security question, and more.
+      description: Updates the existing user's demographic information.
+      operationId: updateUser
+      requestBody:
+        $ref: '#/components/requestBodies/UserUpdateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserUpdateResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+    post:
+      tags:
+        - Users
+      summary: >-
+        Allows for enrollment of an initial user and account into the rewards
+        system.  Users are unique cardholders, as compared to accounts, which
+        are unique cards  that are owned by and are associated to a user.  Use
+        this operation only for new cardholder enrollment with their first
+        account.
+      description: Enrolls a new user for a company.
+      operationId: enrollUser
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/UserEnrollRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/UserEnrollResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+  /accounts:
+    put:
+      tags:
+        - Accounts
+      summary: Updates details for an enrolled account.
+      description: >-
+        Updates a currently enrolled account. An account is a unique card, as
+        compared to a user which is a unique cardholder.
+      operationId: updateAccount
+      requestBody:
+        $ref: '#/components/requestBodies/AccountUpdateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountUpdateResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+    post:
+      tags:
+        - Accounts
+      summary: >
+        Enrolls a new account for an existing User. An Account is a unique card,
+        as compared to a User which is a unique cardholder. Use this operation
+        only for subsequent account enrollments of an existing user.
+      description: Returns Account enrollment details.
+      operationId: enrollAccount
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/AccountEnrollRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/AccountEnrollResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+  /lost-stolen-cards:
+    post:
+      tags:
+        - Lost Stolen
+      summary: >-
+        Allows a consumer to replace a card that was lost or stolen, with a new
+        card.
+      description: >-
+        Depending upon the action code provided, will replace Bank Account
+        Number and/or Bank Customer Number with new values.
+      operationId: lostStolenCard
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/LostStolenCardRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/LostStolenCardResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+  /cls/accounts/activations:
+    post:
+      tags:
+        - CLS Activations
+      summary: |
+        Creates a new CLS offer activation of an account.
+      description: >-
+        Provides the ability for CLS clients to add a new CLS offer activation,
+        in real-time, as Customers pick and link their cards to specific Offers.
+      operationId: createActivation
+      requestBody:
+        $ref: '#/components/requestBodies/AccountActivationRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountActivationResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+  /cls/accounts/{account_id}/activations:
+    get:
+      tags:
+        - CLS Activations
+      summary: >-
+        Returns a list of all CLS offer activations of an account or filter
+        based on search criteria in the request.
+      description: >-
+        Returns a list of all CLS activations of an account or filter based on
+        search criteria in the request. This end point will only accept RANAC as
+        a path parameter.
+      operationId: getActivations
+      parameters:
+        - $ref: '#/components/parameters/ActivationAccountId'
+        - $ref: '#/components/parameters/ActivationId'
+        - $ref: '#/components/parameters/ActivationStatus'
+      responses:
+        '200':
+          $ref: '#/components/responses/ActivationDetailsResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+  /cls/accounts/{account_id}/activations/{activation_id}:
+    put:
+      tags:
+        - CLS Activations
+      summary: Updates an existing CLS offer activation of an account.
+      description: >-
+        Provides the ability for the rewards system Value Network (VN) clients
+        to update an existing CLS offer activation as Customers pick and link
+        their card to specific Offers.
+      operationId: updateActivation
+      parameters:
+        - $ref: '#/components/parameters/ActivationAccountId'
+        - $ref: '#/components/parameters/AccountActivationId'
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateActivationRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/UpdateActivationResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+  /accounts/pan-blocks:
+    post:
+      tags:
+        - PAN Blocks
+      summary: Blocks a PAN from being auto-enrolled in the rewards system.
+      description: >-
+        Provides the capability of restricting a BAN from being auto-enrolled in
+        a particular program within a specified time frame. It also provides the
+        capability of unblocking PAN enrollment.
+      operationId: PanBlock
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/PanBlockRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/PanBlockResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+  /users/references/searches:
+    post:
+      tags:
+        - Lookup Identifiers
+      summary: Provides Opaque and real identifiers
+      description: >-
+        Provides Opaque identifiers like RANAC, RANCU along with sensitive
+        information like BAN, BCN.
+      operationId: getReferenceIds
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/UserReferencesSearchRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserReferencesSearchResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+  /users/{id}/verifications:
+    post:
+      tags:
+        - Users
+      summary: Verifies user
+      description: Verify user based on answers to the security questions.
+      operationId: verifyUser
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/VerifyUsersIdType'
+      x-mastercard-api-encrypted: true
+      requestBody:
+        $ref: '#/components/requestBodies/VerifyUserRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/VerifyUserResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: >-
+        Retrieves a cardholder's information, including their name, address,
+        communication preferences, and more.
+
+        Users are unique cardholders, as compared to Accounts that are unique
+        cards. Each User can have multiple Accounts.
+      description: Retrieves Cardholder information.
+      operationId: getUser
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/UsersIdType'
+        - $ref: '#/components/parameters/IncludeVerificationDetails'
+        - $ref: '#/components/parameters/Language'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserDetailsResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+  /accounts/{id}:
+    get:
+      tags:
+        - Accounts
+      summary: >-
+        Retrieves Account details using the Account Id, including the Account
+        standing, enrollment date, and more.
+      description: >-
+        Retrieves Account details using the Account Id, including the Account
+        standing, enrollment date, and more. An Account is a unique card, as
+        compared to a User which is a unique cardholder.
+      operationId: getAccount
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '#/components/parameters/AccountIdType'
+        - $ref: '#/components/parameters/UserIdType'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountSearchDetailsResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+  /account-groups:
+    put:
+      tags:
+        - Account Groups
+      summary: >-
+        Allows modification of account group information for one or more
+        accounts in a household.
+      description: >-
+        Depending upon the action code provided, will move an account or
+        accounts to another existing account group and/or remove an account or
+        accounts from its current account group. Account Groups is also known as
+        Householding in the rewards system.
+      operationId: UpdateAccountGroup
+      requestBody:
+        $ref: '#/components/requestBodies/AccountGroupUpdateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountGroupUpdateResponse'
+        '400':
+          $ref: '#/components/responses/ErrorsResponse'
+components:
+  parameters:
+    ActivationId:
+      name: activation_id
+      in: query
+      description: Unique id for the activation.
+      required: false
+      schema:
+        type: string
+      example: 9cc35fae-f3cd-11ec-b939-0242ac120002
+    ActivationStatus:
+      name: activation_status
+      in: query
+      description: Status of the activation.
+      required: false
+      schema:
+        type: string
+        enum:
+          - ACTIVE
+          - INACTIVE
+      example: ACTIVE
+    ActivationAccountId:
+      name: account_id
+      in: path
+      description: The unique identifier for the given account.
+      required: true
+      schema:
+        type: string
+      example: '5330333671236516'
+    AccountActivationId:
+      name: activation_id
+      in: path
+      description: The unique identifier for the given account.
+      required: true
+      schema:
+        type: string
+      example: 61866318-5197-457e-bca7-166c5ff4df20
+    UserId:
+      name: id
+      in: path
+      description: The unique identifier for the given user.
+      required: true
+      schema:
+        type: string
+      example: '268810378058708149455458707247'
+    AccountId:
+      name: id
+      in: path
+      description: The unique identifier for the given account. Account Id is always RANAC.
+      required: true
+      schema:
+        type: string
+      example: '268810378058708149455458707247'
+    AccountIdType:
+      name: account_id_type
+      in: query
+      description: >-
+        Determines the type of account identification. Supported identifier is
+        RANAC.
+      required: false
+      schema:
+        type: string
+      example: RANAC
+    UserIdType:
+      name: user_id_type
+      in: query
+      description: >-
+        Determines the type of user identification. Supported identifier is
+        RANCU.
+      required: false
+      schema:
+        type: string
+      example: RANCU
+    IncludeVerificationDetails:
+      name: include_verification_details
+      in: query
+      description: Cardholder verification details are included in the response if true.
+      required: false
+      schema:
+        type: boolean
+      example: true
+    Language:
+      name: language
+      in: query
+      description: Cardholder verification details are returned in the language requested.
+      required: false
+      schema:
+        type: string
+      example: en_US
+    UsersIdType:
+      name: user_id_type
+      in: query
+      description: >-
+        Determines the type of user or account identification. Supported
+        identifiers are RANAC or RANCU.
+      required: false
+      schema:
+        type: string
+      example: RANCU
+    VerifyUsersIdType:
+      name: user_id_type
+      in: query
+      description: >-
+        Determines the type of user or account identification. Supported
+        identifiers are RANAC or RANCU.
+      required: true
+      schema:
+        type: string
+      example: RANCU
+    Offset:
+      name: offset
+      in: query
+      description: >-
+        The number of items you ask the start of the list to be offset from.
+        Zero-based offset index, must NOT be negative, default value is 0.
+      required: false
+      schema:
+        type: integer
+      example: 0
+    Limit:
+      name: limit
+      in: query
+      description: >-
+        The number of items you ask the list to be limited to. Must be greater
+        than 0 and less than or equal to 25, default value is 25.
+      required: false
+      schema:
+        type: integer
+      example: 2
+  requestBodies:
+    UserUpdateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserUpdate'
+    UserEnrollRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserEnroll'
+    AccountUpdateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountUpdate'
+    AccountEnrollRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountEnroll'
+    AccountActivationRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountActivation'
+    UpdateActivationRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClsAccountActivationUpdate'
+    UserReferencesSearchRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserSearch'
+    PanBlockRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PanBlock'
+    LostStolenCardRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LostStolenCard'
+    AccountGroupUpdateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountGroupDetails'
+    VerifyUserRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VerifyUser'
+  schemas:
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of the error
+          example: user-management
+        ReasonCode:
+          type: string
+          description: >-
+            A unique constant identifying the error case encountered during API
+            request processing.
+          example: INVALID_FIELD_FORMAT
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Email Address must be in the valid format.
+        Recoverable:
+          type: boolean
+          description: >-
+            Indicates whether this error will always be returned for this
+            request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: >-
+            Where appropriate, indicates detailed information about the data
+            received.
+          example: Invalid Details
+      description: Error Details
+    Errors:
+      required:
+        - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error Details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    ErrorsWrapper:
+      required:
+        - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    UserAddress:
+      type: object
+      description: This object will define the users default shipping/mailing address.
+      properties:
+        addressLine1:
+          maxLength: 80
+          minLength: 0
+          type: string
+          description: Address Line 1 of the User's address.
+          example: 10 Upper Bank Street
+        addressLine2:
+          maxLength: 80
+          minLength: 0
+          type: string
+          description: Address Line 2 of the User's address.
+          example: Chesterfield
+        addressLine3:
+          maxLength: 80
+          minLength: 0
+          type: string
+          description: Address Line 3 of the User's address.
+          example: Canary Wharf
+        addressLine4:
+          maxLength: 80
+          minLength: 0
+          type: string
+          description: Address Line 4 of the User's address.
+          example: Tower Hamlets
+        city:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: City name as per User's address.
+          example: London
+        countryCode:
+          maxLength: 3
+          minLength: 2
+          type: string
+          description: This value should be the 3-character ISO Country Code for the user.
+          example: ENG
+        postalCode:
+          maxLength: 14
+          minLength: 0
+          type: string
+          description: Postal Code as per User's address.
+          example: '63368'
+        stateProvinceCode:
+          maxLength: 3
+          minLength: 2
+          type: string
+          description: State Code as per User's address.
+          example: JS
+    PCLOUser:
+      type: object
+      description: >-
+        This object should only be used by Personal Card Linked Offers (PCLO)
+        users. This object  will define the users communications preferences
+        for PCLO.
+      properties:
+        pcloAcceptPromotionalOffers:
+          type: boolean
+          description: >-
+            Specifies if the PCLO user would like to receive information about
+            special promotional offers.
+          example: false
+        pcloAcceptEmails:
+          type: boolean
+          description: >-
+            Specifies if the PCLO user allows contact via email for promotional
+            purposes.
+          example: false
+        pcloAcceptSms:
+          type: boolean
+          description: >-
+            Specifies if the PCLO user allows contact to their mobile phone for
+            promotional purposes.
+          example: false
+    VerificationDetails:
+      type: object
+      properties:
+        question:
+          type: string
+          description: Verification question description.
+          example: Zip Code
+        code:
+          type: string
+          description: Verification question code
+          example: VALID_CUST_POSTAL_CODE
+        answer:
+          type: string
+          description: Answer to the Verification question
+          example: '1234'
+    UserVerificationDetails:
+      type: object
+      properties:
+        code:
+          type: string
+          description: >-
+            User verification question. Supported question codes are
+            VALID_CUST_SSN_LAST_4, VALID_CUST_BIRTHDATE,
+            VALID_CUST_MOTHERS_MAIDEN_NAME, VALID_CUST_POSTAL_CODE,
+            VALID_CUST_GENERIC_IDENTIFIER_SW, VALID_CUST_GENERIC_IDENTIFIER_TXT
+            - VALID_CUST_SSN_LAST_4  Verify the user SSN value. -
+            VALID_CUST_BIRTHDATE  Verify the user Birthdate. -
+            VALID_CUST_MOTHERS_MAIDEN_NAME  Verify the user Mothers Maiden
+            Name. - VALID_CUST_POSTAL_CODE  Verify the user Postal code. -
+            VALID_CUST_GENERIC_IDENTIFIER_SW/VALID_CUST_GENERIC_IDENTIFIER_TXT 
+            Verify the user Generic Identifier description.
+          example: VALID_CUST_POSTAL_CODE
+        answer:
+          type: string
+          description: Answer to the User verification question
+          example: '638001'
+    UserUpdate:
+      required:
+        - userId
+        - userIdType
+      type: object
+      properties:
+        userId:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: Unique identifier for the user.
+          example: '268810378058708149455458707247'
+        userIdType:
+          type: string
+          description: >-
+            Identifier type of the User. The value of RANCU or RANAC should be
+            used for this field.
+          example: RANCU
+        firstName:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: User's first name.
+          example: John
+        lastName:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: User's last name.
+          example: Smith
+        motherMaidenName:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: User's mother's maiden name.
+          example: Jennifer
+        birthDate:
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          type: string
+          description: User's date of birth.
+          example: '1975-03-11'
+          format: date
+        nationalIdentifier:
+          maxLength: 11
+          minLength: 0
+          type: string
+          description: >-
+            The user's unique identifier is assigned by the national or
+            government system. For example, passport number or tax
+            identification number.
+          example: 324-56-7574
+        businessPhoneNumber:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: >-
+            User's unformatted business phone number. Provide an unformatted
+            phone number,  except for a leading "+" if including a country code.
+          example: '+11234567890'
+        mobilePhoneNumber:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: >-
+            User's unformatted mobile phone number. Provide an unformatted phone
+            number,  except for a leading "+" if including a country code.
+          example: '+11234567890'
+        emailAddress:
+          maxLength: 120
+          minLength: 0
+          type: string
+          description: User's email address.
+          example: john.smith@mastercard.com
+        vip:
+          type: boolean
+          description: Used to assign VIP status to a user. The default value is false.
+          example: true
+        employee:
+          type: boolean
+          description: >-
+            Used to assign Employee status to a user. The default value is
+            false.
+          example: false
+        acceptTracking:
+          type: boolean
+          description: >-
+            This field is to document if the user has agreed to their activity
+            being tracked on  a customer or partner-hosted experience.
+          example: true
+        managePromotionalEmail:
+          type: boolean
+          description: >-
+            Specifies if the Promotional E-Mail contact preference on record is
+            being managed by the user, instead of the issuer. True indicates 
+            that promotional participation is managed by the user.
+          example: true
+        managePromotionalParticipation:
+          type: boolean
+          description: >-
+            Specifies if the Promotional participation preference on record is
+            being  managed by the user, instead of the issuer. True indicates
+            that  promotional participation is managed by the user.
+          example: true
+        managePromotionalSMS:
+          type: boolean
+          description: >-
+            Specifies if the Promotional SMS contact preference on record is
+            being  managed by the user, instead of the issuer. True indicates
+            that promotional  participation is managed by the user.
+          example: true
+        authorizedUser1:
+          maxLength: 80
+          type: string
+          description: >-
+            This is the first person authorized to access a user's rewards
+            account(s). Authorized users only  apply to designating a person
+            that can call into the Rewards Call Center and be serviced. This 
+            Authorized user must still provide valid answers to the user's
+            security questions.
+          example: testUser1
+        authorizedUser2:
+          maxLength: 80
+          type: string
+          description: >-
+            This is the second person authorized to access a user's rewards
+            account(s). Authorized users only  apply to designating a person
+            that can call into the Rewards Call Center and be serviced. This 
+            Authorized user must still provide valid answers to the user's
+            security questions.
+          example: testUser2
+        comments:
+          maxLength: 200
+          type: string
+          description: Used to keep comments on updated accounts.
+          example: Account closed due to fraud.
+        customerReplaced:
+          type: boolean
+          description: Indicates that the Customer was replaced.
+          example: true
+        manageEmail:
+          type: boolean
+          description: >-
+            Specifies if the email address on record is being managed by the
+            user, instead of the issuer.  True indicates that the email address
+            is managed by the user.
+          example: true
+        faxPhoneNumber:
+          maxLength: 25
+          type: string
+          description: >-
+            User's unformatted fax phone number. Provide an unformatted phone
+            number, except for a leading  "+" if including a country code.
+          example: '+11234567890'
+        genderCode:
+          type: string
+          description: |-
+            The ISO code is used to specify the gender of the customer.
+            Valid values for ISO 5218 standard:
+
+            �    NULL - not known
+
+            �    0 - not known
+
+            �    1 - male
+
+            �    2 - female
+
+            �    9 - not applicable
+          example: '0'
+        homePhoneNumber:
+          maxLength: 25
+          type: string
+          description: >-
+            User's unformatted home phone number. Provide an unformatted phone
+            number, except for a  leading "+" if including a country code.
+          example: '384579387593'
+        middleName:
+          maxLength: 25
+          type: string
+          description: Middle name of the primary cardholder.
+          example: test middle name
+        manageMobilePhone:
+          type: boolean
+          description: >-
+            Specifies if the mobile phone on record is being managed by the
+            user, instead of the issuer.  True indicates that the mobile phone
+            is managed by the user.
+          example: true
+        namePrefix:
+          maxLength: 4
+          type: string
+          description: Name prefix (Mr., Ms., etc) of the primary cardholder.
+          example: Mr
+        nameSuffix:
+          maxLength: 4
+          type: string
+          description: Name suffix (Jr., PhD., etc) of the primary cardholder.
+          example: Jr
+        preferredLanguage:
+          type: string
+          description: >-
+            A code name for a global area or language combination. This is the
+            language the cardholder wants  to do business in. The ISO Language
+            Code and ISO Country Code (separated by an underscore) will  specify
+            the default language for the user. ISO Language Code is 2-characters
+            and lowercase. ISO  Country Code is 2-characters and uppercase. For
+            example, if the user spoke US English, the value  for this field
+            would be en_US.
+          example: en_US
+        programPreview:
+          type: boolean
+          description: >-
+            Determines if the card is being used for program preview. Triggers
+            the Internet Redemptions website to ask for preview date and
+            language.
+          example: true
+        segmentationCluster:
+          maxLength: 50
+          type: string
+          description: >-
+            The field stores proprietary segmentation cluster information for
+            the purpose of segmenting users as determined by the customer.
+          example: Ruby
+        genericIdentification:
+          maxLength: 15
+          minLength: 0
+          type: string
+          description: >-
+            Answer to the user's bank-provided custom verification question. Can
+            be used as a Security Question data point by the Internet
+            Redemptions website, Customer Service, or web services.
+          example: Duster
+        genericIdentificationDescription:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: >-
+            The descriptive label for the user's bank-provided custom
+            verification question. Can be used as a Security Question data point
+            by the Internet Redemptions website, Customer Service, or web
+            services.
+          example: Pet's name
+        userDefined1:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that
+            can be  used for promotions and other business rules.
+          example: UDF 1 Example
+        userDefined2:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 2
+          example: UDF 2 Example
+        userDefined3:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 3
+          example: UDF 3 Example
+        userDefined4:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 4
+          example: UDF 4 Example
+        acceptEmails:
+          type: boolean
+          description: >-
+            Specifies if the user allows contact via email for promotional
+            purposes.  The default value is false.
+          example: false
+        acceptSms:
+          type: boolean
+          description: >-
+            Specifies if the user allows contact to their mobile phone for
+            promotional  purposes. The default value is false.
+          example: false
+        acceptPromotionalInfo:
+          type: boolean
+          description: >-
+            Specifies if the user is interested in receiving promotional
+            information.  The default value is false.
+          example: false
+        pcloUser:
+          $ref: '#/components/schemas/PCLOUser'
+        address:
+          $ref: '#/components/schemas/UserAddress'
+    AccountUpdate:
+      required:
+        - accountId
+        - accountIdType
+      type: object
+      properties:
+        accountId:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: The unique identifier for the account.
+          example: '103580149704735875487800510667'
+        accountIdType:
+          type: string
+          description: >-
+            Identifier type for the account. The static value of RANAC should be
+            used for this field.
+          example: RANAC
+        status:
+          type: string
+          description: >-
+            Status of the user's account. Valid values are NEW, GOOD_STANDING,
+            REDEEM_ONLY, CANCELLED, ON_HOLD, INACTIVE.
+             - NEW  Used for auto and self-enrollment. Can earn, but not redeem.
+             - GOOD_STANDING  Can earn and redeem. This is the typical good status for an account.
+             - REDEEM_ONLY  Cannot earn but can redeem.
+             - CANCELLED  Cannot earn or redeem. This is the typical final state for an account that is no longer active in a program.
+             - ON_HOLD  Can earn, but not redeem. This status is for temporarily derogative accounts.
+             - INACTIVE
+          example: CANCELLED
+          enum:
+            - NEW
+            - GOOD_STANDING
+            - REDEEM_ONLY
+            - CANCELLED
+            - ON_HOLD
+            - INACTIVE
+        accruePoints:
+          type: boolean
+          description: |-
+            Suggested status and accruePoints settings are as follows:
+             - status = NEW, accruePoints = true
+             - status = GOOD_STANDING, accruePoints = true
+             - status = REDEEM_ONLY, accruePoints = false
+             - status = CANCELLED, accruePoints = false
+             - status = ON_HOLD, accruePoints = true
+          example: true
+        primaryAccount:
+          type: boolean
+          description: >-
+            Identifies if the account is primary for the user. A user may only
+            have one primary account. In situations where householding is used,
+            there may only be one primary account in the household, regardless
+            of how many user accounts make up that household. A value of true
+            indicates that the account is primary for the user or the household.
+          example: false
+        receiveStatements:
+          type: boolean
+          description: >-
+            Specifies if the account should be included in the outbound
+            statement file that the rewards system can send a customer, for the
+            purpose of producing paper Rewards Statements. A value of true
+            indicates that the user will receive a paper statement.
+          example: true
+        externalAccountId:
+          maxLength: 10
+          minLength: 0
+          type: string
+          description: >-
+            Used for On-Soil customers when optional fields are turned on in the
+            rewards system.
+          example: '2222332322'
+        cycleId:
+          type: integer
+          description: >-
+            Bank cycle number that the cardholder/primary cardholder is assigned
+            to. This field is typically not used unless the customer is
+            receiving a Statement batch file from the rewards system.
+          format: int64
+          example: 1
+        cycleRun:
+          type: boolean
+          description: >-
+            Flag to indicate whether a Rewards account has been cycled for the
+            current period.
+          example: false
+        pcloAccountStatusCode:
+          type: string
+          description: >-
+            Status of the user's account. This field is only for PCLO customers.
+            Valid values are NEW, GOOD_STANDING, REDEEM_ONLY, CANCELLED,
+            ON_HOLD.
+             - NEW  Used for auto and self-enrollment. Can earn, but not redeem.
+             - GOOD_STANDING  Can earn and redeem. This is the typical good status for an account.
+             - REDEEM_ONLY  Cannot earn but can redeem.
+             - CANCELLED  Cannot earn or redeem. This is the typical final state for an account that is no longer active in a program.
+             - ON_HOLD  Can earn, but not redeem. This status is for temporarily derogative accounts.
+          example: NEW
+          enum:
+            - NEW
+            - GOOD_STANDING
+            - REDEEM_ONLY
+            - CANCELLED
+            - ON_HOLD
+        userDefined1:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that
+            can be used for promotions and other business rules.
+          example: UDF 1 Example
+        userDefined2:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that
+            can be used for promotions and other business rules.
+          example: UDF 2 Example
+        userDefined3:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that
+            can be used for promotions and other business rules.
+          example: UDF 3 Example
+        userDefined4:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that
+            can be used for promotions and other business rules.
+          example: UDF 4 Example
+        userDefined5:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that
+            can be used for promotions and other business rules.
+          example: UDF 5 Example
+        userDefined6:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that
+            can be used for promotions and other business rules.
+          example: UDF 6 Example
+        userDefined7:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that
+            can be used for promotions and other business rules.
+          example: UDF 7 Example
+        userDefined8:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that
+            can be used for promotions and other business rules.
+          example: UDF 8 Example
+        productTransfer:
+          type: boolean
+          description: >-
+            Determines whether the Bank Product needs to be updated. When
+            productTransfer is true, then only bank product for the given
+            account will be updated ignoring other fields in the request
+            payload.
+          example: true
+        bankProductCode:
+          maxLength: 30
+          type: string
+          description: Bank Product Code associated with the new card.
+          example: VISACD
+    EnrolledUser:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: Unique identifier of the user.
+          example: '282947573008198049562610279575'
+        userIdType:
+          type: string
+          description: Identifier type for the given user.
+          example: RANCU
+        accountId:
+          type: string
+          description: The unique identifier for the given account.
+          example: '609330255453162553303101469598'
+        accountIdType:
+          type: string
+          description: Identifier type for the given account.
+          example: RANAC
+    AccountActivationDetails:
+      properties:
+        activationId:
+          type: string
+          description: >-
+            Unique Id for the activation, this will be optional and will be
+            generated if not populated by the user.
+          example: '695026705601132106860975039544'
+    AccountActivation:
+      required:
+        - userId
+        - userIdType
+        - transactionFilterCode
+        - activationStatus
+      type: object
+      properties:
+        userId:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: Unique identifier of the user.
+          example: '907464094037556724544495051611'
+        userIdType:
+          type: string
+          description: Identifier type for the given user. Supported identifier is RANAC.
+          example: RANAC
+        transactionFilterCode:
+          type: string
+          description: Indicates the purpose of the activation.
+          example: ATSET
+        activationStatus:
+          type: string
+          description: The status of the activation, Valid values are A and I
+          example: A
+        activationId:
+          type: string
+          description: >-
+            Unique Id for the activation, this will be optional and will be
+            generated if not populated by the user.
+          example: 61866318-5197-457e-bca7-166c5ff4df20
+        expirationDate:
+          type: string
+          description: The Date of the activation relationship ends.
+          example: '2022-12-31T00:00:00.000-06:00'
+          format: date-time
+        activationDate:
+          type: string
+          description: The Date activation relationship is established.
+          example: '2022-01-01T00:00:00.000-06:00'
+          format: date-time
+        userDefined1:
+          type: string
+          description: Used by the Partner to include custom data.
+          example: UDF 1 Example
+        userDefined2:
+          type: string
+          description: Used by the Partner to include custom data.
+          example: UDF 2 Example
+        userDefined3:
+          type: string
+          description: Used by the Partner to include custom data.
+          example: UDF 3 Example
+        userDefined4:
+          type: string
+          description: Used by the Partner to include custom data.
+          example: UDF 4 Example
+        userDefined5:
+          type: string
+          description: Used by the Partner to include custom data.
+          example: UDF 5 Example
+    AccountSearchActivationDetails:
+      required:
+        - accountActivations
+      type: object
+      properties:
+        accountActivations:
+          type: array
+          description: accountActivations
+          items:
+            $ref: '#/components/schemas/AccountSearchActivations'
+    AccountSearchActivations:
+      type: object
+      properties:
+        activationId:
+          type: string
+          description: >-
+            The unique activation id, like a UUID. No special characters are
+            accepted except for a hyphen (-).
+          example: 9cc35fae-f3cd-11ec-b939-0242ac120002
+        transactionFilterCode:
+          type: string
+          description: >-
+            CLS map type codes. The list of valid map type codes is provided by
+            the account manager during on-boarding.
+          example: ASAMT
+        activationStatus:
+          type: string
+          description: >-
+            The status of the activation. Valid values are A - Active. This is
+            the most common setting for a activation create. I - Inactive.
+          example: A
+        expirationDate:
+          type: string
+          description: The Date of the activation relationship ends.
+          example: '2022-12-31T00:00:00.000-06:00'
+          format: date-time
+        activationDate:
+          type: string
+          description: The Date activation relationship is established.
+          example: '2022-01-01T00:00:00.000-06:00'
+          format: date-time
+        userDefined1:
+          type: string
+          description: Used by the Partner to include custom data.
+          example: SET1234
+        userDefined2:
+          type: string
+          description: Used by the Partner to include custom data.
+          example: '100'
+        userDefined3:
+          type: string
+          description: Used by the Partner to include custom data.
+          example: '8001759'
+        userDefined4:
+          type: string
+          description: Used by the Partner to include custom data.
+          example: WALMART
+        userDefined5:
+          type: string
+          description: Used by the Partner to include custom data.
+          example: 'null'
+    ClsAccountActivationUpdate:
+      required:
+        - activationStatus
+      type: object
+      properties:
+        activationStatus:
+          type: string
+          description: The status of the activation. Valid values are A and I.
+          example: A
+          enum:
+            - A
+            - I
+        transactionFilterCode:
+          type: string
+          description: Indicates the purpose of the activation.
+          example: ASATM
+        expirationDate:
+          type: string
+          description: The Date of the activation relationship ends.
+          example: '2022-12-31T00:00:00.000-06:00'
+          format: date-time
+        activationDate:
+          type: string
+          description: The Date activation relationship is established.
+          example: '2022-01-01T00:00:00.000-06:00'
+          format: date-time
+        userDefined1:
+          type: string
+          description: >-
+            Used by the partner to include custom data that does not go anywhere
+            except for the activation.
+          example: UDF 1 Example
+        userDefined2:
+          type: string
+          description: >-
+            Used by the partner to include custom data that does not go anywhere
+            except for the activation.
+          example: UDF 2 Example
+        userDefined3:
+          type: string
+          description: >-
+            Used by the partner to include custom data that does not go anywhere
+            except for the activation.
+          example: UDF 3 Example
+        userDefined4:
+          type: string
+          description: >-
+            Used by the partner to include custom data that does not go anywhere
+            except for the activation.
+          example: UDF 4 Example
+        userDefined5:
+          type: string
+          description: >-
+            Used by the partner to include custom data that does not go anywhere
+            except for the activation.
+          example: UDF 5 Example
+    AccountBase:
+      required:
+        - accountId
+        - accountIdType
+        - productCode
+        - programIdentifier
+        - status
+      type: object
+      description: >-
+        This object will define the users initial account that is being
+        enrolled  at the same time as the user.
+      properties:
+        accountId:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: The unique identifier for the given account.
+          example: '5330333671236516'
+        accountIdType:
+          type: string
+          description: Identifier type for the given account. Supported identifier is BAN.
+          example: BAN
+        status:
+          type: string
+          description: >-
+            Status of the user's account. Valid values are GOOD_STANDING and
+            NEW.
+          example: NEW
+          enum:
+            - NEW
+            - GOOD_STANDING
+        productCode:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: >-
+            The account's associated reward product identifier as defined by the
+            client and configured during the implementation of the program.
+          example: FIDOCASHBACK
+        programIdentifier:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: >-
+            Program identifier for the program in which the cardholder is
+            enrolled. Program ID is created by Mastercard Rewards System.
+          example: PGM42051
+        openDate:
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          type: string
+          description: The date of account opening as defined by the client.
+          example: '2014-12-31'
+          format: date
+        enrollmentDate:
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          type: string
+          description: >-
+            The date for when the account becomes eligible for the rewards
+            program. If undefined, the enrollment date defaults to the date when
+            Mastercard processes the enrollment.
+          example: '2018-03-10'
+          format: date
+        accruePoints:
+          type: boolean
+          description: >-
+            This specifies if the account can accrue points. It is used in
+            conjunction with Account Status to define earn and burn behavior for
+            the account.
+          example: false
+        householdToken:
+          type: string
+          description: >-
+            This field ties together multiple user accounts into one household.
+            This value is typically assigned by the Client. To use this field, a
+            rewards program must be configured to support the Token or Bank
+            Customer Number householding scheme.
+          example: '254235'
+        primaryAccount:
+          type: boolean
+          description: >-
+            Identifies if the account is primary for the User. A User may only
+            have 1 primary account. In situations where householding is used,
+            there may only be 1 primary account in the household, regardless of
+            how many User accounts make up that household. A value of true
+            indicates that the account is primary for the User or the household.
+          example: false
+        userDefined1:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 1
+          example: UDF 1 Example
+        userDefined2:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 2
+          example: UDF 2 Example
+        userDefined3:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 3
+          example: UDF 3 Example
+        userDefined4:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 4
+          example: UDF 4 Example
+        userDefined5:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Field 5
+          example: UDF 5 Example
+        userDefined6:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Field 6
+          example: UDF 6 Example
+        userDefined7:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Field 7
+          example: UDF 7 Example
+        userDefined8:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Field 8
+          example: UDF 8 Example
+        externalAccountId:
+          maxLength: 10
+          minLength: 0
+          type: string
+          description: >-
+            Used for On-Soil customers when optional fields are turned on in the
+            rewards system.
+          example: '2222332322'
+        cycleId:
+          type: integer
+          description: >-
+            Bank cycle number that the cardholder/primary cardholder is assigned
+            to.
+          format: int64
+          example: 1
+        cycled:
+          type: boolean
+          description: Flag to indicate whether a Rewards account has been cycled.
+          example: false
+        accountReferenceCode:
+          maxLength: 50
+          minLength: 0
+          type: string
+          description: Unique identifier the membership uses to identify an account.
+          example: 123456abcdef123456abcdef123456abcdef0
+        pcloAccountStatusCode:
+          type: string
+          description: >-
+            Status of the user's account. Valid values are GOOD_STANDING,
+            REDEEM_ONLY, NEW, ON_HOLD, CANCELLED, INACTIVE.
+          example: NEW
+          enum:
+            - NEW
+            - GOOD_STANDING
+            - REDEEM_ONLY
+            - CANCELLED
+            - ON_HOLD
+            - INACTIVE
+    UserEnroll:
+      required:
+        - account
+        - companyIca
+        - userId
+        - userIdType
+      type: object
+      properties:
+        companyIca:
+          type: integer
+          description: >-
+            Interbank Card Association number assigned by Mastercard to the
+            financial institution or partner. This is typically a 4-6 digit
+            value.
+          format: int64
+          example: 9989
+        userId:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: >-
+            Unique identifier for the user.  This is typically referred to as
+            the Bank  Customer Number (BCN).
+          example: '5600000000000003000'
+        userIdType:
+          type: string
+          description: Identifier type for the given user. Supported identifier is BCN.
+          example: BCN
+        firstName:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: User's first name.
+          example: John
+        lastName:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: User's last name.
+          example: Smith
+        motherMaidenName:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: >-
+            User's mother's maiden name. This field should be provided if
+            Mother's Maiden  Name will be used as a security data point.
+          example: Jennifer
+        birthDate:
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          type: string
+          description: >-
+            User's date of birth. This field should be provided if Date of Birth
+            will be  used as a security data point.
+          example: '1975-03-10'
+          format: date
+        nationalIdentifier:
+          maxLength: 11
+          minLength: 0
+          type: string
+          description: >-
+            User's unique identifier assigned by the national or government
+            system. For example, passport number or tax identification number.
+          example: 324-56-7574
+        businessPhoneNumber:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: >-
+            User's unformatted business phone number. Provide an unformatted 
+            phone number, except for a leading "+" if including a country code.
+          example: '+11234567890'
+        mobilePhoneNumber:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: >-
+            User's unformatted mobile phone number. Provide an  unformatted
+            phone number, except for a leading "+" if including a country code.
+          example: '+11234567890'
+        homePhoneNumber:
+          type: string
+          description: >-
+            User's unformatted home phone number. Provide an unformatted phone
+            number,  except for a leading "+" if including a country code.
+          example: '+11234567890'
+        faxPhoneNumber:
+          type: string
+          description: Valid fax phone number used by the user.
+          example: +1(0)1234567891
+        emailAddress:
+          maxLength: 120
+          minLength: 0
+          type: string
+          description: User's email address.
+          example: john.smith@mastercard.com
+        vip:
+          type: boolean
+          description: Used to assign VIP status to a user. The default value is false.
+          example: true
+        employee:
+          type: boolean
+          description: >-
+            Used to assign Employee status to a user. The default value is
+            false.
+          example: false
+        acceptEmails:
+          type: boolean
+          description: >-
+            Specifies if the user allows contact via email for promotional
+            purposes.  The default value is false.
+          example: false
+        acceptSms:
+          type: boolean
+          description: >-
+            Specifies if the user allows contact to their mobile phone for
+            promotional  purposes. The default value is false.
+          example: false
+        acceptPromotionalInfo:
+          type: boolean
+          description: >-
+            Specifies if the user is interested in receiving promotional
+            information.  The default value is false.
+          example: false
+        genericIdentification:
+          maxLength: 15
+          minLength: 0
+          type: string
+          description: >-
+            Answer to the user's bank-provided custom verification question. Can
+            be used as a Security Question data point by the Internet
+            Redemptions website, Customer Service, or web services.
+          example: Duster
+        genericIdentificationDescription:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: >-
+            The descriptive label for the user's bank-provided custom
+            verification question. Can be used as a Security Question data point
+            by the Internet Redemptions website, Customer Service, or web
+            services.
+          example: Pet's name
+        userDefined1:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that 
+            can be used for promotions and other business rules.
+          example: UDF 1 Example
+        userDefined2:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that 
+            can be used for promotions and other business rules.
+          example: UDF 2 Example
+        userDefined3:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that 
+            can be used for promotions and other business rules.
+          example: UDF 3 Example
+        userDefined4:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that 
+            can be used for promotions and other business rules.
+          example: UDF 4 Example
+        pcloUser:
+          $ref: '#/components/schemas/PCLOUser'
+        address:
+          $ref: '#/components/schemas/UserAddress'
+        account:
+          $ref: '#/components/schemas/AccountBase'
+    AccountDetails:
+      type: object
+      properties:
+        accountId:
+          type: string
+          description: RANAC corresponding to the input User ID.
+          example: '100000000051204586331247554878'
+        accountNumber:
+          type: string
+          description: BAN corresponding to the input User ID.
+          example: '5114000000005678'
+        accountFirstFour:
+          type: string
+          description: First four digits of the BAN.
+          example: '5114'
+        accountLastFour:
+          type: string
+          description: Last four digits of the BAN.
+          example: '5678'
+      description: Account Details
+    UserReference:
+      type: object
+      properties:
+        customerId:
+          type: string
+          description: RANCU corresponding to the input User ID.
+          example: '123456789120011421'
+        customerNumber:
+          type: string
+          description: BCN corresponding to the input User ID.
+          example: '5114000000005678'
+        accountDetails:
+          type: array
+          description: Account Details
+          items:
+            $ref: '#/components/schemas/AccountDetails'
+    UserReferences:
+      required:
+        - userReference
+      type: object
+      properties:
+        userReferences:
+          type: array
+          description: User Reference
+          items:
+            $ref: '#/components/schemas/UserReference'
+    UserSearch:
+      required:
+        - userId
+        - userIdType
+      type: object
+      properties:
+        userId:
+          maxLength: 50
+          minLength: 0
+          type: string
+          description: Unique identifier of the User.
+          example: '5444163200000015000'
+        userIdType:
+          type: string
+          description: >-
+            Identifier type for the given user. Supported identifiers are BAN or
+            BCN or RANCU or RANAC.
+          example: BAN
+        includeSensitiveIdentifiers:
+          type: boolean
+          description: >-
+            When set to true, authorized clients will also receive sensitive
+            identifiers in response.
+          example: true
+        programIdentifier:
+          type: string
+          description: Filter response to include only accounts that belong to the program.
+          example: PGM42051
+        includeOnlyPrimary:
+          type: boolean
+          description: >-
+            When set to true, only primary accounts details are included in the
+            response.
+          example: true
+    EnrolledAccount:
+      type: object
+      properties:
+        accountIdType:
+          type: string
+          description: Account identifier type such as RANAC.
+          example: RANAC
+        accountId:
+          type: string
+          description: The unique identifier for the given account.
+          example: '136821076497727922312391057516'
+    AccountEnroll:
+      required:
+        - accountId
+        - accountIdType
+        - companyIca
+        - productCode
+        - programIdentifier
+        - status
+        - userId
+        - userIdType
+      type: object
+      properties:
+        accountId:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: >-
+            The unique identifier for a given account. This is typically
+            referred to as the Bank Account Number (BAN). When enrolling a card
+            account, the physical card number should be followed by 3 trailing
+            zeros.
+          example: '5330333671236516000'
+        accountIdType:
+          type: string
+          description: Identifier type for the given account. Supported identifier is BAN.
+          example: BAN
+        status:
+          type: string
+          description: >-
+            Status of the user's account. Valid values are GOOD_STANDING and
+            NEW.
+             - NEW  Used for auto and self-enrollment.  Can earn, but not redeem.
+             - GOOD_STANDING  Can earn and redeem. This is the typical good status for an account.
+          example: NEW
+          enum:
+            - NEW
+            - GOOD_STANDING
+        productCode:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: >-
+            The account's associated reward product identifier as defined by the
+            client and configured during the implementation of the program.
+          example: FIDOCASHBACK
+        programIdentifier:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: >-
+            Program identifier for the program in which the account is enrolled.
+            Program identifier is assigned during the implementation of the
+            program.
+          example: PGM42051
+        openDate:
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          type: string
+          description: >-
+            The date of account opening as defined by the client. This date is
+            typically when the banking account was opened.
+          example: '2014-12-31'
+          format: date
+        enrollmentDate:
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          type: string
+          description: >-
+            The date when the account becomes eligible for rewards program. If
+            undefined, enrollment date is defaulted to the date that Mastercard
+            processes the enrollment.
+          example: '2018-03-10'
+          format: date
+        accruePoints:
+          type: boolean
+          description: |-
+            Suggested status and accruePoints settings are as follows:
+             - status = NEW, accruePoints = true
+             - status = GOOD_STANDING, accruePoints = true
+             - status = REDEEM_ONLY, accruePoints = false
+             - status = CANCELLED, accruePoints = false
+             - status = ON_HOLD, accruePoints = true
+          example: false
+        householdToken:
+          type: string
+          description: >-
+            This field ties together multiple User accounts into one household.
+            This value is typically assigned by the customer. To use this field,
+            a rewards program must be configured to support the Token or Token
+            then Bank Customer Number householding scheme.
+          example: '254235'
+        primaryAccount:
+          type: boolean
+          description: >-
+            Identifies if the account is primary for the User. A User may only
+            have 1 primary account. In situations where householding is used,
+            there may only be 1 primary account in the household, regardless of
+            how many User accounts make up that household. A value of true
+            indicates that the account is primary for the User or the household.
+          example: false
+        userDefined1:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that
+            can be used for promotions and other business rules.
+          example: UDF 1 Example
+        userDefined2:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that
+            can be used for promotions and other business rules.
+          example: UDF 2 Example
+        userDefined3:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that
+            can be used for promotions and other business rules.
+          example: UDF 3 Example
+        userDefined4:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that
+            can be used for promotions and other business rules.
+          example: UDF 4 Example
+        userDefined5:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that
+            can be used for promotions and other business rules.
+          example: UDF 5 Example
+        userDefined6:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that
+            can be used for promotions and other business rules.
+          example: UDF 6 Example
+        userDefined7:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that
+            can be used for promotions and other business rules.
+          example: UDF 7 Example
+        userDefined8:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: >-
+            User Defined Fields can be used to store partner-specific data that
+            can be used for promotions and other business rules.
+          example: UDF 8 Example
+        externalAccountId:
+          maxLength: 10
+          minLength: 0
+          type: string
+          description: >-
+            Used for On-Soil customers when optional fields are turned on in the
+            rewards system.
+          example: '2222332322'
+        cycleId:
+          type: integer
+          description: >-
+            Bank cycle number that the cardholder/primary cardholder is assigned
+            to. This field is typically not used unless the customer is
+            receiving a statement batch file from the rewards system.
+          format: int64
+          example: 1
+        cycled:
+          type: boolean
+          description: >-
+            Flag to indicate whether a Rewards account has been cycled for the
+            current period.
+          example: false
+        pcloAccountStatusCode:
+          type: string
+          description: >-
+            Status of the user's account. Valid values are NEW, GOOD_STANDING,
+            REDEEM_ONLY, CANCELLED, ON_HOLD.
+             - NEW  Used for auto and self-enrollment. Can earn, but not redeem.
+             - GOOD_STANDING  Can earn and redeem. This is the typical good status for an account.
+             - REDEEM_ONLY  Cannot earn but can redeem.
+             - CANCELLED  Cannot earn or redeem. This is the typical final state for an account that is no longer active in a program.
+             - ON_HOLD  Can earn, but not redeem. This status is for temporarily derogative accounts.
+          example: NEW
+          enum:
+            - NEW
+            - GOOD_STANDING
+            - REDEEM_ONLY
+            - CANCELLED
+            - ON_HOLD
+        accountReferenceCode:
+          maxLength: 50
+          minLength: 0
+          type: string
+          description: Unique identifier the membership uses to identify an account.
+          example: 123456abcdef123456abcdef123456abcdef0
+        companyIca:
+          type: integer
+          description: >-
+            Interbank Card Association number assigned by Mastercard to the
+            financial institution.
+          format: int64
+          example: 9989
+        userId:
+          maxLength: 50
+          minLength: 0
+          type: string
+          description: The unique identifier of the User.
+          example: '5600000000000003000'
+        userIdType:
+          type: string
+          description: Identifier type of the User. Supported identifiers are BCN or RANCU.
+          example: BCN
+    UserDetails:
+      type: object
+      properties:
+        companyIca:
+          type: integer
+          description: The unique identifier of the company.
+          format: int64
+          example: 611532
+        userId:
+          type: string
+          description: >-
+            A system generated unique User identifier such as random customer
+            number.
+          example: '282947573008198049562610279575'
+        userIdType:
+          type: string
+          description: User identifier type. Supported identifier is RANCU.
+          example: RANCU
+        namePrefix:
+          type: string
+          description: User's name prefix.
+          example: R
+        firstName:
+          type: string
+          description: User's first name.
+          example: John
+        middleName:
+          type: string
+          description: User's middle name.
+          example: Robert
+        lastName:
+          type: string
+          description: User's last name.
+          example: Smith
+        motherMaidenName:
+          type: string
+          description: User's mother maiden name.
+          example: Jennifer
+        authorizedUser1:
+          type: string
+          description: First authorized user in primary cardholder's account.
+          example: testUser1
+        authorizedUser2:
+          type: string
+          description: Second authorized user in primary cardholder's account.
+          example: testUser2
+        birthDate:
+          type: string
+          description: User's Date of Birth.
+          example: Mon Mar 10 19:00:00 CDT 1975
+        nationalIdentifier:
+          type: string
+          description: National Identifier of the User.
+          example: 324-56-7574
+        businessPhoneNumber:
+          type: string
+          description: Valid business phone number used by the User.
+          example: +1(0)1234567890
+        mobilePhoneNumber:
+          type: string
+          description: Valid mobile phone number used by the User.
+          example: +1(0)1234567891
+        homePhoneNumber:
+          type: string
+          description: Valid home phone number used by the User.
+          example: +1(0)1234567891
+        faxPhoneNumber:
+          type: string
+          description: Valid fax phone number used by the User.
+          example: +1(0)1234567891
+        emailAddress:
+          type: string
+          description: Valid email address used by the User.
+          example: abc@example.com
+        vip:
+          type: boolean
+          description: Allows the user to hold VIP status, default value is false.
+          example: true
+        employee:
+          type: boolean
+          description: Allows the user to hold EMPLOYEE status, default value is false.
+          example: false
+        acceptEmails:
+          type: boolean
+          description: >-
+            Specifies if the account holder can be contacted via email, default
+            value is false.
+          example: false
+        acceptSms:
+          type: boolean
+          description: >-
+            Specifies if the account holder can be contacted via SMS, default
+            value is false.
+          example: false
+        acceptPromotionalInfo:
+          type: boolean
+          description: >-
+            Specifies if the account holder is interested in receiving
+            promotional information, the default value is false.
+          example: true
+        acceptTracking:
+          type: boolean
+          description: >-
+            Specifies whether or not a particular customer has accepted
+            tracking.
+          example: true
+        genericIdentification:
+          type: string
+          description: Answer to the user's verification question.
+          example: Duster
+        genericIdentificationDescription:
+          type: string
+          description: The user's custom verification question.
+          example: Pet's name
+        userDefined1:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 1
+          example: UDF 1 Example
+        userDefined2:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 2
+          example: UDF 2 Example
+        userDefined3:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 3
+          example: UDF 3 Example
+        userDefined4:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 4
+          example: UDF 4 Example
+        pcloUser:
+          $ref: '#/components/schemas/PCLOUser'
+        preferredLanguage:
+          type: string
+          description: Customer's preferred language.
+          example: en_US
+        address:
+          $ref: '#/components/schemas/UserAddress'
+        verificationDetails:
+          type: array
+          description: Cardholder verification details.
+          items:
+            $ref: '#/components/schemas/VerificationDetails'
+    Account:
+      required:
+        - accountId
+        - accountIdType
+        - productCode
+        - programIdentifier
+        - status
+      type: object
+      properties:
+        accountId:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: The unique identifier for the given account.
+          example: '5330333671236516'
+        accountIdType:
+          type: string
+          description: Identifier type for the given account.
+          example: BAN
+        status:
+          type: string
+          description: >-
+            Status of the user's account. Valid values are GOOD_STANDING,
+            REDEEM_ONLY, NEW, ON_HOLD, CANCELLED, INACTIVE.
+          example: NEW
+        productCode:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: >-
+            The account's associated reward product identifier as defined by the
+            client and configured during the implementation of the program.
+          example: FIDOCASHBACK
+        programIdentifier:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: >-
+            Program identifier for the program in which the cardholder is
+            enrolled. The program ID is created by Mastercard Rewards System.
+          example: PGM42051
+        openDate:
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          type: string
+          description: The date of account opening as defined by the client.
+          example: '2014-12-31'
+          format: date
+        enrollmentDate:
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          type: string
+          description: >-
+            The date when the account becomes eligible for rewards program. If
+            undefined, enrollment date is defaulted to the date when Mastercard
+            processes the enrollment.
+          example: '2018-03-10'
+          format: date
+        accruePoints:
+          type: boolean
+          description: >-
+            This specifies if the account can accrue points. It is used in
+            conjunction with Account Status to define earn and burn behavior for
+            the account.
+          example: false
+        householdToken:
+          type: string
+          description: >-
+            This field ties together multiple user accounts into one household.
+            This value is typically assigned by the Client. To use this field, a
+            rewards program must be configured to support the Token or Bank
+            Customer Number householding scheme.
+          example: '254235'
+        primaryAccount:
+          type: boolean
+          description: >-
+            Identifies if the account is primary for the User. A User may only
+            have 1 primary account. In situations where householding is used,
+            there may only be 1 primary account in the household, regardless of
+            how many User accounts make up that household. A value of true
+            indicates that the account is primary for the User or the household.
+          example: false
+        userDefined1:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 1
+          example: UDF 1 Example
+        userDefined2:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 2
+          example: UDF 2 Example
+        userDefined3:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 3
+          example: UDF 3 Example
+        userDefined4:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Field 4
+          example: UDF 4 Example
+        userDefined5:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Field 5
+          example: UDF 5 Example
+        userDefined6:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Field 6
+          example: UDF 6 Example
+        userDefined7:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Field 7
+          example: UDF 7 Example
+        userDefined8:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Field 8
+          example: UDF 8 Example
+        externalAccountId:
+          maxLength: 10
+          minLength: 0
+          type: string
+          description: >-
+            Used for On-Soil customers when optional fields are turned on in the
+            rewards system.
+          example: '2222332322'
+        cycleId:
+          type: integer
+          description: >-
+            Bank cycle number that the cardholder/primary cardholder is assigned
+            to.
+          format: int64
+          example: 1
+        cycled:
+          type: boolean
+          description: Flag to indicate whether a Rewards account has been cycled.
+          example: false
+        pcloAccountStatusCode:
+          type: string
+          description: >-
+            Status of the user's account. Valid values are GOOD_STANDING,
+            REDEEM_ONLY, NEW, ON_HOLD, CANCELLED, INACTIVE.
+          example: NEW
+        accountReferenceCode:
+          maxLength: 50
+          minLength: 0
+          type: string
+          description: Unique identifier the membership uses to identify an account.
+          example: 123456abcdef123456abcdef123456abcdef0
+        companyIca:
+          type: integer
+          description: >-
+            Interbank Card Association number assigned by Mastercard to the
+            financial institution.
+          format: int64
+          example: 611532
+        accountFirstFour:
+          type: string
+          description: The first 4 digits of the account number.
+          example: '5114'
+        accountLastFour:
+          type: string
+          description: The last 4 digits of the account number.
+          example: '5678'
+        userId:
+          type: string
+          description: Value of the user or account identification.
+          example: '5330333671236516'
+        userIdType:
+          type: string
+          description: >-
+            Type of the user or account identification. Supported identifier is
+            RANCU.
+          example: RANCU
+        autoEnrolled:
+          type: boolean
+          description: Indicates whether this card was auto-enrolled.
+          example: false
+        enrollmentTypeId:
+          type: integer
+          description: Indicates how the customer is enrolled.
+          format: int64
+          example: 12
+        enrollmentType:
+          type: string
+          description: Indicates the description of how the customer is enrolled.
+          example: B2B Service
+        previousAccountLostStolen:
+          type: boolean
+          description: Indicates whether this card number has been reported lost or stolen.
+          example: false
+        receiveStatements:
+          type: boolean
+          description: >-
+            Used on programs receiving statements from Mastercard to determine
+            which cardholders should receive a statement.
+          example: false
+        previousAccountFirstFour:
+          type: string
+          description: >-
+            Indicates the first four digits of customer's previous bank account
+            number.
+          example: '1234'
+        previousAccountLastFour:
+          type: string
+          description: >-
+            Indicates the last four digits of customer's previous bank account
+            number.
+          example: '5678'
+        programName:
+          type: string
+          description: >-
+            Program name is the reference for a program associated to an
+            account.
+          example: SURPREENDA
+        householdId:
+          type: integer
+          description: >-
+            Unique ID for a Household in the rewards system. This is an internal
+            value assigned to the household, when a customer is enrolled.
+          format: int64
+          example: 1234
+      description: accounts
+    AccountSearchDetails:
+      required:
+        - accounts
+      type: object
+      properties:
+        offset:
+          type: integer
+          description: >-
+            Indicates the number of items you asked the start of the list to be
+            offset from.
+          example: 1
+        limit:
+          type: integer
+          description: Indicates the number of items you asked the list to be limited to.
+          example: 1
+        total:
+          type: integer
+          format: int64
+          description: Indicates the total number of items in the collection.
+          example: 1
+        count:
+          type: integer
+          description: >-
+            Indicates the number of items in this batch (the size of the item
+            array).
+          example: 1
+        accounts:
+          type: array
+          description: accounts
+          items:
+            $ref: '#/components/schemas/Account'
+    LostStolen:
+      type: object
+      properties:
+        message:
+          type: string
+          description: result
+          example: Successfully processed Lost Stolen request
+    PanBlockAutoEnrollment:
+      type: object
+      properties:
+        message:
+          type: string
+          description: result
+          example: Successfully blocked PAN auto enrollment
+    VerifiedUser:
+      type: object
+      properties:
+        message:
+          type: string
+          description: result
+          example: Successfully verified user
+    PanBlock:
+      required:
+        - accountId
+        - accountIdType
+        - programs
+      type: object
+      properties:
+        accountId:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: The unique identifier for the given account.
+          example: '5330333671236516'
+        accountIdType:
+          type: string
+          description: Identifier type for the given account. Supported identifier is BAN.
+          example: BAN
+        beginDate:
+          type: string
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          description: >-
+            The date from which the PAN will be blocked from enrollment. Date
+            format should be in CST.
+          example: '2050-12-31'
+        endDate:
+          type: string
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          description: The date until which the PAN will be blocked from enrollment.
+          example: '2051-12-31'
+        programs:
+          type: array
+          items:
+            type: string
+          description: >-
+            Program identifier for the program in which the cardholder is
+            enrolled. Note the program identifier is filler name and not a
+            sequential ID.
+          example:
+            - PGM41632
+    AccountGroupDetails:
+      required:
+        - actionCode
+        - sourceId
+        - sourceIdType
+      type: object
+      properties:
+        actionCode:
+          type: string
+          description: >-
+            Indicates the type of householding action that is to be performed by
+            the request.
+
+            Valid values are:
+                "   MH - Moves all accounts in account group to new target account group.
+                "   MA - Moves an account to another existing account group.
+                "   DH - Removes all accounts in account group to new target account group.
+                "   DA - Removes an account from its current account group and update the token.
+          example: MA
+        sourceId:
+          maxLength: 30
+          type: string
+          description: >-
+            The unique identifier for the given account. This will always be a
+            RANAC value.
+          example: '268810378058708149455458707247'
+        sourceIdType:
+          type: string
+          description: >-
+            Identifier type for the source account. The static value of RANAC
+            should be used for this field.
+          example: RANAC
+        targetId:
+          maxLength: 140
+          type: string
+          description: >-
+            Specifies the household that the account(s) will be joining.
+            Depending on the actionCode that is specified, this value will
+            either be an existing Household ID or a household token. When using
+            actionCode MH or MA, this field is required and will always contain
+            an existing Household ID. When using actionCode DH or DA, this field
+            is only required when the Program is using a token-based
+            householding scheme. This value will be used as the household token
+            for the new household that the account(s) are being placed into. If
+            a token is provided in this field, it must be unique and not
+            currently being used.
+          example: '02925999'
+        targetIdType:
+          type: string
+          description: >-
+            Identifier type that will be used to identify the reference to the
+            target household. When using actionCode MH or MA, this field is
+            should contain the static value of HHID. When using actionCode DH or
+            DA, in a Program with a token-based householding scheme, this field
+            is should contain the static value of HHT if the target household
+            created by the operation needs to assign a household token to the
+            new household.
+          example: HHID
+    LostStolenCard:
+      required:
+        - oldAccountId
+        - actionCode
+      type: object
+      properties:
+        oldAccountId:
+          type: string
+          description: >-
+            The RANAC associated with original account that is being replaced by
+            the lost/stolen process.
+          example: '695026705601132106860975039544'
+        newAccountNumber:
+          maxLength: 30
+          type: string
+          description: >-
+            New 16-digit card number with 3 trailing zeros that is replacing the
+            lost or stolen card.
+          example: '5563654494590634000'
+        newCustomerNumber:
+          maxLength: 30
+          type: string
+          description: New unique identifier for specific customer.
+          example: '5420000000001234000'
+        status:
+          type: string
+          description: >-
+            Status of the user's account. Valid values are GOOD_STANDING,
+            REDEEM_ONLY, NEW, ON_HOLD, CANCELLED, INACTIVE.
+          example: GOOD_STANDING
+          enum:
+            - NEW
+            - GOOD_STANDING
+            - REDEEM_ONLY
+            - CANCELLED
+            - ON_HOLD
+            - INACTIVE
+        actionCode:
+          type: string
+          description: |-
+            Indicates the type of action that is to be performed by the request
+            valid action codes are:
+
+                "   A - Replaces the previous Bank Account Number with the new number.
+                        Mandatory fields for action code A are oldAccountId, 
+                        newAccountNumber, status.
+                "   B - Replaces both Bank Account Number and Bank Customer Number with 
+                        new numbers. Mandatory fields for action code B are oldAccountId, 
+                        newAccountNumber, status.
+                "   C - Replaces the previous Bank Customer Number with the new number. 
+                        Mandatory fields for action code C are oldAccountId, 
+                        newCustomerNumber.
+                "   S - Move the Account from the old Bank Customer Number to a 
+                        new Bank Customer Number. Mandatory fields for action code S are
+                        oldAccountId, newCustomerNumber.
+          enum:
+            - A
+            - B
+            - C
+            - S
+          example: A
+    VerifyUser:
+      required:
+        - userVerificationDetails
+      type: object
+      properties:
+        userVerificationDetails:
+          type: array
+          description: User Verification Details
+          items:
+            $ref: '#/components/schemas/UserVerificationDetails'
+  responses:
+    UserUpdateResponse:
+      description: Ok
+    ErrorsResponse:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+    UserEnrollResponse:
+      description: Successfully enrolled user.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EnrolledUser'
+    AccountUpdateResponse:
+      description: Ok
+    AccountEnrollResponse:
+      description: Successfully enrolled account.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EnrolledAccount'
+    AccountActivationResponse:
+      description: Successfully activated account.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountActivationDetails'
+    ActivationDetailsResponse:
+      description: Successfully retrieved account activations.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountSearchActivationDetails'
+    UpdateActivationResponse:
+      description: Ok
+    UserReferencesSearchResponse:
+      description: >-
+        Successfully retrieved account and customer Opaque and Real Identifiers
+        depending upon request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserReferences'
+    UserDetailsResponse:
+      description: Successfully retrieved user.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserDetails'
+    AccountSearchDetailsResponse:
+      description: Successfully retrieved account.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountSearchDetails'
+    PanBlockResponse:
+      description: Successfully blocked PAN auto enrollment.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PanBlockAutoEnrollment'
+    LostStolenCardResponse:
+      description: Successfully processed Lost Stolen request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LostStolen'
+    AccountGroupUpdateResponse:
+      description: Ok
+    VerifyUserResponse:
+      description: Successfully verified user
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VerifiedUser'
