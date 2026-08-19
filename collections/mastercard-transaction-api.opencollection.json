@@ -1,0 +1,91 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Mastercard Bill Payment Validator Account Opening Transaction API",
+    "version": "1.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Transaction",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Fetches Historical Transactions and its Transaction Footprints",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "{{baseUrl}}/payment-cards/:payment_card_id/transaction-footprints",
+            "params": [
+              {
+                "name": "payment_card_id",
+                "value": "83c0711e-1851-4771-950a-055dded7f168",
+                "type": "path",
+                "description": "Unique ID provided in the response while registering a payment card."
+              },
+              {
+                "name": "from_date",
+                "value": "2018-05-07",
+                "type": "query",
+                "description": "Start date for searching transaction (Format- YYYY-MM-DD)."
+              },
+              {
+                "name": "to_date",
+                "value": "2021-05-07",
+                "type": "query",
+                "description": "End date for searching transaction (Format- YYYY-MM-DD)."
+              },
+              {
+                "name": "offset",
+                "value": "50",
+                "type": "query",
+                "description": "The number of items you need the start of the list to be offset from."
+              },
+              {
+                "name": "limit",
+                "value": "50",
+                "type": "query",
+                "description": "The number of items you asked the list to be limited to."
+              }
+            ]
+          },
+          "docs": "Allows a Service Provider to fetch historical transactions for a payment card. Note that a maximum of one year of transactions can be retrieved using this API. Also, the payment card has to be registered first using /payment-cards service."
+        },
+        {
+          "info": {
+            "name": "Fetches carbon score for payment cards and aggregates the same on a weekly and monthly basis. The result will be in descending order.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/payment-cards/transaction-footprints/aggregates",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Allows a Service Provider to fetch aggregate carbon score for a single or multiple payment cards. A payment card has to be registered first using /service-providers/payment-cards endpoint before this endpoint can be called. The aggregate can be requested weekly, or monthly. Note that **ONLY** cleared transactions will be returned.\n\nIf any of the paymentCardIds is not valid or not registered, then the entire request will be rejected, and no aggregate will be returned.\n\nIf no transaction is found "
+        },
+        {
+          "info": {
+            "name": "Calculate Transaction Footprints",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transaction-footprints",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Calculates carbon emission based on the payment transaction amount, the merchant category code and the AIIA code. You can send **one or more transactions** together to get the transaction footprints. <br> Below is the approach to deliver **MCC** or **AIIA** based scoring. <li><b>If only `mcc` field provided in the request with required fields :</b> MCC based scoring will be delivered.</li>\n <li><b>If `type` and `additionalInformation` field provided in the request with required fields :</b> AIIA"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

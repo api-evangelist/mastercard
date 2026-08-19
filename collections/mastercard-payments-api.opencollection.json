@@ -1,0 +1,561 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Mastercard Bill Payment Validator Account Opening Payments API",
+    "version": "1.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Payments",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Bulk Registration of Payment Cards",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/service-providers/payment-cards",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Allows a registered service provider to add a list of new payment cards to its profile.This endpoint uses [Mastercard payload encryption](https://mstr.cd/2UPfda0). Refer to the [Payload Encryption](https://developer.mastercard.com/carbon-calculator/documentation/tutorials-and-guides/payload-encryption/) page for implementation details."
+        },
+        {
+          "info": {
+            "name": "Delete a Payment Card",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/service-providers/payment-cards/:payment_card_id",
+            "params": [
+              {
+                "name": "payment_card_id",
+                "value": "83c0711e-1851-4771-950a-055dded7f168",
+                "type": "path",
+                "description": "Unique ID provided in the response while registering a payment card."
+              }
+            ]
+          },
+          "docs": "Allows a registered Service Provider to delete single Payment Card at a time from its profile. Any data associated with a requested paymentCardId will also be deleted permanently.\n\nOn the successful response from the server, a Service Provider should remove all the requested paymentCardIds from the system.\n\nOnce a request has been received from a Service Provider, data deletion will happen immediately."
+        },
+        {
+          "info": {
+            "name": "Fetches Historical Transactions and its Transaction Footprints",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "{{baseUrl}}/payment-cards/:payment_card_id/transaction-footprints",
+            "params": [
+              {
+                "name": "payment_card_id",
+                "value": "83c0711e-1851-4771-950a-055dded7f168",
+                "type": "path",
+                "description": "Unique ID provided in the response while registering a payment card."
+              },
+              {
+                "name": "from_date",
+                "value": "2018-05-07",
+                "type": "query",
+                "description": "Start date for searching transaction (Format- YYYY-MM-DD)."
+              },
+              {
+                "name": "to_date",
+                "value": "2021-05-07",
+                "type": "query",
+                "description": "End date for searching transaction (Format- YYYY-MM-DD)."
+              },
+              {
+                "name": "offset",
+                "value": "50",
+                "type": "query",
+                "description": "The number of items you need the start of the list to be offset from."
+              },
+              {
+                "name": "limit",
+                "value": "50",
+                "type": "query",
+                "description": "The number of items you asked the list to be limited to."
+              }
+            ]
+          },
+          "docs": "Allows a Service Provider to fetch historical transactions for a payment card. Note that a maximum of one year of transactions can be retrieved using this API. Also, the payment card has to be registered first using /payment-cards service."
+        },
+        {
+          "info": {
+            "name": "Fetches carbon score for payment cards and aggregates the same on a weekly and monthly basis. The result will be in descending order.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/payment-cards/transaction-footprints/aggregates",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Allows a Service Provider to fetch aggregate carbon score for a single or multiple payment cards. A payment card has to be registered first using /service-providers/payment-cards endpoint before this endpoint can be called. The aggregate can be requested weekly, or monthly. Note that **ONLY** cleared transactions will be returned.\n\nIf any of the paymentCardIds is not valid or not registered, then the entire request will be rejected, and no aggregate will be returned.\n\nIf no transaction is found "
+        },
+        {
+          "info": {
+            "name": "Register a Payment Card (to be deprecated)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/payment-cards",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Allows a registered Service Provider to add a new Payment Card to its profile. This endpoint uses [Mastercard payload encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/#mastercard-encryption). Refer to the [Payload Encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/) section for implementation details."
+        },
+        {
+          "info": {
+            "name": "Batch Registration of Payment Cards (to be deprecated)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/payment-card-enrolments",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Allows a registered Service Provider to add a list of new Payment Cards **(at most maximum of 100 payment cards)** to its profile. This endpoint uses [Mastercard payload encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/#mastercard-encryption). Refer to the [Payload Encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encr"
+        },
+        {
+          "info": {
+            "name": "Delete one or more Payment Cards (to be deprecated)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/payment-card-deletions",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Allows a registered Service Provider to delete one or more Payment Cards from its profile. Any data associated with a requested paymentCardId will also be deleted permanently.\n\nOn the successful response from the server, a Service Provider should remove all the requested paymentCardIds from the system.\n\nOnce a request has been received from a Service Provider, data deletion will happen immediately.\n"
+        },
+        {
+          "info": {
+            "name": "Guest Donation",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/payments/guests",
+            "headers": [
+              {
+                "name": "x-openapi-clientid",
+                "value": ""
+              },
+              {
+                "name": "x-correlation-id",
+                "value": ""
+              },
+              {
+                "name": "ProgramId",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "This API is used to process One Time Donation for a Guest Donor. Entire request body should be encrypted."
+        },
+        {
+          "info": {
+            "name": "One Time Donation API",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/payments",
+            "headers": [
+              {
+                "name": "x-openapi-clientid",
+                "value": ""
+              },
+              {
+                "name": "x-correlation-id",
+                "value": ""
+              },
+              {
+                "name": "ProgramId",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "This API is used to process One Time Donation for a Registered Donor. The donor can either use an already added card or a new card for the payment. The field 'cardId' will be present only for the existing card flow, the card details (PAN, cvc, expiry info) are not required in this scenario hence shouldn't be part of the request body. In case of the new card flow, the request body will not be having a cardId field only the card details will be present. Entire request body should be encrypted."
+        },
+        {
+          "info": {
+            "name": "Mastercard Payment Request Creation.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/payment-requests",
+            "headers": [
+              {
+                "name": "X-Request-ID",
+                "value": ""
+              },
+              {
+                "name": "X-Product-ID",
+                "value": ""
+              },
+              {
+                "name": "X-Participant-ID",
+                "value": ""
+              },
+              {
+                "name": "X-JWS-Signature",
+                "value": ""
+              },
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Enables the presentment of request for payment (with or without agreement) by a CSP on behalf of its Creditor."
+        },
+        {
+          "info": {
+            "name": "Mastercard Payment Request Status Retrieval Request.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/payment-requests/:payment_request_lifecycle_id/status-retrievals",
+            "headers": [
+              {
+                "name": "X-Request-ID",
+                "value": ""
+              },
+              {
+                "name": "X-Product-ID",
+                "value": ""
+              },
+              {
+                "name": "X-Participant-ID",
+                "value": ""
+              },
+              {
+                "name": "X-JWS-Signature",
+                "value": ""
+              },
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "payment_request_lifecycle_id",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Enables Mastercard to retrieve payment request status from DSP."
+        },
+        {
+          "info": {
+            "name": "Mastercard Refund Account Request.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/payment-requests/:payment_request_lifecycle_id/refunds",
+            "headers": [
+              {
+                "name": "X-Request-ID",
+                "value": ""
+              },
+              {
+                "name": "X-Product-ID",
+                "value": ""
+              },
+              {
+                "name": "X-Participant-ID",
+                "value": ""
+              },
+              {
+                "name": "X-JWS-Signature",
+                "value": ""
+              },
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "payment_request_lifecycle_id",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "A CSP can request refund account details from a Debtor Service Provider(DSP) on behalf of a Creditor. They can use these details to refund the Debtor."
+        },
+        {
+          "info": {
+            "name": "Mastercard Refund Payment Confirmation.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/payment-requests/:payment_request_lifecycle_id/refunds/:refund_request_lifecycle_id/payment-confirmations",
+            "headers": [
+              {
+                "name": "X-Request-ID",
+                "value": ""
+              },
+              {
+                "name": "X-Product-ID",
+                "value": ""
+              },
+              {
+                "name": "X-Participant-ID",
+                "value": ""
+              },
+              {
+                "name": "X-JWS-Signature",
+                "value": ""
+              },
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "payment_request_lifecycle_id",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services."
+              },
+              {
+                "name": "refund_request_lifecycle_id",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier assigned by Mastercard, to identify the refund request in subsequent transactions or services."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Enables CSP to notify DSP of a refund payment confirmation."
+        },
+        {
+          "info": {
+            "name": "Mastercard Retrieve Payment Request Details.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/payment-request-retrievals",
+            "headers": [
+              {
+                "name": "X-Request-ID",
+                "value": ""
+              },
+              {
+                "name": "X-Product-ID",
+                "value": ""
+              },
+              {
+                "name": "X-Participant-ID",
+                "value": ""
+              },
+              {
+                "name": "X-JWS-Signature",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Enables DSP to retrieve request for payment using either paymentRequestLifecycleId or paymentRequestReferenceNumber to present it to the debtor and obtain consent for funds transfer."
+        },
+        {
+          "info": {
+            "name": "Mastercard Confirm Payment",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/payment-requests/:payment_request_lifecycle_id/payment-confirmation-advices",
+            "headers": [
+              {
+                "name": "X-Request-ID",
+                "value": ""
+              },
+              {
+                "name": "X-Product-ID",
+                "value": ""
+              },
+              {
+                "name": "X-Participant-ID",
+                "value": ""
+              },
+              {
+                "name": "X-JWS-Signature",
+                "value": ""
+              },
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "payment_request_lifecycle_id",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Enables DSP to send payment status information for the request for payment message."
+        },
+        {
+          "info": {
+            "name": "Mastercard Step-up Advice",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/payment-requests/:payment_request_lifecycle_id/step-up-advices",
+            "headers": [
+              {
+                "name": "X-Request-ID",
+                "value": ""
+              },
+              {
+                "name": "X-Product-ID",
+                "value": ""
+              },
+              {
+                "name": "X-Participant-ID",
+                "value": ""
+              },
+              {
+                "name": "X-JWS-Signature",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "payment_request_lifecycle_id",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Enables DSP to send step-up advice to CSP through Mastercard."
+        },
+        {
+          "info": {
+            "name": "Mastercard Refund Request Status Retrieval Request",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/payment-requests/:payment_request_lifecycle_id/refunds/:refund_request_lifecycle_id/status-retrievals",
+            "headers": [
+              {
+                "name": "X-Request-ID",
+                "value": ""
+              },
+              {
+                "name": "X-Product-ID",
+                "value": ""
+              },
+              {
+                "name": "X-Participant-ID",
+                "value": ""
+              },
+              {
+                "name": "X-JWS-Signature",
+                "value": ""
+              },
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "refund_request_lifecycle_id",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier assigned by Mastercard, to identify the refund request in subsequent transactions or services."
+              },
+              {
+                "name": "payment_request_lifecycle_id",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Enables DSP to enquire about the status of Refund Request."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}
