@@ -1,0 +1,405 @@
+slug: mastercard
+provider: Mastercard
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Banking & Capital Markets
+- Software & Technology
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 37
+edges:
+- tag: Debit
+  spec_file: mastercard-debit-api-openapi.yml
+  capability_id: BC-1340.60
+  capability_id_l1: BC-1340
+  capability_name: Card Issuance Management
+  confidence: 0.95
+  evidence: POST /debit-cards createDebitCard 'Mastercard **debit Card Issuance** - Issue Debit Card to
+    Existing or New Client'
+  reason: The operation explicitly issues a debit card to a new or existing client, with card plan, alias,
+    embossing name and client schemas — unambiguously card issuance.
+- tag: Suspected  Fraud  Management
+  spec_file: mastercard-suspected-fraud-management-api-openapi.yml
+  capability_id: BC-1400.30
+  capability_id_l1: BC-1400
+  capability_name: Fraud Detection & Investigation Management
+  confidence: 0.9
+  evidence: PUT /mastercard-frauds updateSuspectedFraud — 'Change an Existing Suspected Fraud Record';
+    schemas SuspectedFraudChange, SafeFraudProvider, CardInPossession
+  reason: Maintenance of suspected fraud records on card transactions is squarely fraud detection and
+    investigation within financial crime management.
+- tag: Suspected  Fraud  Submission
+  spec_file: mastercard-suspected-fraud-submission-api-openapi.yml
+  capability_id: BC-1400.30
+  capability_id_l1: BC-1400
+  capability_name: Fraud Detection & Investigation Management
+  confidence: 0.9
+  evidence: POST /mastercard-frauds submitSuspectedFraud — 'Add a New Suspected Fraud Record Using Minimal
+    Input Parameters for Mastercard Built Transactions.'
+  reason: Reporting of suspected fraudulent card transactions into the fraud system; clearly fraud detection
+    and investigation.
+- tag: Confirmed  Fraud  Management
+  spec_file: mastercard-confirmed-fraud-management-api-openapi.yml
+  capability_id: BC-1400.30
+  capability_id_l1: BC-1400
+  capability_name: Fraud Detection & Investigation Management
+  confidence: 0.85
+  evidence: PUT /mastercard-frauds updateMastercardFraud Change an Existing Fraud Record Using Minimal
+    Input Parameters for Mastercard Built Transactions.
+  reason: Operations maintain confirmed-fraud records for card transactions (schemas Fraud, SafeFraudProvider,
+    UpdatedIssuerFraud), which is fraud detection/reporting and investigation on payment transactions.
+- tag: Confirmed  Fraud  Submission
+  spec_file: mastercard-confirmed-fraud-submission-api-openapi.yml
+  capability_id: BC-1400.30
+  capability_id_l1: BC-1400
+  capability_name: Fraud Detection & Investigation Management
+  confidence: 0.85
+  evidence: POST /mastercard-frauds submitMastercardFraud Add a New Fraud Record Using Minimal Input Parameters
+    for Mastercard Built Transactions.
+  reason: Submission of confirmed fraud records for issuer and Mastercard-built transactions (schemas
+    IssuerFraud, TransactionIdentifier, SafeFraudProvider) is squarely fraud detection and case reporting
+    within financial crime management.
+- tag: Environmental  Impact
+  spec_file: mastercard-environmental-impact-api-openapi.yml
+  capability_id: BC-740.20
+  capability_id_l1: BC-740
+  capability_name: Climate & Carbon Management
+  confidence: 0.85
+  evidence: POST /transaction-footprints 'Calculate Transaction Footprints'; schemas ClimateProfile, CarbonUsage
+  reason: Computes carbon footprint of transactions with climate profile and carbon usage schemas — carbon
+    footprinting, i.e. climate & carbon management.
+- tag: Account  Opening
+  spec_file: mastercard-account-opening-api-openapi.yml
+  capability_id: BC-1300.10
+  capability_id_l1: BC-1300
+  capability_name: Customer Onboarding Management
+  confidence: 0.8
+  evidence: 'POST /openings  retrieveAccountOpeningInsights  Response will provide device, IP and user
+    insights; schemas: AccountOpeningData, IPRiskScore, MatchToName'
+  reason: Provides device/IP/identity risk insights at account opening, directly supporting customer onboarding
+    and identity verification for account opening.
+- tag: Aggregate
+  spec_file: mastercard-aggregate-api-openapi.yml
+  capability_id: BC-740.20
+  capability_id_l1: BC-740
+  capability_name: Climate & Carbon Management
+  confidence: 0.8
+  evidence: GET /issuers/users/{userid}/aggregate-carbon-scores — "Fetches Monthly Aggregate Carbon Score
+    for the Transactions Made for the Current Month"; schema AggregateCarbonScore
+  reason: The operation computes a carbon score for a user's transactions, i.e. carbon footprint calculation
+    and disclosure. That is Climate & Carbon Management; the title's bill-payment framing is spurious
+    per the split-spec caveat.
+- tag: Aggregates
+  spec_file: mastercard-aggregates-api-openapi.yml
+  capability_id: BC-740.20
+  capability_id_l1: BC-740
+  capability_name: Climate & Carbon Management
+  confidence: 0.8
+  evidence: '"Fetches carbon score for payment cards and aggregates the same on a weekly and monthly basis";
+    schemas AggregateTransactionFootprints, CarbonUsage'
+  reason: Carbon footprint scoring and aggregation over card transactions — carbon measurement, not payment
+    processing. Maps to Climate & Carbon Management.
+- tag: Footprints
+  spec_file: mastercard-footprints-api-openapi.yml
+  capability_id: BC-740.20
+  capability_id_l1: BC-740
+  capability_name: Climate & Carbon Management
+  confidence: 0.8
+  evidence: POST /transaction-footprints FootprintsByTransactionData 'Mastercard Calculate Transaction
+    Footprints'; schema MCTransactionFootprint
+  reason: Calculates environmental footprints of transactions — carbon/climate measurement capability.
+- tag: Fraud
+  spec_file: mastercard-fraud-api-openapi.yml
+  capability_id: BC-1400.30
+  capability_id_l1: BC-1400
+  capability_name: Fraud Detection & Investigation Management
+  confidence: 0.8
+  evidence: Delete an Existing Fraud Record or Confirm a Suspended Fraud Record for Both Mastercard and
+    Issuer Built Transactions
+  reason: Operations manage fraud records on payment transactions (schemas FraudState, SafeFraudProvider),
+    which is payment fraud detection and case handling.
+- tag: Cards
+  spec_file: mastercard-cards-api-openapi.yml
+  capability_id: BC-1340.60
+  capability_id_l1: BC-1340
+  capability_name: Card Issuance Management
+  confidence: 0.78
+  evidence: POST /prepaid-cards createPrepaidCard Mastercard **prepaid Card Issuance** - Issue Prepaid
+    Card to Existing or New Client; POST /debit-cards createDebitCard Mastercard **debit Card Issuance**
+  reason: Explicit card issuance operations for prepaid and debit cards map to Card Issuance Management;
+    remaining card CRUD operations are consistent with card lifecycle, though some ops (medicare card
+    verification) sit outside.
+- tag: Ica
+  spec_file: mastercard-ica-api-openapi.yml
+  capability_id: BC-1400.30
+  capability_id_l1: BC-1400
+  capability_name: Fraud Detection & Investigation Management
+  confidence: 0.78
+  evidence: GET /fraud-statuses/icas/{ica} fraudRequestStatus — 'Get Status of an Existing Fraud Record
+    for Both Mastercard and Issuer Built Transactions'
+  reason: Despite the opaque tag 'Ica' (an issuer identifier), the operation queries the status of a card
+    fraud record, i.e. fraud case/record handling for card transactions. Schemas Fraud/FraudBase confirm.
+    Some ambiguity between fraud investigation and card transaction fraud screening.
+- tag: Valid
+  spec_file: mastercard-valid-api-openapi.yml
+  capability_id: BC-1340.10
+  capability_id_l1: BC-1340
+  capability_name: Payment Initiation Management
+  confidence: 0.78
+  evidence: POST /isRoutingValid  Mastercard Bill Payment Validator Service Returns the Processing Status
+    for a Potential Rpps Transaction; schemas BillPayRequest, BillPayAccountValidation
+  reason: Validates biller routing/account details for a prospective RPPS bill payment before initiation
+    — payment instruction validation within payment initiation.
+- tag: Virtual
+  spec_file: mastercard-virtual-api-openapi.yml
+  capability_id: BC-1340.60
+  capability_id_l1: BC-1340
+  capability_name: Card Issuance Management
+  confidence: 0.78
+  evidence: POST /users/{user_guid}/virtual-card-accounts — "Register a virtual card linked to a user";
+    schemas VirtualCardAccount, Token, VelocityControl, MccControl
+  reason: Creates, updates and deletes virtual card accounts and their payment tokens with spend controls
+    — card issuance/provisioning and card credential lifecycle, a payments & card management capability.
+    Some overlap with product parameter controls, but issuance of the card instrument dominates.
+- tag: Lost Stolen
+  spec_file: mastercard-lost-stolen-api-openapi.yml
+  capability_id: BC-1340.60
+  capability_id_l1: BC-1340
+  capability_name: Card Issuance Management
+  confidence: 0.75
+  evidence: 'POST /lost-stolen-cards — "Allows a consumer to replace a card that was lost or stolen, with
+    a new card." (schemas: LostStolenCard, LostStolen)'
+  reason: The single operation issues a replacement payment card for a lost/stolen card, which is card
+    issuance/replacement within payments & card management. Some ambiguity remains between issuance and
+    card servicing, but issuance is the closest candidate.
+- tag: Payment  Requests
+  spec_file: mastercard-payment-requests-api-openapi.yml
+  capability_id: BC-1340.10
+  capability_id_l1: BC-1340
+  capability_name: Payment Initiation Management
+  confidence: 0.75
+  evidence: POST /payment-request-retrievals retrievePaymentRequest — "Mastercard Retrieve Payment Request
+    Details"; POST /payment-requests/{id}/payment-confirmation-advices — "Mastercard Confirm Payment";
+    schemas Debtor, CreditorForSRR, Payment, Amount
+  reason: 'Request-to-pay style surface: retrieve payment request details, confirm payment, issue step-up
+    advices, with debtor/creditor schemas. This is payment instruction capture, validation and authorisation
+    — Payment Initiation Management.'
+- tag: Items
+  spec_file: mastercard-items-api-openapi.yml
+  capability_id: BC-420.40
+  capability_id_l1: BC-420
+  capability_name: Loyalty & Retention Management
+  confidence: 0.72
+  evidence: GET /catalogs/{catalog_id}/items getItems — 'Returns a list of all reward items for a given
+    catalog'; schemas RewardItems, RedemptionFees
+  reason: Generic tag, but the operation exposes a rewards catalogue with redemption fees, i.e. loyalty
+    programme reward inventory. Fits loyalty/retention management; slight ambiguity as it could be treated
+    as product catalogue content.
+- tag: Verifications
+  spec_file: mastercard-verifications-api-openapi.yml
+  capability_id: BC-1300
+  capability_id_l1: BC-1300
+  capability_name: Banking Customer Management
+  confidence: 0.72
+  evidence: POST /source-verifications/{issuing_country}/passports — "Verifies the details of a passport
+    document with an identity verification provider"; "Add & Validate an Email Address Verify an OTP Code"
+  reason: Operations perform identity document and contact-point verification (passport, driving licence,
+    Medicare card, email/SMS OTP) building a verified identity record — customer identity verification
+    within banking customer management. Ambiguous between onboarding/account-opening verification (BC-1300.10)
+    and KYC/CDD (BC-1300.20), so only L1 asserted.
+- tag: Accounts
+  spec_file: mastercard-accounts-api-openapi.yml
+  capability_id: BC-1340.60
+  capability_id_l1: BC-1340
+  capability_name: Card Issuance Management
+  confidence: 0.7
+  evidence: POST /users/{user_guid}/virtual-card-accounts  createVirtualCardWithControls  Register a virtual
+    card linked to a user; POST .../tokens  TokenCreate  Register a token linked to a user and a virtual
+    card
+  reason: Dominant surface is virtual card account and token provisioning with spend controls, which is
+    card issuance/provisioning; mixed with BIN search and activity search, so moderate confidence.
+- tag: Benefit-Allocations-Card-Management
+  spec_file: mastercard-benefit-allocations-card-management-api-openapi.yml
+  capability_id: BC-1340.60
+  capability_id_l1: BC-1340
+  capability_name: Card Issuance Management
+  confidence: 0.7
+  evidence: POST /cards  cardReplacement  Mastercard Replace Card Number for a Cardholder; PUT /cards  freezeUnfreeze  Mastercard
+    Freeze/unfreeze a Card for Benefits
+  reason: Operations perform card lifecycle actions — replacing a cardholder's card number and freezing/unfreezing
+    a card — which is card issuance and card-status management rather than any employee-benefits capability.
+- tag: Carbon
+  spec_file: mastercard-carbon-api-openapi.yml
+  capability_id: BC-740.20
+  capability_id_l1: BC-740
+  capability_name: Climate & Carbon Management
+  confidence: 0.7
+  evidence: GET /issuers/users/{userid}/aggregate-carbon-scores  getAggregateCarbonScore  Mastercard Fetches
+    Monthly Aggregate Carbon Score for the Transactions Made for the Current Month.
+  reason: The operation computes an aggregate carbon score (footprint) derived from transactions, i.e.
+    carbon footprint calculation and disclosure, which is Climate & Carbon Management.
+- tag: Catalogs
+  spec_file: mastercard-catalogs-api-openapi.yml
+  capability_id: BC-420.40
+  capability_id_l1: BC-420
+  capability_name: Loyalty & Retention Management
+  confidence: 0.7
+  evidence: GET /catalogs getCatalogs Returns a list of all rewards catalogs for a given program.
+  reason: Operations expose rewards catalogues and reward items for a loyalty program (schemas Catalog,
+    RewardItem, RedemptionFees), supporting Loyalty & Retention Management rather than a payment or product-factory
+    capability.
+- tag: Driving
+  spec_file: mastercard-driving-api-openapi.yml
+  capability_id: BC-1300.20
+  capability_id_l1: BC-1300
+  capability_name: KYC & Customer Due Diligence Management
+  confidence: 0.7
+  evidence: POST /source-verifications/{issuing_country}/driving-licenses 'Verifies the details of a driving
+    license document with an identity verification provider'
+  reason: Explicit identity-document verification via an identity verification provider, the core of customer
+    due diligence / identity proofing.
+- tag: Guest  Donation
+  spec_file: mastercard-guest-donation-api-openapi.yml
+  capability_id: BC-1340.10
+  capability_id_l1: BC-1340
+  capability_name: Payment Initiation Management
+  confidence: 0.7
+  evidence: POST /payments/guests  guestDonationUsingPOST  Guest Donation
+  reason: Captures and authorises a card-funded donation payment (schemas 3ds, cardExpiry, CardCvcGuest,
+    AuthPayerResponse) — payment instruction capture and authorisation.
+- tag: I D  Document  Data  Extraction
+  spec_file: mastercard-i-d-document-data-extraction-api-openapi.yml
+  capability_id: BC-1300
+  capability_id_l1: BC-1300
+  capability_name: Banking Customer Management
+  confidence: 0.7
+  evidence: POST /data-extractions/facematch  facematchVerification  Verifies the details of a selfie
+    with an identity verification provider
+  reason: Selfie/document-based identity verification against a verification provider supports customer
+    identity proofing; evidence does not distinguish onboarding account opening from periodic KYC/CDD,
+    so only the L1 is asserted.
+- tag: I D  Document  Data  Source  Verification
+  spec_file: mastercard-i-d-document-data-source-verification-api-openapi.yml
+  capability_id: BC-1300
+  capability_id_l1: BC-1300
+  capability_name: Banking Customer Management
+  confidence: 0.7
+  evidence: POST /source-verifications/{issuing_country}/passports  verifyPassport  Verifies the details
+    of a passport document with an identity verification provider
+  reason: Passport document verification against an authoritative source is customer identity verification;
+    sub-capability (onboarding vs KYC/CDD) is not determinable from the surface.
+- tag: Lifecycle
+  spec_file: mastercard-lifecycle-api-openapi.yml
+  capability_id: BC-1340.20
+  capability_id_l1: BC-1340
+  capability_name: Payment Processing Management
+  confidence: 0.7
+  evidence: POST /payment-requests/{payment_request_lifecycle_id}/status-retrievals 'Mastercard Payment
+    Request Status Retrieval Request'; POST .../payment-confirmation-advices 'Mastercard Confirm Payment';
+    schemas Refund, Payment, RefundAcknowledgement
+  reason: Operations manage the in-flight lifecycle of payment requests — status retrieval, confirmation
+    advices, refunds, step-up advices — i.e. payment processing rather than initial instruction capture.
+- tag: Mastercard
+  spec_file: mastercard-mastercard-api-openapi.yml
+  capability_id: BC-1400.30
+  capability_id_l1: BC-1400
+  capability_name: Fraud Detection & Investigation Management
+  confidence: 0.7
+  evidence: '"Add a New Fraud Record Using Minimal Input Parameters for Mastercard Built Transactions",
+    "Change an Existing Fraud Record" (schemas: MastercardFraud, FraudBase, SafeFraudProvider, CfcIndicator)'
+  reason: Despite the generic vendor-name tag, the operations create and amend fraud records against transactions
+    — fraud reporting/investigation data. Ambiguity between fraud detection/investigation and card transaction
+    fraud screening keeps confidence moderate.
+- tag: Payment
+  spec_file: mastercard-payment-api-openapi.yml
+  capability_id: BC-1340.10
+  capability_id_l1: BC-1340
+  capability_name: Payment Initiation Management
+  confidence: 0.7
+  evidence: POST /payment-requests/{id}/payment-confirmation-advices confirmPaymentAdvice — "Mastercard
+    Confirm Payment"; POST /payment-requests/{id}/refunds retrieveRefundAccount; POST .../step-up-advices
+    createStepUpAdvice
+  reason: Operations manage the lifecycle of a payment request — status retrieval, confirmation advice,
+    step-up authorisation and refunds — which is payment instruction capture, authorisation and confirmation.
+    Choice between initiation and processing sub-capabilities is somewhat ambiguous, hence 0.7.
+- tag: Plans
+  spec_file: mastercard-plans-api-openapi.yml
+  capability_id: BC-1320
+  capability_id_l1: BC-1320
+  capability_name: Credit & Lending Management
+  confidence: 0.7
+  evidence: POST /plans savePlan — "Notify Mastercard when a consumer chooses a previously presented offer,
+    which is henceforth called as an Installment Plan"; schemas InstallmentPlan, ScheduledRepayments
+  reason: Creation and retrieval of BNPL installment plans — booking a consumer credit facility and its
+    repayment schedule. Clearly Credit & Lending Management at L1, but the surface straddles origination
+    (plan creation from a chosen offer) and servicing (plan retrieval), so no L2 is asserted.
+- tag: Refunds
+  spec_file: mastercard-refunds-api-openapi.yml
+  capability_id: BC-1340
+  capability_id_l1: BC-1340
+  capability_name: Payments & Card Management
+  confidence: 0.7
+  evidence: POST /payment-requests/{id}/refunds  'Mastercard Refund Account Request.'; POST .../payment-confirmations  'Mastercard
+    Refund Payment Confirmation.'
+  reason: Operations initiate refund payments against original payment requests and track their status
+    — payment processing within the bill-payment network. Left at L1 because refunds straddle initiation
+    and processing sub-capabilities.
+- tag: Request
+  spec_file: mastercard-request-api-openapi.yml
+  capability_id: BC-1340.10
+  capability_id_l1: BC-1340
+  capability_name: Payment Initiation Management
+  confidence: 0.7
+  evidence: POST /payment-request-retrievals  'Mastercard Retrieve Payment Request Details.'; POST /payment-requests/{id}/payment-confirmation-advices  'Mastercard
+    Confirm Payment'; POST /payment-requests/{id}/step-up-advices  'Mastercard Step-up Advice'
+  reason: Surface covers payment request retrieval, confirmation advice, step-up (authorisation) advice
+    and status retrieval — capture, validation and authorisation of payment instructions in the bill-payment
+    network.
+- tag: Routing
+  spec_file: mastercard-routing-api-openapi.yml
+  capability_id: BC-1340.20
+  capability_id_l1: BC-1340
+  capability_name: Payment Processing Management
+  confidence: 0.7
+  evidence: POST /isRoutingValid — 'Mastercard Bill Payment Validator Service Returns the Processing Status
+    for a Potential Rpps Transaction'; schemas BillPayRequest, BillPayAccountValidation
+  reason: Single operation validates the routing/processing viability of a prospective bill payment transaction,
+    which is payment processing/routing validation rather than a generic technical routing concern.
+- tag: Sources
+  spec_file: mastercard-sources-api-openapi.yml
+  capability_id: BC-1300.10
+  capability_id_l1: BC-1300
+  capability_name: Customer Onboarding Management
+  confidence: 0.7
+  evidence: '"Verifies the details of a passport document with an identity verification provider"; POST
+    /source-verifications/{issuing_country}/driving-licenses'
+  reason: Operations verify government identity documents against an identity verification provider —
+    identity verification supporting account opening. Sub-capability could arguably be KYC/CDD, hence
+    0.7 rather than higher.
+- tag: States
+  spec_file: mastercard-states-api-openapi.yml
+  capability_id: BC-1400.30
+  capability_id_l1: BC-1400
+  capability_name: Fraud Detection & Investigation Management
+  confidence: 0.7
+  evidence: PUT /fraud-states fraudState "Delete an Existing Fraud Record or Confirm a Suspended Fraud
+    Record for Both Mastercard and Issuer Built Transactions"; schemas SafeFraudProvider, FraudDeleteAndConfirm
+  reason: Dominant operation maintains fraud records for card transactions (confirm/delete suspected fraud),
+    i.e. fraud detection and investigation. A second unrelated sub-merchant activation operation dilutes
+    the surface.
+- tag: Transaction
+  spec_file: mastercard-transaction-api-openapi.yml
+  capability_id: BC-740.20
+  capability_id_l1: BC-740
+  capability_name: Climate & Carbon Management
+  confidence: 0.7
+  evidence: POST /payment-cards/transaction-footprints/aggregates — 'Fetches carbon score for payment
+    cards and aggregates the same on a weekly and monthly basis'; schemas TransactionFootprint, ClimateProfile
+  reason: Despite the generic 'Transaction' tag, the operations compute and aggregate carbon footprints
+    from card transaction data — a carbon measurement service rather than payment processing.
