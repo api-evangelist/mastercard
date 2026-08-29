@@ -1,20 +1,17 @@
-swagger: '2.0'
+openapi: 3.2.0
 info:
-  title: Mastercard Bill Payment Validator Account Opening Widgets API
-  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
-  version: '1.0'
-  x-artifactId: billpay-api
+  title: Mastercard Benefit Eligibility Service Widgets API
+  version: 1.0.1
+  description: This API is for third-parties who want to enable eligibility checks based on input criteria including card number. The Eligibility API is a PAN (Primary Account Number) level verification service designed to promote targeted distribution of Mastercard card level benefits. This service enables merchants and third-party developers to use a PAN to check the eligibility and access rights to the benefits for those cardholders.
   contact:
-    name: Bill Pay Development Support
-    email: Bill_Pay_Development_Support@mastercard.com
-host: sandbox.api.mastercard.com
-basePath: /billpayAPI/v1
-schemes:
-- https
-consumes:
-- application/json
-produces:
-- application/json
+    name: API Support
+    email: apisupport@mastercard.com
+    url: https://developer.mastercard.com/support
+servers:
+- url: https://api.mastercard.com/loyalty/eligibility
+  description: Production server
+- url: https://sandbox.api.mastercard.com/loyalty/eligibility
+  description: Sandbox server
 tags:
 - name: Widgets
 paths:
@@ -31,52 +28,7 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 components:
-  responses:
-    UnauthorizedError:
-      description: Unauthorized - Access Not Granted
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedExample'
-    AccessToken:
-      description: Returns Token for cardholder
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/BenefitsAccessToken'
   schemas:
-    Errors:
-      description: Object that contains the list of errors
-      type: object
-      required:
-      - Error
-      properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList'
-    ErrorWrapper:
-      description: A top level object for errors
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    ErrorList:
-      description: The list of errors
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
-    BenefitsAccessToken:
-      type: object
-      properties:
-        accessToken:
-          description: The String (text) representation of Benefits Access Token
-          type: string
-          example: hereeyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMDIzMTIxMjA5MjMzNC1zdGFnZS1iZW5lZml0cy1hY2Nlc3MtbWFzdGVyY2FyZC1jb20iLCJ0ZXN0IjoidGVzdCIsImV4cCI6MTcwNTkxNjUzNiwiaWF0IjoxNzA1OTEyOTM2fQ.6NGFRgiy_7TayB366Eupz-xmro6Sb9kpwLY35IHoQDs
     Error:
       description: A single error
       type: object
@@ -109,6 +61,51 @@ components:
           maxLength: 10000
           description: More details about the error
           example: Invalid JSON payload
+    Errors:
+      description: Object that contains the list of errors
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorList:
+      description: The list of errors
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    BenefitsAccessToken:
+      type: object
+      properties:
+        accessToken:
+          description: The String (text) representation of Benefits Access Token
+          type: string
+          example: hereeyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMDIzMTIxMjA5MjMzNC1zdGFnZS1iZW5lZml0cy1hY2Nlc3MtbWFzdGVyY2FyZC1jb20iLCJ0ZXN0IjoidGVzdCIsImV4cCI6MTcwNTkxNjUzNiwiaWF0IjoxNzA1OTEyOTM2fQ.6NGFRgiy_7TayB366Eupz-xmro6Sb9kpwLY35IHoQDs
+    ErrorWrapper:
+      description: A top level object for errors
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+  responses:
+    AccessToken:
+      description: Returns Token for cardholder
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BenefitsAccessToken'
+    UnauthorizedError:
+      description: Unauthorized - Access Not Granted
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
   examples:
     UnauthorizedExample:
       value:

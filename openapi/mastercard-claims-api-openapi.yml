@@ -1,20 +1,21 @@
-swagger: '2.0'
+openapi: 3.2.0
 info:
-  title: Mastercard Bill Payment Validator Account Opening Claims API
-  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
-  version: '1.0'
-  x-artifactId: billpay-api
+  title: Mastercard ID for Trust Providers Claims API
+  description: Mastercard ID for Trust Providers is a service that helps businesses and organizations verify the identity of their customers. By utilizing advanced technology and security measures, Mastercard ID for Trust Providers enables businesses to securely authenticate the identities of individuals in real-time, reducing the risk of fraud and ensuring a seamless and secure customer experience. This service allows businesses to confidently verify the identities of their customers, streamlining operations and improving trust and security in online transactions. With Mastercard ID for Trust Providers, businesses can effectively combat fraud and identity theft, safeguarding sensitive information and enhancing the overall customer experience.
   contact:
-    name: Bill Pay Development Support
-    email: Bill_Pay_Development_Support@mastercard.com
-host: sandbox.api.mastercard.com
-basePath: /billpayAPI/v1
-schemes:
-- https
-consumes:
-- application/json
-produces:
-- application/json
+    name: API Support
+    email: apisupport@mastercard.com
+    url: https://developer.mastercard.com/support
+  version: 1.1.0
+servers:
+- url: https://api.mastercard.com/idservice
+  description: Production server (uses USA live data).
+- url: https://sandbox.api.mastercard.com/idservice
+  description: Sandbox server (testing USA environment).
+- url: https://api.mastercard.com.au/idservice
+  description: Production server  (uses AUS live data).
+- url: https://sandbox.api.mastercard.com.au/idservice
+  description: Sandbox server (testing AUS environment).
 tags:
 - name: Claims
 paths:
@@ -46,34 +47,101 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/TPRPClaimsRequest'
 components:
+  responses:
+    TPRPClaimsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClaimIdentities'
+          examples:
+            TPRPClaimsUnencryptedResponse:
+              $ref: '#/components/examples/ClaimIdentitiesExample'
+            TPRPClaimsEncryptedResponse:
+              $ref: '#/components/examples/EncryptedPayloadWithPDSExample'
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
+    UnauthorizedError:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
   schemas:
-    TpAuditMetadata:
+    ErrorResponse:
       required:
-      - sessionId
-      - transactionGroupId
+      - Errors
       type: object
-      description: Object containing metadata related to the request.
+      description: The error response model used by all the API endpoints.
       properties:
-        sessionId:
-          type: string
-          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
-          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-          minLength: 36
-          maxLength: 36
-          example: be3ad617-04ad-43e1-a438-79425b6511b6
-        transactionGroupId:
-          type: string
-          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
-          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-          minLength: 36
-          maxLength: 36
-          example: be3ad617-04ad-43e1-a438-79425b6511b6
-    FraudDetectionResponseMeta:
-      type: object
-      description: An object that represents the result of the fraud risk assessment.
-      properties:
-        score:
-          $ref: '#/components/schemas/FraudDetectionScore'
+        Errors:
+          required:
+          - Error
+          type: object
+          description: The error response model used by all the API endpoints.
+          properties:
+            Error:
+              type: array
+              description: A list of Error objects.
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The source of the problem. That is where the error occurred.
+                    example: mids
+                  ReasonCode:
+                    type: string
+                    description: A code defining the error, as defined in documentation.
+                    example: USER_PROFILE_ID_NOT_FOUND
+                  Description:
+                    type: string
+                    description: A description of this specific occurrence of the Reason code.
+                    example: The provided user profile ID does not exist.
+                  Recoverable:
+                    type: boolean
+                    description: Whether or not retrying this request could result in a successful response.
+                    example: false
+                  Details:
+                    type: string
+                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+                    example: User X was not found
+                  redirectUri:
+                    type: string
+                    description: TP will use this URI to redirect to RP.
+                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
     PDS:
       type: string
       description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
@@ -129,57 +197,27 @@ components:
             type: string
             description: The specific signals which caused the above score band.
             example: anonymous_ip
-    ErrorResponse:
+    TpAuditMetadata:
       required:
-      - Errors
+      - sessionId
+      - transactionGroupId
       type: object
-      description: The error response model used by all the API endpoints.
+      description: Object containing metadata related to the request.
       properties:
-        Errors:
-          required:
-          - Error
-          type: object
-          description: The error response model used by all the API endpoints.
-          properties:
-            Error:
-              type: array
-              description: A list of Error objects.
-              minItems: 1
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    description: The source of the problem. That is where the error occurred.
-                    example: mids
-                  ReasonCode:
-                    type: string
-                    description: A code defining the error, as defined in documentation.
-                    example: USER_PROFILE_ID_NOT_FOUND
-                  Description:
-                    type: string
-                    description: A description of this specific occurrence of the Reason code.
-                    example: The provided user profile ID does not exist.
-                  Recoverable:
-                    type: boolean
-                    description: Whether or not retrying this request could result in a successful response.
-                    example: false
-                  Details:
-                    type: string
-                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
-                    example: User X was not found
-                  redirectUri:
-                    type: string
-                    description: TP will use this URI to redirect to RP.
-                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
-                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
-    SdkVersion:
-      type: string
-      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
-      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
-      minLength: 5
-      maxLength: 255
-      example: 2.3.0
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
     UserConsent:
       enum:
       - ACCEPT
@@ -224,65 +262,39 @@ components:
           $ref: '#/components/schemas/PDS'
         fraudDetectionMeta:
           $ref: '#/components/schemas/FraudDetectionResponseMeta'
-  responses:
-    UnauthorizedError:
-      description: Unauthorized request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedExample'
-    ForbiddenError:
-      description: Consent not given.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            ForbiddenExample:
-              $ref: '#/components/examples/ForbiddenExample'
-            ForbiddenExampleUnauthorizedScopedFields:
-              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
-    BadRequestError:
-      description: Something was wrong with the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            UserProfileDeletedErrorExample:
-              $ref: '#/components/examples/UserProfileDeletedErrorExample'
-    TPRPClaimsResponse:
-      description: Success.
-      headers:
-        X-Transaction-ID:
-          schema:
-            type: string
-          description: A random 128-bit UUID represents the transaction.
-        X-User-Identity:
-          schema:
-            type: string
-          description: JWT token for session validation in subsequent API calls.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ClaimIdentities'
-          examples:
-            TPRPClaimsUnencryptedResponse:
-              $ref: '#/components/examples/ClaimIdentitiesExample'
-            TPRPClaimsEncryptedResponse:
-              $ref: '#/components/examples/EncryptedPayloadWithPDSExample'
+    FraudDetectionResponseMeta:
+      type: object
+      description: An object that represents the result of the fraud risk assessment.
+      properties:
+        score:
+          $ref: '#/components/schemas/FraudDetectionScore'
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
+  parameters:
+    XUserIdentityParameter:
+      in: header
+      name: X-User-Identity
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      description: 'JWT token for session validation. Returned as response header in previous API calls with key X-User-Identity.
+
+        '
+      schema:
+        type: string
+    XEncryptedPayload:
+      in: header
+      name: X-Encrypted-Payload
+      type: boolean
+      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
+
+        '
+      example: true
+      schema: null
   examples:
-    UnauthorizedExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: UNAUTHORIZED_REQUEST
-            Description: Unauthorized request.
-            Recoverable: false
     ClaimIdentitiesExample:
       value:
         claims:
@@ -297,13 +309,13 @@ components:
             band: GREEN
             signals:
             - anonymous_ip
-    ForbiddenExampleUnauthorizedScopedFields:
+    ForbiddenExample:
       value:
         Errors:
           Error:
           - Source: mids
-            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
-            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
             Recoverable: false
     UserProfileDeletedErrorExample:
       value:
@@ -318,13 +330,21 @@ components:
       value:
         encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyf
         pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-    ForbiddenExample:
+    ForbiddenExampleUnauthorizedScopedFields:
       value:
         Errors:
           Error:
           - Source: mids
-            ReasonCode: CONSENT_NOT_GIVEN
-            Description: User Consent Not Given.
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
             Recoverable: false
   requestBodies:
     TPRPClaimsRequest:
@@ -333,22 +353,3 @@ components:
           schema:
             $ref: '#/components/schemas/ClaimScopes'
       required: true
-  parameters:
-    XEncryptedPayload:
-      in: header
-      name: X-Encrypted-Payload
-      type: boolean
-      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
-
-        '
-      example: true
-      schema: null
-    XUserIdentityParameter:
-      in: header
-      name: X-User-Identity
-      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-      description: 'JWT token for session validation. Returned as response header in previous API calls with key X-User-Identity.
-
-        '
-      schema:
-        type: string

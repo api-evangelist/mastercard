@@ -1,20 +1,25 @@
-swagger: '2.0'
+openapi: 3.2.0
 info:
-  title: Mastercard Bill Payment Validator Account Opening Batch API
-  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
-  version: '1.0'
-  x-artifactId: billpay-api
+  title: Mastercard Batch API
+  version: 1.0.0
   contact:
-    name: Bill Pay Development Support
-    email: Bill_Pay_Development_Support@mastercard.com
-host: sandbox.api.mastercard.com
-basePath: /billpayAPI/v1
-schemes:
-- https
-consumes:
-- application/json
-produces:
-- application/json
+    email: apisupport@mastercard.com
+    url: https://developer.mastercard.com/support
+    name: API Support
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: https://developer.mastercard.com/terms-of-use
+  description: 'Operations tagged Batch across 2 of this provider''s published API definitions: mastercard-checkout-solutions-openapi.yml, mastercard-unified-checkout-solutions-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://sandbox.api.mastercard.com/src/onboarding
+  description: Sandbox server
+- url: https://api.mastercard.com/src/onboarding
+  description: Production server
+- url: https://sandbox.api.mastercard.com/srci/onboarding
+  description: Sandbox server
+- url: https://api.mastercard.com/srci/onboarding
+  description: Production server
 tags:
 - name: Batch
 paths:
@@ -137,6 +142,11 @@ paths:
       x-microcks-operation:
         delay: 0
         dispatcher: FALLBACK
+    servers:
+    - url: https://sandbox.api.mastercard.com/src/onboarding
+      description: Sandbox server
+    - url: https://api.mastercard.com/src/onboarding
+      description: Production server
   /srci/{src-client-id}/dpas/batch/status/{batch-id}:
     get:
       summary: Mastercard Get Status of the Dpa Add/update Async (batch) Job by Batch Id.
@@ -186,6 +196,11 @@ paths:
       x-microcks-operation:
         delay: 0
         dispatcher: FALLBACK
+    servers:
+    - url: https://sandbox.api.mastercard.com/src/onboarding
+      description: Sandbox server
+    - url: https://api.mastercard.com/src/onboarding
+      description: Production server
   /org/{organization_id}/dpas/batch:
     post:
       summary: Mastercard Store Dpa Bulk Load Data
@@ -243,11 +258,130 @@ paths:
       x-microcks-operation:
         delay: 0
         dispatcher: FALLBACK
+    servers:
+    - url: https://sandbox.api.mastercard.com/srci/onboarding
+      description: Sandbox server
+    - url: https://api.mastercard.com/srci/onboarding
+      description: Production server
 components:
   schemas:
-    Error_2:
+    Address:
       type: object
-      description: 'An error object is associated with individual DPA failures in a given batch.
+      description: The Digital Payment Application (DPA) business address.
+      properties:
+        name:
+          maxLength: 100
+          description: Contact name for the address.
+          example: Ecom Online Store
+          type: string
+        line1:
+          maxLength: 75
+          description: First line of the address.
+          example: 100 Avenue Lane Street
+          type: string
+        line2:
+          maxLength: 75
+          description: Second line of the address.
+          example: Address line 2
+          type: string
+        line3:
+          maxLength: 75
+          description: Third line of the address.
+          example: Address line 3
+          type: string
+        city:
+          maxLength: 50
+          description: Address of city
+          example: Metropolis
+          type: string
+        state:
+          maxLength: 30
+          description: Address of state
+          example: MH
+          type: string
+        countryCode:
+          maxLength: 2
+          description: Address country code. ISO 3166 alpha 2 country code.
+          example: US
+          type: string
+        zip:
+          maxLength: 20
+          description: Address zip/postal code.
+          type: string
+          example: '41321'
+    DpaAddUpdateResponse:
+      type: object
+      description: The DpaAddUpdateResponse contains the Batch ID for the submitted Digital Payment Application (DPA) batch. The Batch ID can be used to retrieve the status of the batch.
+      properties:
+        batchId:
+          description: A unique identifier associated with the submitted Digital Payment Application (DPA) batch. The Batch ID can be used to retrieve the status of the batch by calling GET DPA status endpoint.
+          example: 21d03dde-42e4-4ddb-b9f0-96b7cb8bf820
+          type: string
+    DpaAddUpdateRequest:
+      type: object
+      description: "The DpaAddUpdateRequest is used to add, update, or delete DPAs from the Mastercard system. Additionally, the DpaAddUpdateRequest can be used to generate serviceIds in Commerce Platform use cases.\n\nA Digital Payment Application (DPA) is a website, web or mobile application operated by a Merchant, marketplace, or other service provider where a consumer can purchase goods or services.\n\nA ServiceId is a unique identifier assigned by Mastercard for which tokens are created uniquely for the entity onboarded. A serviceId can have multiple associated DPAs.\n\nThe DpaAddUpdateRequest request must contain the following values:\n\n * items\n * action\n * programType\n\n The contents of the DPA items will vary based on the operation requested.\n"
+      required:
+      - items
+      properties:
+        requestId:
+          description: This field allows the Integrator to assign an internal reference to a batch request so that it can be used for internal tracking purposes.
+          example: '48192'
+          type: string
+        items:
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/AddUpdateItems'
+          type: array
+          description: 'Items
+
+
+            Object for Integrator to provide a list of Digital Payment Applications (DPA) to be enrolled in a given program. A minimum of 1 item must be provided in a request.
+
+            '
+          example: []
+    DpaResults:
+      type: object
+      description: Object for individual Digital Payment Application (DPA) item status data.
+      properties:
+        srcDpaId:
+          type: string
+          description: 'The registered identifier for the Digital Payment Application (DPA) accessing the service.
+
+
+            Conditional: Required if you are a Merchant directly integrating with Mastercard Checkout Solutions (MCS) APIs, a Payment Service Provider (PSP) integrating On-Behalf-Of (OBO) a Merchant, a Payment Facilitator, or if you are enrolling in the Secure Card on File (SCOF) QR program.
+
+            '
+          example: 58aed7fe-07d9-11ea-8d71-362b9e155667
+        status:
+          type: string
+          description: 'Status of the individual Digital Payment Application (DPA) item. Potential statuses include:
+
+
+            * SUCCESSFUL - The DPA is eligible to process transactions.
+
+
+            * FAILED - The DPA is NOT eligible to process transactions. Please see the error object for more details."
+
+            '
+          example: SUCCESSFUL
+          enum:
+          - SUCCESSFUL
+          - FAILED
+        dpaName:
+          type: string
+          description: Legal name of Merchant (which may differ from dpaPresentationName).
+          example: Ecom Holdings Online Inc
+        error:
+          $ref: '#/components/schemas/Error'
+      example:
+        srcDpaId: 58aed7fe-07d9-11ea-8d71-362b9e155667
+        status: SUCCESSFUL
+        dpaName: TEST_DPA
+        error: null
+    Error:
+      type: object
+      description: 'An error object is associated with individual DPA failures in a given batch (assuming a COMPLETED_WITH_ERRORS response).
+
 
         Please note: In the event of a SUCCESSFUL response, this error object may be sent as NULL.
 
@@ -258,125 +392,10 @@ components:
       - message
       properties:
         status:
-          type: integer
           format: int32
-          description: HTTP status code associated with the Digital Payment Application (DPA) item error
-          example: 500
-        reason:
-          type: string
-          example: Server timed out
-          description: Reason for receiving an error for the Digital Payment Application (DPA) item.
-        message:
-          type: string
-          description: Additional details on the Digital Payment Application (DPA) item error.
-          example: Internal Server
-        errordetail:
-          type: array
-          description: List of errors associated with a failed Digital Payment Application (DPA) item action.
-          items:
-            $ref: '#/components/schemas/ErrorDetail_2'
-          example: []
-    DpaAddUpdateResponse:
-      type: object
-      description: The DpaAddUpdateResponse contains the Batch ID for the submitted Digital Payment Application (DPA) batch. The Batch ID can be used to retrieve the status of the batch.
-      properties:
-        batchId:
-          description: A unique identifier associated with the submitted Digital Payment Application (DPA) batch. The Batch ID can be used to retrieve the status of the batch by calling GET DPA status endpoint.
-          example: 21d03dde-42e4-4ddb-b9f0-96b7cb8bf820
-          type: string
-    DpaResponse:
-      type: object
-      description: Container object for DpaResults
-      properties:
-        dpaResults:
-          type: array
-          items:
-            $ref: '#/components/schemas/DpaResults_2'
-          example: []
-    DpaData_2:
-      type: object
-      required:
-      - dpaName
-      - dpaUri
-      properties:
-        dpaName:
-          type: string
-          maxLength: 60
-          minLength: 0
-          description: Legal name of Merchant (which may differ from dpaPresentationName).
-          example: Ecom Holdings Online Inc
-        dpaPresentationName:
-          type: string
-          maxLength: 60
-          minLength: 1
-          description: The name of the Merchant that the Cardholder will see when checking out with the Digital Payment Application (DPA).
-          example: FieldTestDpa12
-        dpaUri:
-          type: string
-          maxLength: 100
-          minLength: 1
-          description: Digital Payment Application (DPA) identifier. This field may contain the DPA website URI, a mobile application identifier, or another unique identifier (UUID, URL, APK package name, etc.).
-          example: https://example.com/ecom-online-ltd/basket.html
-        originDomains:
-          type: array
-          description: Website or URL where the payment experience is placed on the checkout page.
-          example:
-          - http://companyuri1.com
-          - http://companyuri2.com
-          items:
-            type: string
-            maxLength: 1024
-          minItems: 0
-          maxItems: 10
-          uniqueItems: true
-        dpaAddress:
-          $ref: '#/components/schemas/DpaAddress'
-    merchantCountryCode:
-      type: string
-      description: Country code for the registering merchant in ISO 3166 format. It is also required for the phone number field.
-      maxLength: 2
-      example: US
-    DpaData:
-      type: object
-      description: 'DpaData
-
-        Object for Integrator to populate Digital Payment Application (DPA) information, including the Merchant name, address, and other relevant data.
-
-        '
-      properties:
-        dpaPresentationName:
-          type: string
-          maxLength: 255
-          description: 'The name of the Merchant that the Cardholder will see when checking out with the Digital Payment Application (DPA).
-
-
-            Conditional: Required for Guest Checkout Tokenization (GCT) and SQR programs.
-
-            '
-          example: FieldTestDpa01_update12
-        dpaAddress:
-          $ref: '#/components/schemas/Address'
-        dpaName:
-          type: string
-          maxLength: 255
-          description: Legal name of Merchant (which may differ from dpaPresentationName).
-          example: Ecom Holdings Online Inc
-        dpaLogoUri:
-          type: string
-          maxLength: 1024
-          description: URI for the logo displayed to Cardholders during C2P checkout.
-          example: https://example.com/ecom-online-ltd/images/ecom-logo.png
-        dpaUri:
-          type: string
-          maxLength: 1024
-          description: Digital Payment Application (DPA) identifier. This field may contain the DPA website URI, a mobile application identifier, or another unique identifier (UUID, URL, APK package name, etc.).
-          example: https://example.com/ecom-online-ltd/basket.html
-    ErrorDetail:
-      type: object
-      description: Error associated with a failed Digital Payment Application (DPA) item action.
-      required:
-      - reason
-      properties:
+          description: HTTP status code associated with the Digital Payment Application (DPA) item error.
+          example: 400, 401, 403, 500
+          type: integer
         reason:
           description: Reason for receiving an error for the Digital Payment Application (DPA) item.
           example: INVALID_VALUE
@@ -389,18 +408,16 @@ components:
           - INVALID_STATE
           - AUTHENTICATION_FAILED
           - INTERNAL_SERVER_ERROR
-        sourceType:
-          description: Indicates the source type of the Digital Payment Application (DPA) item error.
-          example: Request, Response
-          type: string
         message:
           description: Additional details on the Digital Payment Application (DPA) item error.
-          example: Invalid data
+          example: Bad request, see error object for details
           type: string
-        source:
-          description: Indicates the field name for the cause of the Digital Payment Application (DPA) item error.
-          example: dpas
-          type: string
+        errordetail:
+          description: List of errors associated with a failed Digital Payment Application (DPA) item action.
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+          type: array
+          example: []
     ThreeDSDefaultData:
       type: object
       description: Enables a Merchant to supply their existing 3-D Secure (3DS) integration details at the time of Digital Payment Application (DPA) registration.
@@ -439,10 +456,89 @@ components:
 
             '
           example: '4442'
-    AcquirerData_2:
+    DpaBatchStatus:
       type: object
-      description: 'AcquirerData
+      description: The DpaBatchStatus response contains information related to the status of a submitted Digital Payment Application (DPA) batch.
+      properties:
+        requestId:
+          type: string
+          description: This field allows the Integrator to assign an internal reference to a batch request so that it can be used for internal tracking purposes.
+          example: '48192'
+        batchId:
+          type: string
+          description: A unique identifier associated with the submitted Digital Payment Application (DPA) batch. The Batch ID can be used to retrieve the status of the batch by calling GET DPA status endpoint.
+          example: f1f225ed-99c6-4a5e-823d-440c09c7e0a6
+        batchStatus:
+          example: COMPLETED_SUCCESSFULLY
+          description: 'Describes the outcome of the submitted Digital Payment Application (DPA) batch. Possible outcomes include:
 
+
+            * COMPLETED_SUCCESSFULLY - Batch was completed successfully and all DPAs included in the batch are ready to transact.
+
+
+            * COMPLETED_WITH_ERRORS - Batch was completed successfully, but some DPAs included in the batch aren''t ready to transact.
+
+
+            * FAILED -  Batch failed to load.
+
+
+            * IN_PROGRESS - Batch processing in progress.
+
+
+            For a full breakdown of all DPA outcomes in a batch, refer to the items.
+
+            '
+          enum:
+          - COMPLETED_SUCCESSFULLY
+          - COMPLETED_WITH_ERRORS
+          - FAILED
+          - IN_PROGRESS
+          type: string
+        batchStartTime:
+          type: string
+          description: Start time of batch request
+          example: '2023-02-08 07:10:28.0'
+        batchEndTime:
+          type: string
+          description: End time of batch request
+          example: '2023-02-08 07:10:30.0'
+        errorMessage:
+          type: string
+          description: Provides additional information when batchStatus yields a FAILED status.
+          example: Merchant not registered under requested program type
+        items:
+          items:
+            $ref: '#/components/schemas/BatchStatusItems'
+          type: array
+          description: 'An array of status objects that describes the outcome of each Digital Payment Application (DPA) item in a batch request.
+
+
+            Note: DPA item order may differ from original submission."
+
+            '
+          example: []
+      example:
+        requestId: '48192'
+        batchId: f1f225ed-99c6-4a5e-823d-440c09c7e0a6
+        batchStatus: COMPLETED_SUCCESSFULLY
+        batchStartTime: '2023-02-08 07:10:28.0'
+        batchEndTime: '2023-02-08 07:10:30.0'
+        errorMessage: null
+        items:
+        - action: ADD
+          serviceId: SRC
+          trid: '50132184090'
+          programName: Test_Dpa
+          status: SUCCESSFUL
+          error: null
+          dpaResults:
+          - srcDpaId: 58aed7fe-07d9-11ea-8d71-362b9e155667
+            status: SUCCESSFUL
+            dpaName: TEST_DPA
+            error: null
+    AcquirerData:
+      type: object
+      description: '
 
         Object for details about the acquiring institution (for example, merchant bank) or its agent. This includes acquirerIca, acquirerMerchantId and acquirerBin. This object may be used to improve transaction acceptance rates.
 
@@ -468,146 +564,6 @@ components:
           type: string
           description: A Merchant Identifier (MID) is a unique code assigned to the Merchant by the Acquirer once the Merchant has successfully opened an account. A MID identifies the Merchant to the Acquirer.
           example: MC1234567891234
-    Dpas:
-      type: object
-      required:
-      - srcDpaId
-      properties:
-        srcDpaId:
-          type: string
-          description: '
-
-            The registered identifier for the Digital Payment Application (DPA) accessing the service. At least one DPA needs to be registered for each Merchant/Merchant OBO/Sub-Merchant (PF) needed, with additional DPAs being added as required.
-
-
-            Conditional: Required if you are a Merchant directly integrating with Mastercard Checkout Solutions (MCS) APIs, a Payment Service Provider (PSP) integrating On-Behalf-Of (OBO) a Merchant, a Payment Facilitator, or if you are enrolling in the Secure Card on File (SCOF) QR program.
-
-            '
-          maxLength: 255
-          example: src_dpa_56068
-        hasAcquirerRelationship:
-          type: string
-          description: Indicates if the Digital Payment Application (DPA) has an Acquirer relationship. This field may be used to improve acceptance rates.
-          example: Y
-          enum:
-          - Y
-          - N
-        subMerchantId:
-          type: string
-          description: Identifier assigned to a Sub-Merchant by the Payment Facilitator (PF). This field may be used to improve transaction security and acceptance rates.
-          example: merchant123125
-        paymentFacilitatorId:
-          type: string
-          description: Payment Facilitator (PF) identifier that may be used to improve transaction security and acceptance rates.
-          example: pfac123
-        dpaData:
-          $ref: '#/components/schemas/DpaData'
-        debitTokenRequested:
-          type: boolean
-          description: 'Conditional: Must be set to true when the Digital Payment Application (DPA) processes in the United States (US) under the Click to Pay (C2P) program.
-
-            '
-          example: 'false'
-        merchantCategoryCodes:
-          type: array
-          maxItems: 200
-          description: 'Object for the array of Merchant Category Codes (MCC) that the Merchant processes transactions under, and is used for risk-scoring transactions by the issuer. All MCC codes that will be processed by a DPA should be provided here (typically, this will be a single item).
-
-
-            An MCC is a four-character code assigned by Mastercard to the Merchant that indicates the type of business, service, or product provided by the Merchant.
-
-
-            Note: MCC''s may be assigned differently across payment networks. To avoid errors, be sure to use your assigned Mastercard MCC. This code is required for 3-D Secure (3DS) and risk profiling. If the Merchant has more than one MCC, the code most relevant to their business should be used.
-
-            '
-          example: '[0020,4442]'
-          items:
-            type: string
-            maxLength: 4
-        threeDSDefaultdata:
-          $ref: '#/components/schemas/ThreeDSDefaultData'
-        acquirerData:
-          items:
-            $ref: '#/components/schemas/AcquirerData'
-          type: array
-          example: []
-    merchantCategoryCodes:
-      type: array
-      description: 'Object for the array of Merchant Category Codes (MCC) that the Merchant processes transactions under, and is used for risk-scoring transactions by the issuer. All MCC codes that will be processed by a DPA should be provided here (typically, this will be a single item).
-
-
-        An MCC is a four-character code assigned by Mastercard to the Merchant that indicates the type of business, service, or product provided by the Merchant.
-
-
-        Note: MCC''s may be assigned differently across payment networks. To avoid errors, be sure to use your assigned Mastercard MCC. This code is required for 3-D Secure (3DS) and risk profiling. If the Merchant has more than one MCC, the code most relevant to their business should be used.
-
-        '
-      maxItems: 200
-      example:
-      - '0020'
-      - '4444'
-      - '1111'
-      - '4442'
-      - '5732'
-      - '5733'
-      items:
-        type: string
-        maxLength: 4
-    DpaResults_2:
-      type: object
-      description: Status of uploaded dpas
-      properties:
-        srciDpaId:
-          type: string
-          description: generated id for srci dpa
-          example: sb1a235a-f92f-11ec-b939-0242ac120023
-        status:
-          type: string
-          description: 'Status of the individual Digital Payment Application (DPA) item. Potential statuses include:
-
-
-            * `SUCCESSFUL` - The DPA is eligible to process transactions.
-
-            * `FAILED` - The DPA is NOT eligible to process transactions. Please see the error object for more details.
-
-            '
-          example: SUCCESSFUL
-          enum:
-          - SUCCESSFUL
-          - FAILED
-        dpaName:
-          type: string
-          description: Registered Legal Name of the Merchant
-          example: dpa name
-        error:
-          $ref: '#/components/schemas/Error_2'
-      example:
-        srciDpaId: 9ffba749-193c-4f69-af1e-fb95f0af57c4
-        status: SUCCESSFUL
-        dpaName: myShop
-        error: null
-    DpaAddUpdateRequest:
-      type: object
-      description: "The DpaAddUpdateRequest is used to add, update, or delete DPAs from the Mastercard system. Additionally, the DpaAddUpdateRequest can be used to generate serviceIds in Commerce Platform use cases.\n\nA Digital Payment Application (DPA) is a website, web or mobile application operated by a Merchant, marketplace, or other service provider where a consumer can purchase goods or services.\n\nA ServiceId is a unique identifier assigned by Mastercard for which tokens are created uniquely for the entity onboarded. A serviceId can have multiple associated DPAs.\n\nThe DpaAddUpdateRequest request must contain the following values:\n\n * items\n * action\n * programType\n\n The contents of the DPA items will vary based on the operation requested.\n"
-      required:
-      - items
-      properties:
-        requestId:
-          description: This field allows the Integrator to assign an internal reference to a batch request so that it can be used for internal tracking purposes.
-          example: '48192'
-          type: string
-        items:
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/AddUpdateItems'
-          type: array
-          description: 'Items
-
-
-            Object for Integrator to provide a list of Digital Payment Applications (DPA) to be enrolled in a given program. A minimum of 1 item must be provided in a request.
-
-            '
-          example: []
     AddUpdateItems:
       type: object
       required:
@@ -726,273 +682,6 @@ components:
 
             '
           example: []
-    DpaBatchStatus:
-      type: object
-      description: The DpaBatchStatus response contains information related to the status of a submitted Digital Payment Application (DPA) batch.
-      properties:
-        requestId:
-          type: string
-          description: This field allows the Integrator to assign an internal reference to a batch request so that it can be used for internal tracking purposes.
-          example: '48192'
-        batchId:
-          type: string
-          description: A unique identifier associated with the submitted Digital Payment Application (DPA) batch. The Batch ID can be used to retrieve the status of the batch by calling GET DPA status endpoint.
-          example: f1f225ed-99c6-4a5e-823d-440c09c7e0a6
-        batchStatus:
-          example: COMPLETED_SUCCESSFULLY
-          description: 'Describes the outcome of the submitted Digital Payment Application (DPA) batch. Possible outcomes include:
-
-
-            * COMPLETED_SUCCESSFULLY - Batch was completed successfully and all DPAs included in the batch are ready to transact.
-
-
-            * COMPLETED_WITH_ERRORS - Batch was completed successfully, but some DPAs included in the batch aren''t ready to transact.
-
-
-            * FAILED -  Batch failed to load.
-
-
-            * IN_PROGRESS - Batch processing in progress.
-
-
-            For a full breakdown of all DPA outcomes in a batch, refer to the items.
-
-            '
-          enum:
-          - COMPLETED_SUCCESSFULLY
-          - COMPLETED_WITH_ERRORS
-          - FAILED
-          - IN_PROGRESS
-          type: string
-        batchStartTime:
-          type: string
-          description: Start time of batch request
-          example: '2023-02-08 07:10:28.0'
-        batchEndTime:
-          type: string
-          description: End time of batch request
-          example: '2023-02-08 07:10:30.0'
-        errorMessage:
-          type: string
-          description: Provides additional information when batchStatus yields a FAILED status.
-          example: Merchant not registered under requested program type
-        items:
-          items:
-            $ref: '#/components/schemas/BatchStatusItems'
-          type: array
-          description: 'An array of status objects that describes the outcome of each Digital Payment Application (DPA) item in a batch request.
-
-
-            Note: DPA item order may differ from original submission."
-
-            '
-          example: []
-      example:
-        requestId: '48192'
-        batchId: f1f225ed-99c6-4a5e-823d-440c09c7e0a6
-        batchStatus: COMPLETED_SUCCESSFULLY
-        batchStartTime: '2023-02-08 07:10:28.0'
-        batchEndTime: '2023-02-08 07:10:30.0'
-        errorMessage: null
-        items:
-        - action: ADD
-          serviceId: SRC
-          trid: '50132184090'
-          programName: Test_Dpa
-          status: SUCCESSFUL
-          error: null
-          dpaResults:
-          - srcDpaId: 58aed7fe-07d9-11ea-8d71-362b9e155667
-            status: SUCCESSFUL
-            dpaName: TEST_DPA
-            error: null
-    AcquirerData:
-      type: object
-      description: '
-
-        Object for details about the acquiring institution (for example, merchant bank) or its agent. This includes acquirerIca, acquirerMerchantId and acquirerBin. This object may be used to improve transaction acceptance rates.
-
-        '
-      required:
-      - acquirerIca
-      - acquirerMerchantId
-      properties:
-        acquirerIca:
-          type: string
-          description: An Acquirer Interbank Card Association (ICA) value is an identifier assigned to the Acquirer by Mastercard.
-          example: '12345'
-        acquirerBin:
-          type: string
-          description: 'Each Acquirer Interbank Card Association (ICA) identifier may be assigned one or more BINs by Mastercard.
-
-
-            Note: It is important to use the correct Acquirer ICA associated with the Acquirer BIN.
-
-            '
-          example: '112233'
-        acquirerMerchantId:
-          type: string
-          description: A Merchant Identifier (MID) is a unique code assigned to the Merchant by the Acquirer once the Merchant has successfully opened an account. A MID identifies the Merchant to the Acquirer.
-          example: MC1234567891234
-    Dpa:
-      type: object
-      description: An array of objects to contain DPA registration details.
-      required:
-      - supportedCardBrands
-      - dpaData
-      - merchantCountryCode
-      properties:
-        supportedCardBrands:
-          type: array
-          description: 'Card networks that are supported for DPA registration. The following networks are supported: MASTERCARD, VISA, DISCOVER, AMEX.
-
-            '
-          maxItems: 4
-          minItems: 1
-          example:
-          - MASTERCARD
-          - VISA
-          - DISCOVER
-          - AMEX
-          items:
-            type: string
-            maxLength: 20
-        dpaData:
-          $ref: '#/components/schemas/DpaData_2'
-        debitTokenRequested:
-          type: boolean
-          description: 'A flag for the Integrator to indicate that they would not like to have their Cardholder''s debit cards tokenized.
-
-
-            Conditional: Must be set to true when the Digital Payment Application (DPA) processes in the United States (US)"''
-
-            '
-          example: false
-        merchantCountryCode:
-          $ref: '#/components/schemas/merchantCountryCode'
-        merchantCategoryCodes:
-          $ref: '#/components/schemas/merchantCategoryCodes'
-        supportedCheckoutTypes:
-          type: array
-          description: List of checkout types to be supported by the DPA. These include CLICK_TO_PAY, GUEST_CHECKOUT_TOKENIZATION and CARD_ON_FILE_TOKENIZATION.
-          example:
-          - CLICK_TO_PAY
-          - GUEST_CHECKOUT_TOKENIZATION
-          - CARD_ON_FILE_TOKENIZATION
-          items:
-            type: string
-        threeDSDefaultdata:
-          $ref: '#/components/schemas/ThreeDSDefaultData'
-        acquirerData:
-          type: array
-          items:
-            $ref: '#/components/schemas/AcquirerData_2'
-          example: []
-    Address:
-      type: object
-      description: The Digital Payment Application (DPA) business address.
-      properties:
-        name:
-          maxLength: 100
-          description: Contact name for the address.
-          example: Ecom Online Store
-          type: string
-        line1:
-          maxLength: 75
-          description: First line of the address.
-          example: 100 Avenue Lane Street
-          type: string
-        line2:
-          maxLength: 75
-          description: Second line of the address.
-          example: Address line 2
-          type: string
-        line3:
-          maxLength: 75
-          description: Third line of the address.
-          example: Address line 3
-          type: string
-        city:
-          maxLength: 50
-          description: Address of city
-          example: Metropolis
-          type: string
-        state:
-          maxLength: 30
-          description: Address of state
-          example: MH
-          type: string
-        countryCode:
-          maxLength: 2
-          description: Address country code. ISO 3166 alpha 2 country code.
-          example: US
-          type: string
-        zip:
-          maxLength: 20
-          description: Address zip/postal code.
-          type: string
-          example: '41321'
-    DpaResults:
-      type: object
-      description: Object for individual Digital Payment Application (DPA) item status data.
-      properties:
-        srcDpaId:
-          type: string
-          description: 'The registered identifier for the Digital Payment Application (DPA) accessing the service.
-
-
-            Conditional: Required if you are a Merchant directly integrating with Mastercard Checkout Solutions (MCS) APIs, a Payment Service Provider (PSP) integrating On-Behalf-Of (OBO) a Merchant, a Payment Facilitator, or if you are enrolling in the Secure Card on File (SCOF) QR program.
-
-            '
-          example: 58aed7fe-07d9-11ea-8d71-362b9e155667
-        status:
-          type: string
-          description: 'Status of the individual Digital Payment Application (DPA) item. Potential statuses include:
-
-
-            * SUCCESSFUL - The DPA is eligible to process transactions.
-
-
-            * FAILED - The DPA is NOT eligible to process transactions. Please see the error object for more details."
-
-            '
-          example: SUCCESSFUL
-          enum:
-          - SUCCESSFUL
-          - FAILED
-        dpaName:
-          type: string
-          description: Legal name of Merchant (which may differ from dpaPresentationName).
-          example: Ecom Holdings Online Inc
-        error:
-          $ref: '#/components/schemas/Error'
-      example:
-        srcDpaId: 58aed7fe-07d9-11ea-8d71-362b9e155667
-        status: SUCCESSFUL
-        dpaName: TEST_DPA
-        error: null
-    ErrorDetail_2:
-      type: object
-      description: Error associated with a failed Digital Payment Application (DPA) item action.
-      required:
-      - reason
-      properties:
-        reason:
-          type: string
-          description: Reason for receiving an error for the Digital Payment Application (DPA) item.
-          example: ERR_CODE
-        sourceType:
-          type: string
-          description: Indicates the source type of the Digital Payment Application (DPA) item error.
-          example: Request
-        message:
-          type: string
-          description: Additional details on the Digital Payment Application (DPA) item error.
-          example: Invalid data
-        source:
-          type: string
-          description: Indicates the field name for the cause of the Digital Payment Application (DPA) item error.
-          example: field name
     BatchStatusItems:
       type: object
       properties:
@@ -1059,22 +748,229 @@ components:
             $ref: '#/components/schemas/DpaResults'
           type: array
           example: []
-    DpaRequest:
+    DpaData:
       type: object
-      required:
-      - dpas
+      description: 'DpaData
+
+        Object for Integrator to populate Digital Payment Application (DPA) information, including the Merchant name, address, and other relevant data.
+
+        '
       properties:
-        dpas:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/Dpa'
-          description: 'Dpas
+        dpaPresentationName:
+          type: string
+          maxLength: 255
+          description: 'The name of the Merchant that the Cardholder will see when checking out with the Digital Payment Application (DPA).
 
 
-            Object for Integrator to provide a list of Digital Processing Application (DPA) objects. Each DPA object is used to create a corresponding DPA. A minimum of 1 DPA object must be provided in the request.
+            Conditional: Required for Guest Checkout Tokenization (GCT) and SQR programs.
 
             '
+          example: FieldTestDpa01_update12
+        dpaAddress:
+          $ref: '#/components/schemas/Address'
+        dpaName:
+          type: string
+          maxLength: 255
+          description: Legal name of Merchant (which may differ from dpaPresentationName).
+          example: Ecom Holdings Online Inc
+        dpaLogoUri:
+          type: string
+          maxLength: 1024
+          description: URI for the logo displayed to Cardholders during C2P checkout.
+          example: https://example.com/ecom-online-ltd/images/ecom-logo.png
+        dpaUri:
+          type: string
+          maxLength: 1024
+          description: Digital Payment Application (DPA) identifier. This field may contain the DPA website URI, a mobile application identifier, or another unique identifier (UUID, URL, APK package name, etc.).
+          example: https://example.com/ecom-online-ltd/basket.html
+    ErrorDetail:
+      type: object
+      description: Error associated with a failed Digital Payment Application (DPA) item action.
+      required:
+      - reason
+      properties:
+        reason:
+          description: Reason for receiving an error for the Digital Payment Application (DPA) item.
+          example: INVALID_VALUE
+          type: string
+          enum:
+          - INVALID_ARGUMENT
+          - INVALID_VALUE
+          - NOT_FOUND
+          - DECLINED
+          - INVALID_STATE
+          - AUTHENTICATION_FAILED
+          - INTERNAL_SERVER_ERROR
+        sourceType:
+          description: Indicates the source type of the Digital Payment Application (DPA) item error.
+          example: Request, Response
+          type: string
+        message:
+          description: Additional details on the Digital Payment Application (DPA) item error.
+          example: Invalid data
+          type: string
+        source:
+          description: Indicates the field name for the cause of the Digital Payment Application (DPA) item error.
+          example: dpas
+          type: string
+    Dpas:
+      type: object
+      required:
+      - srcDpaId
+      properties:
+        srcDpaId:
+          type: string
+          description: '
+
+            The registered identifier for the Digital Payment Application (DPA) accessing the service. At least one DPA needs to be registered for each Merchant/Merchant OBO/Sub-Merchant (PF) needed, with additional DPAs being added as required.
+
+
+            Conditional: Required if you are a Merchant directly integrating with Mastercard Checkout Solutions (MCS) APIs, a Payment Service Provider (PSP) integrating On-Behalf-Of (OBO) a Merchant, a Payment Facilitator, or if you are enrolling in the Secure Card on File (SCOF) QR program.
+
+            '
+          maxLength: 255
+          example: src_dpa_56068
+        hasAcquirerRelationship:
+          type: string
+          description: Indicates if the Digital Payment Application (DPA) has an Acquirer relationship. This field may be used to improve acceptance rates.
+          example: Y
+          enum:
+          - Y
+          - N
+        subMerchantId:
+          type: string
+          description: Identifier assigned to a Sub-Merchant by the Payment Facilitator (PF). This field may be used to improve transaction security and acceptance rates.
+          example: merchant123125
+        paymentFacilitatorId:
+          type: string
+          description: Payment Facilitator (PF) identifier that may be used to improve transaction security and acceptance rates.
+          example: pfac123
+        dpaData:
+          $ref: '#/components/schemas/DpaData'
+        debitTokenRequested:
+          type: boolean
+          description: 'Conditional: Must be set to true when the Digital Payment Application (DPA) processes in the United States (US) under the Click to Pay (C2P) program.
+
+            '
+          example: 'false'
+        merchantCategoryCodes:
+          type: array
+          maxItems: 200
+          description: 'Object for the array of Merchant Category Codes (MCC) that the Merchant processes transactions under, and is used for risk-scoring transactions by the issuer. All MCC codes that will be processed by a DPA should be provided here (typically, this will be a single item).
+
+
+            An MCC is a four-character code assigned by Mastercard to the Merchant that indicates the type of business, service, or product provided by the Merchant.
+
+
+            Note: MCC''s may be assigned differently across payment networks. To avoid errors, be sure to use your assigned Mastercard MCC. This code is required for 3-D Secure (3DS) and risk profiling. If the Merchant has more than one MCC, the code most relevant to their business should be used.
+
+            '
+          example: '[0020,4442]'
+          items:
+            type: string
+            maxLength: 4
+        threeDSDefaultdata:
+          $ref: '#/components/schemas/ThreeDSDefaultData'
+        acquirerData:
+          items:
+            $ref: '#/components/schemas/AcquirerData'
+          type: array
+          example: []
+    DpaResults_2:
+      type: object
+      description: Status of uploaded dpas
+      properties:
+        srciDpaId:
+          type: string
+          description: generated id for srci dpa
+          example: sb1a235a-f92f-11ec-b939-0242ac120023
+        status:
+          type: string
+          description: 'Status of the individual Digital Payment Application (DPA) item. Potential statuses include:
+
+
+            * `SUCCESSFUL` - The DPA is eligible to process transactions.
+
+            * `FAILED` - The DPA is NOT eligible to process transactions. Please see the error object for more details.
+
+            '
+          example: SUCCESSFUL
+          enum:
+          - SUCCESSFUL
+          - FAILED
+        dpaName:
+          type: string
+          description: Registered Legal Name of the Merchant
+          example: dpa name
+        error:
+          $ref: '#/components/schemas/Error_2'
+      example:
+        srciDpaId: 9ffba749-193c-4f69-af1e-fb95f0af57c4
+        status: SUCCESSFUL
+        dpaName: myShop
+        error: null
+    Dpa:
+      type: object
+      description: An array of objects to contain DPA registration details.
+      required:
+      - supportedCardBrands
+      - dpaData
+      - merchantCountryCode
+      properties:
+        supportedCardBrands:
+          type: array
+          description: 'Card networks that are supported for DPA registration. The following networks are supported: MASTERCARD, VISA, DISCOVER, AMEX.
+
+            '
+          maxItems: 4
+          minItems: 1
+          example:
+          - MASTERCARD
+          - VISA
+          - DISCOVER
+          - AMEX
+          items:
+            type: string
+            maxLength: 20
+        dpaData:
+          $ref: '#/components/schemas/DpaData_2'
+        debitTokenRequested:
+          type: boolean
+          description: 'A flag for the Integrator to indicate that they would not like to have their Cardholder''s debit cards tokenized.
+
+
+            Conditional: Must be set to true when the Digital Payment Application (DPA) processes in the United States (US)"''
+
+            '
+          example: false
+        merchantCountryCode:
+          $ref: '#/components/schemas/merchantCountryCode'
+        merchantCategoryCodes:
+          $ref: '#/components/schemas/merchantCategoryCodes'
+        supportedCheckoutTypes:
+          type: array
+          description: List of checkout types to be supported by the DPA. These include CLICK_TO_PAY, GUEST_CHECKOUT_TOKENIZATION and CARD_ON_FILE_TOKENIZATION.
+          example:
+          - CLICK_TO_PAY
+          - GUEST_CHECKOUT_TOKENIZATION
+          - CARD_ON_FILE_TOKENIZATION
+          items:
+            type: string
+        threeDSDefaultdata:
+          $ref: '#/components/schemas/ThreeDSDefaultData'
+        acquirerData:
+          type: array
+          items:
+            $ref: '#/components/schemas/AcquirerData_2'
+          example: []
+    DpaResponse:
+      type: object
+      description: Container object for DpaResults
+      properties:
+        dpaResults:
+          type: array
+          items:
+            $ref: '#/components/schemas/DpaResults_2'
           example: []
     DpaAddress:
       type: object
@@ -1120,10 +1016,9 @@ components:
           maxLength: 8
           description: Zipcode for the region.
           example: '41321'
-    Error:
+    Error_2:
       type: object
-      description: 'An error object is associated with individual DPA failures in a given batch (assuming a COMPLETED_WITH_ERRORS response).
-
+      description: 'An error object is associated with individual DPA failures in a given batch.
 
         Please note: In the event of a SUCCESSFUL response, this error object may be sent as NULL.
 
@@ -1134,32 +1029,226 @@ components:
       - message
       properties:
         status:
-          format: int32
-          description: HTTP status code associated with the Digital Payment Application (DPA) item error.
-          example: 400, 401, 403, 500
           type: integer
+          format: int32
+          description: HTTP status code associated with the Digital Payment Application (DPA) item error
+          example: 500
         reason:
+          type: string
+          example: Server timed out
           description: Reason for receiving an error for the Digital Payment Application (DPA) item.
-          example: INVALID_VALUE
-          type: string
-          enum:
-          - INVALID_ARGUMENT
-          - INVALID_VALUE
-          - NOT_FOUND
-          - DECLINED
-          - INVALID_STATE
-          - AUTHENTICATION_FAILED
-          - INTERNAL_SERVER_ERROR
         message:
-          description: Additional details on the Digital Payment Application (DPA) item error.
-          example: Bad request, see error object for details
           type: string
+          description: Additional details on the Digital Payment Application (DPA) item error.
+          example: Internal Server
         errordetail:
+          type: array
           description: List of errors associated with a failed Digital Payment Application (DPA) item action.
           items:
-            $ref: '#/components/schemas/ErrorDetail'
-          type: array
+            $ref: '#/components/schemas/ErrorDetail_2'
           example: []
+    DpaRequest:
+      type: object
+      required:
+      - dpas
+      properties:
+        dpas:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/Dpa'
+          description: 'Dpas
+
+
+            Object for Integrator to provide a list of Digital Processing Application (DPA) objects. Each DPA object is used to create a corresponding DPA. A minimum of 1 DPA object must be provided in the request.
+
+            '
+          example: []
+    AcquirerData_2:
+      type: object
+      description: 'AcquirerData
+
+
+        Object for details about the acquiring institution (for example, merchant bank) or its agent. This includes acquirerIca, acquirerMerchantId and acquirerBin. This object may be used to improve transaction acceptance rates.
+
+        '
+      required:
+      - acquirerIca
+      - acquirerMerchantId
+      properties:
+        acquirerIca:
+          type: string
+          description: An Acquirer Interbank Card Association (ICA) value is an identifier assigned to the Acquirer by Mastercard.
+          example: '12345'
+        acquirerBin:
+          type: string
+          description: 'Each Acquirer Interbank Card Association (ICA) identifier may be assigned one or more BINs by Mastercard.
+
+
+            Note: It is important to use the correct Acquirer ICA associated with the Acquirer BIN.
+
+            '
+          example: '112233'
+        acquirerMerchantId:
+          type: string
+          description: A Merchant Identifier (MID) is a unique code assigned to the Merchant by the Acquirer once the Merchant has successfully opened an account. A MID identifies the Merchant to the Acquirer.
+          example: MC1234567891234
+    DpaData_2:
+      type: object
+      required:
+      - dpaName
+      - dpaUri
+      properties:
+        dpaName:
+          type: string
+          maxLength: 60
+          minLength: 0
+          description: Legal name of Merchant (which may differ from dpaPresentationName).
+          example: Ecom Holdings Online Inc
+        dpaPresentationName:
+          type: string
+          maxLength: 60
+          minLength: 1
+          description: The name of the Merchant that the Cardholder will see when checking out with the Digital Payment Application (DPA).
+          example: FieldTestDpa12
+        dpaUri:
+          type: string
+          maxLength: 100
+          minLength: 1
+          description: Digital Payment Application (DPA) identifier. This field may contain the DPA website URI, a mobile application identifier, or another unique identifier (UUID, URL, APK package name, etc.).
+          example: https://example.com/ecom-online-ltd/basket.html
+        originDomains:
+          type: array
+          description: Website or URL where the payment experience is placed on the checkout page.
+          example:
+          - http://companyuri1.com
+          - http://companyuri2.com
+          items:
+            type: string
+            maxLength: 1024
+          minItems: 0
+          maxItems: 10
+          uniqueItems: true
+        dpaAddress:
+          $ref: '#/components/schemas/DpaAddress'
+    ErrorDetail_2:
+      type: object
+      description: Error associated with a failed Digital Payment Application (DPA) item action.
+      required:
+      - reason
+      properties:
+        reason:
+          type: string
+          description: Reason for receiving an error for the Digital Payment Application (DPA) item.
+          example: ERR_CODE
+        sourceType:
+          type: string
+          description: Indicates the source type of the Digital Payment Application (DPA) item error.
+          example: Request
+        message:
+          type: string
+          description: Additional details on the Digital Payment Application (DPA) item error.
+          example: Invalid data
+        source:
+          type: string
+          description: Indicates the field name for the cause of the Digital Payment Application (DPA) item error.
+          example: field name
+    merchantCategoryCodes:
+      type: array
+      description: 'Object for the array of Merchant Category Codes (MCC) that the Merchant processes transactions under, and is used for risk-scoring transactions by the issuer. All MCC codes that will be processed by a DPA should be provided here (typically, this will be a single item).
+
+
+        An MCC is a four-character code assigned by Mastercard to the Merchant that indicates the type of business, service, or product provided by the Merchant.
+
+
+        Note: MCC''s may be assigned differently across payment networks. To avoid errors, be sure to use your assigned Mastercard MCC. This code is required for 3-D Secure (3DS) and risk profiling. If the Merchant has more than one MCC, the code most relevant to their business should be used.
+
+        '
+      maxItems: 200
+      example:
+      - '0020'
+      - '4444'
+      - '1111'
+      - '4442'
+      - '5732'
+      - '5733'
+      items:
+        type: string
+        maxLength: 4
+    merchantCountryCode:
+      type: string
+      description: Country code for the registering merchant in ISO 3166 format. It is also required for the phone number field.
+      maxLength: 2
+      example: US
+  examples:
+    Forbidden:
+      value:
+        error:
+          status: 403
+          reason: AUTHENTICATION_FAILED
+          message: null
+          errordetail:
+          - reason: AUTHENTICATION_FAILED
+            sourceType: Gateway
+            message: OAuth Signature parameter failed verification.
+            source: Gateway
+    NotFound:
+      value:
+        error:
+          status: 404
+          reason: NOT_FOUND
+          message: Org client id did not match for Srci id
+          errordetail:
+          - reason: INVALID_VALUE
+            sourceType: BODY
+            message: Org client id did not match for Srci id
+            source: Application
+    UnAuthorized:
+      value:
+        error:
+          status: 401
+          reason: DECLINED
+          message: Unauthorized - Access Not Granted
+          errordetail:
+          - reason: DECLINED
+            sourceType: Gateway
+            message: Unauthorized - Access Not Granted
+            source: Gateway
+    InvalidArgument:
+      value:
+        error:
+          status: 400
+          reason: INVALID_VALUE
+          message: Invalid Srci-Client Id
+          errordetail:
+          - reason: INVALID_VALUE
+            sourceType: DOWNSTREAM
+            message: Invalid Srci-Client Id
+            source: Application
+    ServerError:
+      value:
+        error:
+          status: 500
+          reason: INVALID_STATE
+          message: Internal server error. Typically a server bug. The client should report this error to the Mastercard support team
+    ServerError_2:
+      value:
+        error:
+          status: 500
+          reason: INVALID_STATE
+          message: Internal server error. Typically a server bug. The client should report this error to the Mastercard support team
+          errordetail: null
+    InvalidArgument_2:
+      value:
+        error:
+          status: 400
+          reason: INVALID_ARGUMENT
+          message: Invalid orgId or clientId provided in request
+          errordetail:
+          - reason: INVALID_VALUE
+            sourceType: BODY
+            message: Invalid orgId or clientId provided in request
+            source: name
   responses:
     Forbidden:
       description: Forbidden, see error object for details, e.g. client identity (origin) not validated
@@ -1170,6 +1259,46 @@ components:
           examples:
             FORBIDDEN:
               $ref: '#/components/examples/Forbidden'
+    NotFound:
+      description: 'Not found, see error object for details.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            NOT_FOUND:
+              $ref: '#/components/examples/NotFound'
+    InternalServerError:
+      description: 'Internal server error, see error object for details
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            SERVER_ERROR:
+              $ref: '#/components/examples/ServerError'
+    BadRequest:
+      description: Bad request, see error object for details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            INVALID_ARGUMENT:
+              $ref: '#/components/examples/InvalidArgument'
+    Unauthorized:
+      description: Unauthorized, see error object for details, e.g. authorization token validation failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            UNAUTHORIZED:
+              $ref: '#/components/examples/UnAuthorized'
     Forbidden_2:
       description: Forbidden, see error object for details, e.g. client identity (origin) not validated.
       content:
@@ -1190,46 +1319,6 @@ components:
           examples:
             INVALID_ARGUMENT:
               $ref: '#/components/examples/InvalidArgument_2'
-    Unauthorized:
-      description: Unauthorized, see error object for details, e.g. authorization token validation failure
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          examples:
-            UNAUTHORIZED:
-              $ref: '#/components/examples/UnAuthorized'
-    InternalServerError:
-      description: 'Internal server error, see error object for details
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          examples:
-            SERVER_ERROR:
-              $ref: '#/components/examples/ServerError'
-    NotFound:
-      description: 'Not found, see error object for details.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          examples:
-            NOT_FOUND:
-              $ref: '#/components/examples/NotFound'
-    BadRequest:
-      description: Bad request, see error object for details
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          examples:
-            INVALID_ARGUMENT:
-              $ref: '#/components/examples/InvalidArgument'
     Unauthorized_2:
       description: 'Unauthorized, see error object for details, e.g. authorization token validation failure
 
@@ -1250,26 +1339,19 @@ components:
       required: true
       schema:
         type: string
-    dpaCorrelationId:
-      in: header
-      name: correlation-id
-      description: The correlation-id is an optional customer-provided value that can be used to trace a request end to end through customer and Mastercard systems, which can be helpful if an issue occurs. The correlation-id value should be unique to the request.
-      schema:
-        type: string
-      example: 015d277368.1675680750.1e1bd17
-    batchId:
-      in: path
-      name: batch-id
-      description: A unique identifier associated with the submitted Digital Payment Application (DPA) batch. The Batch ID can be used to retrieve the status of the batch by calling GET DPA status endpoint.
-      example: 1c9d3e43-f232-44a1-9552-7da22aaf5590
-      required: true
-      schema:
-        type: string
     srcCorrelationId:
       in: header
       name: correlation-id
       description: A unique identifier that correlates a series of two or more requests to a single session of activity. Mastercard Checkout Solutions (MCS) will return a new srcCorrelationId in each response by default, but Integrators may choose to populate previously used srcCorrelationIds in subsequent requests to correlate their activity under a single ID. This can be done by providing a Mastercard generated srcCorrelationId in the request, or by generating your own ID in the same format. SrcCorrelationId is used for tracking and troubleshooting purposes within Mastercard's ecosystem.
       example: 0000016e0364631b-e4cefc
+      required: true
+      schema:
+        type: string
+    batchId:
+      in: path
+      name: batch-id
+      description: A unique identifier associated with the submitted Digital Payment Application (DPA) batch. The Batch ID can be used to retrieve the status of the batch by calling GET DPA status endpoint.
+      example: 1c9d3e43-f232-44a1-9552-7da22aaf5590
       required: true
       schema:
         type: string
@@ -1284,65 +1366,13 @@ components:
         type: string
       allowEmptyValue: false
       example: 12d370c7-84bc-4763-909b-ecbc86271185
-  examples:
-    Forbidden:
-      value:
-        error:
-          status: 403
-          reason: AUTHENTICATION_FAILED
-          message: null
-          errordetail:
-          - reason: AUTHENTICATION_FAILED
-            sourceType: Gateway
-            message: OAuth Signature parameter failed verification.
-            source: Gateway
-    InvalidArgument_2:
-      value:
-        error:
-          status: 400
-          reason: INVALID_ARGUMENT
-          message: Invalid orgId or clientId provided in request
-          errordetail:
-          - reason: INVALID_VALUE
-            sourceType: BODY
-            message: Invalid orgId or clientId provided in request
-            source: name
-    UnAuthorized:
-      value:
-        error:
-          status: 401
-          reason: DECLINED
-          message: Unauthorized - Access Not Granted
-          errordetail:
-          - reason: DECLINED
-            sourceType: Gateway
-            message: Unauthorized - Access Not Granted
-            source: Gateway
-    ServerError:
-      value:
-        error:
-          status: 500
-          reason: INVALID_STATE
-          message: Internal server error. Typically a server bug. The client should report this error to the Mastercard support team
-    InvalidArgument:
-      value:
-        error:
-          status: 400
-          reason: INVALID_VALUE
-          message: Invalid Srci-Client Id
-          errordetail:
-          - reason: INVALID_VALUE
-            sourceType: DOWNSTREAM
-            message: Invalid Srci-Client Id
-            source: Application
-    NotFound:
-      value:
-        error:
-          status: 404
-          reason: NOT_FOUND
-          message: Org client id did not match for Srci id
-          errordetail:
-          - reason: INVALID_VALUE
-            sourceType: BODY
-            message: Org client id did not match for Srci id
-            source: Application
+    dpaCorrelationId:
+      in: header
+      name: correlation-id
+      description: The correlation-id is an optional customer-provided value that can be used to trace a request end to end through customer and Mastercard systems, which can be helpful if an issue occurs. The correlation-id value should be unique to the request.
+      schema:
+        type: string
+      example: 015d277368.1675680750.1e1bd17
+x-refined-from:
+- mastercard-checkout-solutions-openapi.yml
+- mastercard-unified-checkout-solutions-openapi.yml

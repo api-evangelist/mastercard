@@ -1,20 +1,14 @@
-swagger: '2.0'
+openapi: 3.2.0
 info:
-  title: Mastercard Bill Payment Validator Account Opening Routing API
+  title: Mastercard Bill Payment Validator Routing API
   description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
   version: '1.0'
   x-artifactId: billpay-api
   contact:
     name: Bill Pay Development Support
     email: Bill_Pay_Development_Support@mastercard.com
-host: sandbox.api.mastercard.com
-basePath: /billpayAPI/v1
-schemes:
-- https
-consumes:
-- application/json
-produces:
-- application/json
+servers:
+- url: https://sandbox.api.mastercard.com/billpayAPI/v1
 tags:
 - name: Routing
 paths:
@@ -22,24 +16,21 @@ paths:
     post:
       summary: Mastercard Bill Payment Validator Service Returns the Processing Status for a Potential Rpps Transaction
       description: Bill Payment Validator performs real time transaction validation against the specified Biller ID's account masks, account check digits and all other registered RPPS processing parameters.
-      parameters:
-      - name: BillPayRequest
-        in: body
-        description: Contains the details of the get PAR API request message.
-        schema:
-          $ref: '#/definitions/BillPayRequest'
-        example: example_value
       tags:
       - Routing
       responses:
         '200':
           description: The Bill Payment Validator response.
-          schema:
-            $ref: '#/definitions/BillPayResponse'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillPayResponse'
         default:
           description: unexpected error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
       x-samples:
       - name: example_billpay_routing_validation_request_explorer
         type: documentation
@@ -57,69 +48,76 @@ paths:
       x-microcks-operation:
         delay: 0
         dispatcher: FALLBACK
-definitions:
-  Error:
-    properties:
-      Source:
-        type: string
-        description: This is the unique identifier that attempts to define the field in error when available.  If a specific field can't be identified System will be returned.
-        example: Atms.Atm.Location.Address.Line1
-      ReasonCode:
-        type: string
-        description: This will identify the reason for the error.
-  BillPayResponse:
-    properties:
-      BillPayAccountValidation:
-        $ref: '#/definitions/BillPayAccountValidation'
-  ErrorResponse:
-    properties:
-      Errors:
-        $ref: '#/definitions/Errors'
-  BillPayRequest:
-    properties:
-      BillPayAccountValidation:
-        $ref: '#/definitions/BillPayAccountValidation'
-  BillPayAccountValidation:
-    properties:
-      RppsId:
-        type: string
-        description: Originator RPPS ID populated in the message.  The maximum length is 8
-        example: '99887761'
-      BillerId:
-        description: Biller ID populated in the message. The maximum length is 10.
-        type: string
-        example: '9998887771'
-      AccountNumber:
-        description: Consumer account number populated in the message.  The minimum length is 8 and the maximum length is 22.
-        type: string
-        example: '1234567890'
-      TransactionAmount:
-        description: Amount populated in the message.
-        type: string
-        example: '250.00'
-      CustomerIdentifier1:
-        description: Consumer identifier populated in the message.
-        type: string
-        example: ''
-      CustomerIdentifier2:
-        description: Consumer identifier populated in the message.
-        type: string
-        example: ''
-      CustomerIdentifier3:
-        description: Consumer identifier populated in the message.
-        type: string
-        example: ''
-      CustomerIdentifier4:
-        description: Consumer identifier populated in the message.
-        type: string
-        example: ''
-      ResponseString:
-        description: Indicates if the bill payment transaction information passed all RPPS transaction processing edits for the specified biller ID or indicates errors. The minimum length is 0 and the maximum length is 120.
-        type: string
-        example: Successful
-  Errors:
-    properties:
-      Error:
-        type: array
-        items:
-          $ref: '#/definitions/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BillPayRequest'
+        description: Contains the details of the get PAR API request message.
+components:
+  schemas:
+    Error:
+      properties:
+        Source:
+          type: string
+          description: This is the unique identifier that attempts to define the field in error when available.  If a specific field can't be identified System will be returned.
+          example: Atms.Atm.Location.Address.Line1
+        ReasonCode:
+          type: string
+          description: This will identify the reason for the error.
+    ErrorResponse:
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Errors:
+      properties:
+        Error:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+    BillPayRequest:
+      properties:
+        BillPayAccountValidation:
+          $ref: '#/components/schemas/BillPayAccountValidation'
+    BillPayResponse:
+      properties:
+        BillPayAccountValidation:
+          $ref: '#/components/schemas/BillPayAccountValidation'
+    BillPayAccountValidation:
+      properties:
+        RppsId:
+          type: string
+          description: Originator RPPS ID populated in the message.  The maximum length is 8
+          example: '99887761'
+        BillerId:
+          description: Biller ID populated in the message. The maximum length is 10.
+          type: string
+          example: '9998887771'
+        AccountNumber:
+          description: Consumer account number populated in the message.  The minimum length is 8 and the maximum length is 22.
+          type: string
+          example: '1234567890'
+        TransactionAmount:
+          description: Amount populated in the message.
+          type: string
+          example: '250.00'
+        CustomerIdentifier1:
+          description: Consumer identifier populated in the message.
+          type: string
+          example: ''
+        CustomerIdentifier2:
+          description: Consumer identifier populated in the message.
+          type: string
+          example: ''
+        CustomerIdentifier3:
+          description: Consumer identifier populated in the message.
+          type: string
+          example: ''
+        CustomerIdentifier4:
+          description: Consumer identifier populated in the message.
+          type: string
+          example: ''
+        ResponseString:
+          description: Indicates if the bill payment transaction information passed all RPPS transaction processing edits for the specified biller ID or indicates errors. The minimum length is 0 and the maximum length is 120.
+          type: string
+          example: Successful

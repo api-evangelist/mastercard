@@ -1,20 +1,17 @@
-swagger: '2.0'
+openapi: 3.2.0
 info:
-  title: Mastercard Bill Payment Validator Account Opening Alert  Outcomes API
-  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
-  version: '1.0'
-  x-artifactId: billpay-api
+  title: Mastercard Ethoca Alerts for Merchants and Merchant Partners Alert  Outcomes API
+  description: Ethoca Alerts" is a collaborative tool that brings merchants (and merchant partners), acquirers, and issuers together to share fraud and dispute data, which enables a faster dispute resolution process that reduces the need for chargebacks altogether.
+  version: 1.0.0
   contact:
-    name: Bill Pay Development Support
-    email: Bill_Pay_Development_Support@mastercard.com
-host: sandbox.api.mastercard.com
-basePath: /billpayAPI/v1
-schemes:
-- https
-consumes:
-- application/json
-produces:
-- application/json
+    name: API Support
+    url: https://developer.mastercard.com/support
+    email: apisupport@mastercard.com
+servers:
+- url: https://api.ethocaweb.com/ethoca/alerts/merchants
+  description: Production server (uses live data)
+- url: https://sandbox.api.ethocaweb.com/ethoca/alerts/merchants
+  description: Sandbox server (testing environment)
 tags:
 - name: Alert  Outcomes
 paths:
@@ -38,29 +35,92 @@ paths:
           $ref: '#/components/responses/Forbidden'
 components:
   schemas:
-    AlertsOutcome:
-      type: object
+    ErrorResponse:
       required:
-      - alertId
-      - outcome
-      - refundStatus
-      - refund
-      - amountStopped
+      - Errors
+      type: object
       properties:
-        alertId:
-          $ref: '#/components/schemas/AlertId'
-        outcome:
-          $ref: '#/components/schemas/Outcome'
-        refundStatus:
-          $ref: '#/components/schemas/RefundStatus'
-        refund:
-          $ref: '#/components/schemas/Refund'
-        amountStopped:
-          $ref: '#/components/schemas/AmountStopped'
-        comments:
-          $ref: '#/components/schemas/Comments'
-        actionTimestamp:
-          $ref: '#/components/schemas/ActionTimestamp'
+        Errors:
+          $ref: '#/components/schemas/Errors'
+      description: Error Response object
+    AmountStopped:
+      description: Total amount value and currency of fraud stopped
+      required:
+      - currencyCode
+      - value
+      type: object
+      properties:
+        value:
+          maximum: 999999
+          minimum: 1
+          type: number
+          format: double
+          description: Total amount value associated with the transaction.<br>Decimal point period expected to denote the separation of the fractional suffix from the rest of the  amount, if applicable for the currency. Decimal point period must not be the first character. Examples:<br>- USD exponent is 2, so the $250 USD value should be represented as 250.00, 34&cent; USD value should be represented as 0.34<br>- JPY exponent is 0, so &yen;250 JPY value should be represented as 250
+          example: 361.56
+        currencyCode:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: Alphabetic currency code associated with the value in ISO 4217 format
+          example: USD
+    Error:
+      type: object
+      properties:
+        Source:
+          maxLength: 100
+          minLength: 0
+          type: string
+          description: Source of the error
+          example: Service
+        ReasonCode:
+          maxLength: 100
+          minLength: 0
+          type: string
+          description: Unique code identifying the error case
+          example: RESULT_CODE
+        Description:
+          maxLength: 1000
+          minLength: 0
+          type: string
+          description: Short description of the error
+          example: Short description of the error
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request or retrying could change the outcome
+          example: false
+          default: false
+        Details:
+          maxLength: 1000
+          minLength: 0
+          type: string
+          description: Optional detailed description of the issue
+          example: Detailed description of the error
+      description: Error object
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: List of error objects
+          items:
+            $ref: '#/components/schemas/Error'
+      description: Errors object
+    RefundStatus:
+      maxLength: 12
+      minLength: 8
+      type: string
+      description: 'Whether the transaction was REFUNDED, NOT_REFUNDED, or NOT_SETTLED.
+
+        Using NOT_SETTLED as a refund flag means that the transaction did not go to settlement. The allowed values for refund are:
+
+        - REFUNDED
+
+        - NOT_REFUNDED
+
+        - NOT_SETTLED'
+      example: REFUNDED
     StatusUpdate:
       type: object
       required:
@@ -76,46 +136,32 @@ components:
       example:
         alertId: A4IM9K2MIYL9F2BPF9TWUIXTU
         status: SUCCESS
-    RefundStatus:
-      maxLength: 12
-      minLength: 8
-      type: string
-      description: 'Whether the transaction was REFUNDED, NOT_REFUNDED, or NOT_SETTLED.
-
-        Using NOT_SETTLED as a refund flag means that the transaction did not go to settlement. The allowed values for refund are:
-
-        - REFUNDED
-
-        - NOT_REFUNDED
-
-        - NOT_SETTLED'
-      example: REFUNDED
-    Status:
-      type: string
-      maxLength: 7
-      minLength: 7
-      description: "The code indicates the outcome of the request.\n  - SUCCESS = The Alert was consumed successfully.\n  - FAILURE = The Alert was failed to consume."
-      example: SUCCESS
-    ErrorResponse:
-      required:
-      - Errors
+    Outcomes:
       type: object
       properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-      description: Error Response object
-    Outcome:
+        outcomes:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertsOutcome'
+          description: Outcome indicating the action taken on the alert
+    AlertId:
       type: string
-      maxLength: 30
-      minLength: 5
-      description: "The outcome of the alert.This MUST always be provided.\n\nConfirmed Fraud Outcomes: \n- STOPPED: the order was stopped\n- PARTIALLY_STOPPED: part of the order was stopped\n- PREVIOUSLY_CANCELLED: the transaction was already canceled\n- MISSED: too late, the order has shipped / service consumed\n- NOT_FOUND: the order could not be found\n- ACCOUNT_SUSPENDED: the account has been suspended\n- OTHER: anything else not covered above\n\nCustomer Dispute Outcomes\n- RESOLVED: case resolved with the customer\n- RESOLVED_PREVIOUSLY_REFUNDED: refund already processed\n- UNRESOLVED_DISPUTE: Merchant disagrees with reason for dispute\n- NOT_FOUND: Alert could not be found in the system\n- OTHER: Any other outcome as described in the comments\n\n Allowed values for outcome:\n  - STOPPED\n  - PARTIALLY_STOPPED\n  - PREVIOUSLY_CANCELLED\n  - MISSED\n  - NOT_FOUND\n  - ACCOUNT_SUSPENDED\n  - TOO_LATE\n  - OTHER\n  - RESOLVED\n  - RESOLVED_PREVIOUSLY_REFUNDED\n  - UNRESOLVED_DISPUTE\n\nNote:\nConfirmed Fraud Outcome missed corresponds to\nthe Ethoca Alerts Web Portal outcome Too Late\nCustomer Dispute Outcome previously_refunded\ncorresponds to the Ethoca Alerts Web Portal outcome\nResolved-Previously Refunded"
-      example: RESOLVED
+      minLength: 25
+      maxLength: 25
+      description: Ethoca generated unique identifier for the alert.
+      example: A4IM9K2MIYL9F2BPF9TWUIXTU
     ActionTimestamp:
       maxLength: 25
       minLength: 10
       type: string
       description: Date, time, and time zone of the transaction (e.g., 2020-06-18T17:11:05-05:00), OR<br>Date and time of the transaction in Coordinated Universal Time (UTC) (e.g., 2020-06-18T17:11:05+00:00), OR<br>If time or time zone is unknown, then the date of the transaction (e.g., 2020-06-18). ISO 8601 format
       example: '2021-06-18T17:11:05.000Z'
+    Outcome:
+      type: string
+      maxLength: 30
+      minLength: 5
+      description: "The outcome of the alert.This MUST always be provided.\n\nConfirmed Fraud Outcomes: \n- STOPPED: the order was stopped\n- PARTIALLY_STOPPED: part of the order was stopped\n- PREVIOUSLY_CANCELLED: the transaction was already canceled\n- MISSED: too late, the order has shipped / service consumed\n- NOT_FOUND: the order could not be found\n- ACCOUNT_SUSPENDED: the account has been suspended\n- OTHER: anything else not covered above\n\nCustomer Dispute Outcomes\n- RESOLVED: case resolved with the customer\n- RESOLVED_PREVIOUSLY_REFUNDED: refund already processed\n- UNRESOLVED_DISPUTE: Merchant disagrees with reason for dispute\n- NOT_FOUND: Alert could not be found in the system\n- OTHER: Any other outcome as described in the comments\n\n Allowed values for outcome:\n  - STOPPED\n  - PARTIALLY_STOPPED\n  - PREVIOUSLY_CANCELLED\n  - MISSED\n  - NOT_FOUND\n  - ACCOUNT_SUSPENDED\n  - TOO_LATE\n  - OTHER\n  - RESOLVED\n  - RESOLVED_PREVIOUSLY_REFUNDED\n  - UNRESOLVED_DISPUTE\n\nNote:\nConfirmed Fraud Outcome missed corresponds to\nthe Ethoca Alerts Web Portal outcome Too Late\nCustomer Dispute Outcome previously_refunded\ncorresponds to the Ethoca Alerts Web Portal outcome\nResolved-Previously Refunded"
+      example: RESOLVED
     Comments:
       type: string
       description: Additional comments to be provided with the outcome
@@ -192,93 +238,38 @@ components:
           minLength: 1
           description: The acquirer's reference number is related to the refund. It is a unique 23/24 digit number that tags a card transaction when it goes from the merchant's bank (the acquiring bank) through the card scheme to the cardholder's bank (the issuer). This is represented by Mastercard DE 31 (clearing.)
           example: 9.876543245678987e+22
-    AmountStopped:
-      description: Total amount value and currency of fraud stopped
-      required:
-      - currencyCode
-      - value
+    AlertsOutcome:
       type: object
+      required:
+      - alertId
+      - outcome
+      - refundStatus
+      - refund
+      - amountStopped
       properties:
-        value:
-          maximum: 999999
-          minimum: 1
-          type: number
-          format: double
-          description: Total amount value associated with the transaction.<br>Decimal point period expected to denote the separation of the fractional suffix from the rest of the  amount, if applicable for the currency. Decimal point period must not be the first character. Examples:<br>- USD exponent is 2, so the $250 USD value should be represented as 250.00, 34&cent; USD value should be represented as 0.34<br>- JPY exponent is 0, so &yen;250 JPY value should be represented as 250
-          example: 361.56
-        currencyCode:
-          maxLength: 3
-          minLength: 3
-          type: string
-          description: Alphabetic currency code associated with the value in ISO 4217 format
-          example: USD
-    AlertId:
+        alertId:
+          $ref: '#/components/schemas/AlertId'
+        outcome:
+          $ref: '#/components/schemas/Outcome'
+        refundStatus:
+          $ref: '#/components/schemas/RefundStatus'
+        refund:
+          $ref: '#/components/schemas/Refund'
+        amountStopped:
+          $ref: '#/components/schemas/AmountStopped'
+        comments:
+          $ref: '#/components/schemas/Comments'
+        actionTimestamp:
+          $ref: '#/components/schemas/ActionTimestamp'
+    Status:
       type: string
-      minLength: 25
-      maxLength: 25
-      description: Ethoca generated unique identifier for the alert.
-      example: A4IM9K2MIYL9F2BPF9TWUIXTU
-    Outcomes:
-      type: object
-      properties:
-        outcomes:
-          type: array
-          items:
-            $ref: '#/components/schemas/AlertsOutcome'
-          description: Outcome indicating the action taken on the alert
-    Errors:
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          type: array
-          description: List of error objects
-          items:
-            $ref: '#/components/schemas/Error'
-      description: Errors object
-    Error:
-      type: object
-      properties:
-        Source:
-          maxLength: 100
-          minLength: 0
-          type: string
-          description: Source of the error
-          example: Service
-        ReasonCode:
-          maxLength: 100
-          minLength: 0
-          type: string
-          description: Unique code identifying the error case
-          example: RESULT_CODE
-        Description:
-          maxLength: 1000
-          minLength: 0
-          type: string
-          description: Short description of the error
-          example: Short description of the error
-        Recoverable:
-          type: boolean
-          description: Indicates whether this error will always be returned for this request or retrying could change the outcome
-          example: false
-          default: false
-        Details:
-          maxLength: 1000
-          minLength: 0
-          type: string
-          description: Optional detailed description of the issue
-          example: Detailed description of the error
-      description: Error object
+      maxLength: 7
+      minLength: 7
+      description: "The code indicates the outcome of the request.\n  - SUCCESS = The Alert was consumed successfully.\n  - FAILURE = The Alert was failed to consume."
+      example: SUCCESS
   responses:
     Forbidden:
       description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    Unauthorized:
-      description: Unauthorized
       content:
         application/json:
           schema:
@@ -295,6 +286,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/OutcomeAcknowledgement'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
   requestBodies:
     Outcomes:
       description: Success

@@ -1,20 +1,17 @@
-swagger: '2.0'
+openapi: 3.2.0
 info:
-  title: Mastercard Bill Payment Validator Account Opening PAN Blocks API
-  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
-  version: '1.0'
-  x-artifactId: billpay-api
+  title: User Management PAN Blocks API
+  description: API for user management.
   contact:
-    name: Bill Pay Development Support
-    email: Bill_Pay_Development_Support@mastercard.com
-host: sandbox.api.mastercard.com
-basePath: /billpayAPI/v1
-schemes:
-- https
-consumes:
-- application/json
-produces:
-- application/json
+    name: API Support
+    url: https://developer.mastercard.com/support
+    email: apisupport@mastercard.com
+  version: 1.3.10
+servers:
+- url: https://sandbox.api.mastercard.com/loyalty/mrs
+  description: Sandbox server
+- url: https://api.mastercard.com/loyalty/mrs
+  description: Production server
 tags:
 - name: PAN Blocks
   description: Operations related to PAN Blocks.
@@ -35,13 +32,19 @@ paths:
         '400':
           $ref: '#/components/responses/ErrorsResponse'
 components:
-  requestBodies:
-    PanBlockRequest:
-      required: true
+  responses:
+    ErrorsResponse:
+      description: Bad Request
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/PanBlock'
+            $ref: '#/components/schemas/ErrorsWrapper'
+    PanBlockResponse:
+      description: Successfully blocked PAN auto enrollment.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PanBlockAutoEnrollment'
   schemas:
     Errors:
       required:
@@ -91,6 +94,13 @@ components:
           description: Program identifier for the program in which the cardholder is enrolled. Note the program identifier is filler name and not a sequential ID.
           example:
           - PGM41632
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
     ErrorItem:
       type: object
       properties:
@@ -122,23 +132,10 @@ components:
           type: string
           description: result
           example: Successfully blocked PAN auto enrollment
-    ErrorsWrapper:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-  responses:
-    PanBlockResponse:
-      description: Successfully blocked PAN auto enrollment.
+  requestBodies:
+    PanBlockRequest:
+      required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/PanBlockAutoEnrollment'
-    ErrorsResponse:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorsWrapper'
+            $ref: '#/components/schemas/PanBlock'

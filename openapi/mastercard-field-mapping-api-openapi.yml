@@ -1,20 +1,17 @@
-swagger: '2.0'
+openapi: 3.2.0
 info:
-  title: Mastercard Bill Payment Validator Account Opening Field Mapping API
-  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
-  version: '1.0'
-  x-artifactId: billpay-api
+  title: Mastercard Commercial Event Notifications Field Mapping API
+  description: Receive near real-time payment alerts enabling accurate completion and reconciliation of commercial payments
+  version: 1.2.0
   contact:
-    name: Bill Pay Development Support
-    email: Bill_Pay_Development_Support@mastercard.com
-host: sandbox.api.mastercard.com
-basePath: /billpayAPI/v1
-schemes:
-- https
-consumes:
-- application/json
-produces:
-- application/json
+    name: API Support
+    email: apisupport@mastercard.com
+    url: https://developer.mastercard.com/support
+servers:
+- url: https://api.mastercard.com/commercial-event-notifications
+  description: Production server URL
+- url: https://sandbox.api.mastercard.com/commercial-event-notifications
+  description: Sandbox server URL
 tags:
 - name: Field Mapping
 paths:
@@ -33,7 +30,123 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
 components:
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-400'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-403'
+    FieldMappingSuccess:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/FieldMapping'
+          examples:
+            BPC PAYMENT AUTHORIZATION:
+              $ref: '#/components/examples/FieldMappingBPCAuthorizationResponse'
+            ICCP CLEARING:
+              $ref: '#/components/examples/FieldMappingICCPClearingResponse'
+            ICCP PAYMENT AUTHORIZATION:
+              $ref: '#/components/examples/FieldMappingICCPAuthorizationResponse'
+            ICMP TOKEN LIFECYCLE:
+              $ref: '#/components/examples/FieldMappingICMPLifecycleResponse'
+            ICMP TOKEN PROVISIONING:
+              $ref: '#/components/examples/FieldMappingICMPProvisioningResponse'
   examples:
+    FieldMappingICCPClearingResponse:
+      value:
+      - id: 135E59332C14BF9AE06368459E0ACEF0
+        name: virtualPaymentCard.number
+        displayName: virtual Card number
+        subjectType: CLEARING
+        contentType: TEXT
+      - id: 16E733C760225235E06368459E0AD1EA
+        name: purchaseRequest.rcnAlias
+        displayName: purchaseRequest rcnAlias
+        subjectType: CLEARING
+        contentType: TEXT
+      - id: 16E733C760235235E06368459E0AD1EA
+        name: purchaseRequest.companyId
+        displayName: purchaseRequest company Id
+        subjectType: CLEARING
+        contentType: INTEGER
+      - id: 16E733C760245235E06368459E0AD1EA
+        name: purchaseRequest.companyGuid
+        displayName: purchaseRequest company Guid
+        subjectType: CLEARING
+        contentType: TEXT
+      - id: 16E733C760255235E06368459E0AD1EA
+        name: purchaseRequest.issuerGuid
+        displayName: purchaseRequest issuer Guid
+        subjectType: CLEARING
+        contentType: TEXT
+      - id: 16E733C75FE65235E06368459E0AD1EA
+        name: acceptor.merchantCategoryCode
+        displayName: acceptor merchantCategoryCode
+        subjectType: CLEARING
+        contentType: TEXT
+      - id: 16E733C760065235E06368459E0AD1EA
+        name: isMatched
+        displayName: isMatched
+        subjectType: CLEARING
+        contentType: TEXT
+      - id: 16E733C7600B5235E06368459E0AD1EA
+        name: type
+        displayName: type
+        subjectType: CLEARING
+        contentType: TEXT
+    FieldMappingICCPAuthorizationResponse:
+      value:
+      - id: 0CNS2cfa3d3977d6d991b7cd723570ba96bf6830ef4c4f897f4d00df0038e288f34c1556724071
+        name: virtualPaymentCard.number
+        displayName: Virtual card number
+        subjectType: PAYMENT_AUTHORIZATION
+        contentType: TEXT
+      - id: 0CNSa6d4a329d377bb296957df43e9f2f1ab5b35c997f88bcbc34939bc1525990be51556724071
+        name: messageTypeIndicator
+        displayName: Message type indicator
+        subjectType: PAYMENT_AUTHORIZATION
+        contentType: TEXT
+      - id: 0CNS05bb6badecddacf50a3c4c94184c6214f38e0980883b13bf7205165c7a74a8231556724071
+        name: responseCode
+        displayName: Response code
+        subjectType: PAYMENT_AUTHORIZATION
+        contentType: TEXT
+      - id: 0CNSddd4612f680dd452c61b945436e06f73e80786d7ebd6683d8cc0c7950bdd01211556724071
+        name: inControlOnBehalfServiceResult.vcnServiceResultCode
+        displayName: In Control VCN service result code
+        subjectType: PAYMENT_AUTHORIZATION
+        contentType: TEXT
+      - id: 0CNS14802eafac9cfe04d25da2a5944074eaa89bee5ca2136329e493399a27a39ccd1556724071
+        name: purchaseRequest.rcnAlias
+        displayName: Purchase request RCN alias
+        subjectType: PAYMENT_AUTHORIZATION
+        contentType: TEXT
+      - id: 0CNS0e2d81ac7109e23ee63d818f575d43e465ca193771eb510a4156d772fd98eb5a1556724071
+        name: purchaseRequest.companyId
+        displayName: Purchase request company id
+        subjectType: PAYMENT_AUTHORIZATION
+        contentType: INTEGER
+      - id: 0CNS1fe7275144b16a3ef1cec8f8261598d7491491c2894015d549ec00e13ba961a31556724071
+        name: purchaseRequest.companyGuid
+        displayName: Purchase request company GUID
+        subjectType: PAYMENT_AUTHORIZATION
+        contentType: TEXT
+      - id: 0CNSa91bf379b48a593fd17f07f431bad8fb296796498f4e9982ea134394c1fa4f071556724071
+        name: purchaseRequest.issuerGuid
+        displayName: Purchase request issuer GUID
+        subjectType: PAYMENT_AUTHORIZATION
+        contentType: TEXT
     FieldMappingBPCAuthorizationResponse:
       value:
       - id: 141747A087EADC9DE06368459E0AC116
@@ -125,159 +238,7 @@ components:
         displayName: Purchase Request Company Id
         subjectType: TOKEN_LIFECYCLE_EVENT
         contentType: INTEGER
-    FieldMappingICCPAuthorizationResponse:
-      value:
-      - id: 0CNS2cfa3d3977d6d991b7cd723570ba96bf6830ef4c4f897f4d00df0038e288f34c1556724071
-        name: virtualPaymentCard.number
-        displayName: Virtual card number
-        subjectType: PAYMENT_AUTHORIZATION
-        contentType: TEXT
-      - id: 0CNSa6d4a329d377bb296957df43e9f2f1ab5b35c997f88bcbc34939bc1525990be51556724071
-        name: messageTypeIndicator
-        displayName: Message type indicator
-        subjectType: PAYMENT_AUTHORIZATION
-        contentType: TEXT
-      - id: 0CNS05bb6badecddacf50a3c4c94184c6214f38e0980883b13bf7205165c7a74a8231556724071
-        name: responseCode
-        displayName: Response code
-        subjectType: PAYMENT_AUTHORIZATION
-        contentType: TEXT
-      - id: 0CNSddd4612f680dd452c61b945436e06f73e80786d7ebd6683d8cc0c7950bdd01211556724071
-        name: inControlOnBehalfServiceResult.vcnServiceResultCode
-        displayName: In Control VCN service result code
-        subjectType: PAYMENT_AUTHORIZATION
-        contentType: TEXT
-      - id: 0CNS14802eafac9cfe04d25da2a5944074eaa89bee5ca2136329e493399a27a39ccd1556724071
-        name: purchaseRequest.rcnAlias
-        displayName: Purchase request RCN alias
-        subjectType: PAYMENT_AUTHORIZATION
-        contentType: TEXT
-      - id: 0CNS0e2d81ac7109e23ee63d818f575d43e465ca193771eb510a4156d772fd98eb5a1556724071
-        name: purchaseRequest.companyId
-        displayName: Purchase request company id
-        subjectType: PAYMENT_AUTHORIZATION
-        contentType: INTEGER
-      - id: 0CNS1fe7275144b16a3ef1cec8f8261598d7491491c2894015d549ec00e13ba961a31556724071
-        name: purchaseRequest.companyGuid
-        displayName: Purchase request company GUID
-        subjectType: PAYMENT_AUTHORIZATION
-        contentType: TEXT
-      - id: 0CNSa91bf379b48a593fd17f07f431bad8fb296796498f4e9982ea134394c1fa4f071556724071
-        name: purchaseRequest.issuerGuid
-        displayName: Purchase request issuer GUID
-        subjectType: PAYMENT_AUTHORIZATION
-        contentType: TEXT
-    FieldMappingICCPClearingResponse:
-      value:
-      - id: 135E59332C14BF9AE06368459E0ACEF0
-        name: virtualPaymentCard.number
-        displayName: virtual Card number
-        subjectType: CLEARING
-        contentType: TEXT
-      - id: 16E733C760225235E06368459E0AD1EA
-        name: purchaseRequest.rcnAlias
-        displayName: purchaseRequest rcnAlias
-        subjectType: CLEARING
-        contentType: TEXT
-      - id: 16E733C760235235E06368459E0AD1EA
-        name: purchaseRequest.companyId
-        displayName: purchaseRequest company Id
-        subjectType: CLEARING
-        contentType: INTEGER
-      - id: 16E733C760245235E06368459E0AD1EA
-        name: purchaseRequest.companyGuid
-        displayName: purchaseRequest company Guid
-        subjectType: CLEARING
-        contentType: TEXT
-      - id: 16E733C760255235E06368459E0AD1EA
-        name: purchaseRequest.issuerGuid
-        displayName: purchaseRequest issuer Guid
-        subjectType: CLEARING
-        contentType: TEXT
-      - id: 16E733C75FE65235E06368459E0AD1EA
-        name: acceptor.merchantCategoryCode
-        displayName: acceptor merchantCategoryCode
-        subjectType: CLEARING
-        contentType: TEXT
-      - id: 16E733C760065235E06368459E0AD1EA
-        name: isMatched
-        displayName: isMatched
-        subjectType: CLEARING
-        contentType: TEXT
-      - id: 16E733C7600B5235E06368459E0AD1EA
-        name: type
-        displayName: type
-        subjectType: CLEARING
-        contentType: TEXT
-  responses:
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-403'
-    FieldMappingSuccess:
-      description: OK
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/FieldMapping'
-          examples:
-            BPC PAYMENT AUTHORIZATION:
-              $ref: '#/components/examples/FieldMappingBPCAuthorizationResponse'
-            ICCP CLEARING:
-              $ref: '#/components/examples/FieldMappingICCPClearingResponse'
-            ICCP PAYMENT AUTHORIZATION:
-              $ref: '#/components/examples/FieldMappingICCPAuthorizationResponse'
-            ICMP TOKEN LIFECYCLE:
-              $ref: '#/components/examples/FieldMappingICMPLifecycleResponse'
-            ICMP TOKEN PROVISIONING:
-              $ref: '#/components/examples/FieldMappingICMPProvisioningResponse'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-400'
   schemas:
-    Error-403:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          properties:
-            Error:
-              type: array
-              description: An array of error objects giving information about relevant errors.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    description: The origin of the error
-                    example: Commercial Event Notifications
-                  ReasonCode:
-                    type: string
-                    description: A unique error code representing the error that occurred
-                    example: subscriber.notAllowed
-                  Description:
-                    type: string
-                    description: A developer-friendly description of the error that occurred
-                    example: Access not allowed
-                  Recoverable:
-                    type: boolean
-                    description: Can the error be recovered by retrying the same request later?
-                    example: false
-                  Details:
-                    type: string
-                    description: Additional details regarding the error that occurred
-                    example: Subscriber with consumerKey 'INVALID_CONSUMER_KEY' doesn't have permissions to complete the request
     Error-400:
       type: object
       required:
@@ -314,6 +275,42 @@ components:
                     type: string
                     description: Additional details regarding the error that occurred
                     example: Invalid content in request payload
+    Error-403:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              type: array
+              description: An array of error objects giving information about relevant errors.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The origin of the error
+                    example: Commercial Event Notifications
+                  ReasonCode:
+                    type: string
+                    description: A unique error code representing the error that occurred
+                    example: subscriber.notAllowed
+                  Description:
+                    type: string
+                    description: A developer-friendly description of the error that occurred
+                    example: Access not allowed
+                  Recoverable:
+                    type: boolean
+                    description: Can the error be recovered by retrying the same request later?
+                    example: false
+                  Details:
+                    type: string
+                    description: Additional details regarding the error that occurred
+                    example: Subscriber with consumerKey 'INVALID_CONSUMER_KEY' doesn't have permissions to complete the request
     FieldMapping:
       description: A collection of field definitions any of which can be used to specify matching criteria when creating a subscription.
       type: object

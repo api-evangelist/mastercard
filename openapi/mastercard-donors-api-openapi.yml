@@ -1,20 +1,19 @@
-swagger: '2.0'
+openapi: 3.2.0
 info:
-  title: Mastercard Bill Payment Validator Account Opening Donors API
-  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
-  version: '1.0'
-  x-artifactId: billpay-api
+  description: The Mastercard Donate Service provides a seamless and safe way for partners to enable cardholders to incorporate giving into their daily activities. Cardholders can make a one-time donation, a monthly donations, or donate a few cents for every transaction they make. A small gesture, like paying for groceries or a bus, becomes something bigger.
+  version: 2.2.1
+  title: Mastercard Donate Donors API
   contact:
-    name: Bill Pay Development Support
-    email: Bill_Pay_Development_Support@mastercard.com
-host: sandbox.api.mastercard.com
-basePath: /billpayAPI/v1
-schemes:
-- https
-consumes:
-- application/json
-produces:
-- application/json
+    name: API Support
+    email: apisupport@mastercard.com
+    url: https://developer.mastercard.com/support
+servers:
+- url: https://sandbox.api.mastercard.com/donations
+  description: Sandbox server
+- url: https://mtf.mastercard.com/donations
+  description: MTF server
+- url: https://api.mastercard.com/donations
+  description: Production server
 tags:
 - name: Donors
   description: Donors
@@ -51,38 +50,295 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       deprecated: false
 components:
-  responses:
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-403'
-    DonateUser:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DonateUser'
-    Unauthorized:
-      description: Unauthorised
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-401'
-    InternalServerError:
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-500'
-    Unsupported:
-      description: Unsupported Content Type
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-415'
   schemas:
+    Error-AddUser:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an error condition.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: USER_ALREADY_PRESENT
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Username already exists.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: array
+                    items:
+                      type: string
+                      example: 'DonorId: ac9208b9-65cc-4d64-85c1-63ea703e3252'
+    Error-500:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to server error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an server issue.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: PROGRAM_ID_NOT_FOUND
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Program id is required as this client is mapped to multiple programs.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error-403:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to forbidden requests
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of forbidden request.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: INVALID_KEY
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The signing certificate is not valid.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    DonateUser:
+      type: object
+      properties:
+        donorId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          example: 652ce9ff-fa5f-4e9f-8151-c73fa20088f7
+          format: uuid
+          description: Valid UUID.
+        userName:
+          type: string
+          example: John.Doe@mail.com
+          minLength: 5
+          maxLength: 30
+          description: User Name
+      title: DonateUserResponse
+    DonorPhoneNumber:
+      type: object
+      properties:
+        type:
+          type: string
+          example: home
+          minLength: 3
+          maxLength: 20
+          description: Type
+        value:
+          type: string
+          example: '+16367222222'
+          minLength: 11
+          maxLength: 20
+          description: Phone number with country code.
+      title: DonorPhoneNumber
+    Identification:
+      type: object
+      properties:
+        country:
+          type: string
+          example: MX
+          minLength: 2
+          maxLength: 3
+          description: Country
+        type:
+          type: string
+          example: GovtId
+          minLength: 3
+          maxLength: 20
+          description: Type
+        value:
+          type: string
+          example: '16367222222'
+          minLength: 11
+          maxLength: 20
+          description: Value
+      title: Identification
+    DonateUserAddress:
+      required:
+      - type
+      - country
+      - streetAddress
+      type: object
+      properties:
+        country:
+          type: string
+          example: USA
+          minLength: 3
+          maxLength: 3
+          description: Country
+        formatted:
+          type: string
+          minLength: 3
+          maxLength: 150
+          example: 7832 West Elm Street Huntington Station, NY 11746
+          description: Address
+        locality:
+          type: string
+          minLength: 3
+          maxLength: 30
+          example: Rly Station
+          description: Locality
+        postalCode:
+          type: string
+          example: 11746
+          minLength: 5
+          maxLength: 5
+          description: Postal Code
+        region:
+          type: string
+          example: Huntington
+          minLength: 3
+          maxLength: 20
+          description: Region
+        streetAddress:
+          type: string
+          example: 7832 West Elm Street
+          minLength: 3
+          maxLength: 30
+          description: Street Address
+        type:
+          type: string
+          example: work
+          minLength: 3
+          maxLength: 20
+          description: Type
+      title: DonateUserAddress
+    AddUser:
+      type: object
+      required:
+      - acceptedConsents
+      - userName
+      - userType
+      - name
+      - emails
+      - locale
+      properties:
+        acceptedConsents:
+          $ref: '#/components/schemas/AcceptedConsent'
+        addresses:
+          type: array
+          description: Address is Optional. but if passed, type, streetAddress and country are required.
+          items:
+            $ref: '#/components/schemas/DonateUserAddress'
+        emails:
+          type: array
+          description: Emails
+          items:
+            $ref: '#/components/schemas/ConsumerEmail'
+        locale:
+          type: string
+          example: en-us
+          minLength: 5
+          maxLength: 5
+          description: Locale
+        name:
+          $ref: '#/components/schemas/UserName'
+        personalInformation:
+          $ref: '#/components/schemas/PersonalInformation'
+        phoneNumbers:
+          type: array
+          description: Phone Numbers
+          items:
+            $ref: '#/components/schemas/DonorPhoneNumber'
+        timezone:
+          type: string
+          example: UTC-06:00
+          minLength: 9
+          maxLength: 20
+          description: Timezone
+        title:
+          type: string
+          example: Mr
+          minLength: 2
+          maxLength: 20
+          description: Title
+        userName:
+          type: string
+          example: John.Doe@mail.com
+          minLength: 6
+          maxLength: 30
+          description: Name
+        userType:
+          type: string
+          example: API
+          minLength: 6
+          maxLength: 20
+          description: User Type
+      title: AddUserRequest
+    PersonalInformation:
+      title: PersonalInformation
+      type: object
+      properties:
+        identifications:
+          type: array
+          description: identifications
+          items:
+            $ref: '#/components/schemas/Identification'
     Error-415:
       type: object
       required:
@@ -151,23 +407,50 @@ components:
           maxLength: 30
           description: Honorific Suffix
       title: UserName
-    DonateUser:
+    ConsumerEmail:
       type: object
+      required:
+      - type
       properties:
-        donorId:
+        type:
           type: string
-          minLength: 36
-          maxLength: 36
-          example: 652ce9ff-fa5f-4e9f-8151-c73fa20088f7
-          format: uuid
-          description: Valid UUID.
-        userName:
+          example: home
+          description: The type must be "home" for at least one email address.
+          minLength: 4
+          maxLength: 20
+        value:
           type: string
           example: John.Doe@mail.com
-          minLength: 5
+          description: Email Id
+          minLength: 10
           maxLength: 30
-          description: User Name
-      title: DonateUserResponse
+      title: ConsumerEmail
+    AcceptedConsent:
+      type: object
+      required:
+      - marketingEmailSubscribed
+      - privacyNoticeVersion
+      - tncVersion
+      properties:
+        marketingEmailSubscribed:
+          type: string
+          example: Y
+          minLength: 1
+          maxLength: 1
+          description: Marketing Email Subscribed
+        privacyNoticeVersion:
+          type: string
+          example: PN.2-#-xr.en-us.99.01
+          minLength: 21
+          maxLength: 21
+          description: Privacy Notice Version
+        tncVersion:
+          type: string
+          example: TC.##r#12.EN-Us.99.99
+          minLength: 21
+          maxLength: 21
+          description: Tnc Version
+      title: AcceptedConsent
     Error-401:
       type: object
       required:
@@ -205,338 +488,38 @@ components:
                     type: string
                     example: 'null'
                     description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    Error-403:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          description: Contains all errors caused due to forbidden requests
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of forbidden request.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: Gateway
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: INVALID_KEY
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: The signing certificate is not valid.
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example: 'null'
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    Error-AddUser:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          description: Contains all errors caused
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of an error condition.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: DONATE_SERVICE
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: USER_ALREADY_PRESENT
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: Username already exists.
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: array
-                    items:
-                      type: string
-                      example: 'DonorId: ac9208b9-65cc-4d64-85c1-63ea703e3252'
-    Identification:
-      type: object
-      properties:
-        country:
-          type: string
-          example: MX
-          minLength: 2
-          maxLength: 3
-          description: Country
-        type:
-          type: string
-          example: GovtId
-          minLength: 3
-          maxLength: 20
-          description: Type
-        value:
-          type: string
-          example: '16367222222'
-          minLength: 11
-          maxLength: 20
-          description: Value
-      title: Identification
-    PersonalInformation:
-      title: PersonalInformation
-      type: object
-      properties:
-        identifications:
-          type: array
-          description: identifications
-          items:
-            $ref: '#/components/schemas/Identification'
-    AcceptedConsent:
-      type: object
-      required:
-      - marketingEmailSubscribed
-      - privacyNoticeVersion
-      - tncVersion
-      properties:
-        marketingEmailSubscribed:
-          type: string
-          example: Y
-          minLength: 1
-          maxLength: 1
-          description: Marketing Email Subscribed
-        privacyNoticeVersion:
-          type: string
-          example: PN.2-#-xr.en-us.99.01
-          minLength: 21
-          maxLength: 21
-          description: Privacy Notice Version
-        tncVersion:
-          type: string
-          example: TC.##r#12.EN-Us.99.99
-          minLength: 21
-          maxLength: 21
-          description: Tnc Version
-      title: AcceptedConsent
-    DonateUserAddress:
-      required:
-      - type
-      - country
-      - streetAddress
-      type: object
-      properties:
-        country:
-          type: string
-          example: USA
-          minLength: 3
-          maxLength: 3
-          description: Country
-        formatted:
-          type: string
-          minLength: 3
-          maxLength: 150
-          example: 7832 West Elm Street Huntington Station, NY 11746
-          description: Address
-        locality:
-          type: string
-          minLength: 3
-          maxLength: 30
-          example: Rly Station
-          description: Locality
-        postalCode:
-          type: string
-          example: 11746
-          minLength: 5
-          maxLength: 5
-          description: Postal Code
-        region:
-          type: string
-          example: Huntington
-          minLength: 3
-          maxLength: 20
-          description: Region
-        streetAddress:
-          type: string
-          example: 7832 West Elm Street
-          minLength: 3
-          maxLength: 30
-          description: Street Address
-        type:
-          type: string
-          example: work
-          minLength: 3
-          maxLength: 20
-          description: Type
-      title: DonateUserAddress
-    ConsumerEmail:
-      type: object
-      required:
-      - type
-      properties:
-        type:
-          type: string
-          example: home
-          description: The type must be "home" for at least one email address.
-          minLength: 4
-          maxLength: 20
-        value:
-          type: string
-          example: John.Doe@mail.com
-          description: Email Id
-          minLength: 10
-          maxLength: 30
-      title: ConsumerEmail
-    DonorPhoneNumber:
-      type: object
-      properties:
-        type:
-          type: string
-          example: home
-          minLength: 3
-          maxLength: 20
-          description: Type
-        value:
-          type: string
-          example: '+16367222222'
-          minLength: 11
-          maxLength: 20
-          description: Phone number with country code.
-      title: DonorPhoneNumber
-    Error-500:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          description: Contains all errors caused due to server error
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of an server issue.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: DONATE_SERVICE
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: PROGRAM_ID_NOT_FOUND
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: Program id is required as this client is mapped to multiple programs.
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example: 'null'
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    AddUser:
-      type: object
-      required:
-      - acceptedConsents
-      - userName
-      - userType
-      - name
-      - emails
-      - locale
-      properties:
-        acceptedConsents:
-          $ref: '#/components/schemas/AcceptedConsent'
-        addresses:
-          type: array
-          description: Address is Optional. but if passed, type, streetAddress and country are required.
-          items:
-            $ref: '#/components/schemas/DonateUserAddress'
-        emails:
-          type: array
-          description: Emails
-          items:
-            $ref: '#/components/schemas/ConsumerEmail'
-        locale:
-          type: string
-          example: en-us
-          minLength: 5
-          maxLength: 5
-          description: Locale
-        name:
-          $ref: '#/components/schemas/UserName'
-        personalInformation:
-          $ref: '#/components/schemas/PersonalInformation'
-        phoneNumbers:
-          type: array
-          description: Phone Numbers
-          items:
-            $ref: '#/components/schemas/DonorPhoneNumber'
-        timezone:
-          type: string
-          example: UTC-06:00
-          minLength: 9
-          maxLength: 20
-          description: Timezone
-        title:
-          type: string
-          example: Mr
-          minLength: 2
-          maxLength: 20
-          description: Title
-        userName:
-          type: string
-          example: John.Doe@mail.com
-          minLength: 6
-          maxLength: 30
-          description: Name
-        userType:
-          type: string
-          example: API
-          minLength: 6
-          maxLength: 20
-          description: User Type
-      title: AddUserRequest
+  responses:
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-403'
+    DonateUser:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DonateUser'
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-500'
+    Unsupported:
+      description: Unsupported Content Type
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-415'
+    Unauthorized:
+      description: Unauthorised
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-401'
   parameters:
-    ClientId:
-      name: x-openapi-clientid
-      in: header
-      description: ClientId is a unique and a mandatory ID shared while creating a project on Mastercard Developers Portal.
-      required: true
-      schema:
-        type: string
-        example: 0a7e433a-63fc-4557-8cf4
-    ProgramId:
-      name: ProgramId
-      in: header
-      description: ProgramId is an optional field, but if a client has more than one program associated to it, then this field becomes mandatory.
-      required: false
-      schema:
-        type: string
-        example: 80380ef2-5037-4e57-86bf-1bdd1efb0ae2
     CorrelationId:
       name: x-correlation-id
       in: header
@@ -545,6 +528,22 @@ components:
       schema:
         type: string
         example: 03f8c4e8-8bdc-4a30-a2b4-b6f989e96ca3
+    ProgramId:
+      name: ProgramId
+      in: header
+      description: ProgramId is an optional field, but if a client has more than one program associated to it, then this field becomes mandatory.
+      required: false
+      schema:
+        type: string
+        example: 80380ef2-5037-4e57-86bf-1bdd1efb0ae2
+    ClientId:
+      name: x-openapi-clientid
+      in: header
+      description: ClientId is a unique and a mandatory ID shared while creating a project on Mastercard Developers Portal.
+      required: true
+      schema:
+        type: string
+        example: 0a7e433a-63fc-4557-8cf4
   requestBodies:
     AddUser:
       description: addUserRequest

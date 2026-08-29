@@ -1,20 +1,21 @@
-swagger: '2.0'
+openapi: 3.2.0
 info:
-  title: Mastercard Bill Payment Validator Account Opening Audit API
-  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
-  version: '1.0'
-  x-artifactId: billpay-api
+  title: Mastercard ID for Trust Providers Audit API
+  description: Mastercard ID for Trust Providers is a service that helps businesses and organizations verify the identity of their customers. By utilizing advanced technology and security measures, Mastercard ID for Trust Providers enables businesses to securely authenticate the identities of individuals in real-time, reducing the risk of fraud and ensuring a seamless and secure customer experience. This service allows businesses to confidently verify the identities of their customers, streamlining operations and improving trust and security in online transactions. With Mastercard ID for Trust Providers, businesses can effectively combat fraud and identity theft, safeguarding sensitive information and enhancing the overall customer experience.
   contact:
-    name: Bill Pay Development Support
-    email: Bill_Pay_Development_Support@mastercard.com
-host: sandbox.api.mastercard.com
-basePath: /billpayAPI/v1
-schemes:
-- https
-consumes:
-- application/json
-produces:
-- application/json
+    name: API Support
+    email: apisupport@mastercard.com
+    url: https://developer.mastercard.com/support
+  version: 1.1.0
+servers:
+- url: https://api.mastercard.com/idservice
+  description: Production server (uses USA live data).
+- url: https://sandbox.api.mastercard.com/idservice
+  description: Sandbox server (testing USA environment).
+- url: https://api.mastercard.com.au/idservice
+  description: Production server  (uses AUS live data).
+- url: https://sandbox.api.mastercard.com.au/idservice
+  description: Sandbox server (testing AUS environment).
 tags:
 - name: Audit
 paths:
@@ -37,66 +38,7 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/AuditEventsRequest'
 components:
-  requestBodies:
-    AuditEventsRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AuditEvents'
-      required: true
-  responses:
-    AuditEventsResponse:
-      description: Success.
-      headers:
-        X-Transaction-ID:
-          schema:
-            type: string
-          description: A random 128-bit UUID represents the transaction.
-    BadRequestError:
-      description: Something was wrong with the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            UserProfileDeletedErrorExample:
-              $ref: '#/components/examples/UserProfileDeletedErrorExample'
-  examples:
-    UserProfileDeletedErrorExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: USER_PROFILE_DELETED
-            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
-            Recoverable: false
-            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
   schemas:
-    AuditEvents:
-      required:
-      - countryCode
-      - userProfileId
-      - sdkAuditEvents
-      properties:
-        sdkAuditEvents:
-          type: array
-          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
-          items:
-            $ref: '#/components/schemas/AuditEventsItem'
-        userProfileId:
-          type: string
-          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
-          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-          example: df52649e-4096-456a-bca0-751ee470009f
-        countryCode:
-          $ref: '#/components/schemas/CountryCode'
-        sdkVersion:
-          $ref: '#/components/schemas/SdkVersion'
-    CountryCode:
-      type: string
-      description: The country code of the country where the transaction originates from.
-      pattern: ^[a-zA-Z]{2}$
-      example: US
     ErrorResponse:
       required:
       - Errors
@@ -141,6 +83,33 @@ components:
                     description: TP will use this URI to redirect to RP.
                     pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
                     example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    AuditEvents:
+      required:
+      - countryCode
+      - userProfileId
+      - sdkAuditEvents
+      properties:
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        userProfileId:
+          type: string
+          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
     AuditEventsItem:
       type: object
       properties:
@@ -273,10 +242,42 @@ components:
               type: object
               description: Response Details.
               example: Response Data
-    SdkVersion:
+    CountryCode:
       type: string
-      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
-      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
-      minLength: 5
-      maxLength: 255
-      example: 2.3.0
+      description: The country code of the country where the transaction originates from.
+      pattern: ^[a-zA-Z]{2}$
+      example: US
+  examples:
+    UserProfileDeletedErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_DELETED
+            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
+            Recoverable: false
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+  responses:
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
+    AuditEventsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+  requestBodies:
+    AuditEventsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuditEvents'
+      required: true

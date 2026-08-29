@@ -1,20 +1,17 @@
-swagger: '2.0'
+openapi: 3.2.0
 info:
-  title: Mastercard Bill Payment Validator Account Opening Bin API
-  description: This service is provided on behalf of the Mastercard Remote Payment and Presentment (RPPS) Bill Payment Processing Network, which supports consumer to business "push" bill payments (i.e. those which are not funded by debit/credit card transactions) in the U.S.
-  version: '1.0'
-  x-artifactId: billpay-api
+  title: Mastercard Lookup Bin API
+  description: The BIN Lookup service provides two distinct APIs, a full or filtered list of available Mastercard BINs and information for a single BIN. Filtering allows you to search for BIN data that is relevant to your business needs, for example filtering on issuer, product code or country.
   contact:
-    name: Bill Pay Development Support
-    email: Bill_Pay_Development_Support@mastercard.com
-host: sandbox.api.mastercard.com
-basePath: /billpayAPI/v1
-schemes:
-- https
-consumes:
-- application/json
-produces:
-- application/json
+    name: API Support
+    url: https://developer.mastercard.com/support
+    email: apisupport@mastercard.com
+  version: ' 1.1'
+servers:
+- url: https://api.mastercard.com/bin-resources
+  description: Production
+- url: https://sandbox.api.mastercard.com/bin-resources
+  description: Sandbox
 tags:
 - name: Bin
 paths:
@@ -64,6 +61,62 @@ paths:
           $ref: '#/components/responses/NotFoundErrorResponse'
 components:
   examples:
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: BINTABLE_API
+            ReasonCode: BAD_REQUEST
+            Description: Not all mandatory parameters are supplied or sent incorrectly.
+            Recoverable: false
+            Details: The value of parameter 'sort' is invalid.
+    BINSuccessExample:
+      description: Individual Mastercard BIN data
+      value:
+      - lowAccountRange: 2229326100000000000
+        highAccountRange: 2229326200000000000
+        binNum: '22292931'
+        binLength: 8
+        acceptanceBrand: MCC
+        ica: '00000023460'
+        customerName: TRIPLINK INTERNATIONAL CO.,LIMITED
+        country:
+          code: '372'
+          alpha3: IRL
+          name: Ireland
+        localUse: false
+        authorizationOnly: false
+        productCode: MCO
+        productDescription: MASTERCARD CORPORATE
+        governmentRange: false
+        nonReloadableIndicator: false
+        anonymousPrepaidIndicator: N
+        programName: null
+        vertical: null
+        fundingSource: DEBIT
+        consumerType: CONSUMER
+        cardholderCurrencyIndicator: C
+        billingCurrencyDefault: USD
+        smartDataEnabled: false
+        affiliate: California Community Bank
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: BINTABLE_API
+            ReasonCode: PERMISSION_DENIED
+            Description: You don't seem authorized to do that
+            Recoverable: false
+            Details: The resource was processed and can't be updated anymore
+    BINNotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: BINTABLE_API
+            ReasonCode: NOT_FOUND
+            Description: Invalid BIN format, please ensure there are no spaces used
+            Recoverable: false
+            Details: BIN '131 840' doesn't exist
     SearchBINsExample:
       value:
         currentPageNumber: 1
@@ -132,96 +185,19 @@ components:
             Description: We couldn't recognize you
             Recoverable: false
             Details: 'Full authentication is required to access this resource. See also: https://mstr.cd/31YcrTi'
-    BINSuccessExample:
-      description: Individual Mastercard BIN data
-      value:
-      - lowAccountRange: 2229326100000000000
-        highAccountRange: 2229326200000000000
-        binNum: '22292931'
-        binLength: 8
-        acceptanceBrand: MCC
-        ica: '00000023460'
-        customerName: TRIPLINK INTERNATIONAL CO.,LIMITED
-        country:
-          code: '372'
-          alpha3: IRL
-          name: Ireland
-        localUse: false
-        authorizationOnly: false
-        productCode: MCO
-        productDescription: MASTERCARD CORPORATE
-        governmentRange: false
-        nonReloadableIndicator: false
-        anonymousPrepaidIndicator: N
-        programName: null
-        vertical: null
-        fundingSource: DEBIT
-        consumerType: CONSUMER
-        cardholderCurrencyIndicator: C
-        billingCurrencyDefault: USD
-        smartDataEnabled: false
-        affiliate: California Community Bank
-    BadRequestExample:
-      value:
-        Errors:
-          Error:
-          - Source: BINTABLE_API
-            ReasonCode: BAD_REQUEST
-            Description: Not all mandatory parameters are supplied or sent incorrectly.
-            Recoverable: false
-            Details: The value of parameter 'sort' is invalid.
-    BINNotFoundExample:
-      value:
-        Errors:
-          Error:
-          - Source: BINTABLE_API
-            ReasonCode: NOT_FOUND
-            Description: Invalid BIN format, please ensure there are no spaces used
-            Recoverable: false
-            Details: BIN '131 840' doesn't exist
-    ForbiddenExample:
-      value:
-        Errors:
-          Error:
-          - Source: BINTABLE_API
-            ReasonCode: PERMISSION_DENIED
-            Description: You don't seem authorized to do that
-            Recoverable: false
-            Details: The resource was processed and can't be updated anymore
   schemas:
-    BinResourcePage:
+    ErrorResponse:
       type: object
+      required:
+      - Errors
       properties:
-        currentPageNumber:
-          description: current page indicator
-          type: integer
-          minimum: 1
-          maximum: 100000000
-          example: 10
-        currentPageSize:
-          description: total elements in current page
-          type: integer
-          minimum: 1
-          maximum: 100000000
-          example: 5000
-        totalPages:
-          description: total pages available with size of page
-          type: integer
-          minimum: 1
-          maximum: 100000000
-          example: 5000
-        totalItems:
-          description: total elements in the database
-          type: integer
-          format: int64
-          minimum: 1
-          maximum: 100000000
-          example: 6000
-        items:
-          description: The items
-          type: array
-          items:
-            $ref: '#/components/schemas/BinResource'
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              $ref: '#/components/schemas/Errors'
     SearchCriteria:
       type: object
       required:
@@ -240,38 +216,6 @@ components:
           minLength: 1
           maxLength: 200
           example: CITIBANK EUROPE PUBLIC LIMITED COMPANY
-    ErrorResponse:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          properties:
-            Error:
-              $ref: '#/components/schemas/Errors'
-    BinResourceArray:
-      type: array
-      items:
-        $ref: '#/components/schemas/BinResource'
-    SearchByAccountRange:
-      type: object
-      required:
-      - accountRange
-      properties:
-        accountRange:
-          type: number
-          description: The first 8 digits of a card number (without spaces), or up to the 11th digit of an account range
-          minimum: 10000000
-          maximum: 99999999999
-          example: 22293261
-    Errors:
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
     BinResource:
       type: object
       properties:
@@ -455,23 +399,114 @@ components:
           example: The provided search value does not exist
           minLength: 0
           maxLength: 500
-  requestBodies:
-    BinResourceSearchRequest:
-      description: BIN Resource Search Request
-      required: true
+    Errors:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    BinResourceArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/BinResource'
+    BinResourcePage:
+      type: object
+      properties:
+        currentPageNumber:
+          description: current page indicator
+          type: integer
+          minimum: 1
+          maximum: 100000000
+          example: 10
+        currentPageSize:
+          description: total elements in current page
+          type: integer
+          minimum: 1
+          maximum: 100000000
+          example: 5000
+        totalPages:
+          description: total pages available with size of page
+          type: integer
+          minimum: 1
+          maximum: 100000000
+          example: 5000
+        totalItems:
+          description: total elements in the database
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 100000000
+          example: 6000
+        items:
+          description: The items
+          type: array
+          items:
+            $ref: '#/components/schemas/BinResource'
+    SearchByAccountRange:
+      type: object
+      required:
+      - accountRange
+      properties:
+        accountRange:
+          type: number
+          description: The first 8 digits of a card number (without spaces), or up to the 11th digit of an account range
+          minimum: 10000000
+          maximum: 99999999999
+          example: 22293261
+  responses:
+    NotAuthorizedErrorResponse:
+      description: Authentication information was missing or invalid
       content:
         application/json:
           schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/SearchCriteria'
-    BinResourceSearchByAccountRangeRequest:
-      description: BIN Resource Search By account range Request
-      required: true
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BINNotFoundExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    NotFoundErrorResponse:
+      description: The URI didn't match an existing resource
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/SearchByAccountRange'
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BINNotFoundExample:
+              $ref: '#/components/examples/BINNotFoundExample'
+    AccountRangeSearchResponse:
+      description: Account Range Search response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BinResourceArray'
+          examples:
+            BINSuccessExample:
+              $ref: '#/components/examples/BINSuccessExample'
+    ForbiddenErrorResponse:
+      description: Insufficient permissions for interacting with the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BINNotFoundExample:
+              $ref: '#/components/examples/ForbiddenExample'
+    BadRequestErrorResponse:
+      description: Invalid or insufficient parameters supplied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BINNotFoundExample:
+              $ref: '#/components/examples/BadRequestExample'
+    BinResourceResponse:
+      description: BIN Resource response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BinResourcePage'
+          examples:
+            FilterBINsExample:
+              $ref: '#/components/examples/SearchBINsExample'
   parameters:
     Size:
       name: size
@@ -498,58 +533,20 @@ components:
       description: The current page based on the number of items per page. Use this value to iterate through all of the paginated data and to know when you are the end of the data.
       example: 1
       required: false
-  responses:
-    NotFoundErrorResponse:
-      description: The URI didn't match an existing resource
+  requestBodies:
+    BinResourceSearchByAccountRangeRequest:
+      description: BIN Resource Search By account range Request
+      required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            BINNotFoundExample:
-              $ref: '#/components/examples/BINNotFoundExample'
-    BadRequestErrorResponse:
-      description: Invalid or insufficient parameters supplied
+            $ref: '#/components/schemas/SearchByAccountRange'
+    BinResourceSearchRequest:
+      description: BIN Resource Search Request
+      required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            BINNotFoundExample:
-              $ref: '#/components/examples/BadRequestExample'
-    AccountRangeSearchResponse:
-      description: Account Range Search response
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/BinResourceArray'
-          examples:
-            BINSuccessExample:
-              $ref: '#/components/examples/BINSuccessExample'
-    NotAuthorizedErrorResponse:
-      description: Authentication information was missing or invalid
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            BINNotFoundExample:
-              $ref: '#/components/examples/UnauthorizedExample'
-    ForbiddenErrorResponse:
-      description: Insufficient permissions for interacting with the resource
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            BINNotFoundExample:
-              $ref: '#/components/examples/ForbiddenExample'
-    BinResourceResponse:
-      description: BIN Resource response
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/BinResourcePage'
-          examples:
-            FilterBINsExample:
-              $ref: '#/components/examples/SearchBINsExample'
+            type: array
+            items:
+              $ref: '#/components/schemas/SearchCriteria'
