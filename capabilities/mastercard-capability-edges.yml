@@ -11,7 +11,7 @@ capability_model:
   attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
     CC BY 4.0
   notice: NOTICE
-edge_count: 17
+edge_count: 23
 edges:
 - tag: Cards
   spec_file: mastercard-cards-api-openapi.yml
@@ -66,6 +66,29 @@ edges:
   reason: Although the tag is just the vendor name, the operations submit and update suspected fraud records
     for issuer investigation and confirmation, which is transaction fraud detection and investigation.
     Schemas SuspectedFraud and Fraud confirm the reading.
+- tag: Account  Opening
+  spec_file: mastercard-account-opening-api-openapi.yml
+  capability_id: BC-1300.10
+  capability_id_l1: BC-1300
+  capability_name: Customer Onboarding Management
+  confidence: 0.8
+  evidence: 'POST /openings  retrieveAccountOpeningInsights  Response will provide device, IP and user
+    insights; schemas: AccountOpeningData, IPRiskScore, MatchToName'
+  reason: Provides device/IP/identity risk insights at account opening, directly supporting customer onboarding
+    and identity verification for account opening.
+  recovered_from: capability-edges-sweep.json
+- tag: Aggregate
+  spec_file: mastercard-aggregate-api-openapi.yml
+  capability_id: BC-740.20
+  capability_id_l1: BC-740
+  capability_name: Climate & Carbon Management
+  confidence: 0.8
+  evidence: GET /issuers/users/{userid}/aggregate-carbon-scores — "Fetches Monthly Aggregate Carbon Score
+    for the Transactions Made for the Current Month"; schema AggregateCarbonScore
+  reason: The operation computes a carbon score for a user's transactions, i.e. carbon footprint calculation
+    and disclosure. That is Climate & Carbon Management; the title's bill-payment framing is spurious
+    per the split-spec caveat.
+  recovered_from: capability-edges-sweep.json
 - tag: Confirmations
   spec_file: mastercard-confirmations-api-openapi.yml
   capability_id: BC-1340.10
@@ -166,6 +189,30 @@ edges:
     issuance/replacement in the card lifecycle. Confidence tempered because card replacement requests
     are also a customer-servicing act (BC-1300.30), but the issuance of a replacement card is the substantive
     outcome.
+- tag: Verifications
+  spec_file: mastercard-verifications-api-openapi.yml
+  capability_id: BC-1300
+  capability_id_l1: BC-1300
+  capability_name: Banking Customer Management
+  confidence: 0.72
+  evidence: POST /source-verifications/{issuing_country}/passports — "Verifies the details of a passport
+    document with an identity verification provider"; "Add & Validate an Email Address Verify an OTP Code"
+  reason: Operations perform identity document and contact-point verification (passport, driving licence,
+    Medicare card, email/SMS OTP) building a verified identity record — customer identity verification
+    within banking customer management. Ambiguous between onboarding/account-opening verification (BC-1300.10)
+    and KYC/CDD (BC-1300.20), so only L1 asserted.
+  recovered_from: capability-edges-sweep.json
+- tag: Benefit-Allocations-Card-Management
+  spec_file: mastercard-benefit-allocations-card-management-api-openapi.yml
+  capability_id: BC-1340.60
+  capability_id_l1: BC-1340
+  capability_name: Card Issuance Management
+  confidence: 0.7
+  evidence: POST /cards  cardReplacement  Mastercard Replace Card Number for a Cardholder; PUT /cards  freezeUnfreeze  Mastercard
+    Freeze/unfreeze a Card for Benefits
+  reason: Operations perform card lifecycle actions — replacing a cardholder's card number and freezing/unfreezing
+    a card — which is card issuance and card-status management rather than any employee-benefits capability.
+  recovered_from: capability-edges-sweep.json
 - tag: Catalogs
   spec_file: mastercard-catalogs-api-openapi.yml
   capability_id: BC-420.40
@@ -201,3 +248,26 @@ edges:
     account resolution and refund confirmations — processing and lifecycle handling of payment instructions.
     L2 payment processing chosen over initiation because the endpoints act on already-created payment
     requests; confidence 0.7 given the initiation/processing boundary is blurred.
+- tag: Sources
+  spec_file: mastercard-sources-api-openapi.yml
+  capability_id: BC-1300.10
+  capability_id_l1: BC-1300
+  capability_name: Customer Onboarding Management
+  confidence: 0.7
+  evidence: '"Verifies the details of a passport document with an identity verification provider"; POST
+    /source-verifications/{issuing_country}/driving-licenses'
+  reason: Operations verify government identity documents against an identity verification provider —
+    identity verification supporting account opening. Sub-capability could arguably be KYC/CDD, hence
+    0.7 rather than higher.
+  recovered_from: capability-edges-sweep.json
+- tag: Transaction
+  spec_file: mastercard-transaction-api-openapi.yml
+  capability_id: BC-740.20
+  capability_id_l1: BC-740
+  capability_name: Climate & Carbon Management
+  confidence: 0.7
+  evidence: POST /payment-cards/transaction-footprints/aggregates — 'Fetches carbon score for payment
+    cards and aggregates the same on a weekly and monthly basis'; schemas TransactionFootprint, ClimateProfile
+  reason: Despite the generic 'Transaction' tag, the operations compute and aggregate carbon footprints
+    from card transaction data — a carbon measurement service rather than payment processing.
+  recovered_from: capability-edges-gap.json
