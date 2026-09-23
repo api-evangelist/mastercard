@@ -1,7 +1,9 @@
 ---
 title: Artificial Intelligence News, Blogs, Articles, Podcasts and ...
 url: https://www.mastercard.com/us/en/news-and-trends/featured-topic/artificial-intelligence-featured-topic.html
-date: '2026-05-25'
+published: ''
+date_basis: harvested
+harvested: '2026-05-25'
 query: '"MasterCard" press release artificial intelligence'
 position: 1
 source: serpapi-google

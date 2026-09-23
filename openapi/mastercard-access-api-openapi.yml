@@ -1,7 +1,7 @@
 openapi: 3.2.0
 info:
   title: Mastercard ID for Trust Providers Access API
-  description: Mastercard ID for Trust Providers is a service that helps businesses and organizations verify the identity of their customers. By utilizing advanced technology and security measures, Mastercard ID for Trust Providers enables businesses to securely authenticate the identities of individuals in real-time, reducing the risk of fraud and ensuring a seamless and secure customer experience. This service allows businesses to confidently verify the identities of their customers, streamlining operations and improving trust and security in online transactions. With Mastercard ID for Trust Providers, businesses can effectively combat fraud and identity theft, safeguarding sensitive information and enhancing the overall customer experience.
+  description: Mastercard ID for Trust Providers is a service that helps businesses and organizations verify the identity of their customers.
   contact:
     name: API Support
     email: apisupport@mastercard.com
@@ -28,8 +28,12 @@ paths:
           $ref: '#/components/responses/AccessTokensResponse'
         '400':
           $ref: '#/components/responses/BadRequestError'
-      description: "Returns a `SDK Token` token to be passed to the MIDS verification SDK\nmodule.   \n**This API is mandatory.**\n"
-      summary: Request a token to enroll an identity.
+      description: 'Returns a `SDK Token` token to be passed to the MIDS verification SDK
+
+        module.
+
+        **This API is mandatory.**'
+      summary: Request a token to enroll an identity
       operationId: getAccessToken
       parameters:
       - $ref: '#/components/parameters/XEncryptedPayload'
@@ -37,41 +41,6 @@ paths:
         $ref: '#/components/requestBodies/AccessTokensRequest'
 components:
   schemas:
-    AccessTokenCommonFields:
-      required:
-      - countryCode
-      - sdkVersion
-      - channelType
-      - userProfileId
-      type: object
-      properties:
-        countryCode:
-          $ref: '#/components/schemas/CountryCode'
-        sdkVersion:
-          $ref: '#/components/schemas/SdkVersion'
-        channelType:
-          type: string
-          description: The platform from where the request is originating Web/SDK.
-          enum:
-          - WEB
-          - SDK
-          minLength: 3
-          maxLength: 3
-          example: WEB
-        userProfileId:
-          type: string
-          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
-          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-          example: df52649e-4096-456a-bca0-751ee470009f
-        sdkAuditEvents:
-          type: array
-          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
-          items:
-            $ref: '#/components/schemas/AuditEventsItem'
-        tpAuditMetadata:
-          $ref: '#/components/schemas/TpAuditMetadata'
-        arid:
-          $ref: '#/components/schemas/ARID'
     TpAuditMetadata:
       required:
       - sessionId
@@ -93,50 +62,6 @@ components:
           minLength: 36
           maxLength: 36
           example: be3ad617-04ad-43e1-a438-79425b6511b6
-    ErrorResponse:
-      required:
-      - Errors
-      type: object
-      description: The error response model used by all the API endpoints.
-      properties:
-        Errors:
-          required:
-          - Error
-          type: object
-          description: The error response model used by all the API endpoints.
-          properties:
-            Error:
-              type: array
-              description: A list of Error objects.
-              minItems: 1
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    description: The source of the problem. That is where the error occurred.
-                    example: mids
-                  ReasonCode:
-                    type: string
-                    description: A code defining the error, as defined in documentation.
-                    example: USER_PROFILE_ID_NOT_FOUND
-                  Description:
-                    type: string
-                    description: A description of this specific occurrence of the Reason code.
-                    example: The provided user profile ID does not exist.
-                  Recoverable:
-                    type: boolean
-                    description: Whether or not retrying this request could result in a successful response.
-                    example: false
-                  Details:
-                    type: string
-                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
-                    example: User X was not found
-                  redirectUri:
-                    type: string
-                    description: TP will use this URI to redirect to RP.
-                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
-                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
     AccessToken:
       required:
       - apiDataCenter
@@ -162,14 +87,13 @@ components:
           minLength: 1
           maxLength: 2
           example: SG
-    ARID:
+    SdkVersion:
       type: string
-      description: A unique identifier for any activity being executed arising out of a Claim Share request. This value is passed as a parameter in the URL redirecting a User to the TP Flow during a Claim Share.
-      format: uuid
-      pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-      minLength: 36
-      maxLength: 36
-      example: a15fa6de-b199-11eb-8529-0242ac130003
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
     AuditEventsItem:
       type: object
       properties:
@@ -302,13 +226,14 @@ components:
               type: object
               description: Response Details.
               example: Response Data
-    SdkVersion:
+    ARID:
       type: string
-      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
-      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
-      minLength: 5
-      maxLength: 255
-      example: 2.3.0
+      description: A unique identifier for any activity being executed arising out of a Claim Share request. This value is passed as a parameter in the URL redirecting a User to the TP Flow during a Claim Share.
+      format: uuid
+      pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+      minLength: 36
+      maxLength: 36
+      example: a15fa6de-b199-11eb-8529-0242ac130003
     RetrieveAccessToken:
       required:
       - countryCode
@@ -325,6 +250,85 @@ components:
             maxLength: 20
             example: RETAIL
       - $ref: '#/components/schemas/AccessTokenCommonFields'
+    AccessTokenCommonFields:
+      required:
+      - countryCode
+      - sdkVersion
+      - channelType
+      - userProfileId
+      type: object
+      properties:
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+        channelType:
+          type: string
+          description: The platform from where the request is originating Web/SDK.
+          enum:
+          - WEB
+          - SDK
+          minLength: 3
+          maxLength: 3
+          example: WEB
+        userProfileId:
+          type: string
+          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      description: The error response model used by all the API endpoints.
+      properties:
+        Errors:
+          required:
+          - Error
+          type: object
+          description: The error response model used by all the API endpoints.
+          properties:
+            Error:
+              type: array
+              description: A list of Error objects.
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The source of the problem. That is where the error occurred.
+                    example: mids
+                  ReasonCode:
+                    type: string
+                    description: A code defining the error, as defined in documentation.
+                    example: USER_PROFILE_ID_NOT_FOUND
+                  Description:
+                    type: string
+                    description: A description of this specific occurrence of the Reason code.
+                    example: The provided user profile ID does not exist.
+                  Recoverable:
+                    type: boolean
+                    description: Whether or not retrying this request could result in a successful response.
+                    example: false
+                  Details:
+                    type: string
+                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+                    example: User X was not found
+                  redirectUri:
+                    type: string
+                    description: TP will use this URI to redirect to RP.
+                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
     CountryCode:
       type: string
       description: The country code of the country where the transaction originates from.
@@ -358,6 +362,13 @@ components:
         '
       example: true
       schema: null
+  requestBodies:
+    AccessTokensRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RetrieveAccessToken'
+      required: true
   responses:
     AccessTokensResponse:
       description: Success.
@@ -384,10 +395,3 @@ components:
           examples:
             UserProfileDeletedErrorExample:
               $ref: '#/components/examples/UserProfileDeletedErrorExample'
-  requestBodies:
-    AccessTokensRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/RetrieveAccessToken'
-      required: true

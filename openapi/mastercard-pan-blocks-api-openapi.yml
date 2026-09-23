@@ -20,7 +20,7 @@ paths:
     post:
       tags:
       - PAN Blocks
-      summary: Blocks a PAN from being auto-enrolled in the rewards system.
+      summary: Blocks a PAN from being auto-enrolled in the rewards system
       description: Provides the capability of restricting a BAN from being auto-enrolled in a particular program within a specified time frame. It also provides the capability of unblocking PAN enrollment.
       operationId: PanBlock
       x-mastercard-api-encrypted: true
@@ -32,20 +32,31 @@ paths:
         '400':
           $ref: '#/components/responses/ErrorsResponse'
 components:
-  responses:
-    ErrorsResponse:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorsWrapper'
-    PanBlockResponse:
-      description: Successfully blocked PAN auto enrollment.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PanBlockAutoEnrollment'
   schemas:
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of the error
+          example: user-management
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during API request processing.
+          example: INVALID_FIELD_FORMAT
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Email Address must be in the valid format.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about the data received.
+          example: Invalid Details
+      description: Error Details
     Errors:
       required:
       - Error
@@ -94,37 +105,6 @@ components:
           description: Program identifier for the program in which the cardholder is enrolled. Note the program identifier is filler name and not a sequential ID.
           example:
           - PGM41632
-    ErrorsWrapper:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    ErrorItem:
-      type: object
-      properties:
-        Source:
-          type: string
-          description: Source of the error
-          example: user-management
-        ReasonCode:
-          type: string
-          description: A unique constant identifying the error case encountered during API request processing.
-          example: INVALID_FIELD_FORMAT
-        Description:
-          type: string
-          description: Short description of the ReasonCode field.
-          example: Email Address must be in the valid format.
-        Recoverable:
-          type: boolean
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
-          example: false
-        Details:
-          type: string
-          description: Where appropriate, indicates detailed information about the data received.
-          example: Invalid Details
-      description: Error Details
     PanBlockAutoEnrollment:
       type: object
       properties:
@@ -132,6 +112,26 @@ components:
           type: string
           description: result
           example: Successfully blocked PAN auto enrollment
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+  responses:
+    ErrorsResponse:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+    PanBlockResponse:
+      description: Successfully blocked PAN auto enrollment.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PanBlockAutoEnrollment'
   requestBodies:
     PanBlockRequest:
       required: true

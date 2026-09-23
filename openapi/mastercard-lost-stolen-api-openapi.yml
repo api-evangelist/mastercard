@@ -20,7 +20,7 @@ paths:
     post:
       tags:
       - Lost Stolen
-      summary: Allows a consumer to replace a card that was lost or stolen, with a new card.
+      summary: Allows a consumer to replace a card that was lost or stolen, with a new card
       description: Depending upon the action code provided, will replace Bank Account Number and/or Bank Customer Number with new values.
       operationId: lostStolenCard
       x-mastercard-api-encrypted: true
@@ -33,19 +33,50 @@ paths:
           $ref: '#/components/responses/ErrorsResponse'
 components:
   responses:
-    ErrorsResponse:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorsWrapper'
     LostStolenCardResponse:
       description: Successfully processed Lost Stolen request.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/LostStolen'
+    ErrorsResponse:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
   schemas:
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of the error
+          example: user-management
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during API request processing.
+          example: INVALID_FIELD_FORMAT
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Email Address must be in the valid format.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about the data received.
+          example: Invalid Details
+      description: Error Details
+    LostStolen:
+      type: object
+      properties:
+        message:
+          type: string
+          description: result
+          example: Successfully processed Lost Stolen request
     Errors:
       required:
       - Error
@@ -56,13 +87,6 @@ components:
           description: Error Details
           items:
             $ref: '#/components/schemas/ErrorItem'
-    LostStolen:
-      type: object
-      properties:
-        message:
-          type: string
-          description: result
-          example: Successfully processed Lost Stolen request
     LostStolenCard:
       required:
       - oldAccountId
@@ -110,30 +134,6 @@ components:
       properties:
         Errors:
           $ref: '#/components/schemas/Errors'
-    ErrorItem:
-      type: object
-      properties:
-        Source:
-          type: string
-          description: Source of the error
-          example: user-management
-        ReasonCode:
-          type: string
-          description: A unique constant identifying the error case encountered during API request processing.
-          example: INVALID_FIELD_FORMAT
-        Description:
-          type: string
-          description: Short description of the ReasonCode field.
-          example: Email Address must be in the valid format.
-        Recoverable:
-          type: boolean
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
-          example: false
-        Details:
-          type: string
-          description: Where appropriate, indicates detailed information about the data received.
-          example: Invalid Details
-      description: Error Details
   requestBodies:
     LostStolenCardRequest:
       required: true

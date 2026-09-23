@@ -33,26 +33,30 @@ paths:
           $ref: '#/components/responses/ErrorsResponse'
 components:
   schemas:
-    UserReferences:
-      required:
-      - userReference
+    ErrorItem:
       type: object
       properties:
-        userReferences:
-          type: array
-          description: User Reference
-          items:
-            $ref: '#/components/schemas/UserReference'
-    Errors:
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          type: array
-          description: Error Details
-          items:
-            $ref: '#/components/schemas/ErrorItem'
+        Source:
+          type: string
+          description: Source of the error
+          example: user-management
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during API request processing.
+          example: INVALID_FIELD_FORMAT
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Email Address must be in the valid format.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about the data received.
+          example: Invalid Details
+      description: Error Details
     AccountDetails:
       type: object
       properties:
@@ -73,13 +77,42 @@ components:
           description: Last four digits of the BAN.
           example: '5678'
       description: Account Details
-    ErrorsWrapper:
-      required:
-      - Errors
+    UserReference:
       type: object
       properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
+        customerId:
+          type: string
+          description: RANCU corresponding to the input User ID.
+          example: '123456789120011421'
+        customerNumber:
+          type: string
+          description: BCN corresponding to the input User ID.
+          example: '5114000000005678'
+        accountDetails:
+          type: array
+          description: Account Details
+          items:
+            $ref: '#/components/schemas/AccountDetails'
+    UserReferences:
+      required:
+      - userReference
+      type: object
+      properties:
+        userReferences:
+          type: array
+          description: User Reference
+          items:
+            $ref: '#/components/schemas/UserReference'
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error Details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
     UserSearch:
       required:
       - userId
@@ -108,46 +141,13 @@ components:
           type: boolean
           description: When set to true, only primary accounts details are included in the response.
           example: true
-    ErrorItem:
+    ErrorsWrapper:
+      required:
+      - Errors
       type: object
       properties:
-        Source:
-          type: string
-          description: Source of the error
-          example: user-management
-        ReasonCode:
-          type: string
-          description: A unique constant identifying the error case encountered during API request processing.
-          example: INVALID_FIELD_FORMAT
-        Description:
-          type: string
-          description: Short description of the ReasonCode field.
-          example: Email Address must be in the valid format.
-        Recoverable:
-          type: boolean
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
-          example: false
-        Details:
-          type: string
-          description: Where appropriate, indicates detailed information about the data received.
-          example: Invalid Details
-      description: Error Details
-    UserReference:
-      type: object
-      properties:
-        customerId:
-          type: string
-          description: RANCU corresponding to the input User ID.
-          example: '123456789120011421'
-        customerNumber:
-          type: string
-          description: BCN corresponding to the input User ID.
-          example: '5114000000005678'
-        accountDetails:
-          type: array
-          description: Account Details
-          items:
-            $ref: '#/components/schemas/AccountDetails'
+        Errors:
+          $ref: '#/components/schemas/Errors'
   responses:
     ErrorsResponse:
       description: Bad Request

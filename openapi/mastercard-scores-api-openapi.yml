@@ -20,14 +20,12 @@ paths:
     post:
       tags:
       - Scores
-      summary: Retrieval of Mastercard Transaction-based Credit Scores and Data Insights.
+      summary: Retrieval of Mastercard Transaction-based Credit Scores and Data Insights
       description: 'Using the provided encrypted list of PAN and consent,
 
         returns a delinquency score,
 
-        that can be used by lenders to make credit application decisions.
-
-        '
+        that can be used by lenders to make credit application decisions.'
       operationId: getScores
       x-mastercard-api-encrypted: true
       requestBody:
@@ -60,6 +58,56 @@ components:
           schema:
             $ref: '#/components/schemas/ConsumerCreditAnalyticsScore'
   schemas:
+    PredictionDataSuccess:
+      type: object
+      properties:
+        customerPAN:
+          type: string
+          description: The card number for which the score is retrieved.
+          example: 5553********4105
+          minimum: 16
+          maximum: 19
+        scores:
+          type: array
+          description: Score data for the card numbers.
+          items:
+            $ref: '#/components/schemas/score'
+          example: []
+    ConsumerCreditAnalyticsScore:
+      type: object
+      properties:
+        predictionDataSuccesses:
+          type: array
+          description: List of scores retrieved for the card numbers.
+          items:
+            $ref: '#/components/schemas/PredictionDataSuccess'
+          example: []
+        predictionDataErrors:
+          type: array
+          description: List of errors while retrieving the score for the card numbers.
+          items:
+            $ref: '#/components/schemas/PredictionDataError'
+          example: []
+    ErrorWrapper:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    PredictionDataError:
+      type: object
+      properties:
+        customerPAN:
+          type: string
+          description: The card number for which error is thrown
+          example: 5553********4106
+        errors:
+          type: array
+          description: List of errors for card number.
+          items:
+            $ref: '#/components/schemas/ErrorData'
+          example: []
     Error:
       type: object
       properties:
@@ -83,21 +131,6 @@ components:
           type: string
           description: Where appropriate, indicates detailed information about data received and calculated during request processing, to help the user with diagnosing errors.
           example: The PAN argument does not match any of the supported, valid PAN numbers
-    PredictionDataSuccess:
-      type: object
-      properties:
-        customerPAN:
-          type: string
-          description: The card number for which the score is retrieved.
-          example: 5553********4105
-          minimum: 16
-          maximum: 19
-        scores:
-          type: array
-          description: Score data for the card numbers.
-          items:
-            $ref: '#/components/schemas/score'
-          example: []
     Errors:
       type: object
       required:
@@ -105,34 +138,6 @@ components:
       properties:
         Error:
           $ref: '#/components/schemas/ErrorList'
-    ErrorList:
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
-    ErrorData:
-      type: object
-      properties:
-        reasonCode:
-          type: string
-          description: A short description of the ErrorCode field.
-          example: PAN_NOT_FOUND
-        errorMessage:
-          type: string
-          description: A detailed description of the Error.
-          example: This error is thrown when a PAN number is not found in Mastercard database
-        modelName:
-          type: string
-          description: Name of the model used for scoring against customerPANs.
-          example: CCA_CCS_Del_M1_v1.0
-        scoreType:
-          type: string
-          description: A score type for which score is not retrieved.
-          example: DELINQUENCY
-        productType:
-          type: string
-          description: A product type for which score is not retrieved.
-          example: CREDIT_CARD
     ConsumerCreditAnalytics:
       type: object
       description: 'Object containing list of customer PAN''s along with score type and product type for which score will be fetched.
@@ -212,13 +217,34 @@ components:
           type: boolean
           description: Indicates whether the card is not issued by the bank requesting the score.
           example: true
-    ErrorWrapper:
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    ErrorData:
       type: object
-      required:
-      - Errors
       properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
+        reasonCode:
+          type: string
+          description: A short description of the ErrorCode field.
+          example: PAN_NOT_FOUND
+        errorMessage:
+          type: string
+          description: A detailed description of the Error.
+          example: This error is thrown when a PAN number is not found in Mastercard database
+        modelName:
+          type: string
+          description: Name of the model used for scoring against customerPANs.
+          example: CCA_CCS_Del_M1_v1.0
+        scoreType:
+          type: string
+          description: A score type for which score is not retrieved.
+          example: DELINQUENCY
+        productType:
+          type: string
+          description: A product type for which score is not retrieved.
+          example: CREDIT_CARD
     CustomerPAN:
       type: object
       properties:
@@ -230,34 +256,6 @@ components:
           type: boolean
           description: A parameter indicating that the user of this API has consent to pull the score for the requested PAN number.
           example: true
-    ConsumerCreditAnalyticsScore:
-      type: object
-      properties:
-        predictionDataSuccesses:
-          type: array
-          description: List of scores retrieved for the card numbers.
-          items:
-            $ref: '#/components/schemas/PredictionDataSuccess'
-          example: []
-        predictionDataErrors:
-          type: array
-          description: List of errors while retrieving the score for the card numbers.
-          items:
-            $ref: '#/components/schemas/PredictionDataError'
-          example: []
-    PredictionDataError:
-      type: object
-      properties:
-        customerPAN:
-          type: string
-          description: The card number for which error is thrown
-          example: 5553********4106
-        errors:
-          type: array
-          description: List of errors for card number.
-          items:
-            $ref: '#/components/schemas/ErrorData'
-          example: []
   examples:
     BadRequestExample:
       value:

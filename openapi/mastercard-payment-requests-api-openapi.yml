@@ -1,7 +1,7 @@
 openapi: 3.2.0
 info:
-  title: Mastercard Debtor Service Provider Resources Payment  Requests API
-  description: Online checkouts can be frustrating and tedious. As shopping habits shift to digital, consumers and merchants require secure and streamlined online experiences. Mastercard Account to Account Commerce enables debtor service providers (DSP) to provide their debtors (customers) with a fast, secure, and convenient way to pay using their mobile banking app.= Through Account to Account Commerce, the debtors can view their balance before checkout, initiate refunds, and use their accounts for recurring payments or frequent purchases.
+  title: Mastercard Debtor Service Provider Resources Payment…
+  description: Online checkouts can be frustrating and tedious.
   contact:
     name: API Support
     email: apisupport@mastercard.com
@@ -13,13 +13,13 @@ servers:
 - url: https://services.mastercard.com/zapp/pbarfp/dsp
   description: Production environment.
 tags:
-- name: Payment  Requests
+- name: Payment Requests
 paths:
   /payment-request-retrievals:
     post:
       tags:
-      - Payment  Requests
-      summary: Mastercard Retrieve Payment Request Details.
+      - Payment Requests
+      summary: Mastercard Retrieve Payment Request Details
       description: Enables DSP to retrieve request for payment using either paymentRequestLifecycleId or paymentRequestReferenceNumber to present it to the debtor and obtain consent for funds transfer.
       operationId: retrievePaymentRequest
       parameters:
@@ -41,15 +41,14 @@ paths:
         dispatcher: FALLBACK
 components:
   schemas:
-    NewPaymentRequestDetailRetrieval:
-      allOf:
-      - $ref: '#/components/schemas/MessageRequestBlock'
-      - type: object
-        required:
-        - transaction
-        properties:
-          transaction:
-            $ref: '#/components/schemas/TransactionForPaymentRetrieval'
+    ErrorWrapper:
+      description: A top level object for errors.
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
     PaymentRequestDetailRetrieval:
       allOf:
       - $ref: '#/components/schemas/MessageResponseBlock'
@@ -102,32 +101,6 @@ components:
           minimum: 1
           maximum: 999
           description: Unique identifier assigned by Mastercard to define the commercial product construct. * Refer to Codes and Formats section for more details.
-    ErrorWrapper:
-      description: A top level object for errors.
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    DebtorAckForPaymentRetrieval:
-      type: object
-      required:
-      - debtorId
-      - debtorServiceProviderId
-      properties:
-        debtorId:
-          type: string
-          example: Fxrsi5345
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier of the Debtor provided to Mastercard by the DSP.
-        debtorServiceProviderId:
-          type: string
-          example: 000369
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned to the DSP during Mastercard onboarding.
     Error:
       description: A single error.
       type: object
@@ -152,20 +125,6 @@ components:
           type: string
           example: Invalid structure
           description: Optional details of the error.
-    Errors:
-      description: Object that contains the list of errors.
-      type: object
-      required:
-      - Error
-      properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList'
-    ErrorList:
-      description: The list of errors.
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
     CreditorAckForPaymentRetrieval:
       type: object
       required:
@@ -354,37 +313,54 @@ components:
           type: boolean
           example: true
           description: Indicates a request from Creditor to DSP to step-up authentication for the transaction.
-    MessageResponseBlock:
+    Amount:
+      required:
+      - currency
+      - value
+      type: object
+      properties:
+        currency:
+          type: string
+          example: GBP
+          maxLength: 3
+          minLength: 3
+          description: ISO 4217 code for Currency.
+        value:
+          type: number
+          example: 100.25
+          description: Amount value.
+    Errors:
+      description: Object that contains the list of errors.
       type: object
       required:
-      - messageId
-      - creationDateTime
-      - initiatingPartyId
-      - originalMessageId
+      - Error
       properties:
-        initiatingPartyId:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorList:
+      description: The list of errors.
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    DebtorAckForPaymentRetrieval:
+      type: object
+      required:
+      - debtorId
+      - debtorServiceProviderId
+      properties:
+        debtorId:
           type: string
-          example: ZAPP
+          example: Fxrsi5345
           minLength: 1
           maxLength: 35
-          description: Unique identifier of the message sender.
-        messageId:
+          description: Unique identifier of the Debtor provided to Mastercard by the DSP.
+        debtorServiceProviderId:
           type: string
-          example: 3bef00e542ec4be583b1b5d449799084
+          example: 000369
           minLength: 1
           maxLength: 35
-          description: A point-to-point unique identifier is assigned to every message by the message initiator.
-        creationDateTime:
-          type: string
-          example: '2020-11-20T06:57:24.465Z'
-          format: date-time
-          description: ISO 8601 format date and time in Coordinated Universal Time (UTC) when this message was created.
-        originalMessageId:
-          type: string
-          example: 7eab4eab35a542e085add0363a49c035
-          minLength: 1
-          maxLength: 35
-          description: Original message identifier generated and sent by the initiator of the request message.
+          description: Unique identifier assigned to the DSP during Mastercard onboarding.
     TransactionForPaymentRetrieval:
       type: object
       required:
@@ -422,85 +398,47 @@ components:
           minLength: 6
           maxLength: 6
           description: Unique 6 character reference provided by Mastercard to the CSP to be conveyed to the Debtor to make a payment.
-    Amount:
-      required:
-      - currency
-      - value
+    NewPaymentRequestDetailRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - transaction
+        properties:
+          transaction:
+            $ref: '#/components/schemas/TransactionForPaymentRetrieval'
+    MessageResponseBlock:
       type: object
+      required:
+      - messageId
+      - creationDateTime
+      - initiatingPartyId
+      - originalMessageId
       properties:
-        currency:
+        initiatingPartyId:
           type: string
-          example: GBP
-          maxLength: 3
-          minLength: 3
-          description: ISO 4217 code for Currency.
-        value:
-          type: number
-          example: 100.25
-          description: Amount value.
-  headers:
-    X-Product-ID:
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: PBARFP
-      description: Unique identifier assigned to the product by Mastercard and given to the participant.
-    X-JWS-Signature:
-      required: true
-      description: JWS detached signature is applied to ensure data integrity.
-      schema:
-        type: string
-        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
-        minLength: 1
-        maxLength: 512
-    X-Participant-ID:
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: '000545'
-      description: Unique identifier assigned to the participant by Mastercard during onboarding.
-    X-Request-ID:
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: 7eab4eab35a542e085add0363a49c035
-      description: Each API request has an associated request identifier. It can be used to match the response to the request and for tracing, troubleshooting and analysis purposes.
-  examples:
-    BadRequestErrorExample:
-      value:
-        Errors:
-          Error:
-          - Source: ZAPP
-            ReasonCode: STVL-9999
-            Description: Invalid structure.
-            Recoverable: false
-            Details: Invalid structure
-    UnauthorisedExample:
-      value:
-        Errors:
-          Error:
-          - Source: ZAPP
-            ReasonCode: SECU-9999
-            Description: Invalid signature.
-            Recoverable: false
-            Details: Invalid signature
+          example: ZAPP
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the message sender.
+        messageId:
+          type: string
+          example: 3bef00e542ec4be583b1b5d449799084
+          minLength: 1
+          maxLength: 35
+          description: A point-to-point unique identifier is assigned to every message by the message initiator.
+        creationDateTime:
+          type: string
+          example: '2020-11-20T06:57:24.465Z'
+          format: date-time
+          description: ISO 8601 format date and time in Coordinated Universal Time (UTC) when this message was created.
+        originalMessageId:
+          type: string
+          example: 7eab4eab35a542e085add0363a49c035
+          minLength: 1
+          maxLength: 35
+          description: Original message identifier generated and sent by the initiator of the request message.
   parameters:
-    X-Participant-ID:
-      name: X-Participant-ID
-      in: header
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: '000545'
-      description: Unique identifier assigned to the participant by Mastercard during onboarding.
     X-Request-ID:
       name: X-Request-ID
       in: header
@@ -511,16 +449,6 @@ components:
         maxLength: 50
         example: 7eab4eab35a542e085add0363a49c035
       description: Each API request has an associated request identifier. It can be used to match the response to the request and used for tracing, troubleshooting and analysis purposes.
-    X-Product-ID:
-      name: X-Product-ID
-      in: header
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: PBARFP
-      description: Unique identifier assigned to the product by Mastercard and given to the participant.
     X-JWS-Signature:
       name: X-JWS-Signature
       in: header
@@ -531,6 +459,78 @@ components:
         example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
         minLength: 1
         maxLength: 512
+    X-Participant-ID:
+      name: X-Participant-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: '000545'
+      description: Unique identifier assigned to the participant by Mastercard during onboarding.
+    X-Product-ID:
+      name: X-Product-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product by Mastercard and given to the participant.
+  examples:
+    UnauthorisedExample:
+      value:
+        Errors:
+          Error:
+          - Source: ZAPP
+            ReasonCode: SECU-9999
+            Description: Invalid signature.
+            Recoverable: false
+            Details: Invalid signature
+    BadRequestErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: ZAPP
+            ReasonCode: STVL-9999
+            Description: Invalid structure.
+            Recoverable: false
+            Details: Invalid structure
+  headers:
+    X-Request-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: 7eab4eab35a542e085add0363a49c035
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and for tracing, troubleshooting and analysis purposes.
+    X-JWS-Signature:
+      required: true
+      description: JWS detached signature is applied to ensure data integrity.
+      schema:
+        type: string
+        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
+        minLength: 1
+        maxLength: 512
+    X-Participant-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: '000545'
+      description: Unique identifier assigned to the participant by Mastercard during onboarding.
+    X-Product-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product by Mastercard and given to the participant.
   requestBodies:
     PaymentRequestDetailRetrievalRequest:
       required: true
@@ -540,22 +540,6 @@ components:
           schema:
             $ref: '#/components/schemas/NewPaymentRequestDetailRetrieval'
   responses:
-    BadRequestErrorResponse:
-      description: 'Invalid structure: The header or payload fails syntax or structural validation.'
-      headers:
-        X-Request-ID:
-          $ref: '#/components/headers/X-Request-ID'
-        X-Product-ID:
-          $ref: '#/components/headers/X-Product-ID'
-        X-Participant-ID:
-          $ref: '#/components/headers/X-Participant-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            BadRequestErrorExample:
-              $ref: '#/components/examples/BadRequestErrorExample'
     UnauthorisedErrorResponse:
       description: Invalid signature. The service fails signature validation.
       headers:
@@ -587,3 +571,19 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PaymentRequestDetailRetrieval'
+    BadRequestErrorResponse:
+      description: 'Invalid structure: The header or payload fails syntax or structural validation.'
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestErrorExample:
+              $ref: '#/components/examples/BadRequestErrorExample'

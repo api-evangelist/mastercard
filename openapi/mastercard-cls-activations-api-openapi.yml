@@ -20,9 +20,7 @@ paths:
     post:
       tags:
       - CLS Activations
-      summary: 'Creates a new CLS offer activation of an account.
-
-        '
+      summary: Creates a new CLS offer activation of an account
       description: Provides the ability for CLS clients to add a new CLS offer activation, in real-time, as Customers pick and link their cards to specific Offers.
       operationId: createActivation
       requestBody:
@@ -36,7 +34,7 @@ paths:
     get:
       tags:
       - CLS Activations
-      summary: Returns a list of all CLS offer activations of an account or filter based on search criteria in the request.
+      summary: Returns a list of all CLS offer activations of an account or filter based on…
       description: Returns a list of all CLS activations of an account or filter based on search criteria in the request. This end point will only accept RANAC as a path parameter.
       operationId: getActivations
       parameters:
@@ -52,7 +50,7 @@ paths:
     put:
       tags:
       - CLS Activations
-      summary: Updates an existing CLS offer activation of an account.
+      summary: Updates an existing CLS offer activation of an account
       description: Provides the ability for the rewards system Value Network (VN) clients to update an existing CLS offer activation as Customers pick and link their card to specific Offers.
       operationId: updateActivation
       parameters:
@@ -91,32 +89,21 @@ components:
           description: Where appropriate, indicates detailed information about the data received.
           example: Invalid Details
       description: Error Details
-    Errors:
-      required:
-      - Error
+    AccountSearchActivations:
       type: object
       properties:
-        Error:
-          type: array
-          description: Error Details
-          items:
-            $ref: '#/components/schemas/ErrorItem'
-    ClsAccountActivationUpdate:
-      required:
-      - activationStatus
-      type: object
-      properties:
-        activationStatus:
+        activationId:
           type: string
-          description: The status of the activation. Valid values are A and I.
-          example: A
-          enum:
-          - A
-          - I
+          description: The unique activation id, like a UUID. No special characters are accepted except for a hyphen (-).
+          example: 9cc35fae-f3cd-11ec-b939-0242ac120002
         transactionFilterCode:
           type: string
-          description: Indicates the purpose of the activation.
-          example: ASATM
+          description: CLS map type codes. The list of valid map type codes is provided by the account manager during on-boarding.
+          example: ASAMT
+        activationStatus:
+          type: string
+          description: The status of the activation. Valid values are A - Active. This is the most common setting for a activation create. I - Inactive.
+          example: A
         expirationDate:
           type: string
           description: The Date of the activation relationship ends.
@@ -129,31 +116,34 @@ components:
           format: date-time
         userDefined1:
           type: string
-          description: Used by the partner to include custom data that does not go anywhere except for the activation.
-          example: UDF 1 Example
+          description: Used by the Partner to include custom data.
+          example: SET1234
         userDefined2:
           type: string
-          description: Used by the partner to include custom data that does not go anywhere except for the activation.
-          example: UDF 2 Example
+          description: Used by the Partner to include custom data.
+          example: '100'
         userDefined3:
           type: string
-          description: Used by the partner to include custom data that does not go anywhere except for the activation.
-          example: UDF 3 Example
+          description: Used by the Partner to include custom data.
+          example: '8001759'
         userDefined4:
           type: string
-          description: Used by the partner to include custom data that does not go anywhere except for the activation.
-          example: UDF 4 Example
+          description: Used by the Partner to include custom data.
+          example: WALMART
         userDefined5:
           type: string
-          description: Used by the partner to include custom data that does not go anywhere except for the activation.
-          example: UDF 5 Example
-    ErrorsWrapper:
+          description: Used by the Partner to include custom data.
+          example: 'null'
+    Errors:
       required:
-      - Errors
+      - Error
       type: object
       properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
+        Error:
+          type: array
+          description: Error Details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
     AccountActivation:
       required:
       - userId
@@ -214,31 +204,22 @@ components:
           type: string
           description: Used by the Partner to include custom data.
           example: UDF 5 Example
-    AccountSearchActivationDetails:
+    ClsAccountActivationUpdate:
       required:
-      - accountActivations
+      - activationStatus
       type: object
       properties:
-        accountActivations:
-          type: array
-          description: accountActivations
-          items:
-            $ref: '#/components/schemas/AccountSearchActivations'
-    AccountSearchActivations:
-      type: object
-      properties:
-        activationId:
-          type: string
-          description: The unique activation id, like a UUID. No special characters are accepted except for a hyphen (-).
-          example: 9cc35fae-f3cd-11ec-b939-0242ac120002
-        transactionFilterCode:
-          type: string
-          description: CLS map type codes. The list of valid map type codes is provided by the account manager during on-boarding.
-          example: ASAMT
         activationStatus:
           type: string
-          description: The status of the activation. Valid values are A - Active. This is the most common setting for a activation create. I - Inactive.
+          description: The status of the activation. Valid values are A and I.
           example: A
+          enum:
+          - A
+          - I
+        transactionFilterCode:
+          type: string
+          description: Indicates the purpose of the activation.
+          example: ASATM
         expirationDate:
           type: string
           description: The Date of the activation relationship ends.
@@ -251,60 +232,82 @@ components:
           format: date-time
         userDefined1:
           type: string
-          description: Used by the Partner to include custom data.
-          example: SET1234
+          description: Used by the partner to include custom data that does not go anywhere except for the activation.
+          example: UDF 1 Example
         userDefined2:
           type: string
-          description: Used by the Partner to include custom data.
-          example: '100'
+          description: Used by the partner to include custom data that does not go anywhere except for the activation.
+          example: UDF 2 Example
         userDefined3:
           type: string
-          description: Used by the Partner to include custom data.
-          example: '8001759'
+          description: Used by the partner to include custom data that does not go anywhere except for the activation.
+          example: UDF 3 Example
         userDefined4:
           type: string
-          description: Used by the Partner to include custom data.
-          example: WALMART
+          description: Used by the partner to include custom data that does not go anywhere except for the activation.
+          example: UDF 4 Example
         userDefined5:
           type: string
-          description: Used by the Partner to include custom data.
-          example: 'null'
+          description: Used by the partner to include custom data that does not go anywhere except for the activation.
+          example: UDF 5 Example
     AccountActivationDetails:
       properties:
         activationId:
           type: string
           description: Unique Id for the activation, this will be optional and will be generated if not populated by the user.
           example: '695026705601132106860975039544'
+    AccountSearchActivationDetails:
+      required:
+      - accountActivations
+      type: object
+      properties:
+        accountActivations:
+          type: array
+          description: accountActivations
+          items:
+            $ref: '#/components/schemas/AccountSearchActivations'
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+  requestBodies:
+    AccountActivationRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountActivation'
+    UpdateActivationRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClsAccountActivationUpdate'
   responses:
+    UpdateActivationResponse:
+      description: Ok
     ErrorsResponse:
       description: Bad Request
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorsWrapper'
-    UpdateActivationResponse:
-      description: Ok
-    ActivationDetailsResponse:
-      description: Successfully retrieved account activations.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AccountSearchActivationDetails'
     AccountActivationResponse:
       description: Successfully activated account.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/AccountActivationDetails'
+    ActivationDetailsResponse:
+      description: Successfully retrieved account activations.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountSearchActivationDetails'
   parameters:
-    ActivationAccountId:
-      name: account_id
-      in: path
-      description: The unique identifier for the given account.
-      required: true
-      schema:
-        type: string
-      example: '5330333671236516'
     ActivationId:
       name: activation_id
       in: query
@@ -313,14 +316,6 @@ components:
       schema:
         type: string
       example: 9cc35fae-f3cd-11ec-b939-0242ac120002
-    AccountActivationId:
-      name: activation_id
-      in: path
-      description: The unique identifier for the given account.
-      required: true
-      schema:
-        type: string
-      example: 61866318-5197-457e-bca7-166c5ff4df20
     ActivationStatus:
       name: activation_status
       in: query
@@ -332,16 +327,19 @@ components:
         - ACTIVE
         - INACTIVE
       example: ACTIVE
-  requestBodies:
-    UpdateActivationRequest:
+    ActivationAccountId:
+      name: account_id
+      in: path
+      description: The unique identifier for the given account.
       required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ClsAccountActivationUpdate'
-    AccountActivationRequest:
+      schema:
+        type: string
+      example: '5330333671236516'
+    AccountActivationId:
+      name: activation_id
+      in: path
+      description: The unique identifier for the given account.
       required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AccountActivation'
+      schema:
+        type: string
+      example: 61866318-5197-457e-bca7-166c5ff4df20

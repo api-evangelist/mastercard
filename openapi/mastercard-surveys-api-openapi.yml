@@ -19,7 +19,7 @@ paths:
     get:
       tags:
       - Surveys
-      summary: A survey that can be answered by the user.
+      summary: A survey that can be answered by the user
       description: The Survey API offers essential features for seamless onboarding onto the Engagement Services platform, enabling integration with diverse surveys designed to fine-tune a climate profile. In response, the API furnishes a comprehensive set of survey questions, inviting user input to gather valuable insights and data.
       operationId: getSurvey
       responses:
@@ -29,6 +29,25 @@ paths:
           $ref: '#/components/responses/ServiceProviderNotFoundError'
 components:
   schemas:
+    Surveys:
+      type: object
+      properties:
+        surveysPayload:
+          $ref: '#/components/schemas/SurveyData'
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
     Error:
       title: Error
       type: object
@@ -76,6 +95,91 @@ components:
       properties:
         Error:
           $ref: '#/components/schemas/ErrorList'
+    Question:
+      properties:
+        choices:
+          description: dropdown or choice
+          items:
+            $ref: '#/components/schemas/Option'
+          type: array
+        description:
+          description: Question asked as a part of survey
+          type: string
+          example: I am curious about my own carbon footprint and how I personally contribute to climate change
+        name:
+          type: string
+          example: interest
+          description: name given to the question
+        title:
+          description: title for survey question
+          type: string
+          example: I am curious about my own carbon footprint and how I personally contribute to climate change
+        type:
+          description: denotes input type of the choices
+          type: string
+          example: radiogroup
+      required:
+      - description
+      - name
+      - title
+      - type
+      type: object
+    Page:
+      properties:
+        questions:
+          description: Array containing the questions for this page
+          items:
+            $ref: '#/components/schemas/Question'
+          type: array
+        name:
+          description: 'Name of this page default: `pageNN` ex `page3`'
+          type: string
+          example: page1
+          minLength: 5
+          maxLength: 20
+        visibleIf:
+          description: to denote if the page will be visible or not. This will only be displayed in the response if a particular page is to be displayed based on a certain condition.
+          type: boolean
+          example: '{haveCar} = ''transport.hasCar'''
+      required:
+      - questions
+      - name
+      type: object
+    SurveyData:
+      title: surveys
+      type: object
+      description: List of survey questions.
+      properties:
+        id:
+          description: Id of survey
+          type: string
+          example: onboarding
+          minLength: 10
+          maxLength: 15
+        language:
+          description: language of user
+          type: string
+          example: en
+          minLength: 2
+          maxLength: 10
+        type:
+          description: The type of survey
+          type: string
+          example: survey
+          minLength: 6
+          maxLength: 20
+        survey:
+          $ref: '#/components/schemas/SurveyJs'
+        version:
+          description: Survey version number
+          type: string
+          example: '1.0'
+          minLength: 2
+          maxLength: 10
+      required:
+      - id
+      - survey
+      - version
     SurveyJs:
       description: SurveyJS compatible survey. See https://surveyjs.io/
       properties:
@@ -113,110 +217,6 @@ components:
       - text
       - value
       type: object
-    ErrorList:
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
-    Page:
-      properties:
-        questions:
-          description: Array containing the questions for this page
-          items:
-            $ref: '#/components/schemas/Question'
-          type: array
-        name:
-          description: 'Name of this page default: `pageNN` ex `page3`'
-          type: string
-          example: page1
-          minLength: 5
-          maxLength: 20
-        visibleIf:
-          description: to denote if the page will be visible or not. This will only be displayed in the response if a particular page is to be displayed based on a certain condition.
-          type: boolean
-          example: '{haveCar} = ''transport.hasCar'''
-      required:
-      - questions
-      - name
-      type: object
-    Question:
-      properties:
-        choices:
-          description: dropdown or choice
-          items:
-            $ref: '#/components/schemas/Option'
-          type: array
-        description:
-          description: Question asked as a part of survey
-          type: string
-          example: I am curious about my own carbon footprint and how I personally contribute to climate change
-        name:
-          type: string
-          example: interest
-          description: name given to the question
-        title:
-          description: title for survey question
-          type: string
-          example: I am curious about my own carbon footprint and how I personally contribute to climate change
-        type:
-          description: denotes input type of the choices
-          type: string
-          example: radiogroup
-      required:
-      - description
-      - name
-      - title
-      - type
-      type: object
-    Surveys:
-      type: object
-      properties:
-        surveysPayload:
-          $ref: '#/components/schemas/SurveyData'
-    ErrorWrapper:
-      title: ErrorWrapper
-      type: object
-      description: The error response object gets returned in case of any error.
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    SurveyData:
-      title: surveys
-      type: object
-      description: List of survey questions.
-      properties:
-        id:
-          description: Id of survey
-          type: string
-          example: onboarding
-          minLength: 10
-          maxLength: 15
-        language:
-          description: language of user
-          type: string
-          example: en
-          minLength: 2
-          maxLength: 10
-        type:
-          description: The type of survey
-          type: string
-          example: survey
-          minLength: 6
-          maxLength: 20
-        survey:
-          $ref: '#/components/schemas/SurveyJs'
-        version:
-          description: Survey version number
-          type: string
-          example: '1.0'
-          minLength: 2
-          maxLength: 10
-      required:
-      - id
-      - survey
-      - version
   responses:
     ServiceProviderNotFoundError:
       description: This response code is returned when the server cannot find the account which has been used to call this API.
@@ -237,6 +237,15 @@ components:
             SurveyResponse:
               $ref: '#/components/examples/SurveyResponseData'
   examples:
+    ServiceProviderNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: ACCOUNT_NOT_FOUND
+            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
+            Recoverable: false
+            Details: ''
     SurveyResponseData:
       value:
       - surveysPayload:
@@ -371,15 +380,6 @@ components:
                 choices:
                 - value: transport.twice
                   text: A couple of times a year
-    ServiceProviderNotFoundError:
-      value:
-        Errors:
-          Error:
-          - Source: Service-Provider-Mgmt
-            ReasonCode: ACCOUNT_NOT_FOUND
-            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
-            Recoverable: false
-            Details: ''
 externalDocs:
   description: ISO 4217 - Currency Code
   url: https://en.wikipedia.org/wiki/ISO_4217

@@ -19,7 +19,7 @@ paths:
     put:
       operationId: updateUserProfile
       description: The Profile Service employs a sophisticated algorithm to compute a detailed climate profile, drawing upon the responses gathered through a survey obtained from the Surveys Service. This process involves a meticulous analysis of user-provided answers to generate a comprehensive and nuanced representation of their climate preferences and perspectives. See (https://surveyjs.io/survey-creator)
-      summary: Calculates a climate profile based on the answers from a survey obtained from the Surveys Service.
+      summary: Calculates a climate profile based on the answers from a survey obtained from…
       tags:
       - Profiles
       requestBody:
@@ -33,6 +33,15 @@ paths:
           $ref: '#/components/responses/ServiceProviderNotFoundError'
 components:
   schemas:
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
     Error:
       title: Error
       type: object
@@ -71,6 +80,13 @@ components:
           minLength: 0
           maxLength: 5000
           example: paymentCardId size must be between 36 and 36
+    Profile:
+      type: object
+      properties:
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
+      required:
+      - profileResponsePayload
     Errors:
       title: Errors
       type: object
@@ -80,11 +96,6 @@ components:
       properties:
         Error:
           $ref: '#/components/schemas/ErrorList'
-    ErrorList:
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
     ClimateProfile:
       description: Represents a Climate Profile for a User. Always use updated profile present in the response, which might include benchmarks, comparisons, insights and surveys.
       properties:
@@ -202,13 +213,6 @@ components:
       - traits
       - version
       type: object
-    Profile:
-      type: object
-      properties:
-        profile:
-          $ref: '#/components/schemas/ClimateProfile'
-      required:
-      - profileResponsePayload
     Profiles:
       title: profiles
       type: object
@@ -307,54 +311,11 @@ components:
           $ref: '#/components/schemas/ClimateProfile'
       required:
       - profilesPayload
-    ErrorWrapper:
-      title: ErrorWrapper
-      type: object
-      description: The error response object gets returned in case of any error.
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-  requestBodies:
-    ProfileRequest:
-      description: List of payment transactions which needs to be scored.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Profiles'
-          examples:
-            ProfileRequest:
-              $ref: '#/components/examples/ProfileRequest'
-      required: true
-  responses:
-    ServiceProviderNotFoundError:
-      description: This response code is returned when the server cannot find the account which has been used to call this API.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            ServiceProviderNotFoundError:
-              $ref: '#/components/examples/ServiceProviderNotFoundError'
-    ProfilePayloadBadRequestError:
-      description: This response code is returned when one or more request parameters is either missing or is invalid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            BadRequestError:
-              $ref: '#/components/examples/ProfilePayloadBadRequestError'
-    Profile:
-      description: The resulting profile.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Profile'
-          examples:
-            ProfileResponse:
-              $ref: '#/components/examples/ProfileResponseData'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
   examples:
     ProfilePayloadBadRequestError:
       value:
@@ -370,6 +331,39 @@ components:
             Description: One of the request parameters is invalid, try again with correct request.
             Recoverable: false
             Details: payload.version must not be null
+    ProfileResponseData:
+      value:
+      - profile:
+          traits:
+            knowledge: 0
+            lifestyle: 0.683
+            motivated: 0.3
+          userAttributes:
+            demo: 34
+            diet: 16399
+            lifestyle: 16
+            energy: 0
+            transport: 0
+            country: AF
+          created: '2024-01-19T09:31:08.065Z'
+          surveys:
+            key1:
+              key2: 1
+              key3: 2
+          persona: '5'
+          benchmarks:
+            key1:
+              key2: 1
+              key3: 2
+          comparisons:
+            key1:
+              key2: 1
+              key3: 2
+          insights:
+            key1:
+              key2: 1
+              key3: 2
+          version: '1.0'
     ProfileRequest:
       value:
         profilesPayload:
@@ -429,39 +423,45 @@ components:
             Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
             Recoverable: false
             Details: ''
-    ProfileResponseData:
-      value:
-      - profile:
-          traits:
-            knowledge: 0
-            lifestyle: 0.683
-            motivated: 0.3
-          userAttributes:
-            demo: 34
-            diet: 16399
-            lifestyle: 16
-            energy: 0
-            transport: 0
-            country: AF
-          created: '2024-01-19T09:31:08.065Z'
-          surveys:
-            key1:
-              key2: 1
-              key3: 2
-          persona: '5'
-          benchmarks:
-            key1:
-              key2: 1
-              key3: 2
-          comparisons:
-            key1:
-              key2: 1
-              key3: 2
-          insights:
-            key1:
-              key2: 1
-              key3: 2
-          version: '1.0'
+  responses:
+    ServiceProviderNotFoundError:
+      description: This response code is returned when the server cannot find the account which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+    ProfilePayloadBadRequestError:
+      description: This response code is returned when one or more request parameters is either missing or is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestError:
+              $ref: '#/components/examples/ProfilePayloadBadRequestError'
+    Profile:
+      description: The resulting profile.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Profile'
+          examples:
+            ProfileResponse:
+              $ref: '#/components/examples/ProfileResponseData'
+  requestBodies:
+    ProfileRequest:
+      description: List of payment transactions which needs to be scored.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Profiles'
+          examples:
+            ProfileRequest:
+              $ref: '#/components/examples/ProfileRequest'
+      required: true
 externalDocs:
   description: ISO 4217 - Currency Code
   url: https://en.wikipedia.org/wiki/ISO_4217

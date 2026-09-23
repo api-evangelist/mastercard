@@ -34,86 +34,7 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedOrderErrorResponse'
 components:
-  responses:
-    UnauthorizedOrderErrorResponse:
-      description: User does not have access to the resource
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorsWrapper'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedOrderExample'
-    BadRequestOrderErrorResponse:
-      description: Something was wrong with the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorsWrapper'
-          examples:
-            BadRequestExample:
-              $ref: '#/components/examples/BadOrderRequestExample'
-    SuccessResponse:
-      description: Status updated successfully
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/OrderStatusArray'
-          examples:
-            SuccessRequestExample:
-              $ref: '#/components/examples/OrderStatusExample'
   schemas:
-    Errors:
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          type: array
-          description: Error details
-          items:
-            $ref: '#/components/schemas/ErrorItem'
-    ErrorsWrapper:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    OrderItemError:
-      type: object
-      properties:
-        fieldName:
-          type: string
-          description: field name
-          example: address1
-        code:
-          type: string
-          description: errorcode
-          example: GRS_1001
-        message:
-          type: string
-          description: error message
-          example: address1 is required
-    History:
-      type: object
-      properties:
-        orderItemNumber:
-          type: string
-          description: order_item_number
-          example: order-item-1
-        eventType:
-          type: string
-          description: event_type
-          example: note
-        eventDate:
-          type: string
-          description: event_date
-          example: '2023-10-03T21:05:10Z'
-        note:
-          type: string
-          description: note
-          example: 'GRS order item created for partner system order number: SL_OCT-03-2023-16-431 Status is pending.'
     OrderStatus:
       type: object
       properties:
@@ -158,11 +79,25 @@ components:
           description: Where appropriate, indicates detailed information about the data received.
           example: Invalid Details
       description: Error Details
-    OrderStatusArray:
-      type: array
-      description: order status array list
-      items:
-        $ref: '#/components/schemas/OrderStatus'
+    History:
+      type: object
+      properties:
+        orderItemNumber:
+          type: string
+          description: order_item_number
+          example: order-item-1
+        eventType:
+          type: string
+          description: event_type
+          example: note
+        eventDate:
+          type: string
+          description: event_date
+          example: '2023-10-03T21:05:10Z'
+        note:
+          type: string
+          description: note
+          example: 'GRS order item created for partner system order number: SL_OCT-03-2023-16-431 Status is pending.'
     OrderItemStatus:
       type: object
       properties:
@@ -196,14 +131,44 @@ components:
           description: history detail of order item
           items:
             $ref: '#/components/schemas/History'
+    OrderItemError:
+      type: object
+      properties:
+        fieldName:
+          type: string
+          description: field name
+          example: address1
+        code:
+          type: string
+          description: errorcode
+          example: GRS_1001
+        message:
+          type: string
+          description: error message
+          example: address1 is required
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    OrderStatusArray:
+      type: array
+      description: order status array list
+      items:
+        $ref: '#/components/schemas/OrderStatus'
   examples:
-    OrderStatusExample:
-      value:
-      - orderId: 656afd7-2396-54345-34545
-        mcOrderId: afd72396-b9c0-11ed-afa1-0242ac120002
-        status: FAILED
-        errorCode: 1001
-        description: '[Combination of ExternalOrderId: (656afd7-2396-54345-34545) and OrderId: (afd72396-b9c0-11ed-afa1-0242ac120002) invalid.]'
     BadOrderRequestExample:
       value:
         Errors:
@@ -212,6 +177,13 @@ components:
             ReasonCode: MISSING_REQUIRED_FIELD_VENDORS_UPDATE_ORDER_REQUEST_LIST[0].MC_ORDER_ID
             Description: McOrderId is blank or null.
             Recoverable: false
+    OrderStatusExample:
+      value:
+      - orderId: 656afd7-2396-54345-34545
+        mcOrderId: afd72396-b9c0-11ed-afa1-0242ac120002
+        status: FAILED
+        errorCode: 1001
+        description: '[Combination of ExternalOrderId: (656afd7-2396-54345-34545) and OrderId: (afd72396-b9c0-11ed-afa1-0242ac120002) invalid.]'
     UnauthorizedOrderExample:
       value:
         Errors:
@@ -220,13 +192,34 @@ components:
             ReasonCode: INVALID_CLIENT_ID
             Description: ClientId doesn't have access to the requested service.
             Recoverable: false
-  requestBodies:
-    OrderStatusRequest:
-      required: true
+  responses:
+    BadRequestOrderErrorResponse:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadOrderRequestExample'
+    UnauthorizedOrderErrorResponse:
+      description: User does not have access to the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedOrderExample'
+    SuccessResponse:
+      description: Status updated successfully
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/OrderStatusArray'
+          examples:
+            SuccessRequestExample:
+              $ref: '#/components/examples/OrderStatusExample'
   parameters:
     VendorId:
       name: vendor_id
@@ -236,3 +229,10 @@ components:
       schema:
         type: string
       example: carltonone
+  requestBodies:
+    OrderStatusRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrderStatusArray'

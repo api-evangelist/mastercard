@@ -41,28 +41,6 @@ paths:
         dispatcher: FALLBACK
 components:
   examples:
-    BadRequestExample:
-      value:
-        Errors:
-          Error:
-          - Source: PAYMENT_SERVICE
-            ReasonCode: BAD_REQUEST
-            Description: We couldn't handle your request
-            Recoverable: false
-            Details: appId should be either MFN or Kupaa
-    AdditionalInfoExample:
-      value:
-        balance: 1500
-        currency: UGX
-    InvalidKeyExample:
-      value:
-        Errors:
-          Error:
-          - Source: PAYMENT_SERVIC
-            ReasonCode: INVALID_KEY
-            Description: Signing certificate must be valid
-            Recoverable: false
-            Details: 'null'
     PaymentValidationStatusExample:
       value:
         accountId: 25471234567
@@ -70,15 +48,10 @@ components:
         additionalInfo:
           balance: 1500
           currency: UGX
-    InvalidAuthHeaderExample:
+    AdditionalInfoExample:
       value:
-        Errors:
-          Error:
-          - Source: PAYMENT_SERVICE
-            ReasonCode: INVALID_AUTH_HEADER
-            Description: Bad Request - No Authorization header set
-            Recoverable: false
-            Details: check if key is passed to call the API
+        balance: 1500
+        currency: UGX
     NotFoundExample:
       value:
         Errors:
@@ -88,7 +61,95 @@ components:
             Description: You requested something we don't have
             Recoverable: false
             Details: Requested resource doesn't exist
+    InvalidAuthHeaderExample:
+      value:
+        Errors:
+          Error:
+          - Source: PAYMENT_SERVICE
+            ReasonCode: INVALID_AUTH_HEADER
+            Description: Bad Request - No Authorization header set
+            Recoverable: false
+            Details: check if key is passed to call the API
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: PAYMENT_SERVICE
+            ReasonCode: BAD_REQUEST
+            Description: We couldn't handle your request
+            Recoverable: false
+            Details: appId should be either MFN or Kupaa
+    InvalidKeyExample:
+      value:
+        Errors:
+          Error:
+          - Source: PAYMENT_SERVIC
+            ReasonCode: INVALID_KEY
+            Description: Signing certificate must be valid
+            Recoverable: false
+            Details: 'null'
+  responses:
+    InvalidKeyError:
+      description: Forbidden-You do not have necessary permission to access this resource on this server.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidKeyExample:
+              $ref: '#/components/examples/InvalidKeyExample'
+    NotFoundError:
+      description: Not Found-The requested resource was not found on this server.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
+    PaymentValidationStatus:
+      description: Payment validations request executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentValidationStatus'
+          examples:
+            PaymentValidationStatusExample:
+              $ref: '#/components/examples/PaymentValidationStatusExample'
+    InvalidAuthHeaderError:
+      description: Bad Request - No Authorization header set
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidAuthHeaderExample:
+              $ref: '#/components/examples/InvalidAuthHeaderExample'
+    BadRequestError:
+      description: Bad Request-The server cannot not process the request due to invalid request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
   schemas:
+    ErrorWrapper:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              $ref: '#/components/schemas/Errors'
+          description: Error object
+          example:
+            $ref: '#/components/examples/BadRequestExample'
     Error:
       type: object
       properties:
@@ -129,6 +190,25 @@ components:
       description: Errors list
       example:
         $ref: '#/components/examples/BadRequestExample'
+    PaymentValidationStatus:
+      type: object
+      properties:
+        accountId:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: '25471234567'
+          description: Account Id
+        accountName:
+          type: string
+          minLength: 1
+          maxLength: 250
+          example: Student Name
+          description: Account Name
+        additionalInfo:
+          $ref: '#/components/schemas/AdditionalInfo'
+      title: ValidationStatus
+      description: Validation Response
     Validation:
       type: object
       properties:
@@ -186,40 +266,6 @@ components:
           example: MOBILE
       title: Validation
       description: Validation Request
-    PaymentValidationStatus:
-      type: object
-      properties:
-        accountId:
-          type: string
-          minLength: 1
-          maxLength: 50
-          example: '25471234567'
-          description: Account Id
-        accountName:
-          type: string
-          minLength: 1
-          maxLength: 250
-          example: Student Name
-          description: Account Name
-        additionalInfo:
-          $ref: '#/components/schemas/AdditionalInfo'
-      title: ValidationStatus
-      description: Validation Response
-    ErrorWrapper:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          properties:
-            Error:
-              $ref: '#/components/schemas/Errors'
-          description: Error object
-          example:
-            $ref: '#/components/examples/BadRequestExample'
     AdditionalInfo:
       type: object
       properties:
@@ -239,52 +285,6 @@ components:
       description: AdditionalInfo Response
       example:
         $ref: '#/components/examples/AdditionalInfoExample'
-  responses:
-    PaymentValidationStatus:
-      description: Payment validations request executed successfully.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PaymentValidationStatus'
-          examples:
-            PaymentValidationStatusExample:
-              $ref: '#/components/examples/PaymentValidationStatusExample'
-    InvalidKeyError:
-      description: Forbidden-You do not have necessary permission to access this resource on this server.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            InvalidKeyExample:
-              $ref: '#/components/examples/InvalidKeyExample'
-    InvalidAuthHeaderError:
-      description: Bad Request - No Authorization header set
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            InvalidAuthHeaderExample:
-              $ref: '#/components/examples/InvalidAuthHeaderExample'
-    NotFoundError:
-      description: Not Found-The requested resource was not found on this server.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            NotFoundExample:
-              $ref: '#/components/examples/NotFoundExample'
-    BadRequestError:
-      description: Bad Request-The server cannot not process the request due to invalid request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            BadRequestExample:
-              $ref: '#/components/examples/BadRequestExample'
   requestBodies:
     ValidationRequest:
       description: Validation Request

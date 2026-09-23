@@ -19,7 +19,7 @@ paths:
     get:
       tags:
       - Catalogs
-      summary: Returns a list of all rewards catalogs for a given program.
+      summary: Returns a list of all rewards catalogs for a given program
       description: Allows the retrieval of the rewards catalog for a given program. This method will provide all levels of the programs catalog hierarchy.
       operationId: getCatalogs
       parameters:
@@ -37,7 +37,7 @@ paths:
     get:
       tags:
       - Catalogs
-      summary: Returns a list of all reward items for a given catalog.
+      summary: Returns a list of all reward items for a given catalog
       description: Returns a list of all reward items for a given catalog and search criteria.
       operationId: getItems
       parameters:
@@ -56,24 +56,22 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedErrorResponse'
 components:
-  examples:
-    BadRequestExample:
-      value:
-        Errors:
-          Error:
-          - Source: mrs-catalog-api
-            ReasonCode: MISSING_REQUIRED_FIELD
-            Description: program_id parameter cannot be null.
-            Recoverable: false
-    UnauthorizedExample:
-      value:
-        Errors:
-          Error:
-          - Source: mrs-catalog-api
-            ReasonCode: INVALID_CLIENT_ID
-            Description: ClientId doesn't have access to the requested service.
-            Recoverable: false
   responses:
+    UnauthorizedErrorResponse:
+      description: User is not found in the reward programs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    Catalog:
+      description: Rewards catalog response for a given program.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CatalogDetails'
     RewardItems:
       description: Reward Matrix Item details result for a given set of items that are associated with a catalog hierarchy.
       content:
@@ -89,56 +87,7 @@ components:
           examples:
             BadRequestExample:
               $ref: '#/components/examples/BadRequestExample'
-    Catalog:
-      description: Rewards catalog response for a given program.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/CatalogDetails'
-    UnauthorizedErrorResponse:
-      description: User is not found in the reward programs.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorsWrapper'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedExample'
   schemas:
-    RedemptionFees:
-      type: object
-      properties:
-        description:
-          type: string
-          description: Description of the fee associated with this reward item.
-          example: Point purchase
-          maxLength: 50
-        amount:
-          type: number
-          description: The fee associated with this reward item.
-          example: 50
-        quantityLevel:
-          type: boolean
-          description: Indicates if the redemption fee amount will be multiplied by the quantity on the redemption.
-          example: true
-    CatalogDetails:
-      type: object
-      properties:
-        catalogs:
-          type: array
-          description: catalogs
-          items:
-            $ref: '#/components/schemas/Catalog'
-    Errors:
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          type: array
-          description: Error details
-          items:
-            $ref: '#/components/schemas/ErrorItem'
     Catalog:
       type: object
       properties:
@@ -166,13 +115,6 @@ components:
           type: boolean
           description: Indicates that the reward catalog hierarchy is the lowest level and therefore has the reward items associated to it.
           example: true
-    ErrorsWrapper:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
     RewardItem:
       type: object
       properties:
@@ -285,22 +227,55 @@ components:
           description: Where appropriate, indicates detailed information about the data received.
           example: Invalid Details
       description: Error Details
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    CatalogDetails:
+      type: object
+      properties:
+        catalogs:
+          type: array
+          description: catalogs
+          items:
+            $ref: '#/components/schemas/Catalog'
+    RedemptionFees:
+      type: object
+      properties:
+        description:
+          type: string
+          description: Description of the fee associated with this reward item.
+          example: Point purchase
+          maxLength: 50
+        amount:
+          type: number
+          description: The fee associated with this reward item.
+          example: 50
+        quantityLevel:
+          type: boolean
+          description: Indicates if the redemption fee amount will be multiplied by the quantity on the redemption.
+          example: true
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
   parameters:
-    ProductCode:
-      name: product_code
+    Keyword:
+      name: keyword
       in: query
+      description: Filters reward items based on the keywords provided.
       schema:
         type: string
-      description: The reward product identifier for the associated account, as defined by the client and configured during the implementation of the program.
-      example: FIDOCASHBACK
-      required: false
-    MinPoints:
-      name: min_points
-      in: query
-      description: Minimum point value for a reward item.
-      schema:
-        type: integer
-      example: 0
+      example: catalog
     CatalogId:
       name: catalog_id
       in: path
@@ -319,20 +294,13 @@ components:
         type: integer
         format: int64
       example: 49631
-    Language:
-      name: language
+    MinPoints:
+      name: min_points
       in: query
-      description: Language for the requested information. Customer preferred language code. This must be a valid language code that is configured for Mastercard program. This field is optional and will return English (en_US), if not specified.
+      description: Minimum point value for a reward item.
       schema:
-        type: string
-      example: en_US
-    Keyword:
-      name: keyword
-      in: query
-      description: Filters reward items based on the keywords provided.
-      schema:
-        type: string
-      example: catalog
+        type: integer
+      example: 0
     MaxPoints:
       name: max_points
       in: query
@@ -340,3 +308,35 @@ components:
       schema:
         type: integer
       example: 9999
+    ProductCode:
+      name: product_code
+      in: query
+      schema:
+        type: string
+      description: The reward product identifier for the associated account, as defined by the client and configured during the implementation of the program.
+      example: FIDOCASHBACK
+      required: false
+    Language:
+      name: language
+      in: query
+      description: Language for the requested information. Customer preferred language code. This must be a valid language code that is configured for Mastercard program. This field is optional and will return English (en_US), if not specified.
+      schema:
+        type: string
+      example: en_US
+  examples:
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: mrs-catalog-api
+            ReasonCode: MISSING_REQUIRED_FIELD
+            Description: program_id parameter cannot be null.
+            Recoverable: false
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mrs-catalog-api
+            ReasonCode: INVALID_CLIENT_ID
+            Description: ClientId doesn't have access to the requested service.
+            Recoverable: false

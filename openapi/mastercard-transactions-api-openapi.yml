@@ -36,7 +36,7 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
       description: Provides merchants transaction or device or identity scores to help with pre-authorization and pre-authentication decisioning. Using this API enables merchants or acquirer to be able to catch fraud early on & reduce fraudulent transactions while improving their risk models.
-      summary: Mastercard Response Will Be Individual and Device Insights for Mvp.
+      summary: Mastercard Response Will Be Individual and Device Insights for Mvp
       operationId: retrieveTransactionInsights
       requestBody:
         $ref: '#/components/requestBodies/TransactionRequest'
@@ -45,6 +45,39 @@ paths:
         dispatcher: FALLBACK
 components:
   schemas:
+    Phone:
+      type: object
+      properties:
+        matchToName:
+          description: 'The match status between either of the input names (person or business) and the queried entity. Possible values are: * not-found * match * no-match'
+          example: no-match
+          type: string
+          minLength: 1
+          maxLength: 100
+        lineType:
+          description: The line type of the phone number. * landline - Traditional wired phone line. * fixed-voip - VOIP-based fixed line phones. * mobile - Wireless phone line. * voicemail - Voicemail-only service. * toll-free - Callee pays for call. * premium - Caller pays a premium for the call-e.g. 976 area code. * non-fixed-voip - Skype, for example. * other - Anything that does not match the previous categories.
+          example: other
+          type: string
+        valid:
+          description: True if the phone number is valid.
+          type: boolean
+          example: true
+        phoneNumberCarrier:
+          description: The company that provides voice and/or data services for the phone number. Carriers are returned at the MVNO level.
+          example: Ekata Telco
+          type: string
+          minLength: 1
+          maxLength: 50
+    EmailRiskScore:
+      type: object
+      properties:
+        score:
+          description: Comprehensive risk score associated with an email address, with a higher score indicating a riskier individual.  A number between 0 and 1 rounded to three decimal places.
+          format: double
+          maximum: 1
+          type: number
+          minimum: 0
+          example: 0.445
     Address:
       type: object
       properties:
@@ -85,139 +118,6 @@ components:
           description: 'The ISO-3166-1 numeric country code of the billing or shipping address requested by the cardholder. See: [ISO-3166](https://www.nationsonline.org/oneworld/country_code_list.htm).'
           minLength: 3
           maxLength: 3
-    ErrorResponse:
-      required:
-      - Errors
-      type: object
-      description: The error response model used by all of our API endpoints
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    PaymentCard:
-      type: object
-      properties:
-        cardHolderNamefirstSeenDays:
-          description: Count of days since the payment card and name was first observed in the network. If they have not been observed together before, first seen days will be 0.
-          format: int64
-          type: integer
-          example: 55
-        cardHolderNameVelocity:
-          description: Count of times the payment card and name have been observed in the network over the past 90 days. If they have not been observed together in the past 90 days, velocity will be 0.
-          format: int64
-          type: integer
-          example: 24
-    IpRisk:
-      type: object
-      properties:
-        score:
-          description: A 0-1 score (rounded to three decimal places) associated with an IP address.
-          format: double
-          type: number
-          example: 0.562
-    PrimaryEmail:
-      type: object
-      properties:
-        firstSeenDays:
-          description: Count of days since the email was first observed in Ekata's Identity Network. If the email has not been observed before, first_seen_days will be 0.
-          example: 234
-          type: integer
-          format: int64
-          minimum: 0
-          maximum: 999999999
-        lastSeenDays:
-          description: Number of days that have passed since the email address was last seen.
-          example: 234
-          type: integer
-          format: int64
-          minimum: 0
-          maximum: 999999999
-        valid:
-          description: True if the email address is valid
-          type: boolean
-          example: true
-        domainCreationDate:
-          description: The date when the email domain was created. Format is YYYY-MM-DD.
-          example: '2000-11-29'
-          pattern: ^\d{4}-\d{2}-\d{2}
-          type: string
-        matchToName:
-          description: The match status between the input name and the queried entity.
-          example: no-match
-          type: string
-          minLength: 1
-          maxLength: 100
-        mailboxVelocity:
-          description: Number of times email has been seen in last 180 days.
-          example: 3
-          type: integer
-          format: int64
-          minimum: 0
-          maximum: 1000
-        isDisposable:
-          description: True if the email domain is disposable. Disposable emails are generally associated with fraudulent activities. If true, this is one of the strongest risk indicators and the transaction should be flagged for further review.
-          example: false
-          type: boolean
-        emailRisk:
-          $ref: '#/components/schemas/EmailRiskScore'
-    Phone:
-      type: object
-      properties:
-        matchToName:
-          description: 'The match status between either of the input names (person or business) and the queried entity. Possible values are: * not-found * match * no-match'
-          example: no-match
-          type: string
-          minLength: 1
-          maxLength: 100
-        lineType:
-          description: The line type of the phone number. * landline - Traditional wired phone line. * fixed-voip - VOIP-based fixed line phones. * mobile - Wireless phone line. * voicemail - Voicemail-only service. * toll-free - Callee pays for call. * premium - Caller pays a premium for the call-e.g. 976 area code. * non-fixed-voip - Skype, for example. * other - Anything that does not match the previous categories.
-          example: other
-          type: string
-        valid:
-          description: True if the phone number is valid.
-          type: boolean
-          example: true
-        phoneNumberCarrier:
-          description: The company that provides voice and/or data services for the phone number. Carriers are returned at the MVNO level.
-          example: Ekata Telco
-          type: string
-          minLength: 1
-          maxLength: 50
-    DeviceInfo:
-      description: This field contains information related to the consumer device used to authorize with your product or service.
-      type: object
-      properties:
-        deviceType:
-          description: The device type used to authorize your product or service.
-          type: string
-          example: iPhone
-        country:
-          description: The country where the consumer device is located when attempting to authorize with your product or service.
-          type: string
-          example: USA
-        ipCarrier:
-          description: The service provider used by the consumer device when attempting to authorize with your product or service.
-          type: string
-          example: AT&T
-        city:
-          description: The city where the consumer device is located when attempting to authorize with your product or service.
-          type: string
-          example: Los Angeles
-        browser:
-          description: The name of the browser used to authorize your product or service.
-          type: string
-          example: Safari
-        state:
-          description: The state where the consumer device is located when attempting to authorize with your product or service.
-          type: string
-          example: CA
-        platform:
-          description: The device platform used to authorize your product or service.
-          type: string
-          example: iOS
-      required:
-      - browser
-      - platform
-      - deviceType
     BillingInsights:
       type: object
       properties:
@@ -253,251 +153,6 @@ components:
           type: string
           minLength: 1
           maxLength: 100
-    PaymentAmount:
-      type: object
-      properties:
-        merchantCategoryRatio:
-          description: A ratio of the purchase amount compared to the median purchase amount seen for other similar merchants in the same category. The higher the ratio means that the purchase amount is further from the median purchase amount observed.
-          format: double
-          type: number
-          example: 1.5
-    Ip:
-      type: object
-      properties:
-        billingAddressDistance:
-          description: The distance (in miles) between the IP address and the physical address.
-          example: 240
-          type: integer
-          format: int64
-        lastSeenDays:
-          description: Number of days that have passed since the IP address was last seen.
-          example: 234
-          type: integer
-          format: int64
-          minimum: 0
-          maximum: 999999999
-        connectionType:
-          description: 'Ip Connection type description. Possible values are: * cable-dsl * corporate * cellular * dialup'
-          example: cable-dsl
-          type: string
-        shippingAddressDistance:
-          description: The distance (in miles) between the IP address and the physical address.
-          example: 240
-          type: integer
-          format: int64
-    Error:
-      type: object
-      properties:
-        Source:
-          type: string
-          description: The source of the problem. i.e where the error occurred
-          example: IIT
-          minLength: 1
-          maxLength: 15
-        ReasonCode:
-          type: string
-          description: A code defining the error, as defined in documentation
-          example: VALIDATION_ERROR
-          minLength: 1
-        Description:
-          type: string
-          description: A description for this specific occurrence of the above ReasonCode
-          example: Invalid Format
-          minLength: 1
-        Recoverable:
-          type: boolean
-          description: Whether or not retrying this request could result in a successful response.
-          example: false
-        Details:
-          type: string
-          description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
-          example: purchaseDate, billingAddress.city
-          minLength: 1
-    Errors:
-      required:
-      - Error
-      type: object
-      description: The error response model used by all of our API endpoints
-      properties:
-        Error:
-          description: a list of Error objects
-          minItems: 1
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-          example: []
-    PhoneDetails:
-      type: object
-      properties:
-        cc:
-          description: Country code
-          example: '1'
-          type: string
-          minLength: 1
-          maxLength: 3
-          pattern: ^\d{1,3}$
-        subscriber:
-          description: Subscriber section of the number
-          example: '3143978691'
-          type: string
-          minLength: 1
-          maxLength: 15
-          pattern: ^\d{1,15}$
-      example:
-        cc: '1'
-        subscriber: '3143978691'
-    DeviceInsights:
-      description: The insights details associated with the device.
-      type: object
-      properties:
-        uDeviceId:
-          type: string
-          description: The generated unique device identifier.
-          example: UDID-9284e12b85b0d2763c13d734c70b1d62
-        lastSeen:
-          description: The ISO UTC timestamp when the device was last seen.
-          type: string
-          example: '2022-06-03T18:00:50Z'
-        firstSeen:
-          description: The ISO UTC timestamp when the device was first seen.
-          type: string
-          example: '2022-03-01T13:00:50Z'
-        lastSeenDays:
-          description: Number of of days since the device was last seen. If the device has not been observed before, lastSeenDays will be 0.
-          type: integer
-          format: int64
-          example: 10
-          minimum: 0
-          maximum: 999999999
-        firstSeenDays:
-          description: Number of days since the device was first seen. If the device has not been observed before, firstSeenDays will be 0.
-          type: integer
-          format: int64
-          example: 10
-          minimum: 0
-          maximum: 999999999
-        accountDeviceId:
-          description: This field contains the account device identification hash. If hashedAccountId (optional field) is not present in the request or the device resolved to a default UDID, the accountDeviceId field will be omitted from the response
-          type: string
-          example: b01e4f5e5e984a79ad5ff38e65ddf198
-        deviceInfo:
-          $ref: '#/components/schemas/DeviceInfo'
-        insightFactor:
-          $ref: '#/components/schemas/InsightFactor'
-        riskFactor:
-          $ref: '#/components/schemas/RiskFactor'
-        trustFactor:
-          $ref: '#/components/schemas/TrustFactor'
-        alerts:
-          type: array
-          example:
-          - Unable to generate Insights
-          items:
-            type: string
-            description: Returns alert message when unable to generate insights.
-    InsightFactor:
-      description: 'The insight factor is represented numerically using a range from 0 (no risk data) to 5 (high risk). Each numerical value and its associated risk representation is shown below.
-
-        * `0` - Represents an unknown risk because no data on this device is available.
-
-        * `1` - Represents a no or low risk request.
-
-        * `2` - Represents a low risk request.
-
-        * `3` - Represents a medium risk request.
-
-        * `4` - Represents a high risk request.
-
-        * `5` - Represents a very high risk request.
-
-
-        The insight factor is typically used to identify scenarios where a service provider may want to introduce consumer friction on the authorization process to validate the identity of the consumer. Example usage by a service provider may be to implement controls such as multifactor authentication for calculated risk factors of `3` or `4` and request blocking for risk factors of `5`.'
-      maximum: 5
-      type: integer
-      minimum: 0
-      example: 2
-    RiskFactor:
-      description: 'The risk factor is represented numerically using a range from 0 (no risk data) to 5 (high risk). Each numerical value and its associated risk representation is shown below.
-
-        * `0` - Represents an unknown risk because no data on this device is available.
-
-        * `1` - Represents a no or low risk request.
-
-        * `2` - Represents a low risk request.
-
-        * `3` - Represents a medium risk request.
-
-        * `4` - Represents a high risk request.
-
-        * `5` - Represents a very high risk request.
-
-
-        The risk factor is typically used to identify scenarios where a service provider may want to introduce consumer friction on the authorization process to validate the identity of the consumer. Example usage by a service provider may be to implement controls such as multifactor authentication for calculated risk factors of `3` or `4` and request blocking for risk factors of `5`.'
-      maximum: 5
-      type: integer
-      minimum: 0
-      example: 2
-    TransactionInsights:
-      type: object
-      required:
-      - id
-      properties:
-        id:
-          type: string
-          description: The generated unique transaction identifier.
-          example: be3ad617-04ad-43e1-a438-79425b6511b6
-          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-          minLength: 36
-          maxLength: 36
-        deviceInsights:
-          $ref: '#/components/schemas/DeviceInsights'
-        individualInsights:
-          $ref: '#/components/schemas/IndividualInsights'
-    ShippingInsights:
-      type: object
-      properties:
-        validityLevel:
-          description: 'The most granular level to which the address could be validated. Ex. If the address was only valid to the city level (but not to the house level), it would return valid_to_city. Possible Values are: * valid_to_house_number * missing_address * invalid * valid * valid_to_street * valid_to_country * valid_to_city * valid_to_house_number_missing_apt'
-          example: valid_to_street
-          type: string
-          minLength: 1
-          maxLength: 100
-        firstSeenDays:
-          description: Number of days that have passed since the address was first seen.
-          example: 234
-          type: integer
-          format: int64
-          minimum: 0
-          maximum: 999999999
-        lastSeenDays:
-          description: Number of days that have passed since the address was last seen.
-          example: 234
-          type: integer
-          format: int64
-          minimum: 0
-          maximum: 999999999
-        matchToName:
-          description: 'The match status between either of the input names (person or business) and the queried entity. Possible values are: * not-found * match * no-match'
-          example: no-match
-          type: string
-          minLength: 1
-          maxLength: 100
-    EmailRiskScore:
-      type: object
-      properties:
-        score:
-          description: Comprehensive risk score associated with an email address, with a higher score indicating a riskier individual.  A number between 0 and 1 rounded to three decimal places.
-          format: double
-          maximum: 1
-          type: number
-          minimum: 0
-          example: 0.445
-    TrustFactor:
-      description: The trust factor value associated with the device.
-      type: integer
-      example: 5
-      minimum: 1
-      maximum: 5
     TransactionInsightsData:
       required:
       - purchaseDate
@@ -787,6 +442,382 @@ components:
           $ref: '#/components/schemas/PhoneDetails'
         accountDetails:
           $ref: '#/components/schemas/AccountDetails'
+    Error:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: The source of the problem. i.e where the error occurred
+          example: IIT
+          minLength: 1
+          maxLength: 15
+        ReasonCode:
+          type: string
+          description: A code defining the error, as defined in documentation
+          example: VALIDATION_ERROR
+          minLength: 1
+        Description:
+          type: string
+          description: A description for this specific occurrence of the above ReasonCode
+          example: Invalid Format
+          minLength: 1
+        Recoverable:
+          type: boolean
+          description: Whether or not retrying this request could result in a successful response.
+          example: false
+        Details:
+          type: string
+          description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+          example: purchaseDate, billingAddress.city
+          minLength: 1
+    PaymentCard:
+      type: object
+      properties:
+        cardHolderNamefirstSeenDays:
+          description: Count of days since the payment card and name was first observed in the network. If they have not been observed together before, first seen days will be 0.
+          format: int64
+          type: integer
+          example: 55
+        cardHolderNameVelocity:
+          description: Count of times the payment card and name have been observed in the network over the past 90 days. If they have not been observed together in the past 90 days, velocity will be 0.
+          format: int64
+          type: integer
+          example: 24
+    PhoneDetails:
+      type: object
+      properties:
+        cc:
+          description: Country code
+          example: '1'
+          type: string
+          minLength: 1
+          maxLength: 3
+          pattern: ^\d{1,3}$
+        subscriber:
+          description: Subscriber section of the number
+          example: '3143978691'
+          type: string
+          minLength: 1
+          maxLength: 15
+          pattern: ^\d{1,15}$
+      example:
+        cc: '1'
+        subscriber: '3143978691'
+    PaymentAmount:
+      type: object
+      properties:
+        merchantCategoryRatio:
+          description: A ratio of the purchase amount compared to the median purchase amount seen for other similar merchants in the same category. The higher the ratio means that the purchase amount is further from the median purchase amount observed.
+          format: double
+          type: number
+          example: 1.5
+    IpRisk:
+      type: object
+      properties:
+        score:
+          description: A 0-1 score (rounded to three decimal places) associated with an IP address.
+          format: double
+          type: number
+          example: 0.562
+    DeviceInfo:
+      description: This field contains information related to the consumer device used to authorize with your product or service.
+      type: object
+      properties:
+        deviceType:
+          description: The device type used to authorize your product or service.
+          type: string
+          example: iPhone
+        country:
+          description: The country where the consumer device is located when attempting to authorize with your product or service.
+          type: string
+          example: USA
+        ipCarrier:
+          description: The service provider used by the consumer device when attempting to authorize with your product or service.
+          type: string
+          example: AT&T
+        city:
+          description: The city where the consumer device is located when attempting to authorize with your product or service.
+          type: string
+          example: Los Angeles
+        browser:
+          description: The name of the browser used to authorize your product or service.
+          type: string
+          example: Safari
+        state:
+          description: The state where the consumer device is located when attempting to authorize with your product or service.
+          type: string
+          example: CA
+        platform:
+          description: The device platform used to authorize your product or service.
+          type: string
+          example: iOS
+      required:
+      - browser
+      - platform
+      - deviceType
+    IdentityRisk:
+      type: object
+      properties:
+        score:
+          description: A comprehensive 0-500 score associated with the individual's identity.
+          minimum: 0
+          maximum: 500
+          example: 375
+          type: integer
+          format: int64
+        reasonCode:
+          description: 'Reason code explanation value for the identity risk score based on data provided. Possible values are: * High Severity : AA-AP * Medium Severity : JA-JF * Low Severity : RA-RP'
+          example: RA
+          type: string
+          minLength: 2
+          maxLength: 2
+    Errors:
+      required:
+      - Error
+      type: object
+      description: The error response model used by all of our API endpoints
+      properties:
+        Error:
+          description: a list of Error objects
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+          example: []
+    ShippingInsights:
+      type: object
+      properties:
+        validityLevel:
+          description: 'The most granular level to which the address could be validated. Ex. If the address was only valid to the city level (but not to the house level), it would return valid_to_city. Possible Values are: * valid_to_house_number * missing_address * invalid * valid * valid_to_street * valid_to_country * valid_to_city * valid_to_house_number_missing_apt'
+          example: valid_to_street
+          type: string
+          minLength: 1
+          maxLength: 100
+        firstSeenDays:
+          description: Number of days that have passed since the address was first seen.
+          example: 234
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 999999999
+        lastSeenDays:
+          description: Number of days that have passed since the address was last seen.
+          example: 234
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 999999999
+        matchToName:
+          description: 'The match status between either of the input names (person or business) and the queried entity. Possible values are: * not-found * match * no-match'
+          example: no-match
+          type: string
+          minLength: 1
+          maxLength: 100
+    Ip:
+      type: object
+      properties:
+        billingAddressDistance:
+          description: The distance (in miles) between the IP address and the physical address.
+          example: 240
+          type: integer
+          format: int64
+        lastSeenDays:
+          description: Number of days that have passed since the IP address was last seen.
+          example: 234
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 999999999
+        connectionType:
+          description: 'Ip Connection type description. Possible values are: * cable-dsl * corporate * cellular * dialup'
+          example: cable-dsl
+          type: string
+        shippingAddressDistance:
+          description: The distance (in miles) between the IP address and the physical address.
+          example: 240
+          type: integer
+          format: int64
+    AccountDetails:
+      type: object
+      properties:
+        accountNumber:
+          description: Unique identifier for the Primary Account Number of the card.
+          example: '2303770003400262'
+          type: string
+          minLength: 13
+          maxLength: 19
+        cardLast4:
+          description: The last four digits of the card number.
+          example: '4242'
+          type: string
+          minLength: 4
+          maxLength: 4
+          pattern: ^\d{4}$
+        cardExpiryDate:
+          description: The expiry year and month of the card in YYMM format.
+          example: '2311'
+          type: string
+          minLength: 4
+          maxLength: 4
+          pattern: ^\d{4}$
+        cardBin:
+          description: The first digits of the card number.
+          example: '12345'
+          type: string
+          minLength: 4
+          maxLength: 8
+    PrimaryEmail:
+      type: object
+      properties:
+        firstSeenDays:
+          description: Count of days since the email was first observed in Ekata's Identity Network. If the email has not been observed before, first_seen_days will be 0.
+          example: 234
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 999999999
+        lastSeenDays:
+          description: Number of days that have passed since the email address was last seen.
+          example: 234
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 999999999
+        valid:
+          description: True if the email address is valid
+          type: boolean
+          example: true
+        domainCreationDate:
+          description: The date when the email domain was created. Format is YYYY-MM-DD.
+          example: '2000-11-29'
+          pattern: ^\d{4}-\d{2}-\d{2}
+          type: string
+        matchToName:
+          description: The match status between the input name and the queried entity.
+          example: no-match
+          type: string
+          minLength: 1
+          maxLength: 100
+        mailboxVelocity:
+          description: Number of times email has been seen in last 180 days.
+          example: 3
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 1000
+        isDisposable:
+          description: True if the email domain is disposable. Disposable emails are generally associated with fraudulent activities. If true, this is one of the strongest risk indicators and the transaction should be flagged for further review.
+          example: false
+          type: boolean
+        emailRisk:
+          $ref: '#/components/schemas/EmailRiskScore'
+    RiskFactor:
+      description: 'The risk factor is represented numerically using a range from 0 (no risk data) to 5 (high risk). Each numerical value and its associated risk representation is shown below.
+
+        * `0` - Represents an unknown risk because no data on this device is available.
+
+        * `1` - Represents a no or low risk request.
+
+        * `2` - Represents a low risk request.
+
+        * `3` - Represents a medium risk request.
+
+        * `4` - Represents a high risk request.
+
+        * `5` - Represents a very high risk request.
+
+
+        The risk factor is typically used to identify scenarios where a service provider may want to introduce consumer friction on the authorization process to validate the identity of the consumer. Example usage by a service provider may be to implement controls such as multifactor authentication for calculated risk factors of `3` or `4` and request blocking for risk factors of `5`.'
+      maximum: 5
+      type: integer
+      minimum: 0
+      example: 2
+    Scores:
+      type: object
+      properties:
+        ipRisk:
+          $ref: '#/components/schemas/IpRisk'
+        identityRisk:
+          $ref: '#/components/schemas/IdentityRisk'
+    TransactionInsights:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: The generated unique transaction identifier.
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+        deviceInsights:
+          $ref: '#/components/schemas/DeviceInsights'
+        individualInsights:
+          $ref: '#/components/schemas/IndividualInsights'
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      description: The error response model used by all of our API endpoints
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    DeviceInsights:
+      description: The insights details associated with the device.
+      type: object
+      properties:
+        uDeviceId:
+          type: string
+          description: The generated unique device identifier.
+          example: UDID-9284e12b85b0d2763c13d734c70b1d62
+        lastSeen:
+          description: The ISO UTC timestamp when the device was last seen.
+          type: string
+          example: '2022-06-03T18:00:50Z'
+        firstSeen:
+          description: The ISO UTC timestamp when the device was first seen.
+          type: string
+          example: '2022-03-01T13:00:50Z'
+        lastSeenDays:
+          description: Number of of days since the device was last seen. If the device has not been observed before, lastSeenDays will be 0.
+          type: integer
+          format: int64
+          example: 10
+          minimum: 0
+          maximum: 999999999
+        firstSeenDays:
+          description: Number of days since the device was first seen. If the device has not been observed before, firstSeenDays will be 0.
+          type: integer
+          format: int64
+          example: 10
+          minimum: 0
+          maximum: 999999999
+        accountDeviceId:
+          description: This field contains the account device identification hash. If hashedAccountId (optional field) is not present in the request or the device resolved to a default UDID, the accountDeviceId field will be omitted from the response
+          type: string
+          example: b01e4f5e5e984a79ad5ff38e65ddf198
+        deviceInfo:
+          $ref: '#/components/schemas/DeviceInfo'
+        insightFactor:
+          $ref: '#/components/schemas/InsightFactor'
+        riskFactor:
+          $ref: '#/components/schemas/RiskFactor'
+        trustFactor:
+          $ref: '#/components/schemas/TrustFactor'
+        alerts:
+          type: array
+          example:
+          - Unable to generate Insights
+          items:
+            type: string
+            description: Returns alert message when unable to generate insights.
+    TrustFactor:
+      description: The trust factor value associated with the device.
+      type: integer
+      example: 5
+      minimum: 1
+      maximum: 5
     IndividualInsights:
       type: object
       description: The details associated with the individual insights.
@@ -828,58 +859,27 @@ components:
           items:
             type: string
       additionalProperties: false
-    IdentityRisk:
-      type: object
-      properties:
-        score:
-          description: A comprehensive 0-500 score associated with the individual's identity.
-          minimum: 0
-          maximum: 500
-          example: 375
-          type: integer
-          format: int64
-        reasonCode:
-          description: 'Reason code explanation value for the identity risk score based on data provided. Possible values are: * High Severity : AA-AP * Medium Severity : JA-JF * Low Severity : RA-RP'
-          example: RA
-          type: string
-          minLength: 2
-          maxLength: 2
-    AccountDetails:
-      type: object
-      properties:
-        accountNumber:
-          description: Unique identifier for the Primary Account Number of the card.
-          example: '2303770003400262'
-          type: string
-          minLength: 13
-          maxLength: 19
-        cardLast4:
-          description: The last four digits of the card number.
-          example: '4242'
-          type: string
-          minLength: 4
-          maxLength: 4
-          pattern: ^\d{4}$
-        cardExpiryDate:
-          description: The expiry year and month of the card in YYMM format.
-          example: '2311'
-          type: string
-          minLength: 4
-          maxLength: 4
-          pattern: ^\d{4}$
-        cardBin:
-          description: The first digits of the card number.
-          example: '12345'
-          type: string
-          minLength: 4
-          maxLength: 8
-    Scores:
-      type: object
-      properties:
-        ipRisk:
-          $ref: '#/components/schemas/IpRisk'
-        identityRisk:
-          $ref: '#/components/schemas/IdentityRisk'
+    InsightFactor:
+      description: 'The insight factor is represented numerically using a range from 0 (no risk data) to 5 (high risk). Each numerical value and its associated risk representation is shown below.
+
+        * `0` - Represents an unknown risk because no data on this device is available.
+
+        * `1` - Represents a no or low risk request.
+
+        * `2` - Represents a low risk request.
+
+        * `3` - Represents a medium risk request.
+
+        * `4` - Represents a high risk request.
+
+        * `5` - Represents a very high risk request.
+
+
+        The insight factor is typically used to identify scenarios where a service provider may want to introduce consumer friction on the authorization process to validate the identity of the consumer. Example usage by a service provider may be to implement controls such as multifactor authentication for calculated risk factors of `3` or `4` and request blocking for risk factors of `5`.'
+      maximum: 5
+      type: integer
+      minimum: 0
+      example: 2
   examples:
     InvalidFormatBadRequestErrorExample:
       value:
@@ -909,17 +909,6 @@ components:
             Recoverable: false
             Details: null
   responses:
-    BadRequestError:
-      description: Something was wrong with the request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            InvalidFormatBadRequestErrorExample:
-              $ref: '#/components/examples/InvalidFormatBadRequestErrorExample'
-            MissingRequiredDataBadRequestErrorExample:
-              $ref: '#/components/examples/MissingRequiredDataBadRequestErrorExample'
     TransactionResponse:
       description: Success
       headers:
@@ -941,6 +930,17 @@ components:
           examples:
             UnauthorizedExample:
               $ref: '#/components/examples/UnauthorizedExample'
+    BadRequestError:
+      description: Something was wrong with the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            InvalidFormatBadRequestErrorExample:
+              $ref: '#/components/examples/InvalidFormatBadRequestErrorExample'
+            MissingRequiredDataBadRequestErrorExample:
+              $ref: '#/components/examples/MissingRequiredDataBadRequestErrorExample'
   requestBodies:
     TransactionRequest:
       required: true

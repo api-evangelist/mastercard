@@ -33,6 +33,23 @@ paths:
         '404':
           $ref: '#/components/responses/BenchmarkNotFoundError'
 components:
+  parameters:
+    Period:
+      name: period
+      in: query
+      description: period in which user wants to see benchmark for specific country
+      required: false
+      example: month / year
+      schema:
+        $ref: '#/components/schemas/Period'
+    CountryCode:
+      name: country
+      in: query
+      description: for specific country user wants to see benchmark
+      required: true
+      example: US
+      schema:
+        $ref: '#/components/schemas/CountryCode'
   examples:
     BenchmarksResponseData:
       value:
@@ -42,50 +59,6 @@ components:
             yearly: 1.425
           parisAgreement:
             yearly: 1.66
-    InvalidPeriodError:
-      value:
-        Errors:
-          Error:
-          - Source: Carbon-Calculator
-            ReasonCode: INVALID_REQUEST_PARAMETER
-            Description: One of the request parameters is invalid, try again with correct request.
-            Recoverable: false
-            Details: 'Period: Accepted values are ''month'' and ''year'''
-    BenchmarkBadRequestError:
-      value:
-        Errors:
-          Error:
-          - Source: Carbon-Calculator
-            ReasonCode: BAD_REQUEST
-            Description: One of the request parameters is invalid, try again with correct request.
-            Recoverable: false
-            Details: country is a required field
-    CountryCodeNotFoundError:
-      value:
-        Errors:
-          Error:
-          - Source: Carbon-Calculator
-            ReasonCode: INVALID_REQUEST_PARAMETER
-            Description: One of the request parameters is invalid, try again with correct request.
-            Recoverable: false
-            Details: country code not found
-    InvalidCountryCodeError:
-      value:
-        Errors:
-          Error:
-          - Source: Carbon-Calculator
-            ReasonCode: BAD_REQUEST
-            Description: One of the request parameters is invalid, try again with correct request.
-            Recoverable: false
-            Details: Country code is invalid
-    NoDataEmissionResponseData:
-      value:
-        benchmarksPayload:
-          id: VU
-          emission:
-            data: No emissions records for this country
-          parisAgreement:
-            yearly: 3.498
     ServiceProviderNotFoundError:
       value:
         Errors:
@@ -95,7 +68,60 @@ components:
             Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
             Recoverable: false
             Details: ''
+    BenchmarkBadRequestError:
+      value:
+        Errors:
+          Error:
+          - Source: Carbon-Calculator
+            ReasonCode: BAD_REQUEST
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: country is a required field
+    InvalidPeriodError:
+      value:
+        Errors:
+          Error:
+          - Source: Carbon-Calculator
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: 'Period: Accepted values are ''month'' and ''year'''
+    InvalidCountryCodeError:
+      value:
+        Errors:
+          Error:
+          - Source: Carbon-Calculator
+            ReasonCode: BAD_REQUEST
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: Country code is invalid
+    CountryCodeNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Carbon-Calculator
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: country code not found
+    NoDataEmissionResponseData:
+      value:
+        benchmarksPayload:
+          id: VU
+          emission:
+            data: No emissions records for this country
+          parisAgreement:
+            yearly: 3.498
   responses:
+    BenchmarkNotFoundError:
+      description: This response code is returned when one or more request parameters is either missing or is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
     BenchmarkBadRequestError:
       description: This response code is returned when one or more request parameters is either missing or is invalid.
       content:
@@ -122,16 +148,16 @@ components:
               $ref: '#/components/examples/BenchmarksResponseData'
             NoDataEmissionResponseData:
               $ref: '#/components/examples/NoDataEmissionResponseData'
-    BenchmarkNotFoundError:
-      description: This response code is returned when one or more request parameters is either missing or is invalid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            ServiceProviderNotFoundError:
-              $ref: '#/components/examples/ServiceProviderNotFoundError'
   schemas:
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
     Benchmark:
       type: object
       properties:
@@ -180,19 +206,6 @@ components:
       - emission
       - id
       - parisAgreement
-    ErrorWrapper:
-      title: ErrorWrapper
-      type: object
-      description: The error response object gets returned in case of any error.
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    CountryCode:
-      description: ISO 3166-1 alpha-2 format country code
-      pattern: ^[A-Z]{2}$
-      type: string
     Error:
       title: Error
       type: object
@@ -240,33 +253,20 @@ components:
       properties:
         Error:
           $ref: '#/components/schemas/ErrorList'
-    ErrorList:
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
     Period:
       enum:
       - MONTH
       - YEAR
       type: string
-  parameters:
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
     CountryCode:
-      name: country
-      in: query
-      description: for specific country user wants to see benchmark
-      required: true
-      example: US
-      schema:
-        $ref: '#/components/schemas/CountryCode'
-    Period:
-      name: period
-      in: query
-      description: period in which user wants to see benchmark for specific country
-      required: false
-      example: month / year
-      schema:
-        $ref: '#/components/schemas/Period'
+      description: ISO 3166-1 alpha-2 format country code
+      pattern: ^[A-Z]{2}$
+      type: string
 externalDocs:
   description: ISO 4217 - Currency Code
   url: https://en.wikipedia.org/wiki/ISO_4217

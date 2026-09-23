@@ -18,7 +18,7 @@ paths:
   /source-verifications/{issuing_country}/medicare-cards:
     post:
       x-mastercard-api-encrypted: true
-      summary: Verifies the details of a medicare card document with an identity verification provider
+      summary: Verifies the details of a medicare card document with an identity verification…
       tags:
       - Sources
       responses:
@@ -40,7 +40,7 @@ paths:
   /source-verifications/{issuing_country}/passports:
     post:
       x-mastercard-api-encrypted: true
-      summary: Verifies the details of a passport document with an identity verification provider
+      summary: Verifies the details of a passport document with an identity verification…
       tags:
       - Sources
       responses:
@@ -60,7 +60,7 @@ paths:
   /source-verifications/{issuing_country}/driving-licenses:
     post:
       x-mastercard-api-encrypted: true
-      summary: Verifies the details of a driving license document with an identity verification provider
+      summary: Verifies the details of a driving license document with an identity…
       tags:
       - Sources
       responses:
@@ -78,291 +78,6 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/DriversLicenseSourceVerificationRequest'
 components:
-  headers:
-    X-Transaction-ID:
-      schema:
-        type: string
-        example: 2d077b9c-3c06-44ac-b00e-d78fe8cce606
-        description: A random 128-bit UUID representing the transaction.
-  responses:
-    PassportSourceVerificationResponse:
-      description: Success.
-      headers:
-        X-Transaction-ID:
-          $ref: '#/components/headers/X-Transaction-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/SourceVerificationResult'
-    NotFoundError:
-      description: Request didn't match an existing resource.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiError'
-          examples:
-            NotFoundExample:
-              $ref: '#/components/examples/NotFoundExample'
-    BadRequestError:
-      description: Something was wrong with the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiError'
-          examples:
-            BadRequestExampleUserConsent:
-              $ref: '#/components/examples/BadRequestExampleUserConsent'
-            BadRequestExampleCountryCode:
-              $ref: '#/components/examples/BadRequestExampleCountryCode'
-            BadRequestExamplePhoneNumber:
-              $ref: '#/components/examples/BadRequestExamplePhoneNumber'
-            BadRequestExampleIVPConnectionTimeout:
-              $ref: '#/components/examples/BadRequestExampleIVPConnectionTimeout'
-            BadRequestExampleIVPSystemError:
-              $ref: '#/components/examples/BadRequestExampleIVPSystemError'
-            BadRequestExampleMedicareExpireDate:
-              $ref: '#/components/examples/BadRequestExampleMedicareExpireDate'
-            BadRequestExampleMedicareName:
-              $ref: '#/components/examples/BadRequestExampleMedicareName'
-            BadRequestExampleMedicareIndividualReferenceNo:
-              $ref: '#/components/examples/BadRequestExampleMedicareIndividualReferenceNo'
-            BadRequestExampleMedicareMedicareNumber:
-              $ref: '#/components/examples/BadRequestExampleMedicareMedicareNumber'
-            BadRequestExampleMedicareCountryCode:
-              $ref: '#/components/examples/BadRequestExampleMedicareCountryCode'
-            BadRequestExampleMedicareUserConsent:
-              $ref: '#/components/examples/BadRequestExampleMedicareUserConsent'
-            BadRequestExampleDocumentMismatch:
-              $ref: '#/components/examples/BadRequestExampleDocumentMismatch'
-    ForbiddenError:
-      description: Consent not given.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiError'
-          examples:
-            ForbiddenExample:
-              $ref: '#/components/examples/ForbiddenExample'
-            ForbiddenExampleUnauthorizedScopedFields:
-              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
-    DriversLicenseSourceVerificationResponse:
-      description: Success.
-      headers:
-        X-Transaction-ID:
-          $ref: '#/components/headers/X-Transaction-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/SourceVerificationResult'
-    MedicareCardSourceVerificationResponse:
-      description: Success.
-      headers:
-        X-Transaction-ID:
-          $ref: '#/components/headers/X-Transaction-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/MedicareCardSourceVerificationResult'
-          examples:
-            MedicareSuccessExample:
-              $ref: '#/components/examples/MedicareSuccessExample'
-            MedicareDataNotMatchedExample:
-              $ref: '#/components/examples/MedicareDataNotMatchedExample'
-            MedicareDocumentInvalidExample:
-              $ref: '#/components/examples/MedicareDocumentInvalidExample'
-  requestBodies:
-    MedicareCardSourceVerificationRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/MedicareCardSourceVerificationRequestAttributes'
-      required: true
-    DriversLicenseSourceVerificationRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DriversLicenseSourceVerificationRequestAttributes'
-          examples:
-            SourceVerDrivingLicenceExample:
-              $ref: '#/components/examples/SourceVerDrivingLicenceExample'
-      required: true
-    PassportSourceVerificationRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PassportSourceVerificationRequestAttributes'
-          examples:
-            SourceVerPassportExample:
-              $ref: '#/components/examples/SourceVerPassportExample'
-            EncryptedPayloadExample:
-              $ref: '#/components/examples/EncryptedPayloadExample'
-      required: true
-  examples:
-    SourceVerPassportExample:
-      value:
-        documentNumber: N1234567
-        userConsent: ACCEPT
-        dateOfBirth: '1990-01-01'
-        firstName: John
-        lastName: Smith
-        gender: M
-        visaMatched: true
-        visaIssuingCountry: AUS
-    BadRequestExampleMedicareCountryCode:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value for 'Country code'.
-            Recoverable: false
-            Details: null
-    BadRequestExampleUserConsent:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Unexpected value 'Invalid' for enumerate field.
-            Recoverable: false
-            Details: null
-    BadRequestExampleMedicareIndividualReferenceNo:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value for 'INDIVIDUAL_REFERENCE_NO'.
-            Recoverable: false
-            Details: null
-    EncryptedPayloadExample:
-      value:
-        encryptedData: eyJraWQiOiIwMTQyNmRhY2JlMmRjYzA3NmQ1OWU1NDQ5N2NiNjBiMjdjZmQwMDE0ZjZmMGQyYTJiN2FmNjExNDg2NjYyMj...
-    BadRequestExampleIVPConnectionTimeout:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: IVP_CONNECTION_TIMEOUT
-            Description: Connection timeout when trying to connect with the Identity Verification Provider. Please look at 'details' for additional information.
-            Recoverable: false
-            Details: Received Connection TimeOut Exception
-    MedicareSuccessExample:
-      value:
-        verificationResult: DOCUMENT_VERIFIED
-    ForbiddenExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: CONSENT_NOT_GIVEN
-            Description: User Consent Not Given.
-            Recoverable: false
-    BadRequestExampleMedicareExpireDate:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value for 'expiry date'.
-            Recoverable: false
-            Details: null
-    BadRequestExampleMedicareName:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value for 'nameLine' field OR value exceeds allowed max characters.
-            Recoverable: false
-            Details: null
-    BadRequestExampleMedicareUserConsent:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: User consent not given.
-            Recoverable: false
-            Details: null
-    BadRequestExamplePhoneNumber:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value ASD for 'phoneNumber'.
-            Recoverable: false
-            Details: null
-    BadRequestExampleMedicareMedicareNumber:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value for 'Medicare card number'.
-            Recoverable: false
-            Details: null
-    ForbiddenExampleUnauthorizedScopedFields:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
-            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
-            Recoverable: false
-            Details: null
-    BadRequestExampleIVPSystemError:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: IVP_SYSTEM_ERROR
-            Description: Received system error from the Identity Verification Provider. Please look at 'details' for additional information.
-            Recoverable: false
-            Details: System Error Received
-    BadRequestExampleCountryCode:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value US4 for 'countryCode'.
-            Recoverable: false
-            Details: null
-    SourceVerDrivingLicenceExample:
-      value:
-        documentNumber: AB001234567
-        userConsent: ACCEPT
-        dateOfBirth: '1990-01-01'
-        firstName: John
-        lastName: Smith
-        stateCode: NSW
-        cardNumber: '1867530950'
-    BadRequestExampleDocumentMismatch:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: BAD_REQUEST
-            Description: The document uploaded by the User does not comply to the document type/country specified by the client in the originating access-token request.
-            Recoverable: false
-            Details: null
-    MedicareDocumentInvalidExample:
-      value:
-        verificationResult: DOCUMENT_INVALID
-        reason: Provided data is invalid or not electronically captured
-    MedicareDataNotMatchedExample:
-      value:
-        verificationResult: DOCUMENT_NOT_VERIFIED
-    NotFoundExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: USER_PROFILE_ID_NOT_FOUND
-            Description: The provided userProfileId does not exist.
-            Recoverable: false
   schemas:
     MedicareCardSourceVerificationRequestAttributes:
       required:
@@ -454,13 +169,6 @@ components:
           minLength: 10
           maxLength: 10
           pattern: ^[0-9]{4}-[0-1][0-9]-[0-3][0-9]
-    ApiError:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
     PassportSourceVerificationRequestAttributes:
       required:
       - documentNumber
@@ -516,56 +224,6 @@ components:
           type: string
           example: AUS
           pattern: ^[A-Z]{3}$
-    MedicareCardSourceVerificationResult:
-      required:
-      - verificationResult
-      type: object
-      properties:
-        verificationResult:
-          type: string
-          example: DOCUMENT_VERIFIED
-          description: 'Verification Results, following : DOCUMENT_VERIFIED - Document matches with the IVP registered document, DOCUMENT_NOT_VERIFIED - Document does not match with any of the IVP registered document, DOCUMENT_INVALID - Document is invalid or not electronically captured.'
-          minLength: 16
-          maxLength: 21
-    Error:
-      type: object
-      properties:
-        Source:
-          type: string
-          description: Source of where the error occured.
-          example: mids
-        ReasonCode:
-          type: string
-          description: Code of the error.
-          example: USER_PROFILE_ID_NOT_FOUND
-        Description:
-          type: string
-          description: The cause of the error
-          example: The provided userProfileId does not exist
-        Recoverable:
-          type: boolean
-          description: Indiciates if the error can be recovered from.
-          example: false
-        Details:
-          type: string
-          description: Contains information about the error.
-          example: IOException Occured
-    Errors:
-      description: List of Errors.
-      example:
-        $ref: '#/components/examples/NotFoundExample'
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList'
-    ErrorList:
-      description: Error Details.
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
     DriversLicenseSourceVerificationRequestAttributes:
       required:
       - documentNumber
@@ -618,6 +276,39 @@ components:
           description: Users DVS Card Number.
           type: string
           example: AB45864
+    Error:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of where the error occured.
+          example: mids
+        ReasonCode:
+          type: string
+          description: Code of the error.
+          example: USER_PROFILE_ID_NOT_FOUND
+        Description:
+          type: string
+          description: The cause of the error
+          example: The provided userProfileId does not exist
+        Recoverable:
+          type: boolean
+          description: Indiciates if the error can be recovered from.
+          example: false
+        Details:
+          type: string
+          description: Contains information about the error.
+          example: IOException Occured
+    Errors:
+      description: List of Errors.
+      example:
+        $ref: '#/components/examples/NotFoundExample'
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
     SourceVerificationResult:
       required:
       - verificationResult
@@ -629,6 +320,223 @@ components:
           example: DOCUMENT_VERIFIED
           minLength: 16
           maxLength: 21
+    ErrorList:
+      description: Error Details.
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    MedicareCardSourceVerificationResult:
+      required:
+      - verificationResult
+      type: object
+      properties:
+        verificationResult:
+          type: string
+          example: DOCUMENT_VERIFIED
+          description: 'Verification Results, following : DOCUMENT_VERIFIED - Document matches with the IVP registered document, DOCUMENT_NOT_VERIFIED - Document does not match with any of the IVP registered document, DOCUMENT_INVALID - Document is invalid or not electronically captured.'
+          minLength: 16
+          maxLength: 21
+    ApiError:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+  examples:
+    MedicareSuccessExample:
+      value:
+        verificationResult: DOCUMENT_VERIFIED
+    BadRequestExampleMedicareUserConsent:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: User consent not given.
+            Recoverable: false
+            Details: null
+    BadRequestExampleCountryCode:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value US4 for 'countryCode'.
+            Recoverable: false
+            Details: null
+    SourceVerPassportExample:
+      value:
+        documentNumber: N1234567
+        userConsent: ACCEPT
+        dateOfBirth: '1990-01-01'
+        firstName: John
+        lastName: Smith
+        gender: M
+        visaMatched: true
+        visaIssuingCountry: AUS
+    BadRequestExampleMedicareIndividualReferenceNo:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'INDIVIDUAL_REFERENCE_NO'.
+            Recoverable: false
+            Details: null
+    BadRequestExamplePhoneNumber:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value ASD for 'phoneNumber'.
+            Recoverable: false
+            Details: null
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided userProfileId does not exist.
+            Recoverable: false
+    SourceVerDrivingLicenceExample:
+      value:
+        documentNumber: AB001234567
+        userConsent: ACCEPT
+        dateOfBirth: '1990-01-01'
+        firstName: John
+        lastName: Smith
+        stateCode: NSW
+        cardNumber: '1867530950'
+    BadRequestExampleIVPConnectionTimeout:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: IVP_CONNECTION_TIMEOUT
+            Description: Connection timeout when trying to connect with the Identity Verification Provider. Please look at 'details' for additional information.
+            Recoverable: false
+            Details: Received Connection TimeOut Exception
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+            Details: null
+    EncryptedPayloadExample:
+      value:
+        encryptedData: eyJraWQiOiIwMTQyNmRhY2JlMmRjYzA3NmQ1OWU1NDQ5N2NiNjBiMjdjZmQwMDE0ZjZmMGQyYTJiN2FmNjExNDg2NjYyMj...
+    BadRequestExampleUserConsent:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Unexpected value 'Invalid' for enumerate field.
+            Recoverable: false
+            Details: null
+    BadRequestExampleIVPSystemError:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: IVP_SYSTEM_ERROR
+            Description: Received system error from the Identity Verification Provider. Please look at 'details' for additional information.
+            Recoverable: false
+            Details: System Error Received
+    MedicareDataNotMatchedExample:
+      value:
+        verificationResult: DOCUMENT_NOT_VERIFIED
+    MedicareDocumentInvalidExample:
+      value:
+        verificationResult: DOCUMENT_INVALID
+        reason: Provided data is invalid or not electronically captured
+    BadRequestExampleMedicareName:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'nameLine' field OR value exceeds allowed max characters.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareExpireDate:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'expiry date'.
+            Recoverable: false
+            Details: null
+    BadRequestExampleDocumentMismatch:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: BAD_REQUEST
+            Description: The document uploaded by the User does not comply to the document type/country specified by the client in the originating access-token request.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareCountryCode:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'Country code'.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareMedicareNumber:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'Medicare card number'.
+            Recoverable: false
+            Details: null
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+  requestBodies:
+    PassportSourceVerificationRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PassportSourceVerificationRequestAttributes'
+          examples:
+            SourceVerPassportExample:
+              $ref: '#/components/examples/SourceVerPassportExample'
+            EncryptedPayloadExample:
+              $ref: '#/components/examples/EncryptedPayloadExample'
+      required: true
+    MedicareCardSourceVerificationRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MedicareCardSourceVerificationRequestAttributes'
+      required: true
+    DriversLicenseSourceVerificationRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DriversLicenseSourceVerificationRequestAttributes'
+          examples:
+            SourceVerDrivingLicenceExample:
+              $ref: '#/components/examples/SourceVerDrivingLicenceExample'
+      required: true
   parameters:
     EncryptedPayloadParameter:
       name: X-Encrypted-Payload
@@ -647,3 +555,95 @@ components:
       schema:
         type: string
         pattern: ^[A-Z]{3}
+  responses:
+    DriversLicenseSourceVerificationResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          $ref: '#/components/headers/X-Transaction-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SourceVerificationResult'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    MedicareCardSourceVerificationResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          $ref: '#/components/headers/X-Transaction-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MedicareCardSourceVerificationResult'
+          examples:
+            MedicareSuccessExample:
+              $ref: '#/components/examples/MedicareSuccessExample'
+            MedicareDataNotMatchedExample:
+              $ref: '#/components/examples/MedicareDataNotMatchedExample'
+            MedicareDocumentInvalidExample:
+              $ref: '#/components/examples/MedicareDocumentInvalidExample'
+    PassportSourceVerificationResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          $ref: '#/components/headers/X-Transaction-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SourceVerificationResult'
+    NotFoundError:
+      description: Request didn't match an existing resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            BadRequestExampleUserConsent:
+              $ref: '#/components/examples/BadRequestExampleUserConsent'
+            BadRequestExampleCountryCode:
+              $ref: '#/components/examples/BadRequestExampleCountryCode'
+            BadRequestExamplePhoneNumber:
+              $ref: '#/components/examples/BadRequestExamplePhoneNumber'
+            BadRequestExampleIVPConnectionTimeout:
+              $ref: '#/components/examples/BadRequestExampleIVPConnectionTimeout'
+            BadRequestExampleIVPSystemError:
+              $ref: '#/components/examples/BadRequestExampleIVPSystemError'
+            BadRequestExampleMedicareExpireDate:
+              $ref: '#/components/examples/BadRequestExampleMedicareExpireDate'
+            BadRequestExampleMedicareName:
+              $ref: '#/components/examples/BadRequestExampleMedicareName'
+            BadRequestExampleMedicareIndividualReferenceNo:
+              $ref: '#/components/examples/BadRequestExampleMedicareIndividualReferenceNo'
+            BadRequestExampleMedicareMedicareNumber:
+              $ref: '#/components/examples/BadRequestExampleMedicareMedicareNumber'
+            BadRequestExampleMedicareCountryCode:
+              $ref: '#/components/examples/BadRequestExampleMedicareCountryCode'
+            BadRequestExampleMedicareUserConsent:
+              $ref: '#/components/examples/BadRequestExampleMedicareUserConsent'
+            BadRequestExampleDocumentMismatch:
+              $ref: '#/components/examples/BadRequestExampleDocumentMismatch'
+  headers:
+    X-Transaction-ID:
+      schema:
+        type: string
+        example: 2d077b9c-3c06-44ac-b00e-d78fe8cce606
+        description: A random 128-bit UUID representing the transaction.

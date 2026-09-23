@@ -6,15 +6,11 @@ info:
     email: apisupport@mastercard.com
     url: https://developer.mastercard.com/support
   version: '1.0'
-  description: 'Operations tagged Currencies across 4 of this provider''s published API definitions: mastercard-carbon-calculator-api-openapi.yml, mastercard-doconomy-aland-index-openapi.yml, mastercard-enhanced-currency-conversion-calculator-openapi.yml, mastercard-standard-currency-conversion-calculator-openapi.yml. Each path carries the servers of the definition it was published in.'
+  description: 'Operations tagged Currencies across 3 of this provider''s published API definitions: mastercard-carbon-calculator-api-openapi.yml, mastercard-enhanced-currency-conversion-calculator-openapi.yml, mastercard-standard-currency-conversion-calculator-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://sandbox.api.mastercard.com/carbon
   description: Sandbox
 - url: https://api.mastercard.com/carbon
-  description: Production
-- url: https://sandbox.api.mastercard.com/doconomy
-  description: Sandbox
-- url: https://api.mastercard.com/doconomy
   description: Production
 - url: https://sandbox.api.mastercard.com/enhanced/settlement/currencyrate/subscribed
   description: Sandbox server
@@ -156,38 +152,6 @@ paths:
     - url: https://api.mastercard.com/settlement/currencyrate
       description: Production server
 components:
-  examples:
-    SupportedCurrencies:
-      value:
-      - currencyCode: SEK
-      - currencyCode: USD
-      - currencyCode: EUR
-      - currencyCode: GBP
-    MCSupportedCurrencies:
-      value:
-        currencies:
-        - currencyCode: SEK
-        - currencyCode: USD
-        - currencyCode: EUR
-        - currencyCode: GBP
-    UnauthorizedResponse:
-      value:
-        Errors:
-          Error:
-          - Source: Enhanced Currency Conversion Calculator
-            ReasonCode: UNAUTHORIZED
-            Description: Invalid Client ID
-            Recoverable: false
-            Details: You do not have access to this service. Please visit the Enhanced Currency Conversion Calculator page for details.
-    CurrenciesNotFoundResponse:
-      value:
-        Errors:
-          Error:
-          - Source: Enhanced Currency Conversion Calculator
-            ReasonCode: NOT_FOUND
-            Description: Data not available
-            Recoverable: true
-            Details: No active currency available
   headers:
     X-MC-Correlation-ID:
       description: This id is unique per request and is used to co-relate a request to its response. Customers must share this id while raising any incident for this API.
@@ -202,6 +166,9 @@ components:
       maxItems: 1000
       items:
         $ref: '#/components/schemas/Currency'
+    X-MC-Correlation-ID:
+      type: string
+      example: X-MC-Correlation-ID:5e4b7f904d2820f688c67ef9fc0035
     Currency:
       title: Currency
       type: object
@@ -211,133 +178,12 @@ components:
       properties:
         currencyCode:
           $ref: '#/components/schemas/CurrencyCode'
-    X-MC-Correlation-ID:
-      type: string
-      example: X-MC-Correlation-ID:5e4b7f904d2820f688c67ef9fc0035
     CurrencyCode:
       type: string
       description: Currency code as per ISO 4217
       minLength: 3
       maxLength: 3
       pattern: ^[A-Za-z]{3}$
-    MCCurrency:
-      title: Currency
-      type: object
-      description: This object represents one currency code information.
-      required:
-      - currencyCode
-      properties:
-        currencyCode:
-          $ref: '#/components/schemas/CurrencyCode_2'
-    MCSupportedCurrencies:
-      title: SupportedCurrencies
-      type: object
-      description: The response object that contains a list of supported curencies.
-      required:
-      - currencies
-      properties:
-        currencies:
-          minItems: 1
-          maxItems: 1000
-          type: array
-          items:
-            $ref: '#/components/schemas/MCCurrency'
-          example: []
-    CurrencyCode_2:
-      type: string
-      description: Currency code as per ISO 4217
-      minLength: 3
-      maxLength: 3
-      pattern: ^[A-Za-z]{3}$
-      example: USD
-    EnhancedEcbCurrencyWrapper:
-      type: object
-      properties:
-        name:
-          type: string
-          description: The name of the service being requested
-          example: ecb-currencies
-        description:
-          type: string
-          description: The description of the API being called
-          example: List of EEA currencies for which the ECB publishes an euro foreign exchange reference rate
-        requestDate:
-          type: string
-          description: The date and time the API is being called in GMT
-          example: '2020-01-21T17:43:37.000Z'
-        data:
-          $ref: '#/components/schemas/EnhancedEcbCurrencies'
-    ErrorResponse:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    Errors:
-      type: object
-      required:
-      - Error
-      properties:
-        Error:
-          type: array
-          description: if an errorhas occurred
-          items:
-            $ref: '#/components/schemas/EcbError'
-    EnhancedMastercardCurrencyWrapper:
-      type: object
-      properties:
-        name:
-          type: string
-          description: The name of the service being requested
-          example: mastercard-currencies
-        description:
-          type: string
-          description: The description of the API being called
-          example: List of Mastercard currencies
-        requestDate:
-          type: string
-          description: The date and time the API is being called in GMT
-          example: '2020-01-21T17:39:41.000Z'
-        data:
-          $ref: '#/components/schemas/EnhancedMastercardCurrencies'
-    EnhancedEcbCurrencies:
-      type: object
-      properties:
-        currencyCount:
-          type: integer
-          format: int32
-          description: Number of ECB Currencies
-          example: 33
-        currencies:
-          type: array
-          description: List of ECB Currencies
-          items:
-            $ref: '#/components/schemas/EnhancedCurrency'
-    EnhancedCurrency:
-      type: object
-      properties:
-        alphaCd:
-          type: string
-          description: The currency code for the currency
-          example: EUR
-        currName:
-          type: string
-          description: The full name of the currency
-          example: Euro
-    EnhancedMastercardCurrencies:
-      type: object
-      properties:
-        currencyCount:
-          type: integer
-          format: int32
-          description: Number of Mastercard Currencies
-          example: 153
-        currencies:
-          type: array
-          description: List of Mastercard Currencies
-          items:
-            $ref: '#/components/schemas/EnhancedCurrency'
     EcbError:
       type: object
       properties:
@@ -361,6 +207,105 @@ components:
           type: string
           description: The name of the application that generated this error
           example: Gateway
+    EnhancedCurrency:
+      type: object
+      properties:
+        alphaCd:
+          type: string
+          description: The currency code for the currency
+          example: EUR
+        currName:
+          type: string
+          description: The full name of the currency
+          example: Euro
+    EnhancedEcbCurrencyWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the service being requested
+          example: ecb-currencies
+        description:
+          type: string
+          description: The description of the API being called
+          example: List of EEA currencies for which the ECB publishes an euro foreign exchange reference rate
+        requestDate:
+          type: string
+          description: The date and time the API is being called in GMT
+          example: '2020-01-21T17:43:37.000Z'
+        data:
+          $ref: '#/components/schemas/EnhancedEcbCurrencies'
+    Errors:
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          type: array
+          description: if an errorhas occurred
+          items:
+            $ref: '#/components/schemas/EcbError'
+    EnhancedMastercardCurrencies:
+      type: object
+      properties:
+        currencyCount:
+          type: integer
+          format: int32
+          description: Number of Mastercard Currencies
+          example: 153
+        currencies:
+          type: array
+          description: List of Mastercard Currencies
+          items:
+            $ref: '#/components/schemas/EnhancedCurrency'
+    EnhancedEcbCurrencies:
+      type: object
+      properties:
+        currencyCount:
+          type: integer
+          format: int32
+          description: Number of ECB Currencies
+          example: 33
+        currencies:
+          type: array
+          description: List of ECB Currencies
+          items:
+            $ref: '#/components/schemas/EnhancedCurrency'
+    ErrorResponse:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    EnhancedMastercardCurrencyWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the service being requested
+          example: mastercard-currencies
+        description:
+          type: string
+          description: The description of the API being called
+          example: List of Mastercard currencies
+        requestDate:
+          type: string
+          description: The date and time the API is being called in GMT
+          example: '2020-01-21T17:39:41.000Z'
+        data:
+          $ref: '#/components/schemas/EnhancedMastercardCurrencies'
+    Currency_2:
+      type: object
+      properties:
+        alphaCd:
+          type: string
+          example: AOA
+          description: The Alpha code for the currency.
+        currNam:
+          type: string
+          example: ANGOLAN KWANZA
+          description: The full name of the currency.
     SettlementCurrency:
       type: object
       properties:
@@ -387,17 +332,31 @@ components:
           description: The date and time the API is being called in GMT.
         data:
           $ref: '#/components/schemas/SettlementCurrency'
-    Currency_2:
-      type: object
-      properties:
-        alphaCd:
-          type: string
-          example: AOA
-          description: The Alpha code for the currency.
-        currNam:
-          type: string
-          example: ANGOLAN KWANZA
-          description: The full name of the currency.
+  examples:
+    SupportedCurrencies:
+      value:
+      - currencyCode: SEK
+      - currencyCode: USD
+      - currencyCode: EUR
+      - currencyCode: GBP
+    CurrenciesNotFoundResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: NOT_FOUND
+            Description: Data not available
+            Recoverable: true
+            Details: No active currency available
+    UnauthorizedResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: UNAUTHORIZED
+            Description: Invalid Client ID
+            Recoverable: false
+            Details: You do not have access to this service. Please visit the Enhanced Currency Conversion Calculator page for details.
   responses:
     SupportedCurrencies:
       description: This response code is returned when a request is accepted and successfully processed. A corresponding response will be returned for the API caller.
@@ -411,20 +370,10 @@ components:
           examples:
             SupportedCurrencies:
               $ref: '#/components/examples/SupportedCurrencies'
-    MCSupportedCurrencies:
-      description: This response code is returned when a request is accepted and successfuly processed. A corresponding response will be returned for the API caller.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/MCSupportedCurrencies'
-          examples:
-            MCSupportedCurrencies:
-              $ref: '#/components/examples/MCSupportedCurrencies'
 externalDocs:
   description: ISO 4217 - Currency Code
   url: https://en.wikipedia.org/wiki/ISO_4217
 x-refined-from:
 - mastercard-carbon-calculator-api-openapi.yml
-- mastercard-doconomy-aland-index-openapi.yml
 - mastercard-enhanced-currency-conversion-calculator-openapi.yml
 - mastercard-standard-currency-conversion-calculator-openapi.yml

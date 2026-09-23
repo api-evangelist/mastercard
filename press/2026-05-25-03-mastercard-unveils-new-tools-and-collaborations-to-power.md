@@ -1,7 +1,9 @@
 ---
 title: Mastercard unveils new tools and collaborations to power ...
 url: https://www.mastercard.com/us/en/news-and-trends/press/2025/september/mastercard-unveils-new-tools-and-collaborations-to-power-smarter,-safer-agentic-commerce.html
-date: '2026-05-25'
+published: ''
+date_basis: harvested
+harvested: '2026-05-25'
 query: '"MasterCard" press release artificial intelligence'
 position: 3
 source: serpapi-google

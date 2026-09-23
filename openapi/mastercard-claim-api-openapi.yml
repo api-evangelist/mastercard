@@ -21,7 +21,7 @@ tags:
 paths:
   /claim-share-insights/{arid}:
     post:
-      summary: To send user interaction data to MIDs so MIDs and RPs have insight into the usage of the Claim Share API.
+      summary: To send user interaction data to MIDs so MIDs and RPs have insight into the…
       parameters:
       - $ref: '#/components/parameters/AridParameter'
       tags:
@@ -46,7 +46,7 @@ paths:
     post:
       tags:
       - Claim
-      summary: Mastercard Retrieve the Claim Status.
+      summary: Mastercard Retrieve the Claim Status
       description: Retrieve the status of an insurance claim for the given claim ID and postal code.
       operationId: retrieveClaimStatus
       requestBody:
@@ -67,14 +67,177 @@ paths:
     - url: https://sandbox.api.mastercard.com/loyalty/insurance
       description: Sandbox server
 components:
-  schemas:
-    ApiErrorWrapper:
-      required:
-      - Errors
-      type: object
-      properties:
+  headers:
+    X-Transaction-ID:
+      schema:
+        type: string
+      description: A random 128-bit UUID represents the transaction.
+  examples:
+    BadRequestClaimsEmptyExample:
+      value:
         Errors:
-          $ref: '#/components/schemas/ApiErrors'
+          Error:
+          - Source: mids
+            ReasonCode: BAD_REQUEST
+            Description: Claims in the request are empty.
+            Recoverable: false
+    BadRequestInvalidClaimsExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: INVALID_CLAIMS
+            Description: Provided claims are invalid.
+            Recoverable: false
+            Details: Claims are invalid. System defined claims for a mandatory scope 'ageOver' can't be empty
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CLAIM_SHARING_ARID_DOES_NOT_EXIST
+            Description: ARID does not exist.
+            Recoverable: false
+    BadRequestInvalidFormatExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: BAD_REQUEST
+            Description: Claims in the request are empty.
+            Recoverable: false
+            Details: Invalid Date format. Valid format expected is 'YYYY-MM-DD'
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
+            Recoverable: false
+    ClaimBadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: Loyalty Service - Insurance
+            ReasonCode: MISSING_REQ_FIELD_GW
+            Description: Missing Required Field(s).
+            Recoverable: false
+            Details: Missing required field(s) - 'claimId'.
+    ClaimNotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: Loyalty Service - Insurance
+            ReasonCode: CLAIM_NOT_FOUND
+            Description: Claim not found.
+            Recoverable: false
+            Details: Claim not found
+    UnauthorizedExample_2:
+      value:
+        Errors:
+          Error:
+          - Source: Gateway
+            ReasonCode: DECLINED
+            Description: Unauthorized - Access Not Granted.
+            Recoverable: false
+            Details: null
+  requestBodies:
+    IDPClaimShareInsightsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IDPClaimShareInsights'
+    ClaimSearchRef:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClaimSearch'
+      description: Claim status payload.
+      required: true
+  parameters:
+    AridParameter:
+      name: arid
+      in: path
+      description: UUID represents the ARID.
+      example: df52649e-4096-456a-bca0-751ee470009f
+      required: true
+      schema:
+        maxLength: 36
+        minLength: 36
+        type: string
+        pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+  responses:
+    UnauthorizedError:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    BadRequestError:
+      description: The server cannot process the request due to bad request. client should consider correcting the request before retrying again.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorWrapper'
+          examples:
+            BadRequestClaimsEmptyExample:
+              $ref: '#/components/examples/BadRequestClaimsEmptyExample'
+            BadRequestInvalidFormatExample:
+              $ref: '#/components/examples/BadRequestInvalidFormatExample'
+            BadRequestInvalidClaimsExample:
+              $ref: '#/components/examples/BadRequestInvalidClaimsExample'
+    IDPClaimShareInsightsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          $ref: '#/components/headers/X-Transaction-ID'
+    ClaimStatusRef:
+      description: The status of the claim associated with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClaimStatus'
+    UnauthorizedError_2:
+      description: Unauthorized - Access Not Granted
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorItems'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample_2'
+    ClaimsBadRequestError:
+      description: 'Bad Request
+
+        Reason Codes:
+
+        * MISSING_REQ_FIELD_GW - Missing required field(s)
+
+        * INVALID_FIELD - Invalid field(s)
+
+        * CLAIM_NOT_FOUND - Claim not found
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorItems'
+          examples:
+            ClaimsBadRequestExample:
+              $ref: '#/components/examples/ClaimBadRequestExample'
+            ClaimNotFoundExample:
+              $ref: '#/components/examples/ClaimNotFoundExample'
+  schemas:
+    ApiErrorList:
+      description: Error Details.
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/ApiError'
     IDPClaimShareInsights:
       type: object
       required:
@@ -115,12 +278,6 @@ components:
               type: string
               example: SUSPICIOUS_DATA
               pattern: ^SUSPICIOUS_DEVICE|SUSPICIOUS_NETWORK|SUSPICIOUS_DATA|SUSPICIOUS_USER|UNDETERMINED_LIVENESS|BIOMETRIC_MATCH_FAILURE|OTHER$
-    ApiErrorList:
-      description: Error Details.
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/ApiError'
     ApiError:
       type: object
       properties:
@@ -152,6 +309,13 @@ components:
           minLength: 10
           maxLength: 1000
           example: IOException Occurred
+    ApiErrorWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/ApiErrors'
     ApiErrors:
       description: List of errors.
       example:
@@ -162,6 +326,66 @@ components:
       properties:
         Error:
           $ref: '#/components/schemas/ApiErrorList'
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          example: Error source
+          description: Source of the error.
+        Description:
+          type: string
+          example: Generic error description
+          description: Short description of the ReasonCode field.
+        ReasonCode:
+          type: string
+          example: REASON_CODE
+          description: A unique constant identifying the error case encountered during API request processing.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          example: Detailed error description
+          description: Where appropriate, indicates detailed information about data received.
+    ClaimSearch:
+      type: object
+      required:
+      - claimId
+      - postalCode
+      properties:
+        claimId:
+          type: string
+          description: Insurance claim identifier, cardholder should be able to retrieve once the claim is submitted on the target website.
+          example: '512346231'
+        postalCode:
+          type: string
+          description: Postal code associated with insurance claim.
+          example: '71000'
+        preferredLanguage:
+          type: string
+          description: User's preferred language in localized ISO 639-1 format such as pt-BR
+          example: en-US
+    RequiredClaimDocuments:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the document required for an insurance claim.
+          example: Purchase Receipt
+        description:
+          type: string
+          description: Description of the document required for an insurance claim.
+          example: Receipt from the merchant on the date of purchase.
+        isReceived:
+          type: boolean
+          description: Received indicator of the insurance claim document.
+          example: false
+        category:
+          type: string
+          description: Category of the document required for an insurance claim.
+          example: Travel
     ErrorItems:
       required:
       - Errors
@@ -197,66 +421,6 @@ components:
           type: string
           description: Status description of the insurance claim.
           example: Paid $100 to Cardholder on 02/02/2017 15:05:19
-    ClaimSearch:
-      type: object
-      required:
-      - claimId
-      - postalCode
-      properties:
-        claimId:
-          type: string
-          description: Insurance claim identifier, cardholder should be able to retrieve once the claim is submitted on the target website.
-          example: '512346231'
-        postalCode:
-          type: string
-          description: Postal code associated with insurance claim.
-          example: '71000'
-        preferredLanguage:
-          type: string
-          description: User's preferred language in localized ISO 639-1 format such as pt-BR
-          example: en-US
-    ErrorItem:
-      type: object
-      properties:
-        Source:
-          type: string
-          example: Error source
-          description: Source of the error.
-        Description:
-          type: string
-          example: Generic error description
-          description: Short description of the ReasonCode field.
-        ReasonCode:
-          type: string
-          example: REASON_CODE
-          description: A unique constant identifying the error case encountered during API request processing.
-        Recoverable:
-          type: boolean
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
-          example: false
-        Details:
-          type: string
-          example: Detailed error description
-          description: Where appropriate, indicates detailed information about data received.
-    RequiredClaimDocuments:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Name of the document required for an insurance claim.
-          example: Purchase Receipt
-        description:
-          type: string
-          description: Description of the document required for an insurance claim.
-          example: Receipt from the merchant on the date of purchase.
-        isReceived:
-          type: boolean
-          description: Received indicator of the insurance claim document.
-          example: false
-        category:
-          type: string
-          description: Category of the document required for an insurance claim.
-          example: Travel
     ClaimStatus:
       type: object
       properties:
@@ -276,170 +440,6 @@ components:
           items:
             $ref: '#/components/schemas/RequiredClaimDocuments'
           example: []
-  examples:
-    BadRequestInvalidClaimsExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: INVALID_CLAIMS
-            Description: Provided claims are invalid.
-            Recoverable: false
-            Details: Claims are invalid. System defined claims for a mandatory scope 'ageOver' can't be empty
-    BadRequestInvalidFormatExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: BAD_REQUEST
-            Description: Claims in the request are empty.
-            Recoverable: false
-            Details: Invalid Date format. Valid format expected is 'YYYY-MM-DD'
-    UnauthorizedExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: UNAUTHORIZED_REQUEST
-            Description: Unauthorized request.
-            Recoverable: false
-    BadRequestClaimsEmptyExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: BAD_REQUEST
-            Description: Claims in the request are empty.
-            Recoverable: false
-    NotFoundExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: CLAIM_SHARING_ARID_DOES_NOT_EXIST
-            Description: ARID does not exist.
-            Recoverable: false
-    ClaimNotFoundExample:
-      value:
-        Errors:
-          Error:
-          - Source: Loyalty Service - Insurance
-            ReasonCode: CLAIM_NOT_FOUND
-            Description: Claim not found.
-            Recoverable: false
-            Details: Claim not found
-    ClaimBadRequestExample:
-      value:
-        Errors:
-          Error:
-          - Source: Loyalty Service - Insurance
-            ReasonCode: MISSING_REQ_FIELD_GW
-            Description: Missing Required Field(s).
-            Recoverable: false
-            Details: Missing required field(s) - 'claimId'.
-    UnauthorizedExample_2:
-      value:
-        Errors:
-          Error:
-          - Source: Gateway
-            ReasonCode: DECLINED
-            Description: Unauthorized - Access Not Granted.
-            Recoverable: false
-            Details: null
-  headers:
-    X-Transaction-ID:
-      schema:
-        type: string
-      description: A random 128-bit UUID represents the transaction.
-  responses:
-    BadRequestError:
-      description: The server cannot process the request due to bad request. client should consider correcting the request before retrying again.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorWrapper'
-          examples:
-            BadRequestClaimsEmptyExample:
-              $ref: '#/components/examples/BadRequestClaimsEmptyExample'
-            BadRequestInvalidFormatExample:
-              $ref: '#/components/examples/BadRequestInvalidFormatExample'
-            BadRequestInvalidClaimsExample:
-              $ref: '#/components/examples/BadRequestInvalidClaimsExample'
-    IDPClaimShareInsightsResponse:
-      description: Success.
-      headers:
-        X-Transaction-ID:
-          $ref: '#/components/headers/X-Transaction-ID'
-    UnauthorizedError:
-      description: Unauthorized request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorWrapper'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedExample'
-    ClaimStatusRef:
-      description: The status of the claim associated with the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ClaimStatus'
-    ClaimsBadRequestError:
-      description: 'Bad Request
-
-        Reason Codes:
-
-        * MISSING_REQ_FIELD_GW - Missing required field(s)
-
-        * INVALID_FIELD - Invalid field(s)
-
-        * CLAIM_NOT_FOUND - Claim not found
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorItems'
-          examples:
-            ClaimsBadRequestExample:
-              $ref: '#/components/examples/ClaimBadRequestExample'
-            ClaimNotFoundExample:
-              $ref: '#/components/examples/ClaimNotFoundExample'
-    UnauthorizedError_2:
-      description: Unauthorized - Access Not Granted
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorItems'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedExample_2'
-  requestBodies:
-    IDPClaimShareInsightsRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/IDPClaimShareInsights'
-    ClaimSearchRef:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ClaimSearch'
-      description: Claim status payload.
-      required: true
-  parameters:
-    AridParameter:
-      name: arid
-      in: path
-      description: UUID represents the ARID.
-      example: df52649e-4096-456a-bca0-751ee470009f
-      required: true
-      schema:
-        maxLength: 36
-        minLength: 36
-        type: string
-        pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
 x-refined-from:
 - mastercard-id-for-identity-providers-openapi.yml
 - mastercard-loyalty-insurance-openapi.yml

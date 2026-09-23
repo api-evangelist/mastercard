@@ -1,7 +1,9 @@
 ---
 title: Transforming Commerce with AI Innovation & Business ...
 url: https://www.mastercard.com/us/en/business/artificial-intelligence.html
-date: '2026-05-25'
+published: ''
+date_basis: harvested
+harvested: '2026-05-25'
 query: '"MasterCard" press release artificial intelligence'
 position: 4
 source: serpapi-google

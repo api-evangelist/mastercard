@@ -28,7 +28,31 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 components:
+  responses:
+    AccessToken:
+      description: Returns Token for cardholder
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BenefitsAccessToken'
+    UnauthorizedError:
+      description: Unauthorized - Access Not Granted
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
   schemas:
+    ErrorWrapper:
+      description: A top level object for errors
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
     Error:
       description: A single error
       type: object
@@ -61,6 +85,13 @@ components:
           maxLength: 10000
           description: More details about the error
           example: Invalid JSON payload
+    BenefitsAccessToken:
+      type: object
+      properties:
+        accessToken:
+          description: The String (text) representation of Benefits Access Token
+          type: string
+          example: hereeyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMDIzMTIxMjA5MjMzNC1zdGFnZS1iZW5lZml0cy1hY2Nlc3MtbWFzdGVyY2FyZC1jb20iLCJ0ZXN0IjoidGVzdCIsImV4cCI6MTcwNTkxNjUzNiwiaWF0IjoxNzA1OTEyOTM2fQ.6NGFRgiy_7TayB366Eupz-xmro6Sb9kpwLY35IHoQDs
     Errors:
       description: Object that contains the list of errors
       type: object
@@ -75,37 +106,6 @@ components:
       minItems: 1
       items:
         $ref: '#/components/schemas/Error'
-    BenefitsAccessToken:
-      type: object
-      properties:
-        accessToken:
-          description: The String (text) representation of Benefits Access Token
-          type: string
-          example: hereeyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMDIzMTIxMjA5MjMzNC1zdGFnZS1iZW5lZml0cy1hY2Nlc3MtbWFzdGVyY2FyZC1jb20iLCJ0ZXN0IjoidGVzdCIsImV4cCI6MTcwNTkxNjUzNiwiaWF0IjoxNzA1OTEyOTM2fQ.6NGFRgiy_7TayB366Eupz-xmro6Sb9kpwLY35IHoQDs
-    ErrorWrapper:
-      description: A top level object for errors
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-  responses:
-    AccessToken:
-      description: Returns Token for cardholder
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/BenefitsAccessToken'
-    UnauthorizedError:
-      description: Unauthorized - Access Not Granted
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedExample'
   examples:
     UnauthorizedExample:
       value:

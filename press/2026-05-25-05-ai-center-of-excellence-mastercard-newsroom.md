@@ -1,7 +1,9 @@
 ---
 title: AI Center of Excellence | Mastercard Newsroom
 url: https://www.mastercard.com/news/ap/en/newsroom/in-the-loop/episodes/ai-center-of-excellence/
-date: '2026-05-25'
+published: ''
+date_basis: harvested
+harvested: '2026-05-25'
 query: '"MasterCard" press release artificial intelligence'
 position: 5
 source: serpapi-google

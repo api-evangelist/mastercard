@@ -42,84 +42,51 @@ paths:
         delay: 0
         dispatcher: FALLBACK
 components:
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            InvalidData:
+              $ref: '#/components/examples/InvalidData'
+            AlertsInvalidData:
+              $ref: '#/components/examples/AlertsInvalidData'
+            InvalidParameterSet:
+              $ref: '#/components/examples/InvalidParameterSet'
+            FormatInvalid:
+              $ref: '#/components/examples/FormatInvalid'
+            AlertsFormatInvalid:
+              $ref: '#/components/examples/AlertsFormatInvalid'
+            MissingRequiredHeader:
+              $ref: '#/components/examples/MissingRequiredHeader'
+    Default:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ServerError:
+              $ref: '#/components/examples/ServerError'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ResourceNotFound:
+              $ref: '#/components/examples/ResourceNotFound'
+            EntityNotFound:
+              $ref: '#/components/examples/EntityNotFound'
+            AlertsEntityNotFound:
+              $ref: '#/components/examples/AlertsEntityNotFound'
+    SuccessWithoutBody:
+      description: Successful Operation
   examples:
-    AlertsInvalidData:
-      summary: Invalid Data Field Error Response For Alerts
-      description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: 'invalid data: name'
-            Description: size must be between 3 and 200
-            Recoverable: false
-            Details: ''
-    InvalidParameterSet:
-      summary: Invalid Parameter Set Error Response
-      description: If request body is malformed or missing, then InvalidParameterSet error response is returned to the caller with HTTP Status code 400.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: invalid.parameter.set
-            Description: request body is malformed
-            Recoverable: false
-            Details: ''
-    AlertsEntityNotFound:
-      summary: Entity Not Found Error Response For Alerts
-      description: If a requested entity(e.g. Sub-Merchant or Card Acceptor ID or Card Acceptor Name) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: 'invalid data: subMerchantId'
-            Description: Sub-Merchant 99ca4b15-72a6-41dd-8127-573d4b07669c not found
-            Recoverable: false
-            Details: ''
-    EntityNotFound:
-      summary: Entity Not Found Error Response For Consumer Clarity
-      description: If a requested entity(e.g. Merchant or Logo) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: 'invalid data: GUID'
-            Description: Merchant 1E37M8VSX1D28QYX not found
-            Recoverable: false
-            Details: ''
-    FormatInvalid:
-      summary: Format Invalid Error Response For Consumer Clarity
-      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: format.invalid
-            Description: orderHistoryMonths
-            Recoverable: false
-            Details: ''
-    AlertsFormatInvalid:
-      summary: Format Invalid Error Response For Alerts
-      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: 'invalid data: merchantCategoryCode'
-            Description: must match \"^[0-9]*$\"
-            Recoverable: false
-            Details: ''
-    MissingRequiredHeader:
-      summary: Missing Required Header Error Response
-      description: If a required request header is missing or null, then MissingRequiredHeader error response is returned to the caller with HTTP Status code 400.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: missing required header
-            Description: Submitter-First-Name
-            Recoverable: false
-            Details: ''
     ResourceNotFound:
       summary: Resource Not Found Error Response
       description: If request URI doesn't match with any available endpoints, then ResourceNotFound error response is returned the caller with HTTP Status code 404.
@@ -142,6 +109,61 @@ components:
             Description: must not be blank
             Recoverable: false
             Details: ''
+    AlertsFormatInvalid:
+      summary: Format Invalid Error Response For Alerts
+      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: merchantCategoryCode'
+            Description: must match \"^[0-9]*$\"
+            Recoverable: false
+            Details: ''
+    FormatInvalid:
+      summary: Format Invalid Error Response For Consumer Clarity
+      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: format.invalid
+            Description: orderHistoryMonths
+            Recoverable: false
+            Details: ''
+    EntityNotFound:
+      summary: Entity Not Found Error Response For Consumer Clarity
+      description: If a requested entity(e.g. Merchant or Logo) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: GUID'
+            Description: Merchant 1E37M8VSX1D28QYX not found
+            Recoverable: false
+            Details: ''
+    AlertsEntityNotFound:
+      summary: Entity Not Found Error Response For Alerts
+      description: If a requested entity(e.g. Sub-Merchant or Card Acceptor ID or Card Acceptor Name) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: subMerchantId'
+            Description: Sub-Merchant 99ca4b15-72a6-41dd-8127-573d4b07669c not found
+            Recoverable: false
+            Details: ''
+    InvalidParameterSet:
+      summary: Invalid Parameter Set Error Response
+      description: If request body is malformed or missing, then InvalidParameterSet error response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: invalid.parameter.set
+            Description: request body is malformed
+            Recoverable: false
+            Details: ''
     ServerError:
       summary: Server Error Response
       description: If an unexpected internal server error occurs, then ServerError response is returned to the caller with HTTP Status code 500.
@@ -153,24 +175,78 @@ components:
             Description: Internal Server Error
             Recoverable: false
             Details: ''
-  schemas:
-    ErrorResponse:
-      required:
-      - Errors
-      type: object
-      properties:
+    AlertsInvalidData:
+      summary: Invalid Data Field Error Response For Alerts
+      description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
+      value:
         Errors:
-          $ref: '#/components/schemas/Errors'
-      description: Error Response object
-    FirstName:
-      title: First Name
-      maxLength: 30
-      minLength: 1
-      type:
-      - string
-      - 'null'
-      description: The individual's first name
-      example: Michael
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: name'
+            Description: size must be between 3 and 200
+            Recoverable: false
+            Details: ''
+    MissingRequiredHeader:
+      summary: Missing Required Header Error Response
+      description: If a required request header is missing or null, then MissingRequiredHeader error response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: missing required header
+            Description: Submitter-First-Name
+            Recoverable: false
+            Details: ''
+  parameters:
+    SubmitterFirstNameParam:
+      name: Submitter-First-Name
+      in: header
+      required: true
+      example: Diana
+      description: The first name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/FirstName'
+    UserIdParam:
+      name: User-Id
+      in: header
+      required: true
+      example: princess.diana
+      description: The user id of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/UserId'
+    SubmitterLastNameParam:
+      name: Submitter-Last-Name
+      in: header
+      required: true
+      example: Princess
+      description: The last name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/LastName'
+    MerchantGuidParam:
+      name: guid
+      in: path
+      required: true
+      description: Consumer Clarity internal merchant's GUID
+      example: jK2dA5aybhQQBq6C
+      schema:
+        $ref: '#/components/schemas/MerchantGuid'
+    AcquirerMerchantIdParam:
+      name: acquirer_merchant_id
+      in: path
+      required: true
+      example: Mxyz123
+      description: Unique identifier of Acquirer Reference Id and Card Acceptor Id Pair
+      schema:
+        $ref: '#/components/schemas/ResourceId'
+    LocationIdParam:
+      name: location_id
+      in: path
+      required: true
+      example: Mxyz123
+      description: Unique identifier of location
+      schema:
+        $ref: '#/components/schemas/ResourceId'
+  schemas:
     Error:
       type: object
       properties:
@@ -214,6 +290,14 @@ components:
           description: Optional detailed description of the issue
           example: Detailed description of the error
       description: Error object
+    ResourceId:
+      type:
+      - string
+      - 'null'
+      minLength: 1
+      maxLength: 40
+      description: Unique identifier of resource
+      example: Mxyz123
     Errors:
       required:
       - Error
@@ -226,14 +310,15 @@ components:
             $ref: '#/components/schemas/Error'
           example: []
       description: Errors object
-    ResourceId:
+    FirstName:
+      title: First Name
+      maxLength: 30
+      minLength: 1
       type:
       - string
       - 'null'
-      minLength: 1
-      maxLength: 40
-      description: Unique identifier of resource
-      example: Mxyz123
+      description: The individual's first name
+      example: Michael
     MerchantGuid:
       title: Merchant GUID
       maxLength: 16
@@ -257,96 +342,11 @@ components:
       type: string
       description: The user id of the submitter/technical contact.
       example: princess.diana
-  responses:
-    Default:
-      description: Unexpected error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            ServerError:
-              $ref: '#/components/examples/ServerError'
-    SuccessWithoutBody:
-      description: Successful Operation
-    NotFound:
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            ResourceNotFound:
-              $ref: '#/components/examples/ResourceNotFound'
-            EntityNotFound:
-              $ref: '#/components/examples/EntityNotFound'
-            AlertsEntityNotFound:
-              $ref: '#/components/examples/AlertsEntityNotFound'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            InvalidData:
-              $ref: '#/components/examples/InvalidData'
-            AlertsInvalidData:
-              $ref: '#/components/examples/AlertsInvalidData'
-            InvalidParameterSet:
-              $ref: '#/components/examples/InvalidParameterSet'
-            FormatInvalid:
-              $ref: '#/components/examples/FormatInvalid'
-            AlertsFormatInvalid:
-              $ref: '#/components/examples/AlertsFormatInvalid'
-            MissingRequiredHeader:
-              $ref: '#/components/examples/MissingRequiredHeader'
-  parameters:
-    LocationIdParam:
-      name: location_id
-      in: path
-      required: true
-      example: Mxyz123
-      description: Unique identifier of location
-      schema:
-        $ref: '#/components/schemas/ResourceId'
-    MerchantGuidParam:
-      name: guid
-      in: path
-      required: true
-      description: Consumer Clarity internal merchant's GUID
-      example: jK2dA5aybhQQBq6C
-      schema:
-        $ref: '#/components/schemas/MerchantGuid'
-    SubmitterFirstNameParam:
-      name: Submitter-First-Name
-      in: header
-      required: true
-      example: Diana
-      description: The first name of the submitter/technical contact.
-      schema:
-        $ref: '#/components/schemas/FirstName'
-    UserIdParam:
-      name: User-Id
-      in: header
-      required: true
-      example: princess.diana
-      description: The user id of the submitter/technical contact.
-      schema:
-        $ref: '#/components/schemas/UserId'
-    SubmitterLastNameParam:
-      name: Submitter-Last-Name
-      in: header
-      required: true
-      example: Princess
-      description: The last name of the submitter/technical contact.
-      schema:
-        $ref: '#/components/schemas/LastName'
-    AcquirerMerchantIdParam:
-      name: acquirer_merchant_id
-      in: path
-      required: true
-      example: Mxyz123
-      description: Unique identifier of Acquirer Reference Id and Card Acceptor Id Pair
-      schema:
-        $ref: '#/components/schemas/ResourceId'
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+      description: Error Response object
