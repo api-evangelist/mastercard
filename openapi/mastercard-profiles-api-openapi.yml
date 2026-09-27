@@ -32,70 +32,125 @@ paths:
         '404':
           $ref: '#/components/responses/ServiceProviderNotFoundError'
 components:
-  schemas:
-    ErrorWrapper:
-      title: ErrorWrapper
-      type: object
-      description: The error response object gets returned in case of any error.
-      required:
-      - Errors
-      properties:
+  examples:
+    ServiceProviderNotFoundError:
+      value:
         Errors:
-          $ref: '#/components/schemas/Errors'
-    Error:
-      title: Error
-      type: object
-      description: Error object which contains details about the error.
-      required:
-      - Source
-      - ReasonCode
-      - Description
-      - Recoverable
-      properties:
-        Source:
-          type: string
-          description: The application name that generated this error. Every error message that is generated and returned by the gateway will have this field equal to Gateway. Other possible values are 'Carbon-Calculator' and 'Service-Provider'.
-          minLength: 1
-          maxLength: 100
-          example: Service-Provider-Mgmt
-        ReasonCode:
-          type: string
-          description: A unique constant identifying the error case encountered during request processing.
-          minLength: 1
-          maxLength: 100
-          example: INVALID_REQUEST_PARAMETER
-        Description:
-          type: string
-          description: Short description of the ReasonCode field.
-          minLength: 10
-          maxLength: 1000
-          example: One of the request parameters is invalid, try again with correct request.
-        Recoverable:
-          type: boolean
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
-          example: false
-        Details:
-          type: string
-          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
-          minLength: 0
-          maxLength: 5000
-          example: paymentCardId size must be between 36 and 36
-    Profile:
-      type: object
-      properties:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: ACCOUNT_NOT_FOUND
+            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
+            Recoverable: false
+            Details: ''
+    ProfilePayloadBadRequestError:
+      value:
+        Errors:
+          Error:
+          - Source: Carbon-Calculator
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: payload.id must not be null
+          - Source: Carbon-Calculator
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: payload.version must not be null
+    ProfileResponseData:
+      value:
+      - profile:
+          traits:
+            knowledge: 0
+            lifestyle: 0.683
+            motivated: 0.3
+          userAttributes:
+            demo: 34
+            diet: 16399
+            lifestyle: 16
+            energy: 0
+            transport: 0
+            country: AF
+          created: '2024-01-19T09:31:08.065Z'
+          surveys:
+            key1:
+              key2: 1
+              key3: 2
+          persona: '5'
+          benchmarks:
+            key1:
+              key2: 1
+              key3: 2
+          comparisons:
+            key1:
+              key2: 1
+              key3: 2
+          insights:
+            key1:
+              key2: 1
+              key3: 2
+          version: '1.0'
+    ProfileRequest:
+      value:
+        profilesPayload:
+          id: onboarding
+          version: '1.1'
+          surveyioResults:
+            sex: demo.f
+            age: demo.lt20
+            country: AX
+            interest: stronglyDisagree
+            knowledge: stronglyDisagree
+            diet: diet.vegan
+            renewableElectricity: energy.idk
+            haveCar: transport.noCar
+            flyFrequency: transport.never
+            shopFrequency: lifestyle.shopRarely
+            difference: stronglyDisagree
+            consciousPurchasingDecisions: stronglyDisagree
+            explainCarbonFootprint: stronglyDisagree
         profile:
-          $ref: '#/components/schemas/ClimateProfile'
-      required:
-      - profileResponsePayload
-    Errors:
-      title: Errors
-      type: object
-      description: Error object which returns a list of Error objects.
-      required:
-      - Error
-      properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList'
+          traits:
+            knowledge: 0.65
+            lifestyle: 0.445
+            motivated: 0.683
+          userAttributes:
+            demo: 66
+            diet: 256
+            lifestyle: 4
+            energy: 12288
+            transport: 36933
+            country: AX
+          created: '2024-01-31T10:57:36.161Z'
+          surveys:
+            key1:
+              key2: 1
+              key3: 2
+          persona: '3'
+          benchmarks:
+            key1:
+              key2: 1
+              key3: 2
+          comparisons:
+            key1:
+              key2: 1
+              key3: 2
+          insights:
+            key1:
+              key2: 1
+              key3: 2
+          version: '1.0'
+  requestBodies:
+    ProfileRequest:
+      description: List of payment transactions which needs to be scored.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Profiles'
+          examples:
+            ProfileRequest:
+              $ref: '#/components/examples/ProfileRequest'
+      required: true
+  schemas:
     ClimateProfile:
       description: Represents a Climate Profile for a User. Always use updated profile present in the response, which might include benchmarks, comparisons, insights and surveys.
       properties:
@@ -311,128 +366,75 @@ components:
           $ref: '#/components/schemas/ClimateProfile'
       required:
       - profilesPayload
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns a list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
     ErrorList:
       type: array
       minItems: 1
       items:
         $ref: '#/components/schemas/Error'
-  examples:
-    ProfilePayloadBadRequestError:
-      value:
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of any error.
+      required:
+      - Errors
+      properties:
         Errors:
-          Error:
-          - Source: Carbon-Calculator
-            ReasonCode: INVALID_REQUEST_PARAMETER
-            Description: One of the request parameters is invalid, try again with correct request.
-            Recoverable: false
-            Details: payload.id must not be null
-          - Source: Carbon-Calculator
-            ReasonCode: INVALID_REQUEST_PARAMETER
-            Description: One of the request parameters is invalid, try again with correct request.
-            Recoverable: false
-            Details: payload.version must not be null
-    ProfileResponseData:
-      value:
-      - profile:
-          traits:
-            knowledge: 0
-            lifestyle: 0.683
-            motivated: 0.3
-          userAttributes:
-            demo: 34
-            diet: 16399
-            lifestyle: 16
-            energy: 0
-            transport: 0
-            country: AF
-          created: '2024-01-19T09:31:08.065Z'
-          surveys:
-            key1:
-              key2: 1
-              key3: 2
-          persona: '5'
-          benchmarks:
-            key1:
-              key2: 1
-              key3: 2
-          comparisons:
-            key1:
-              key2: 1
-              key3: 2
-          insights:
-            key1:
-              key2: 1
-              key3: 2
-          version: '1.0'
-    ProfileRequest:
-      value:
-        profilesPayload:
-          id: onboarding
-          version: '1.1'
-          surveyioResults:
-            sex: demo.f
-            age: demo.lt20
-            country: AX
-            interest: stronglyDisagree
-            knowledge: stronglyDisagree
-            diet: diet.vegan
-            renewableElectricity: energy.idk
-            haveCar: transport.noCar
-            flyFrequency: transport.never
-            shopFrequency: lifestyle.shopRarely
-            difference: stronglyDisagree
-            consciousPurchasingDecisions: stronglyDisagree
-            explainCarbonFootprint: stronglyDisagree
+          $ref: '#/components/schemas/Errors'
+    Error:
+      title: Error
+      type: object
+      description: Error object which contains details about the error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error. Every error message that is generated and returned by the gateway will have this field equal to Gateway. Other possible values are 'Carbon-Calculator' and 'Service-Provider'.
+          minLength: 1
+          maxLength: 100
+          example: Service-Provider-Mgmt
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: INVALID_REQUEST_PARAMETER
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+    Profile:
+      type: object
+      properties:
         profile:
-          traits:
-            knowledge: 0.65
-            lifestyle: 0.445
-            motivated: 0.683
-          userAttributes:
-            demo: 66
-            diet: 256
-            lifestyle: 4
-            energy: 12288
-            transport: 36933
-            country: AX
-          created: '2024-01-31T10:57:36.161Z'
-          surveys:
-            key1:
-              key2: 1
-              key3: 2
-          persona: '3'
-          benchmarks:
-            key1:
-              key2: 1
-              key3: 2
-          comparisons:
-            key1:
-              key2: 1
-              key3: 2
-          insights:
-            key1:
-              key2: 1
-              key3: 2
-          version: '1.0'
-    ServiceProviderNotFoundError:
-      value:
-        Errors:
-          Error:
-          - Source: Service-Provider-Mgmt
-            ReasonCode: ACCOUNT_NOT_FOUND
-            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
-            Recoverable: false
-            Details: ''
+          $ref: '#/components/schemas/ClimateProfile'
+      required:
+      - profileResponsePayload
   responses:
-    ServiceProviderNotFoundError:
-      description: This response code is returned when the server cannot find the account which has been used to call this API.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            ServiceProviderNotFoundError:
-              $ref: '#/components/examples/ServiceProviderNotFoundError'
     ProfilePayloadBadRequestError:
       description: This response code is returned when one or more request parameters is either missing or is invalid.
       content:
@@ -451,17 +453,15 @@ components:
           examples:
             ProfileResponse:
               $ref: '#/components/examples/ProfileResponseData'
-  requestBodies:
-    ProfileRequest:
-      description: List of payment transactions which needs to be scored.
+    ServiceProviderNotFoundError:
+      description: This response code is returned when the server cannot find the account which has been used to call this API.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Profiles'
+            $ref: '#/components/schemas/ErrorWrapper'
           examples:
-            ProfileRequest:
-              $ref: '#/components/examples/ProfileRequest'
-      required: true
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
 externalDocs:
   description: ISO 4217 - Currency Code
   url: https://en.wikipedia.org/wiki/ISO_4217

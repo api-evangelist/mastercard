@@ -214,59 +214,6 @@ paths:
       deprecated: false
 components:
   responses:
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    UploadNonMACardTrxResponse:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UploadNonMACardResponse'
-    RetrieveNonMABrandCards:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/RetrieveNonMABrandCards'
-    ProgramTransactionHistoryPaged:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ProgramTransactionHistoryPaged'
-          examples:
-            success:
-              $ref: '#/components/examples/ProgramTransactionHistoryPagedExample'
-    NotFound:
-      description: The specified resource was not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-404'
-    RecordApiResponse:
-      description: Success
-    Created:
-      description: The specified resource was created
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-201'
-    Unauthorized:
-      description: Unauthorised
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-401'
-    Unsupported:
-      description: Unsupported Content Type
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-415'
     RetrieveTransactionStatus:
       description: Success
       content:
@@ -278,44 +225,72 @@ components:
               $ref: '#/components/examples/oneTimePaymentSuccess'
             FAILURE:
               $ref: '#/components/examples/oneTimePaymentFail'
-    Forbidden:
-      description: Forbidden
+    BadRequest:
+      description: Bad Request
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error-403'
+            $ref: '#/components/schemas/Error'
+    RetrieveNonMABrandCards:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RetrieveNonMABrandCards'
     InternalServerError:
       description: Internal Server Error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error-500'
+    Unauthorized:
+      description: Unauthorised
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-401'
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-404'
+    RecordApiResponse:
+      description: Success
+    UploadNonMACardTrxResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UploadNonMACardResponse'
+    Unsupported:
+      description: Unsupported Content Type
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-415'
+    ProgramTransactionHistoryPaged:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProgramTransactionHistoryPaged'
+          examples:
+            success:
+              $ref: '#/components/examples/ProgramTransactionHistoryPagedExample'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-403'
+    Created:
+      description: The specified resource was created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-201'
   parameters:
-    Offset:
-      name: offset
-      in: query
-      description: offset
-      required: false
-      schema:
-        type: integer
-        format: int32
-        example: 10
-    ProgramId:
-      name: ProgramId
-      in: header
-      description: ProgramId is an optional field, but if a client has more than one program associated to it, then this field becomes mandatory.
-      required: false
-      schema:
-        type: string
-        example: 80380ef2-5037-4e57-86bf-1bdd1efb0ae2
-    ClientId:
-      name: x-openapi-clientid
-      in: header
-      description: ClientId is a unique and a mandatory ID shared while creating a project on Mastercard Developers Portal.
-      required: true
-      schema:
-        type: string
-        example: 0a7e433a-63fc-4557-8cf4
     Limit:
       name: limit
       in: query
@@ -325,6 +300,14 @@ components:
         type: integer
         format: int32
         example: 25
+    ProgramId:
+      name: ProgramId
+      in: header
+      description: ProgramId is an optional field, but if a client has more than one program associated to it, then this field becomes mandatory.
+      required: false
+      schema:
+        type: string
+        example: 80380ef2-5037-4e57-86bf-1bdd1efb0ae2
     donorId:
       name: donor_id
       in: query
@@ -341,6 +324,23 @@ components:
       schema:
         type: string
         example: 80380ef2-5037-4e57-86bf-1bdd1efb0ae2
+    ClientId:
+      name: x-openapi-clientid
+      in: header
+      description: ClientId is a unique and a mandatory ID shared while creating a project on Mastercard Developers Portal.
+      required: true
+      schema:
+        type: string
+        example: 0a7e433a-63fc-4557-8cf4
+    Offset:
+      name: offset
+      in: query
+      description: offset
+      required: false
+      schema:
+        type: integer
+        format: int32
+        example: 10
     CorrelationId:
       name: x-correlation-id
       in: header
@@ -349,29 +349,127 @@ components:
       schema:
         type: string
         example: 03f8c4e8-8bdc-4a30-a2b4-b6f989e96ca3
+  examples:
+    oneTimePaymentSuccess:
+      summary: Payment success
+      value:
+        transactionId: OTBVMrlAQa6Ecl7PlKSDyw
+        transactionStatus: SUCCESS
+        transactionMessage: Transaction APPROVED
+    oneTimePaymentFail:
+      summary: Payment failure
+      value:
+        transactionId: OTbB0kCkRxC7tu1itsIN8Q
+        transactionStatus: FAILURE
+        transactionMessage: Transaction declined
+        reasonCode: DECLINE
+        reasonMessage: Your payment was declined.  Please use a different card or contact your issuer for more information.
+    ProgramTransactionHistoryPagedExample:
+      value:
+        limit: 2000,
+        offset: 0,
+        totalTransactions: 602,
+        filteredTransactions: 4,
+        realTimeTransaction:
+          totalTransactions: 137,
+          filteredTransactions: 3,
+          transactions:
+          - charityName: Save the Children,
+            primaryAccountNumberSuffix: 1111,
+            donationType: ONE-TIME,
+            date: 2022-11-07,
+            updatedDate: 2022-11-07,
+            amount: 10.0,
+            currency: EUR,
+            paymentNetwork: null,
+            clientId: 4dG5GoNZizSe_hDkUULGvYoaK9jmbEZsQbGxg-CA7fca22dc,
+            programId: da28a815-fd25-4df4-8b60-1a735d81e473,
+            donorId: 10d212f0-198e-466e-8d9b-ac26746f7fb4,
+            cardId: d518967d-2b76-4d83-8fad-b9c43cdba076,
+            charityId: 9a2e0ca5-e574-440e-af0a-5f58c035d7e8,
+            transactionId: OTrPjQjNS3SC0d-BCPeb1Q,
+            orderId: 84b57c00-63b8-4392-afc6-a1286f02ccd8,
+            transactionStatus: FAILURE
+          - charityName: Save the Children,
+            primaryAccountNumberSuffix: 0019,
+            donationType: ONE-TIME,
+            date: 2022-11-07,
+            updatedDate: 2022-11-07,
+            amount: 40.0,
+            currency: EUR,
+            paymentNetwork: null,
+            clientId: 4dG5GoNZizSe_hDkUULGvYoaK9jmbEZsQbGxg-CA7fca22dc,
+            programId: da28a815-fd25-4df4-8b60-1a735d81e473,
+            donorId: 10d212f0-198e-466e-8d9b-ac26746f7fb4,
+            cardId: 2bd45372-c4cb-4cd2-8d20-9ac0b7f51e2f,
+            charityId: 9a2e0ca5-e574-440e-af0a-5f58c035d7e8,
+            transactionId: OTtgadqNSrmybjRx6f9GmA,
+            orderId: e0002e19-90de-422a-bac2-3001f4bd13ac,
+            transactionStatus: SUCCESS
+          - charityName: Save the Children,
+            primaryAccountNumberSuffix: 0007,
+            donationType: ONE-TIME,
+            date: 2022-11-07,
+            updatedDate: 2022-11-07,
+            amount: 100.0,
+            currency: EUR,
+            paymentNetwork: mastercard,
+            clientId: 4dG5GoNZizSe_hDkUULGvYoaK9jmbEZsQbGxg-CA7fca22dc,
+            programId: da28a815-fd25-4df4-8b60-1a735d81e473,
+            donorId: 10d212f0-198e-466e-8d9b-ac26746f7fb4,
+            cardId: 234c51a1-ee50-4f98-ad3c-e304f2d6f846,
+            charityId: 9a2e0ca5-e574-440e-af0a-5f58c035d7e8,
+            transactionId: OTUpK9mGShS_0BRY8Zv8Rg,
+            orderId: 0bf04655-ff03-4d09-82bf-e6b590dbffba,
+            transactionStatus: FAILURE
+        recurringTransaction:
+          totalTransactions: 465,
+          filteredTransactions: 1,
+          transactions:
+          - charityName: Save the Children,
+            primaryAccountNumberSuffix: 0007,
+            donationType: MICRO,
+            date: 2019-08-24,
+            updatedDate: 2020-10-01,
+            amount: 50.0,
+            currency: EUR,
+            paymentNetwork: mastercard,
+            clientId: 4dG5GoNZizSe_hDkUULGvYoaK9jmbEZsQbGxg-CA7fca22dc,
+            programId: da28a815-fd25-4df4-8b60-1a735d81e473,
+            donorId: 10d212f0-198e-466e-8d9b-ac26746f7fb4,
+            cardId: 234c51a1-ee50-4f98-ad3c-e304f2d6f812,
+            charityId: 9a2e0ca5-e574-440e-af0a-5f58c035d7e8,
+            transactionId: OTUpK9mGShS_0BRY8Zv8Af,
+            orderId: 0bf04655-ff03-4d09-82bf-e6b590dbffer,
+            transactionStatus: FAILURE
   schemas:
-    TransactionsSummary:
+    Transactions:
       type: object
       required:
-      - card_id
-      - card_brand
-      - transactions
+      - transactionId
+      - transactionDate
+      - amount
       properties:
-        card_id:
+        transactionId:
           type: string
-          example: 79bfa3d3-235a-4985-8137-447849fe797d
-          minLength: 3
-          maxLength: 20
-          description: Card Id
-        card_brand:
+          example: 3311e859-3ee4-4155-a640-8cae447c27ca
+          minLength: 36
+          maxLength: 36
+          description: Transaction Id
+        transactionDate:
           type: string
-          example: VISA
+          example: '2021-09-03'
+          format: date
+          minLength: 10
+          maxLength: 10
+          description: Date of the transaction
+        amount:
+          type: string
+          example: 50
           minLength: 3
-          maxLength: 3
-          description: Card Brand
-        transactions:
-          $ref: '#/components/schemas/Transactions'
-      title: TransactionsSummary
+          maxLength: 30
+          description: Transaction amount
+      title: Transactions
     Error-DonationTransactionStatus:
       type: object
       required:
@@ -408,59 +506,6 @@ components:
                     type: string
                     example: null
                     description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    Error-500:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          description: Contains all errors caused due to server error
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of an server issue.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: DONATE_SERVICE
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: PROGRAM_ID_NOT_FOUND
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: Program id is required as this client is mapped to multiple programs.
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example: 'null'
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    Merchant:
-      type: object
-      properties:
-        merchantId:
-          type: string
-          example: 5077f7d84
-          minLength: 5
-          maxLength: 50
-          description: Merchant Id
-        merchantName:
-          type: string
-          example: Santander
-          minLength: 5
-          maxLength: 255
-          description: Merchant Name
-      title: Merchant
     ProgramTransactionHistory:
       type: object
       required:
@@ -525,7 +570,7 @@ components:
           maxLength: 10
           description: Offset
       title: ProgramTransactionHistory
-    Error-201:
+    Error-404:
       type: object
       required:
       - Errors
@@ -534,11 +579,11 @@ components:
           type: object
           required:
           - Error
-          description: Contains all errors caused
+          description: Contains all errors caused due to resource not found
           properties:
             Error:
               type: array
-              description: Only returned in the event of an authorization is failed.
+              description: Only returned in the event of an resource not found.
               items:
                 type: object
                 properties:
@@ -548,66 +593,7 @@ components:
                     description: The application that generated this error
                   ReasonCode:
                     type: string
-                    example: CREATED
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: OAuth signatures did not match.
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example: 'null'
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    RetrieveTransactionStatus:
-      type: object
-      properties:
-        transactionId:
-          type: string
-          example: OTimfp86SL6Q7eaRRh2KfA
-          minLength: 22
-          maxLength: 22
-          description: Transaction Id
-        transactionStatus:
-          type: string
-          example: SUCCESS
-          minLength: 5
-          maxLength: 20
-          description: Transaction Status
-        transactionMessage:
-          type: string
-          example: Transaction APPROVED.
-          minLength: 3
-          maxLength: 30
-          description: Transaction Message
-      title: RetrieveTransactionStatus
-    Error-403:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          description: Contains all errors caused due to forbidden requests
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of forbidden request.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: Gateway
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: INVALID_KEY
+                    example: NOT_FOUND
                     description: A unique constant identifying the error case encountered during API processing
                   Description:
                     type: string
@@ -621,31 +607,6 @@ components:
                     type: string
                     example: 'null'
                     description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    Customer:
-      type: object
-      required:
-      - customerName
-      - isoCountryCode
-      properties:
-        customerName:
-          type: string
-          example: Amazon
-          minLength: 5
-          maxLength: 255
-          description: Customer Name
-        isoCountryCode:
-          type: string
-          example: USA
-          minLength: 3
-          maxLength: 3
-          description: ISO Country Code
-        locale:
-          type: string
-          example: en
-          minLength: 2
-          maxLength: 10
-          description: Locale
-      title: Customer
     RecordApi:
       type: object
       required:
@@ -747,6 +708,22 @@ components:
           description: Total Items
       title: PagedResult�ProgramTransactionHistoryResponse�
       description: ONE-TIME or Monthly transactions will be returned in list,because for monthly setup one real time transaction happens and then monthly donation is started
+    CardItems:
+      type: object
+      properties:
+        card_id:
+          type: string
+          example: 908c0a3c-f258-4313-9f5b-83b6cc058692
+          minLength: 36
+          maxLength: 36
+          description: Card Id
+        pan:
+          type: string
+          example: 371449******8431
+          minLength: 16
+          maxLength: 16
+          description: The Masked Primary Account Number (PAN)
+      title: CardItems
     UploadNonMACardTrxRequest:
       type: object
       required:
@@ -762,6 +739,43 @@ components:
         transactionsSummary:
           $ref: '#/components/schemas/TransactionsSummary'
       title: UploadNonMACardTrxRequest
+    Error-415:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: UNSUPPORTED_CONTENT_TYPE
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The request Content-Type (<request content-type value>) is not supported for this service
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
     DonationHistoryRes:
       type: object
       properties:
@@ -865,7 +879,23 @@ components:
           maxLength: 10
           description: Updated Date
       title: DonationHistoryResponse
-    Error:
+    Merchant:
+      type: object
+      properties:
+        merchantId:
+          type: string
+          example: 5077f7d84
+          minLength: 5
+          maxLength: 50
+          description: Merchant Id
+        merchantName:
+          type: string
+          example: Santander
+          minLength: 5
+          maxLength: 255
+          description: Merchant Name
+      title: Merchant
+    Error-500:
       type: object
       required:
       - Errors
@@ -874,10 +904,11 @@ components:
           type: object
           required:
           - Error
+          description: Contains all errors caused due to server error
           properties:
             Error:
               type: array
-              description: Only returned in the event of an error condition.
+              description: Only returned in the event of an server issue.
               items:
                 type: object
                 properties:
@@ -887,11 +918,11 @@ components:
                     description: The application that generated this error
                   ReasonCode:
                     type: string
-                    example: DONOR_ID_INVALID
+                    example: PROGRAM_ID_NOT_FOUND
                     description: A unique constant identifying the error case encountered during API processing
                   Description:
                     type: string
-                    example: Invalid donorId, it must be a valid UUID.
+                    example: Program id is required as this client is mapped to multiple programs.
                     description: Short description of the ReasonCode field
                   Recoverable:
                     type: boolean
@@ -899,96 +930,7 @@ components:
                     description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
                   Details:
                     type: string
-                    example: Provided donorId is not valid, Please check and provide valid Unique Id.
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    RetrieveNonMABrandCards:
-      type: object
-      properties:
-        totalItems:
-          type: integer
-          example: 1
-          format: int64
-          minLength: 1
-          maxLength: 10
-          description: Total number of items
-        items:
-          type: array
-          description: Card items
-          items:
-            $ref: '#/components/schemas/CardItems'
-      title: RetrieveNonMABrandCards
-    Error-IncorrectNonMACardTransactionData:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of an error condition.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: DONATE_SERVICE
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: INVALID_REQUEST_PARAMETER
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: One of the request parameters is invalid, try again with the correct request.
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example:
-                    - currencyCode, Currency code cannot be empty
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    Error-Record:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of an error condition.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: DONATE_SERVICE
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: DUPLICATE_RECORD_FOUND
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: Record already exists.
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example: null
+                    example: 'null'
                     description: Where appropriate, indicates detailed information about data received and calculated during request processing.
     Error-401:
       type: object
@@ -1027,22 +969,230 @@ components:
                     type: string
                     example: 'null'
                     description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    CardItems:
+    PagedResult_RecurringTransaction_ProgramTransactionHistoryResponse_:
       type: object
+      properties:
+        items:
+          type: array
+          description: Items
+          items:
+            $ref: '#/components/schemas/DonationHistoryRes'
+        limit:
+          type: integer
+          example: 25
+          format: int32
+          minLength: 1
+          maxLength: 5
+          description: Limit
+        offset:
+          type: integer
+          example: 10
+          format: int32
+          minLength: 1
+          maxLength: 10
+          description: Offset
+        totalItems:
+          type: integer
+          example: 60
+          format: int64
+          minLength: 1
+          maxLength: 10
+          description: Total Items
+      title: PagedResult�ProgramTransactionHistoryResponse�
+      description: All Micro OR Monthly transactions will be returned in list
+    Error-Record:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an error condition.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: DUPLICATE_RECORD_FOUND
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Record already exists.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: null
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error-201:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: CREATED
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: OAuth signatures did not match.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an error condition.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: DONOR_ID_INVALID
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Invalid donorId, it must be a valid UUID.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: Provided donorId is not valid, Please check and provide valid Unique Id.
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error-IncorrectNonMACardTransactionData:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an error condition.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: INVALID_REQUEST_PARAMETER
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: One of the request parameters is invalid, try again with the correct request.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example:
+                    - currencyCode, Currency code cannot be empty
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Partner:
+      type: object
+      required:
+      - partnerName
+      - isoCountryCode
+      properties:
+        partnerName:
+          type: string
+          example: Verestro
+          minLength: 5
+          maxLength: 255
+          description: Partner Name
+        isoCountryCode:
+          type: string
+          example: USA
+          minLength: 3
+          maxLength: 3
+          description: ISO Country Code
+        locale:
+          type: string
+          example: en
+          minLength: 2
+          maxLength: 10
+          description: Locale
+      title: Partner
+    TransactionsSummary:
+      type: object
+      required:
+      - card_id
+      - card_brand
+      - transactions
       properties:
         card_id:
           type: string
-          example: 908c0a3c-f258-4313-9f5b-83b6cc058692
-          minLength: 36
-          maxLength: 36
+          example: 79bfa3d3-235a-4985-8137-447849fe797d
+          minLength: 3
+          maxLength: 20
           description: Card Id
-        pan:
+        card_brand:
           type: string
-          example: 371449******8431
-          minLength: 16
-          maxLength: 16
-          description: The Masked Primary Account Number (PAN)
-      title: CardItems
+          example: VISA
+          minLength: 3
+          maxLength: 3
+          description: Card Brand
+        transactions:
+          $ref: '#/components/schemas/Transactions'
+      title: TransactionsSummary
     Error-InternalServerError:
       type: object
       required:
@@ -1080,46 +1230,31 @@ components:
                     type: string
                     example: 'null'
                     description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    Error-415:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          description: Contains all errors caused
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of an authorization is failed.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: DONATE_SERVICE
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: UNSUPPORTED_CONTENT_TYPE
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: The request Content-Type (<request content-type value>) is not supported for this service
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example: 'null'
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
     UploadNonMACardResponse:
       type: string
       example: '{Data load for Non MA Card Transactions is success.}'
+    RetrieveTransactionStatus:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          example: OTimfp86SL6Q7eaRRh2KfA
+          minLength: 22
+          maxLength: 22
+          description: Transaction Id
+        transactionStatus:
+          type: string
+          example: SUCCESS
+          minLength: 5
+          maxLength: 20
+          description: Transaction Status
+        transactionMessage:
+          type: string
+          example: Transaction APPROVED.
+          minLength: 3
+          maxLength: 30
+          description: Transaction Message
+      title: RetrieveTransactionStatus
     Error-InvalidProgramId:
       type: object
       required:
@@ -1156,7 +1291,7 @@ components:
                     type: string
                     example: null
                     description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    Error-404:
+    Error-403:
       type: object
       required:
       - Errors
@@ -1165,11 +1300,11 @@ components:
           type: object
           required:
           - Error
-          description: Contains all errors caused due to resource not found
+          description: Contains all errors caused due to forbidden requests
           properties:
             Error:
               type: array
-              description: Only returned in the event of an resource not found.
+              description: Only returned in the event of forbidden request.
               items:
                 type: object
                 properties:
@@ -1179,7 +1314,7 @@ components:
                     description: The application that generated this error
                   ReasonCode:
                     type: string
-                    example: NOT_FOUND
+                    example: INVALID_KEY
                     description: A unique constant identifying the error case encountered during API processing
                   Description:
                     type: string
@@ -1229,76 +1364,18 @@ components:
         recurringTransaction:
           $ref: '#/components/schemas/PagedResult_RecurringTransaction_ProgramTransactionHistoryResponse_'
       title: ProgramTransactionHistoryPaged
-    Transactions:
+    Customer:
       type: object
       required:
-      - transactionId
-      - transactionDate
-      - amount
-      properties:
-        transactionId:
-          type: string
-          example: 3311e859-3ee4-4155-a640-8cae447c27ca
-          minLength: 36
-          maxLength: 36
-          description: Transaction Id
-        transactionDate:
-          type: string
-          example: '2021-09-03'
-          format: date
-          minLength: 10
-          maxLength: 10
-          description: Date of the transaction
-        amount:
-          type: string
-          example: 50
-          minLength: 3
-          maxLength: 30
-          description: Transaction amount
-      title: Transactions
-    PagedResult_RecurringTransaction_ProgramTransactionHistoryResponse_:
-      type: object
-      properties:
-        items:
-          type: array
-          description: Items
-          items:
-            $ref: '#/components/schemas/DonationHistoryRes'
-        limit:
-          type: integer
-          example: 25
-          format: int32
-          minLength: 1
-          maxLength: 5
-          description: Limit
-        offset:
-          type: integer
-          example: 10
-          format: int32
-          minLength: 1
-          maxLength: 10
-          description: Offset
-        totalItems:
-          type: integer
-          example: 60
-          format: int64
-          minLength: 1
-          maxLength: 10
-          description: Total Items
-      title: PagedResult�ProgramTransactionHistoryResponse�
-      description: All Micro OR Monthly transactions will be returned in list
-    Partner:
-      type: object
-      required:
-      - partnerName
+      - customerName
       - isoCountryCode
       properties:
-        partnerName:
+        customerName:
           type: string
-          example: Verestro
+          example: Amazon
           minLength: 5
           maxLength: 255
-          description: Partner Name
+          description: Customer Name
         isoCountryCode:
           type: string
           example: USA
@@ -1311,101 +1388,31 @@ components:
           minLength: 2
           maxLength: 10
           description: Locale
-      title: Partner
-  examples:
-    oneTimePaymentFail:
-      summary: Payment failure
-      value:
-        transactionId: OTbB0kCkRxC7tu1itsIN8Q
-        transactionStatus: FAILURE
-        transactionMessage: Transaction declined
-        reasonCode: DECLINE
-        reasonMessage: Your payment was declined.  Please use a different card or contact your issuer for more information.
-    oneTimePaymentSuccess:
-      summary: Payment success
-      value:
-        transactionId: OTBVMrlAQa6Ecl7PlKSDyw
-        transactionStatus: SUCCESS
-        transactionMessage: Transaction APPROVED
-    ProgramTransactionHistoryPagedExample:
-      value:
-        limit: 2000,
-        offset: 0,
-        totalTransactions: 602,
-        filteredTransactions: 4,
-        realTimeTransaction:
-          totalTransactions: 137,
-          filteredTransactions: 3,
-          transactions:
-          - charityName: Save the Children,
-            primaryAccountNumberSuffix: 1111,
-            donationType: ONE-TIME,
-            date: 2022-11-07,
-            updatedDate: 2022-11-07,
-            amount: 10.0,
-            currency: EUR,
-            paymentNetwork: null,
-            clientId: 4dG5GoNZizSe_hDkUULGvYoaK9jmbEZsQbGxg-CA7fca22dc,
-            programId: da28a815-fd25-4df4-8b60-1a735d81e473,
-            donorId: 10d212f0-198e-466e-8d9b-ac26746f7fb4,
-            cardId: d518967d-2b76-4d83-8fad-b9c43cdba076,
-            charityId: 9a2e0ca5-e574-440e-af0a-5f58c035d7e8,
-            transactionId: OTrPjQjNS3SC0d-BCPeb1Q,
-            orderId: 84b57c00-63b8-4392-afc6-a1286f02ccd8,
-            transactionStatus: FAILURE
-          - charityName: Save the Children,
-            primaryAccountNumberSuffix: 0019,
-            donationType: ONE-TIME,
-            date: 2022-11-07,
-            updatedDate: 2022-11-07,
-            amount: 40.0,
-            currency: EUR,
-            paymentNetwork: null,
-            clientId: 4dG5GoNZizSe_hDkUULGvYoaK9jmbEZsQbGxg-CA7fca22dc,
-            programId: da28a815-fd25-4df4-8b60-1a735d81e473,
-            donorId: 10d212f0-198e-466e-8d9b-ac26746f7fb4,
-            cardId: 2bd45372-c4cb-4cd2-8d20-9ac0b7f51e2f,
-            charityId: 9a2e0ca5-e574-440e-af0a-5f58c035d7e8,
-            transactionId: OTtgadqNSrmybjRx6f9GmA,
-            orderId: e0002e19-90de-422a-bac2-3001f4bd13ac,
-            transactionStatus: SUCCESS
-          - charityName: Save the Children,
-            primaryAccountNumberSuffix: 0007,
-            donationType: ONE-TIME,
-            date: 2022-11-07,
-            updatedDate: 2022-11-07,
-            amount: 100.0,
-            currency: EUR,
-            paymentNetwork: mastercard,
-            clientId: 4dG5GoNZizSe_hDkUULGvYoaK9jmbEZsQbGxg-CA7fca22dc,
-            programId: da28a815-fd25-4df4-8b60-1a735d81e473,
-            donorId: 10d212f0-198e-466e-8d9b-ac26746f7fb4,
-            cardId: 234c51a1-ee50-4f98-ad3c-e304f2d6f846,
-            charityId: 9a2e0ca5-e574-440e-af0a-5f58c035d7e8,
-            transactionId: OTUpK9mGShS_0BRY8Zv8Rg,
-            orderId: 0bf04655-ff03-4d09-82bf-e6b590dbffba,
-            transactionStatus: FAILURE
-        recurringTransaction:
-          totalTransactions: 465,
-          filteredTransactions: 1,
-          transactions:
-          - charityName: Save the Children,
-            primaryAccountNumberSuffix: 0007,
-            donationType: MICRO,
-            date: 2019-08-24,
-            updatedDate: 2020-10-01,
-            amount: 50.0,
-            currency: EUR,
-            paymentNetwork: mastercard,
-            clientId: 4dG5GoNZizSe_hDkUULGvYoaK9jmbEZsQbGxg-CA7fca22dc,
-            programId: da28a815-fd25-4df4-8b60-1a735d81e473,
-            donorId: 10d212f0-198e-466e-8d9b-ac26746f7fb4,
-            cardId: 234c51a1-ee50-4f98-ad3c-e304f2d6f812,
-            charityId: 9a2e0ca5-e574-440e-af0a-5f58c035d7e8,
-            transactionId: OTUpK9mGShS_0BRY8Zv8Af,
-            orderId: 0bf04655-ff03-4d09-82bf-e6b590dbffer,
-            transactionStatus: FAILURE
+      title: Customer
+    RetrieveNonMABrandCards:
+      type: object
+      properties:
+        totalItems:
+          type: integer
+          example: 1
+          format: int64
+          minLength: 1
+          maxLength: 10
+          description: Total number of items
+        items:
+          type: array
+          description: Card items
+          items:
+            $ref: '#/components/schemas/CardItems'
+      title: RetrieveNonMABrandCards
   requestBodies:
+    ProgramTransactionHistoryRequest:
+      description: ProgramTransactionHistoryRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProgramTransactionHistory'
+      required: true
     UploadNonMACardTrxRequest:
       description: uploadNonMATransactions
       content:
@@ -1420,10 +1427,3 @@ components:
           schema:
             $ref: '#/components/schemas/RecordApi'
       required: false
-    ProgramTransactionHistoryRequest:
-      description: ProgramTransactionHistoryRequest
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ProgramTransactionHistory'
-      required: true

@@ -316,137 +316,262 @@ paths:
         delay: 0
         dispatcher: FALLBACK
 components:
-  responses:
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            InvalidData:
-              $ref: '#/components/examples/InvalidData'
-            AlertsInvalidData:
-              $ref: '#/components/examples/AlertsInvalidData'
-            InvalidParameterSet:
-              $ref: '#/components/examples/InvalidParameterSet'
-            FormatInvalid:
-              $ref: '#/components/examples/FormatInvalid'
-            AlertsFormatInvalid:
-              $ref: '#/components/examples/AlertsFormatInvalid'
-            MissingRequiredHeader:
-              $ref: '#/components/examples/MissingRequiredHeader'
-    PreconditionFailed:
-      description: Pre Condition Failed
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            PreConditionFailed:
-              $ref: '#/components/examples/PreconditionFailed'
-    LocationsBulkSuccess:
-      description: Locations response
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/LocationsBulkResource'
-    LogoSuccess:
-      description: Successful Operation
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/LogoResource'
-    SuccessWithoutBody:
-      description: Successful Operation
-    SubMerchantSuccess:
-      description: Successful Operation
-      headers:
-        Etag:
-          required: true
-          schema:
-            $ref: '#/components/schemas/Etag'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/SubMerchantResource'
-    LogoSuccessWithImage:
-      description: Successful Operation
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/LogoImageResource'
-    LocationSuccess:
-      description: Location response
-      headers:
-        Etag:
-          required: true
-          schema:
-            $ref: '#/components/schemas/Etag'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/LocationWithoutCardAcceptorsResource'
-    PageableLocationsSuccess:
-      description: Pageable locations resource with pagination metadata
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PageableLocationsResource'
-    Default:
-      description: Unexpected error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            ServerError:
-              $ref: '#/components/examples/ServerError'
-    NotFound:
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            ResourceNotFound:
-              $ref: '#/components/examples/ResourceNotFound'
-            EntityNotFound:
-              $ref: '#/components/examples/EntityNotFound'
-            AlertsEntityNotFound:
-              $ref: '#/components/examples/AlertsEntityNotFound'
-    PreconditionRequired:
-      description: Pre Condition Failed
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            PreConditionFailed:
-              $ref: '#/components/examples/PreconditionRequired'
   schemas:
-    CrmResource:
-      title: Customer Relationship Management Response
-      description: Customer Relationship Management Response
+    Location:
+      type: object
+      required:
+      - countryCode
+      - defaultLocation
       allOf:
-      - $ref: '#/components/schemas/Crm'
+      - $ref: '#/components/schemas/LocationWithoutCardAcceptors'
+      - properties:
+          cardAcceptorNames:
+            $ref: '#/components/schemas/CardAcceptors'
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+      description: Error Response object
+    SubMerchantState:
+      required:
+      - state
+      properties:
+        state:
+          type: string
+          description: State of the Sub-Merchant
+          example: ACTIVE
+          enum:
+          - ACTIVE
+          - INACTIVE
+        inactivationReason:
+          title: Reason for Inactivation
+          type: string
+          description: Reason for Inactivation. Required when state is INACTIVE.
+          example: My business is closing
+          minLength: 1
+          maxLength: 250
+    Email:
+      title: Email Address
+      maxLength: 254
+      minLength: 1
+      type:
+      - string
+      - 'null'
+      description: Email address
+      example: john.doe@example.com
+      format: email
+    LocationCount:
+      title: Merchant Location count
+      type: integer
+      default: 0
+      example: 15
+      minimum: 0
+      maximum: 9999999
+    BulkOperationResource:
+      title: Bulk post resource
+      description: Resource with responseCode and details
+      type: object
+      required:
+      - status
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        errors:
+          type:
+          - array
+          - 'null'
+          description: List of error objects
+          items:
+            $ref: '#/components/schemas/Error'
+          example: []
+        status:
+          title: Response Status
+          type: string
+          description: The status of resource - PENDING, PASS, FAILED
+          example: PENDING
+    LastName:
+      title: Last Name
+      maxLength: 30
+      minLength: 1
+      type:
+      - string
+      - 'null'
+      description: The individual's last name
+      example: Fox
+    Etag:
+      title: Entity Tag
+      maxLength: 100
+      minLength: 1
+      type: string
+      description: Etag is a response header which is an identifier for a specific version of a resource.
+      example: '"842DFBC17F921E7716642B9164F3B22B"'
+    SearchFieldResource:
+      type: object
+      properties:
+        searchParameter:
+          title: Search Parameter
+          type:
+          - string
+          - 'null'
+          maxLength: 28
+          minLength: 12
+          description: Merchant api search parameter
+          example: cardAcceptorName
+        required:
+          title: Required
+          type:
+          - boolean
+          - 'null'
+          description: Set true if this search parameter is mandatory
+          example: true
+        searchFieldCards:
+          $ref: '#/components/schemas/CardTypesResource'
+      description: Merchant Api Search Field
+    FirstPartyTrustEnrollment:
+      title: First Party Trust Enrollment
+      type: object
+      required:
+      - enrollmentType
+      properties:
+        enrollmentType:
+          $ref: '#/components/schemas/FirstPartyTrustEnrollmentType'
+    SearchFields:
+      title: Search Fields
+      type:
+      - array
+      - 'null'
+      description: 'SearchFields is an array of SearchField objects. The following validations apply:
+
+        * If the searchFields array contains both TRANSACTION_AMOUNT and TRANSACTION_CURRENCY_CODE searchParameters, then the value of the "searchFieldCards" and "required" properties must be same for both items
+
+        * If the searchFields array contains the TRANSACTION_AMOUNT searchParameter, then it must also contain the TRANSACTION_CURRENCY_CODE searchParameter (and vice versa)'
+      items:
+        $ref: '#/components/schemas/SearchField'
+    SearchField:
+      type: object
+      required:
+      - searchFieldCards
+      properties:
+        searchParameter:
+          title: Merchant API Search parameter
+          type:
+          - string
+          - 'null'
+          description: Merchant api search parameter
+          example: ACQUIRER_REFERENCE_NUMBER
+          enum:
+          - PAYMENT_TYPE
+          - TRANSACTION_IDENTIFIER_VALUE
+          - ACQUIRER_REFERENCE_NUMBER
+          - TRANSACTION_DATE
+          - CARD_FIRST_SIX
+          - CARD_LAST_FOUR
+          - ISSUER_AUTHORIZATION_CODE
+          - TRANSACTION_AMOUNT
+          - TRANSACTION_CURRENCY_CODE
+        required:
+          title: Required
+          type:
+          - boolean
+          - 'null'
+          description: If the search field is required
+          example: true
+        searchFieldCards:
+          $ref: '#/components/schemas/CardTypes'
+      description: Schema for a Search Field
+    LegalAddress:
+      title: Legal Address
+      description: Legal address of the merchant.
+      required:
+      - addressLine1
+      - countryCode
+      - city
+      - regionCode
+      - postalCode
+      - phone
+      allOf:
+      - $ref: '#/components/schemas/Address'
       - type: object
         properties:
-          sanctionScreeningStatus:
-            title: Sanction Screening Status
-            maxLength: 11
-            minLength: 6
+          phone:
+            title: Phone
+            maxLength: 30
+            minLength: 3
             type: string
-            description: Indicates merchant's sanction screening status
-            example: APPROVED
-            default: DENIED
-          billingAccountCreated:
-            type: boolean
-            description: Indicates whether a sub-merchant billing account has been set up in SalesForce
-            example: true
-            default: false
-          salesforceAccountNumber:
-            $ref: '#/components/schemas/SalesforceAccountNumber'
+            description: Phone number of the merchant's office
+            example: 1-234-567-9991
+    ValidationStatus:
+      type:
+      - object
+      - 'null'
+      description: Status of created Merchant
+      properties:
+        messages:
+          title: Messages
+          type:
+          - array
+          - 'null'
+          description: List of validation messages for a merchant.
+          items:
+            $ref: '#/components/schemas/Error'
+          example: []
+        contactUs:
+          title: Contact-us message
+          type:
+          - string
+          - 'null'
+          maxLength: 500
+          minLength: 1
+          description: Ethoca's CX team contact
+          example: Please reach out to Mastercard/Ethoca customer success team for any questions or concerns.
+    CardAcceptor:
+      title: Merchant Card Acceptor
+      maxLength: 50
+      minLength: 1
+      type: string
+      description: Merchant Card Acceptor
+      example: ETHOCA NINJA GAMES
+    Address:
+      title: Address
+      description: Address entity associated to merchant's location and legal address.
+      required:
+      - countryCode
+      allOf:
+      - $ref: '#/components/schemas/ShortAddress'
+      - properties:
+          website:
+            title: Website
+            maxLength: 500
+            minLength: 1
+            type:
+            - string
+            - 'null'
+            description: URL for merchant's website
+            example: https://merchantwebsite.example.com
+          email:
+            $ref: '#/components/schemas/Email'
+          phone:
+            title: Phone
+            maxLength: 30
+            minLength: 3
+            type:
+            - string
+            - 'null'
+            description: Phone number of the merchant's office
+            example: 1-234-567-9999
+    ShortEmail:
+      title: Email Address
+      maxLength: 100
+      minLength: 1
+      type:
+      - string
+      - 'null'
+      description: Email address
+      example: john.doe@example.com
+      format: email
     SubMerchantResource:
       description: Sub-Merchant Response
       allOf:
@@ -459,57 +584,42 @@ components:
             $ref: '#/components/schemas/SearchFieldsResource'
           locationCount:
             $ref: '#/components/schemas/LocationCount'
-    Error:
+    LocationsBulkResource:
+      title: Locations resource
+      description: List of locations resource
       type: object
       properties:
-        Source:
-          maxLength: 100
-          minLength: 0
-          type:
-          - string
-          - 'null'
-          description: Source of the error
-          example: Service
-        ReasonCode:
-          maxLength: 100
-          minLength: 0
-          type:
-          - string
-          - 'null'
-          description: A unique constant identifying the error
-          example: format.invalid
-        Description:
-          maxLength: 1000
-          minLength: 0
-          type:
-          - string
-          - 'null'
-          description: Short description of the error
-          example: Short description of the error
-        Recoverable:
-          type:
-          - boolean
-          - 'null'
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-          example: false
-          default: false
-        Details:
-          maxLength: 1000
-          minLength: 0
-          type:
-          - string
-          - 'null'
-          description: Optional detailed description of the issue
-          example: Detailed description of the error
-      description: Error object
-    ResourceId:
+        locations:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkOperationResource'
+          example: []
+    SubMerchantIdentifier:
+      title: Sub-Merchant Identifier
+      maxLength: 100
+      minLength: 1
+      type: string
+      description: The alphanumeric ID of the sub-merchant associated with the purchase details. Required for channel partner.
+      example: GHF5F67DFSD468GJJXH78
+    EntityName:
+      title: Entity Legal/Business Name
+      maxLength: 100
+      minLength: 1
       type:
       - string
       - 'null'
-      minLength: 1
-      maxLength: 40
-      description: Unique identifier of resource
-      example: Mxyz123
+      description: The entity's legal or business name.
+      example: Walmart
+    CardAcceptors:
+      title: Merchant Card Acceptors
+      maxItems: 1500
+      type:
+      - array
+      - 'null'
+      uniqueItems: true
+      description: List of merchant card acceptors
+      items:
+        $ref: '#/components/schemas/CardAcceptor'
     PrimaryContact:
       title: Primary Contact
       description: Primary contact details of the merchant
@@ -551,93 +661,84 @@ components:
           - 'null'
           description: Phone number for primary contact
           example: 1-234-567-8901
-    SanctionScreening:
-      title: Sanction Screening
+    LocationWithoutCardAcceptorsResource:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/LocationWithoutCardAcceptors'
+      - properties:
+          id:
+            $ref: '#/components/schemas/ResourceId'
+          cardAcceptorLocationType:
+            title: Card Acceptor Location Type
+            type:
+            - string
+            - 'null'
+            description: Types of card acceptor location - ONLINE, PHONE, CARD_PRESENT
+            example: ONLINE
+    LogoResource:
       type: object
       required:
-      - taxId
-      - publiclyTraded
-      - doBusinessWithSanctionedGeographies
+      - status
       properties:
-        taxId:
-          title: Tax Identification
-          description: Known as VAT Number in the US and GST in Canada.
-          example: 123456789AB1234
+        status:
+          title: Status
+          maxLength: 100
+          minLength: 1
           type: string
-          minLength: 1
-          maxLength: 30
-        formerLegalNames:
-          title: List of Former Legal Names
-          description: The merchant's former legal names
-          uniqueItems: true
+          description: Status of the logo
+          example: ACTIVE
+        messages:
+          title: Messages
           type:
           - array
           - 'null'
+          description: List of validation messages for a logo.
           items:
-            $ref: '#/components/schemas/MerchantName'
-          example: []
-        doBusinessWithSanctionedGeographies:
-          title: Business With Sanctioned Geographies Indicator
-          description: 'Indicates whether the merchant does business with sanctioned geographies.
-
-            If it is true, then sanctionedGeographies property can''t be empty.
-
-            '
-          type: boolean
-          example: false
-        sanctionedGeographies:
-          title: List of Sanctioned Geographies
-          description: 'List of sanctioned geographies that the merchant is doing business with. It
-
-            can''t be empty if the doBusinessWithSanctionedGeographies property is true
-
-            '
-          uniqueItems: true
-          type:
-          - array
-          - 'null'
-          items:
-            title: Sanctioned Geography
-            type: string
+            maxLength: 200
             minLength: 1
-            maxLength: 60
-            description: Sanctioned geography
-            example: Iran
+            type: string
+            example: Logo under review
           example: []
-        publiclyTraded:
-          title: Merchant Publicly Traded Indicator
-          description: Indicates whether a merchant is publicly traded.
-          type: boolean
-          example: false
-        tickerSymbol:
-          title: Merchant's Stock Symbol
-          description: Publicly traded merchant's stock symbol. It's mandatory if the isPubliclyTraded attribute is true.
-          type:
-          - string
-          - 'null'
-          minLength: 1
-          maxLength: 10
-          example: NFLX
-        beneficialOwners:
-          type:
-          - array
-          - 'null'
-          title: List of Beneficial Owners
-          description: Required only if publiclyTraded property is false and legalEntities property is empty.
-          uniqueItems: true
-          items:
-            $ref: '#/components/schemas/BeneficialOwner'
-          example: []
-        legalEntities:
-          type:
-          - array
-          - 'null'
-          title: List of Legal Entities
-          description: Required only if publiclyTraded property is false and beneficialOwners property is empty.
-          uniqueItems: true
-          items:
-            $ref: '#/components/schemas/LegalEntity'
-          example: []
+      description: Schema for a sub-merchant logo status
+    ImageBase64Encoded:
+      title: Image Base 64 Encoded
+      type: string
+      description: Base 64 encoded image (JPG or PNG)
+      minLength: 0
+      maxLength: 999999999
+      example: /9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAIBAQIBAQICAgICAgICAwUDAwMDAwYEBAMFBwYHBwcGBwcICQsJCAgKCAcHCg0KCgsMDAwMBwkODw0MDgsMDAz/2wBDAQICAgMDAwYDAwYMCAcIDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAz/wAARCAAQABADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD638d/8HA2uah8em0jwP4L0W+8JxXZt459QmlW6vo1PMoKnbGCASAVY4xn0r6L+F//AAUzn8XatY3Op6HZ22h37AFoXYzWoJxkk8NjvgCvmXx1/wAG/wD4s0X4+HU/A3izw7D4RkuzPEuoiUXVjExOYtqqVkwCQDuXPGcV9JfCz/gmbf8AhTVrGz1TWbCbQ7BgWMAbzroA5IwQAue/JxnvX4TxVPjz63R/slO3Nr8HL/29fXltb8etj+puKKfhUsBR/spxvya6z59vtX0579vP7Nj/2Q==
+    PercentOwnership:
+      title: Percent Ownership
+      minLength: 1
+      maxLength: 5
+      pattern: ^(100(\.00?)?|[1-9]\d?(\.\d{1,2})?|0\.\d{1,2})$
+      type:
+      - string
+      - 'null'
+      description: Percent Ownership.
+      example: '25.50'
+    CrmResource:
+      title: Customer Relationship Management Response
+      description: Customer Relationship Management Response
+      allOf:
+      - $ref: '#/components/schemas/Crm'
+      - type: object
+        properties:
+          sanctionScreeningStatus:
+            title: Sanction Screening Status
+            maxLength: 11
+            minLength: 6
+            type: string
+            description: Indicates merchant's sanction screening status
+            example: APPROVED
+            default: DENIED
+          billingAccountCreated:
+            type: boolean
+            description: Indicates whether a sub-merchant billing account has been set up in SalesForce
+            example: true
+            default: false
+          salesforceAccountNumber:
+            $ref: '#/components/schemas/SalesforceAccountNumber'
     ShortAddress:
       title: Address
       description: Address.
@@ -689,6 +790,236 @@ components:
           - 'null'
           description: The zip/postal detail for the merchant's legal address
           example: M4N1A7
+    LogoImageResource:
+      allOf:
+      - $ref: '#/components/schemas/LogoResource'
+      - type: object
+        properties:
+          imageBase64Encoded:
+            $ref: '#/components/schemas/ImageBase64Encoded'
+      description: Schema for a sub-merchant logo including image binary
+    Locale:
+      required:
+      - merchantDescription
+      - code
+      - defaultLocale
+      type: object
+      properties:
+        code:
+          title: Code
+          type: string
+          description: The locale where the merchant anticipates their business to be located; often referred to as the Accept-Language in HTTP headers.
+          example: EN_CA
+          enum:
+          - EN_US
+          - EN_CA
+          - EN_GB
+          - ES_MX
+          - ES_ES
+          - ES_US
+          - FR_CA
+          - FR_FR
+          - PT_BR
+          - PT_PT
+          - HE_IL
+        merchantDescription:
+          title: Merchant Description
+          maxLength: 4000
+          minLength: 1
+          type: string
+          description: Description of the primary merchant tied to the transaction and responsible for providing the products or services (description of the business, what they do, markets, etc.). Used to help cardholder understand business responsible for the charge.
+          example: An airline that no longer exists.
+        defaultLocale:
+          title: Default Locale
+          type: boolean
+          description: This indicates whether or not this locale will be used as the default locale for displaying information to the customer.
+          example: true
+      description: Merchant Locale details
+    TermsConditionsConsent:
+      title: Terms & conditions consent
+      type: object
+      required:
+      - date
+      - firstName
+      - lastName
+      - jobTitle
+      - email
+      - countryCode
+      - consentUuid
+      - consentVersion
+      properties:
+        date:
+          type: string
+          description: Date stamp in which the sub-merchant provided his consent on the terms and conditions. Date must be in [ISO 8601 format](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6)
+          format: date-time
+          example: '2021-10-18T13:56:47.123+00:00'
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: First name of person that gave consent
+          example: John
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Last name of person that gave consent
+          example: Doe
+        jobTitle:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Job title of person that gave consent
+          example: Manager
+        email:
+          $ref: '#/components/schemas/Email'
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        consentUuid:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Universally Unique Identifier (UUID) of the consent that the user consented to
+          example: 3d94ab7b-fe1c-4f7d-ad4c-93c1eb6d29c3
+        consentVersion:
+          type: string
+          minLength: 1
+          maxLength: 8
+          description: Version of the consent that the user consented to
+          example: '1.0'
+    CountryCode:
+      title: Country Code
+      maxLength: 3
+      minLength: 3
+      type:
+      - string
+      - 'null'
+      description: The [ISO 3166-1](https://www.iso.org/obp/ui/#search) alpha-3 compliant country code.
+      example: CAN
+    ResourceId:
+      type:
+      - string
+      - 'null'
+      minLength: 1
+      maxLength: 40
+      description: Unique identifier of resource
+      example: Mxyz123
+    SecondName:
+      title: Second Name
+      maxLength: 30
+      minLength: 1
+      type:
+      - string
+      - 'null'
+      description: The individual's second name
+      example: Andrew
+    CardTypesResource:
+      title: Card Types Response
+      type: array
+      uniqueItems: true
+      description: A list of all of the card types that are accepted as a form of payment.
+      items:
+        type: string
+        description: Type of card used for a transaction
+        example: AMEX
+    LocationResource:
+      deprecated: true
+      allOf:
+      - $ref: '#/components/schemas/Location'
+      - type: object
+        properties:
+          id:
+            $ref: '#/components/schemas/ResourceId'
+          rejectedCardAcceptorNames:
+            $ref: '#/components/schemas/CardAcceptors'
+          cardAcceptorLocationType:
+            title: Card Acceptor Location Type
+            type:
+            - string
+            - 'null'
+            description: Types of card acceptor location - ONLINE, PHONE, CARD_PRESENT
+            example: ONLINE
+    FirstName:
+      title: First Name
+      maxLength: 30
+      minLength: 1
+      type:
+      - string
+      - 'null'
+      description: The individual's first name
+      example: Michael
+    CardTypes:
+      title: Card Types
+      type: array
+      minItems: 1
+      maxItems: 4
+      uniqueItems: true
+      description: A list of all of the card types that are accepted as a form of payment.
+      items:
+        type: string
+        description: Type of card used for a transaction
+        example: AMEX
+        enum:
+        - AMEX
+        - DISCOVER
+        - MC
+        - VISA
+    ClarityResponseHeader:
+      allOf:
+      - $ref: '#/components/schemas/ResponseHeader'
+      - type: object
+        properties:
+          currentPage:
+            type: integer
+            description: Current page
+            minimum: 0
+            maximum: 999999999
+            example: 2
+    FirstPartyTrustEnrollmentResource:
+      title: First Party Trust Enrollment Resource
+      type: object
+      required:
+      - enrollmentType
+      properties:
+        enrollmentType:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: Type of First Party Trust Enrollment
+          example: CLARITY
+    BeneficialOwner:
+      title: Beneficial Owner
+      description: Individual owning the merchant.
+      type: object
+      properties:
+        firstName:
+          $ref: '#/components/schemas/FirstName'
+        secondName:
+          $ref: '#/components/schemas/SecondName'
+        lastName:
+          $ref: '#/components/schemas/LastName'
+        address:
+          $ref: '#/components/schemas/ShortAddress'
+        birthCountry:
+          $ref: '#/components/schemas/CountryCode'
+        birthDate:
+          title: Beneficial Owner Birth Date
+          description: Beneficial owner birth date. Date must be in a [ISO 8601 format](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6)
+          type:
+          - string
+          - 'null'
+          format: date
+          example: '1977-05-23T00:00:00.000Z'
+        percentOwnership:
+          $ref: '#/components/schemas/PercentOwnership'
+    MerchantLogo:
+      required:
+      - imageBase64Encoded
+      type: object
+      properties:
+        imageBase64Encoded:
+          $ref: '#/components/schemas/ImageBase64Encoded'
+      description: logo request schema for merchants
     MerchantResource:
       description: Base merchant response schema
       required:
@@ -783,160 +1114,18 @@ components:
             maxLength: 2
             items:
               $ref: '#/components/schemas/FirstPartyTrustEnrollmentResource'
-    LocaleResource:
+    SubMerchant:
+      description: Schema for a sub-merchant
       allOf:
-      - $ref: '#/components/schemas/Locale'
+      - $ref: '#/components/schemas/Merchant'
       - type: object
+        required:
+        - subMerchantIdentifier
         properties:
-          code:
-            title: Code
-            type: string
-            description: The locale where the merchant anticipates their business to be located; often referred to as the Accept-Language in HTTP headers.
-            example: EN_CA
-    PageableLocationsResource:
-      title: Pageable locations resource
-      description: Pageable locations resource with pagination metadata
-      properties:
-        data:
-          type: array
-          description: List of Location resources
-          items:
-            $ref: '#/components/schemas/LocationWithoutCardAcceptorsResource'
-          example: []
-        metadata:
-          $ref: '#/components/schemas/ClarityResponseHeader'
-    Errors:
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          type: array
-          description: List of error objects
-          items:
-            $ref: '#/components/schemas/Error'
-          example: []
-      description: Errors object
-    ClarityResponseHeader:
-      allOf:
-      - $ref: '#/components/schemas/ResponseHeader'
-      - type: object
-        properties:
-          currentPage:
-            type: integer
-            description: Current page
-            minimum: 0
-            maximum: 999999999
-            example: 2
-    Locale:
-      required:
-      - merchantDescription
-      - code
-      - defaultLocale
-      type: object
-      properties:
-        code:
-          title: Code
-          type: string
-          description: The locale where the merchant anticipates their business to be located; often referred to as the Accept-Language in HTTP headers.
-          example: EN_CA
-          enum:
-          - EN_US
-          - EN_CA
-          - EN_GB
-          - ES_MX
-          - ES_ES
-          - ES_US
-          - FR_CA
-          - FR_FR
-          - PT_BR
-          - PT_PT
-          - HE_IL
-        merchantDescription:
-          title: Merchant Description
-          maxLength: 4000
-          minLength: 1
-          type: string
-          description: Description of the primary merchant tied to the transaction and responsible for providing the products or services (description of the business, what they do, markets, etc.). Used to help cardholder understand business responsible for the charge.
-          example: An airline that no longer exists.
-        defaultLocale:
-          title: Default Locale
-          type: boolean
-          description: This indicates whether or not this locale will be used as the default locale for displaying information to the customer.
-          example: true
-      description: Merchant Locale details
-    MerchantGuid:
-      title: Merchant GUID
-      maxLength: 16
-      minLength: 11
-      type: string
-      description: Consumer Clarity internal merchant's GUID
-      example: jK2dA5aybhQQBq6C
-    LastName:
-      title: Last Name
-      maxLength: 30
-      minLength: 1
-      type:
-      - string
-      - 'null'
-      description: The individual's last name
-      example: Fox
-    ErrorResponse:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-      description: Error Response object
-    Location:
-      type: object
-      required:
-      - countryCode
-      - defaultLocation
-      allOf:
-      - $ref: '#/components/schemas/LocationWithoutCardAcceptors'
-      - properties:
-          cardAcceptorNames:
-            $ref: '#/components/schemas/CardAcceptors'
-    Email:
-      title: Email Address
-      maxLength: 254
-      minLength: 1
-      type:
-      - string
-      - 'null'
-      description: Email address
-      example: john.doe@example.com
-      format: email
-    Address:
-      title: Address
-      description: Address entity associated to merchant's location and legal address.
-      required:
-      - countryCode
-      allOf:
-      - $ref: '#/components/schemas/ShortAddress'
-      - properties:
-          website:
-            title: Website
-            maxLength: 500
-            minLength: 1
-            type:
-            - string
-            - 'null'
-            description: URL for merchant's website
-            example: https://merchantwebsite.example.com
-          email:
-            $ref: '#/components/schemas/Email'
-          phone:
-            title: Phone
-            maxLength: 30
-            minLength: 3
-            type:
-            - string
-            - 'null'
-            description: Phone number of the merchant's office
-            example: 1-234-567-9999
+          subMerchantIdentifier:
+            $ref: '#/components/schemas/SubMerchantIdentifier'
+          searchFields:
+            $ref: '#/components/schemas/SearchFields'
     Merchant:
       description: Base merchant request schema
       required:
@@ -1023,346 +1212,66 @@ components:
             uniqueItems: true
             items:
               $ref: '#/components/schemas/FirstPartyTrustEnrollment'
-    BulkOperationResource:
-      title: Bulk post resource
-      description: Resource with responseCode and details
+    Error:
       type: object
-      required:
-      - status
       properties:
-        id:
-          $ref: '#/components/schemas/ResourceId'
-        errors:
-          type:
-          - array
-          - 'null'
-          description: List of error objects
-          items:
-            $ref: '#/components/schemas/Error'
-          example: []
-        status:
-          title: Response Status
-          type: string
-          description: The status of resource - PENDING, PASS, FAILED
-          example: PENDING
-    LocationWithoutCardAcceptorsResource:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/LocationWithoutCardAcceptors'
-      - properties:
-          id:
-            $ref: '#/components/schemas/ResourceId'
-          cardAcceptorLocationType:
-            title: Card Acceptor Location Type
-            type:
-            - string
-            - 'null'
-            description: Types of card acceptor location - ONLINE, PHONE, CARD_PRESENT
-            example: ONLINE
-    PercentOwnership:
-      title: Percent Ownership
-      minLength: 1
-      maxLength: 5
-      pattern: ^(100(\.00?)?|[1-9]\d?(\.\d{1,2})?|0\.\d{1,2})$
-      type:
-      - string
-      - 'null'
-      description: Percent Ownership.
-      example: '25.50'
-    SearchFields:
-      title: Search Fields
-      type:
-      - array
-      - 'null'
-      description: 'SearchFields is an array of SearchField objects. The following validations apply:
-
-        * If the searchFields array contains both TRANSACTION_AMOUNT and TRANSACTION_CURRENCY_CODE searchParameters, then the value of the "searchFieldCards" and "required" properties must be same for both items
-
-        * If the searchFields array contains the TRANSACTION_AMOUNT searchParameter, then it must also contain the TRANSACTION_CURRENCY_CODE searchParameter (and vice versa)'
-      items:
-        $ref: '#/components/schemas/SearchField'
-    SalesforceAccountNumber:
-      title: Sales Force Account Number
-      maxLength: 100
-      minLength: 1
-      type: string
-      description: Unique identifier for a merchant in sales force system.
-      example: TY12SS33ERYUIOPDDSS34XX
-    LocationResource:
-      deprecated: true
-      allOf:
-      - $ref: '#/components/schemas/Location'
-      - type: object
-        properties:
-          id:
-            $ref: '#/components/schemas/ResourceId'
-          rejectedCardAcceptorNames:
-            $ref: '#/components/schemas/CardAcceptors'
-          cardAcceptorLocationType:
-            title: Card Acceptor Location Type
-            type:
-            - string
-            - 'null'
-            description: Types of card acceptor location - ONLINE, PHONE, CARD_PRESENT
-            example: ONLINE
-    SearchField:
-      type: object
-      required:
-      - searchFieldCards
-      properties:
-        searchParameter:
-          title: Merchant API Search parameter
+        Source:
+          maxLength: 100
+          minLength: 0
           type:
           - string
           - 'null'
-          description: Merchant api search parameter
-          example: ACQUIRER_REFERENCE_NUMBER
-          enum:
-          - PAYMENT_TYPE
-          - TRANSACTION_IDENTIFIER_VALUE
-          - ACQUIRER_REFERENCE_NUMBER
-          - TRANSACTION_DATE
-          - CARD_FIRST_SIX
-          - CARD_LAST_FOUR
-          - ISSUER_AUTHORIZATION_CODE
-          - TRANSACTION_AMOUNT
-          - TRANSACTION_CURRENCY_CODE
-        required:
-          title: Required
+          description: Source of the error
+          example: Service
+        ReasonCode:
+          maxLength: 100
+          minLength: 0
+          type:
+          - string
+          - 'null'
+          description: A unique constant identifying the error
+          example: format.invalid
+        Description:
+          maxLength: 1000
+          minLength: 0
+          type:
+          - string
+          - 'null'
+          description: Short description of the error
+          example: Short description of the error
+        Recoverable:
           type:
           - boolean
           - 'null'
-          description: If the search field is required
-          example: true
-        searchFieldCards:
-          $ref: '#/components/schemas/CardTypes'
-      description: Schema for a Search Field
-    MerchantLogo:
-      required:
-      - imageBase64Encoded
-      type: object
-      properties:
-        imageBase64Encoded:
-          $ref: '#/components/schemas/ImageBase64Encoded'
-      description: logo request schema for merchants
-    LegalAddress:
-      title: Legal Address
-      description: Legal address of the merchant.
-      required:
-      - addressLine1
-      - countryCode
-      - city
-      - regionCode
-      - postalCode
-      - phone
-      allOf:
-      - $ref: '#/components/schemas/Address'
-      - type: object
-        properties:
-          phone:
-            title: Phone
-            maxLength: 30
-            minLength: 3
-            type: string
-            description: Phone number of the merchant's office
-            example: 1-234-567-9991
-    LocationCount:
-      title: Merchant Location count
-      type: integer
-      default: 0
-      example: 15
-      minimum: 0
-      maximum: 9999999
-    Etag:
-      title: Entity Tag
-      maxLength: 100
-      minLength: 1
-      type: string
-      description: Etag is a response header which is an identifier for a specific version of a resource.
-      example: '"842DFBC17F921E7716642B9164F3B22B"'
-    MerchantName:
-      title: Merchant's Name
-      maxLength: 200
-      minLength: 3
-      type: string
-      description: Merchant's partial or full name.
-      example: Merchant 1
-    CardTypesResource:
-      title: Card Types Response
-      type: array
-      uniqueItems: true
-      description: A list of all of the card types that are accepted as a form of payment.
-      items:
-        type: string
-        description: Type of card used for a transaction
-        example: AMEX
-    UserId:
-      title: User Id
-      maxLength: 300
-      minLength: 1
-      type: string
-      description: The user id of the submitter/technical contact.
-      example: princess.diana
-    ResponseTime:
-      type: string
-      description: Total response time in ms
-      minLength: 0
-      maxLength: 10
-      example: 300 ms
-    FirstPartyTrustEnrollmentType:
-      title: First Party Trust Enrollment Types
-      type: string
-      description: Type of First Party Trust Enrollment
-      example: CLARITY
-      enum:
-      - CLARITY
-      - ISSM
-    ImageBase64Encoded:
-      title: Image Base 64 Encoded
-      type: string
-      description: Base 64 encoded image (JPG or PNG)
-      minLength: 0
-      maxLength: 999999999
-      example: /9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAIBAQIBAQICAgICAgICAwUDAwMDAwYEBAMFBwYHBwcGBwcICQsJCAgKCAcHCg0KCgsMDAwMBwkODw0MDgsMDAz/2wBDAQICAgMDAwYDAwYMCAcIDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAz/wAARCAAQABADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD638d/8HA2uah8em0jwP4L0W+8JxXZt459QmlW6vo1PMoKnbGCASAVY4xn0r6L+F//AAUzn8XatY3Op6HZ22h37AFoXYzWoJxkk8NjvgCvmXx1/wAG/wD4s0X4+HU/A3izw7D4RkuzPEuoiUXVjExOYtqqVkwCQDuXPGcV9JfCz/gmbf8AhTVrGz1TWbCbQ7BgWMAbzroA5IwQAue/JxnvX4TxVPjz63R/slO3Nr8HL/29fXltb8etj+puKKfhUsBR/spxvya6z59vtX0579vP7Nj/2Q==
-    LocationsBulk:
-      type: object
-      required:
-      - locations
-      properties:
-        locations:
-          minItems: 1
-          maxItems: 25
-          type: array
-          uniqueItems: true
-          description: Set of Merchant Locations
-          items:
-            $ref: '#/components/schemas/LocationWithoutCardAcceptors'
-          example: []
-    LogoResource:
-      type: object
-      required:
-      - status
-      properties:
-        status:
-          title: Status
-          maxLength: 100
-          minLength: 1
-          type: string
-          description: Status of the logo
-          example: ACTIVE
-        messages:
-          title: Messages
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+          example: false
+          default: false
+        Details:
+          maxLength: 1000
+          minLength: 0
           type:
-          - array
+          - string
           - 'null'
-          description: List of validation messages for a logo.
-          items:
-            maxLength: 200
-            minLength: 1
-            type: string
-            example: Logo under review
-          example: []
-      description: Schema for a sub-merchant logo status
-    FirstPartyTrustEnrollmentResource:
-      title: First Party Trust Enrollment Resource
-      type: object
-      required:
-      - enrollmentType
-      properties:
-        enrollmentType:
-          minLength: 1
-          maxLength: 50
-          type: string
-          description: Type of First Party Trust Enrollment
-          example: CLARITY
-    ShortEmail:
-      title: Email Address
-      maxLength: 100
-      minLength: 1
+          description: Optional detailed description of the issue
+          example: Detailed description of the error
+      description: Error object
+    Crm:
+      title: Customer Relationship Management
       type:
-      - string
+      - object
       - 'null'
-      description: Email address
-      example: john.doe@example.com
-      format: email
-    TermsConditionsConsent:
-      title: Terms & conditions consent
-      type: object
-      required:
-      - date
-      - firstName
-      - lastName
-      - jobTitle
-      - email
-      - countryCode
-      - consentUuid
-      - consentVersion
+      description: Customer Relationship Management
       properties:
-        date:
-          type: string
-          description: Date stamp in which the sub-merchant provided his consent on the terms and conditions. Date must be in [ISO 8601 format](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6)
-          format: date-time
-          example: '2021-10-18T13:56:47.123+00:00'
-        firstName:
-          type: string
-          minLength: 1
-          maxLength: 50
-          description: First name of person that gave consent
-          example: John
-        lastName:
-          type: string
-          minLength: 1
-          maxLength: 50
-          description: Last name of person that gave consent
-          example: Doe
-        jobTitle:
-          type: string
-          minLength: 1
-          maxLength: 100
-          description: Job title of person that gave consent
-          example: Manager
-        email:
-          $ref: '#/components/schemas/Email'
-        countryCode:
-          $ref: '#/components/schemas/CountryCode'
-        consentUuid:
-          type: string
-          minLength: 1
-          maxLength: 50
-          description: Universally Unique Identifier (UUID) of the consent that the user consented to
-          example: 3d94ab7b-fe1c-4f7d-ad4c-93c1eb6d29c3
-        consentVersion:
-          type: string
-          minLength: 1
-          maxLength: 8
-          description: Version of the consent that the user consented to
-          example: '1.0'
-    CardAcceptors:
-      title: Merchant Card Acceptors
-      maxItems: 1500
-      type:
-      - array
-      - 'null'
-      uniqueItems: true
-      description: List of merchant card acceptors
-      items:
-        $ref: '#/components/schemas/CardAcceptor'
-    CardTypes:
-      title: Card Types
-      type: array
-      minItems: 1
-      maxItems: 4
-      uniqueItems: true
-      description: A list of all of the card types that are accepted as a form of payment.
-      items:
-        type: string
-        description: Type of card used for a transaction
-        example: AMEX
-        enum:
-        - AMEX
-        - DISCOVER
-        - MC
-        - VISA
+        termsConditionsConsent:
+          $ref: '#/components/schemas/TermsConditionsConsent'
+        sanctionScreening:
+          $ref: '#/components/schemas/SanctionScreening'
+        paymentConfirmation:
+          title: Payment Confirmation
+          type: boolean
+          description: Confirmation of payment account setup
+          example: true
+          default: false
     LegalEntity:
       title: Legal Entity
       description: Legal entity owning the merchant.
@@ -1383,6 +1292,273 @@ components:
           - boolean
           - 'null'
           example: false
+    FirstPartyTrustEnrollmentType:
+      title: First Party Trust Enrollment Types
+      type: string
+      description: Type of First Party Trust Enrollment
+      example: CLARITY
+      enum:
+      - CLARITY
+      - ISSM
+    ResponseHeader:
+      type: object
+      properties:
+        totalRecords:
+          type: integer
+          format: int64
+          description: Total number of records found
+          minimum: 0
+          maximum: 999999999
+          example: 500
+        totalPages:
+          type: integer
+          description: Total number of pages based on limit
+          minimum: 0
+          maximum: 999999999
+          example: 10
+        currentPage:
+          type: integer
+          description: The current page number
+          minimum: 1
+          maximum: 999999999
+          example: 2
+        responseTime:
+          $ref: '#/components/schemas/ResponseTime'
+    PageableLocationsResource:
+      title: Pageable locations resource
+      description: Pageable locations resource with pagination metadata
+      properties:
+        data:
+          type: array
+          description: List of Location resources
+          items:
+            $ref: '#/components/schemas/LocationWithoutCardAcceptorsResource'
+          example: []
+        metadata:
+          $ref: '#/components/schemas/ClarityResponseHeader'
+    SearchFieldsResource:
+      title: Search Fields Response
+      type:
+      - array
+      - 'null'
+      description: Search Field
+      items:
+        $ref: '#/components/schemas/SearchFieldResource'
+    SalesforceAccountNumber:
+      title: Sales Force Account Number
+      maxLength: 100
+      minLength: 1
+      type: string
+      description: Unique identifier for a merchant in sales force system.
+      example: TY12SS33ERYUIOPDDSS34XX
+    SanctionScreening:
+      title: Sanction Screening
+      type: object
+      required:
+      - taxId
+      - publiclyTraded
+      - doBusinessWithSanctionedGeographies
+      properties:
+        taxId:
+          title: Tax Identification
+          description: Known as VAT Number in the US and GST in Canada.
+          example: 123456789AB1234
+          type: string
+          minLength: 1
+          maxLength: 30
+        formerLegalNames:
+          title: List of Former Legal Names
+          description: The merchant's former legal names
+          uniqueItems: true
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/MerchantName'
+          example: []
+        doBusinessWithSanctionedGeographies:
+          title: Business With Sanctioned Geographies Indicator
+          description: 'Indicates whether the merchant does business with sanctioned geographies.
+
+            If it is true, then sanctionedGeographies property can''t be empty.
+
+            '
+          type: boolean
+          example: false
+        sanctionedGeographies:
+          title: List of Sanctioned Geographies
+          description: 'List of sanctioned geographies that the merchant is doing business with. It
+
+            can''t be empty if the doBusinessWithSanctionedGeographies property is true
+
+            '
+          uniqueItems: true
+          type:
+          - array
+          - 'null'
+          items:
+            title: Sanctioned Geography
+            type: string
+            minLength: 1
+            maxLength: 60
+            description: Sanctioned geography
+            example: Iran
+          example: []
+        publiclyTraded:
+          title: Merchant Publicly Traded Indicator
+          description: Indicates whether a merchant is publicly traded.
+          type: boolean
+          example: false
+        tickerSymbol:
+          title: Merchant's Stock Symbol
+          description: Publicly traded merchant's stock symbol. It's mandatory if the isPubliclyTraded attribute is true.
+          type:
+          - string
+          - 'null'
+          minLength: 1
+          maxLength: 10
+          example: NFLX
+        beneficialOwners:
+          type:
+          - array
+          - 'null'
+          title: List of Beneficial Owners
+          description: Required only if publiclyTraded property is false and legalEntities property is empty.
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/BeneficialOwner'
+          example: []
+        legalEntities:
+          type:
+          - array
+          - 'null'
+          title: List of Legal Entities
+          description: Required only if publiclyTraded property is false and beneficialOwners property is empty.
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/LegalEntity'
+          example: []
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: List of error objects
+          items:
+            $ref: '#/components/schemas/Error'
+          example: []
+      description: Errors object
+    ResponseTime:
+      type: string
+      description: Total response time in ms
+      minLength: 0
+      maxLength: 10
+      example: 300 ms
+    LocaleResource:
+      allOf:
+      - $ref: '#/components/schemas/Locale'
+      - type: object
+        properties:
+          code:
+            title: Code
+            type: string
+            description: The locale where the merchant anticipates their business to be located; often referred to as the Accept-Language in HTTP headers.
+            example: EN_CA
+    LocationsBulk:
+      type: object
+      required:
+      - locations
+      properties:
+        locations:
+          minItems: 1
+          maxItems: 25
+          type: array
+          uniqueItems: true
+          description: Set of Merchant Locations
+          items:
+            $ref: '#/components/schemas/LocationWithoutCardAcceptors'
+          example: []
+    MerchantGuid:
+      title: Merchant GUID
+      maxLength: 16
+      minLength: 11
+      type: string
+      description: Consumer Clarity internal merchant's GUID
+      example: jK2dA5aybhQQBq6C
+    BaseMerchant:
+      type: object
+      description: Base merchant model schema
+      required:
+      - name
+      - industryCode
+      - primaryContact
+      - legalAddress
+      properties:
+        name:
+          title: Name
+          maxLength: 60
+          minLength: 1
+          type: string
+          description: Name of the merchant that the item was purchased from.
+          example: Pan American Airlines
+        categoryCode:
+          title: Merchant Category Code
+          maxLength: 4
+          minLength: 4
+          pattern: ^[0-9]*$
+          type:
+          - string
+          - 'null'
+          description: A four-digit number listed in ISO 18245 for retail financial services. MCC is used to classify the business by the type of goods or services it provides.
+          example: '3002'
+        orderAvailabilityDateTime:
+          title: Order Availability Date
+          type:
+          - string
+          - 'null'
+          description: The earliest date an Issuer can search for orders (i.e. the date an Issuer cannot search before). Date-Time must be in [ISO 8601 format](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6)
+          example: '2021-10-18T13:56:47.123+00:00'
+          format: date-time
+        orderHistoryMonths:
+          title: Order History in Months
+          maximum: 12
+          minimum: 1
+          type:
+          - integer
+          - 'null'
+          description: The number of months worth of data you have made available to search on.
+          format: int32
+          example: 5
+        orderLatencyDays:
+          title: Order Latency in Days
+          maximum: 365
+          minimum: 0
+          type:
+          - integer
+          - 'null'
+          description: 'The numbers of days that need to elapse between an authorization for a purchase and when the purchase can be searched on. '
+          format: int32
+          example: 5
+        industryCode:
+          title: Industry Code
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: Industry Code is used to classify the business by the type of industry.
+          example: ACC
+        primaryContact:
+          $ref: '#/components/schemas/PrimaryContact'
+        legalAddress:
+          $ref: '#/components/schemas/LegalAddress'
+    MerchantName:
+      title: Merchant's Name
+      maxLength: 200
+      minLength: 3
+      type: string
+      description: Merchant's partial or full name.
+      example: Merchant 1
     LocationWithoutCardAcceptors:
       type: object
       required:
@@ -1504,336 +1680,121 @@ components:
             - PHONE
             - CARD_PRESENT
         description: Merchant location details
-    FirstName:
-      title: First Name
-      maxLength: 30
-      minLength: 1
-      type:
-      - string
-      - 'null'
-      description: The individual's first name
-      example: Michael
-    ResponseHeader:
-      type: object
-      properties:
-        totalRecords:
-          type: integer
-          format: int64
-          description: Total number of records found
-          minimum: 0
-          maximum: 999999999
-          example: 500
-        totalPages:
-          type: integer
-          description: Total number of pages based on limit
-          minimum: 0
-          maximum: 999999999
-          example: 10
-        currentPage:
-          type: integer
-          description: The current page number
-          minimum: 1
-          maximum: 999999999
-          example: 2
-        responseTime:
-          $ref: '#/components/schemas/ResponseTime'
-    SubMerchantIdentifier:
-      title: Sub-Merchant Identifier
-      maxLength: 100
+    UserId:
+      title: User Id
+      maxLength: 300
       minLength: 1
       type: string
-      description: The alphanumeric ID of the sub-merchant associated with the purchase details. Required for channel partner.
-      example: GHF5F67DFSD468GJJXH78
-    LogoImageResource:
-      allOf:
-      - $ref: '#/components/schemas/LogoResource'
-      - type: object
-        properties:
-          imageBase64Encoded:
-            $ref: '#/components/schemas/ImageBase64Encoded'
-      description: Schema for a sub-merchant logo including image binary
-    CountryCode:
-      title: Country Code
-      maxLength: 3
-      minLength: 3
-      type:
-      - string
-      - 'null'
-      description: The [ISO 3166-1](https://www.iso.org/obp/ui/#search) alpha-3 compliant country code.
-      example: CAN
-    FirstPartyTrustEnrollment:
-      title: First Party Trust Enrollment
-      type: object
-      required:
-      - enrollmentType
-      properties:
-        enrollmentType:
-          $ref: '#/components/schemas/FirstPartyTrustEnrollmentType'
-    Crm:
-      title: Customer Relationship Management
-      type:
-      - object
-      - 'null'
-      description: Customer Relationship Management
-      properties:
-        termsConditionsConsent:
-          $ref: '#/components/schemas/TermsConditionsConsent'
-        sanctionScreening:
-          $ref: '#/components/schemas/SanctionScreening'
-        paymentConfirmation:
-          title: Payment Confirmation
-          type: boolean
-          description: Confirmation of payment account setup
-          example: true
-          default: false
-    SearchFieldResource:
-      type: object
-      properties:
-        searchParameter:
-          title: Search Parameter
-          type:
-          - string
-          - 'null'
-          maxLength: 28
-          minLength: 12
-          description: Merchant api search parameter
-          example: cardAcceptorName
-        required:
-          title: Required
-          type:
-          - boolean
-          - 'null'
-          description: Set true if this search parameter is mandatory
-          example: true
-        searchFieldCards:
-          $ref: '#/components/schemas/CardTypesResource'
-      description: Merchant Api Search Field
-    EntityName:
-      title: Entity Legal/Business Name
-      maxLength: 100
-      minLength: 1
-      type:
-      - string
-      - 'null'
-      description: The entity's legal or business name.
-      example: Walmart
-    SubMerchant:
-      description: Schema for a sub-merchant
-      allOf:
-      - $ref: '#/components/schemas/Merchant'
-      - type: object
-        required:
-        - subMerchantIdentifier
-        properties:
-          subMerchantIdentifier:
-            $ref: '#/components/schemas/SubMerchantIdentifier'
-          searchFields:
-            $ref: '#/components/schemas/SearchFields'
-    BeneficialOwner:
-      title: Beneficial Owner
-      description: Individual owning the merchant.
-      type: object
-      properties:
-        firstName:
-          $ref: '#/components/schemas/FirstName'
-        secondName:
-          $ref: '#/components/schemas/SecondName'
-        lastName:
-          $ref: '#/components/schemas/LastName'
-        address:
-          $ref: '#/components/schemas/ShortAddress'
-        birthCountry:
-          $ref: '#/components/schemas/CountryCode'
-        birthDate:
-          title: Beneficial Owner Birth Date
-          description: Beneficial owner birth date. Date must be in a [ISO 8601 format](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6)
-          type:
-          - string
-          - 'null'
-          format: date
-          example: '1977-05-23T00:00:00.000Z'
-        percentOwnership:
-          $ref: '#/components/schemas/PercentOwnership'
-    BaseMerchant:
-      type: object
-      description: Base merchant model schema
-      required:
-      - name
-      - industryCode
-      - primaryContact
-      - legalAddress
-      properties:
-        name:
-          title: Name
-          maxLength: 60
-          minLength: 1
-          type: string
-          description: Name of the merchant that the item was purchased from.
-          example: Pan American Airlines
-        categoryCode:
-          title: Merchant Category Code
-          maxLength: 4
-          minLength: 4
-          pattern: ^[0-9]*$
-          type:
-          - string
-          - 'null'
-          description: A four-digit number listed in ISO 18245 for retail financial services. MCC is used to classify the business by the type of goods or services it provides.
-          example: '3002'
-        orderAvailabilityDateTime:
-          title: Order Availability Date
-          type:
-          - string
-          - 'null'
-          description: The earliest date an Issuer can search for orders (i.e. the date an Issuer cannot search before). Date-Time must be in [ISO 8601 format](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6)
-          example: '2021-10-18T13:56:47.123+00:00'
-          format: date-time
-        orderHistoryMonths:
-          title: Order History in Months
-          maximum: 12
-          minimum: 1
-          type:
-          - integer
-          - 'null'
-          description: The number of months worth of data you have made available to search on.
-          format: int32
-          example: 5
-        orderLatencyDays:
-          title: Order Latency in Days
-          maximum: 365
-          minimum: 0
-          type:
-          - integer
-          - 'null'
-          description: 'The numbers of days that need to elapse between an authorization for a purchase and when the purchase can be searched on. '
-          format: int32
-          example: 5
-        industryCode:
-          title: Industry Code
-          maxLength: 3
-          minLength: 3
-          type: string
-          description: Industry Code is used to classify the business by the type of industry.
-          example: ACC
-        primaryContact:
-          $ref: '#/components/schemas/PrimaryContact'
-        legalAddress:
-          $ref: '#/components/schemas/LegalAddress'
-    ValidationStatus:
-      type:
-      - object
-      - 'null'
-      description: Status of created Merchant
-      properties:
-        messages:
-          title: Messages
-          type:
-          - array
-          - 'null'
-          description: List of validation messages for a merchant.
-          items:
-            $ref: '#/components/schemas/Error'
-          example: []
-        contactUs:
-          title: Contact-us message
-          type:
-          - string
-          - 'null'
-          maxLength: 500
-          minLength: 1
-          description: Ethoca's CX team contact
-          example: Please reach out to Mastercard/Ethoca customer success team for any questions or concerns.
-    SearchFieldsResource:
-      title: Search Fields Response
-      type:
-      - array
-      - 'null'
-      description: Search Field
-      items:
-        $ref: '#/components/schemas/SearchFieldResource'
-    LocationsBulkResource:
-      title: Locations resource
-      description: List of locations resource
-      type: object
-      properties:
-        locations:
-          type: array
-          items:
-            $ref: '#/components/schemas/BulkOperationResource'
-          example: []
-    SubMerchantState:
-      required:
-      - state
-      properties:
-        state:
-          type: string
-          description: State of the Sub-Merchant
-          example: ACTIVE
-          enum:
-          - ACTIVE
-          - INACTIVE
-        inactivationReason:
-          title: Reason for Inactivation
-          type: string
-          description: Reason for Inactivation. Required when state is INACTIVE.
-          example: My business is closing
-          minLength: 1
-          maxLength: 250
-    CardAcceptor:
-      title: Merchant Card Acceptor
-      maxLength: 50
-      minLength: 1
-      type: string
-      description: Merchant Card Acceptor
-      example: ETHOCA NINJA GAMES
-    SecondName:
-      title: Second Name
-      maxLength: 30
-      minLength: 1
-      type:
-      - string
-      - 'null'
-      description: The individual's second name
-      example: Andrew
-  requestBodies:
-    LocationsBulkRequestBody:
-      required: true
+      description: The user id of the submitter/technical contact.
+      example: princess.diana
+  responses:
+    BadRequest:
+      description: Bad Request
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/LocationsBulk'
-    MerchantLogoBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/MerchantLogo'
-    SubMerchantBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/SubMerchant'
-    ChangeSubMerchantStateBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/SubMerchantState'
+            $ref: '#/components/schemas/ErrorResponse'
           examples:
-            inactivation:
-              value:
-                state: INACTIVE
-                inactivationReason: My business is closing
-            activation:
-              value:
-                state: ACTIVE
-    LocationBody:
-      required: true
+            InvalidData:
+              $ref: '#/components/examples/InvalidData'
+            AlertsInvalidData:
+              $ref: '#/components/examples/AlertsInvalidData'
+            InvalidParameterSet:
+              $ref: '#/components/examples/InvalidParameterSet'
+            FormatInvalid:
+              $ref: '#/components/examples/FormatInvalid'
+            AlertsFormatInvalid:
+              $ref: '#/components/examples/AlertsFormatInvalid'
+            MissingRequiredHeader:
+              $ref: '#/components/examples/MissingRequiredHeader'
+    SubMerchantSuccess:
+      description: Successful Operation
+      headers:
+        Etag:
+          required: true
+          schema:
+            $ref: '#/components/schemas/Etag'
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/LocationWithoutCardAcceptors'
+            $ref: '#/components/schemas/SubMerchantResource'
+    PreconditionRequired:
+      description: Pre Condition Failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            PreConditionFailed:
+              $ref: '#/components/examples/PreconditionRequired'
+    LocationsBulkSuccess:
+      description: Locations response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LocationsBulkResource'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ResourceNotFound:
+              $ref: '#/components/examples/ResourceNotFound'
+            EntityNotFound:
+              $ref: '#/components/examples/EntityNotFound'
+            AlertsEntityNotFound:
+              $ref: '#/components/examples/AlertsEntityNotFound'
+    PageableLocationsSuccess:
+      description: Pageable locations resource with pagination metadata
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PageableLocationsResource'
+    LocationSuccess:
+      description: Location response
+      headers:
+        Etag:
+          required: true
+          schema:
+            $ref: '#/components/schemas/Etag'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LocationWithoutCardAcceptorsResource'
+    SuccessWithoutBody:
+      description: Successful Operation
+    LogoSuccessWithImage:
+      description: Successful Operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LogoImageResource'
+    LogoSuccess:
+      description: Successful Operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LogoResource'
+    PreconditionFailed:
+      description: Pre Condition Failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            PreConditionFailed:
+              $ref: '#/components/examples/PreconditionFailed'
+    Default:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ServerError:
+              $ref: '#/components/examples/ServerError'
   examples:
     AlertsInvalidData:
       summary: Invalid Data Field Error Response For Alerts
@@ -1846,17 +1807,17 @@ components:
             Description: size must be between 3 and 200
             Recoverable: false
             Details: ''
-    ResourceNotFound:
-      summary: Resource Not Found Error Response
-      description: If request URI doesn't match with any available endpoints, then ResourceNotFound error response is returned the caller with HTTP Status code 404.
+    AlertsFormatInvalid:
+      summary: Format Invalid Error Response For Alerts
+      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
       value:
         Errors:
           Error:
           - Source: service
-            ReasonCode: resource.not.found
-            Description: Not Found
+            ReasonCode: 'invalid data: merchantCategoryCode'
+            Description: must match \"^[0-9]*$\"
             Recoverable: false
-            Details: /merchant-self-services/sub-merchantTs/
+            Details: ''
     InvalidData:
       summary: Invalid Data Error Response For Consumer Clarity
       description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
@@ -1879,17 +1840,6 @@ components:
             Description: If-Match,
             Recoverable: false
             Details: ''
-    EntityNotFound:
-      summary: Entity Not Found Error Response For Consumer Clarity
-      description: If a requested entity(e.g. Merchant or Logo) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: 'invalid data: GUID'
-            Description: Merchant 1E37M8VSX1D28QYX not found
-            Recoverable: false
-            Details: ''
     PreconditionFailed:
       summary: Precondition Failed for the request
       description: If the Etag value sent in the If-Match header doesn't match with the hash of the merchant saved in the system, a PreconditionFailed error response is returned to the caller with HTTP Status code 412.
@@ -1899,6 +1849,17 @@ components:
           - Source: service
             ReasonCode: 'invalid data: If-Match'
             Description: Merchant has been modified by another user. Please refresh the merchant data and try again
+            Recoverable: false
+            Details: ''
+    EntityNotFound:
+      summary: Entity Not Found Error Response For Consumer Clarity
+      description: If a requested entity(e.g. Merchant or Logo) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: GUID'
+            Description: Merchant 1E37M8VSX1D28QYX not found
             Recoverable: false
             Details: ''
     ServerError:
@@ -1912,26 +1873,26 @@ components:
             Description: Internal Server Error
             Recoverable: false
             Details: ''
-    MissingRequiredHeader:
-      summary: Missing Required Header Error Response
-      description: If a required request header is missing or null, then MissingRequiredHeader error response is returned to the caller with HTTP Status code 400.
+    ResourceNotFound:
+      summary: Resource Not Found Error Response
+      description: If request URI doesn't match with any available endpoints, then ResourceNotFound error response is returned the caller with HTTP Status code 404.
       value:
         Errors:
           Error:
           - Source: service
-            ReasonCode: missing required header
-            Description: Submitter-First-Name
+            ReasonCode: resource.not.found
+            Description: Not Found
             Recoverable: false
-            Details: ''
-    FormatInvalid:
-      summary: Format Invalid Error Response For Consumer Clarity
-      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
+            Details: /merchant-self-services/sub-merchantTs/
+    AlertsEntityNotFound:
+      summary: Entity Not Found Error Response For Alerts
+      description: If a requested entity(e.g. Sub-Merchant or Card Acceptor ID or Card Acceptor Name) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
       value:
         Errors:
           Error:
           - Source: service
-            ReasonCode: format.invalid
-            Description: orderHistoryMonths
+            ReasonCode: 'invalid data: subMerchantId'
+            Description: Sub-Merchant 99ca4b15-72a6-41dd-8127-573d4b07669c not found
             Recoverable: false
             Details: ''
     InvalidParameterSet:
@@ -1945,29 +1906,102 @@ components:
             Description: request body is malformed
             Recoverable: false
             Details: ''
-    AlertsFormatInvalid:
-      summary: Format Invalid Error Response For Alerts
+    FormatInvalid:
+      summary: Format Invalid Error Response For Consumer Clarity
       description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
       value:
         Errors:
           Error:
           - Source: service
-            ReasonCode: 'invalid data: merchantCategoryCode'
-            Description: must match \"^[0-9]*$\"
+            ReasonCode: format.invalid
+            Description: orderHistoryMonths
             Recoverable: false
             Details: ''
-    AlertsEntityNotFound:
-      summary: Entity Not Found Error Response For Alerts
-      description: If a requested entity(e.g. Sub-Merchant or Card Acceptor ID or Card Acceptor Name) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
+    MissingRequiredHeader:
+      summary: Missing Required Header Error Response
+      description: If a required request header is missing or null, then MissingRequiredHeader error response is returned to the caller with HTTP Status code 400.
       value:
         Errors:
           Error:
           - Source: service
-            ReasonCode: 'invalid data: subMerchantId'
-            Description: Sub-Merchant 99ca4b15-72a6-41dd-8127-573d4b07669c not found
+            ReasonCode: missing required header
+            Description: Submitter-First-Name
             Recoverable: false
             Details: ''
+  requestBodies:
+    ChangeSubMerchantStateBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubMerchantState'
+          examples:
+            inactivation:
+              value:
+                state: INACTIVE
+                inactivationReason: My business is closing
+            activation:
+              value:
+                state: ACTIVE
+    SubMerchantBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubMerchant'
+    LocationsBulkRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LocationsBulk'
+    LocationBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LocationWithoutCardAcceptors'
+    MerchantLogoBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MerchantLogo'
   parameters:
+    SubmitterLastNameParam:
+      name: Submitter-Last-Name
+      in: header
+      required: true
+      example: Princess
+      description: The last name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/LastName'
+    ClarityPageNumberParam:
+      name: page_number
+      in: query
+      required: false
+      description: current page number
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+      example: 2
+    MerchantGuidParam:
+      name: guid
+      in: path
+      required: true
+      description: Consumer Clarity internal merchant's GUID
+      example: jK2dA5aybhQQBq6C
+      schema:
+        $ref: '#/components/schemas/MerchantGuid'
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      example: '"842DFBC17F921E7716642B9164F3B22B"'
+      description: If-Match is a request header which makes the request conditional. Client must send the corresponding value from the latest Etag response header received for this merchant.
+      schema:
+        $ref: '#/components/schemas/Etag'
     LocationSearchTextQueryParam:
       name: search_text
       in: query
@@ -1977,6 +2011,26 @@ components:
         type: string
         maxLength: 100
       example: Toronto
+    LocationIdParam:
+      name: location_id
+      in: path
+      required: true
+      example: Mxyz123
+      description: Unique identifier of location
+      schema:
+        $ref: '#/components/schemas/ResourceId'
+    ClaritySortDirectionParam:
+      name: sort_direction
+      in: query
+      required: false
+      description: Direction to sort the data using sort_field in response
+      schema:
+        type: string
+        default: DESC
+        enum:
+        - ASC
+        - DESC
+        example: ASC
     ClarityOffsetParam:
       name: offset
       in: query
@@ -1987,14 +2041,6 @@ components:
         default: 50
         minimum: 0
         example: 0
-    IfMatch:
-      name: If-Match
-      in: header
-      required: true
-      example: '"842DFBC17F921E7716642B9164F3B22B"'
-      description: If-Match is a request header which makes the request conditional. Client must send the corresponding value from the latest Etag response header received for this merchant.
-      schema:
-        $ref: '#/components/schemas/Etag'
     SubmitterFirstNameParam:
       name: Submitter-First-Name
       in: header
@@ -2013,36 +2059,6 @@ components:
         default: modifiedDateTime
         maxLength: 100
       example: modifiedDateTime
-    ClaritySortDirectionParam:
-      name: sort_direction
-      in: query
-      required: false
-      description: Direction to sort the data using sort_field in response
-      schema:
-        type: string
-        default: DESC
-        enum:
-        - ASC
-        - DESC
-        example: ASC
-    ClarityPageNumberParam:
-      name: page_number
-      in: query
-      required: false
-      description: current page number
-      schema:
-        type: integer
-        default: 0
-        minimum: 0
-      example: 2
-    LocationIdParam:
-      name: location_id
-      in: path
-      required: true
-      example: Mxyz123
-      description: Unique identifier of location
-      schema:
-        $ref: '#/components/schemas/ResourceId'
     UserIdParam:
       name: User-Id
       in: header
@@ -2051,19 +2067,3 @@ components:
       description: The user id of the submitter/technical contact.
       schema:
         $ref: '#/components/schemas/UserId'
-    SubmitterLastNameParam:
-      name: Submitter-Last-Name
-      in: header
-      required: true
-      example: Princess
-      description: The last name of the submitter/technical contact.
-      schema:
-        $ref: '#/components/schemas/LastName'
-    MerchantGuidParam:
-      name: guid
-      in: path
-      required: true
-      description: Consumer Clarity internal merchant's GUID
-      example: jK2dA5aybhQQBq6C
-      schema:
-        $ref: '#/components/schemas/MerchantGuid'

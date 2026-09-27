@@ -63,97 +63,6 @@ paths:
         $ref: '#/components/requestBodies/InitializePremiumAuthenticationsRequest'
 components:
   schemas:
-    UserConsent:
-      enum:
-      - ACCEPT
-      - DECLINE
-      - REVOKE
-      - EXPIRE
-      type: string
-      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
-      pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
-      minLength: 6
-      maxLength: 7
-      example: ACCEPT
-    InitPremiumAuthentications:
-      required:
-      - countryCode
-      - sdkVersion
-      - userProfileId
-      - userConsent
-      - channelType
-      - pds
-      - locale
-      allOf:
-      - $ref: '#/components/schemas/InitializeAuthentications'
-    SdkVersion:
-      type: string
-      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
-      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
-      minLength: 5
-      maxLength: 255
-      example: 2.3.0
-    ARID:
-      type: string
-      description: A unique identifier for any activity being executed arising out of a Claim Share request. This value is passed as a parameter in the URL redirecting a User to the TP Flow during a Claim Share.
-      format: uuid
-      pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-      minLength: 36
-      maxLength: 36
-      example: a15fa6de-b199-11eb-8529-0242ac130003
-    Authentications:
-      required:
-      - transactionId
-      - apiDataCenter
-      - sdkToken
-      type: object
-      properties:
-        transactionId:
-          type: string
-          description: A random 128-bit UUID represents the MIDS transaction.
-          minLength: 36
-          maxLength: 36
-          example: 1ec14310-e85c-11ea-adc1-0242ac120002
-        apiDataCenter:
-          type: string
-          description: Identity verification vendor SDK datacenter to be used by API. Possible values.
-          example: SG
-          minLength: 1
-          maxLength: 2
-        sdkToken:
-          type: string
-          description: Passed into the MIDS verification SDK for authentication.
-          minLength: 1
-          maxLength: 400
-          example: eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAB3NQQpCMQwE0Lt0baBJ0yZ159KtN0jTBgTBjYgg3t3__3KGN8w3rc_llc4JG6KUhrmoYjolc7_OvWfPKJ2hUzNgagE2hcC5hsYIUeOdH7gStVr6AtElwNUcrBNDFppYMjqxb9hvKzb9fNzfa4_HVkORomdoggsYp8HgPqAWF43VtsOcfn_stx4UsAAAAA.tDRVowYYcpQ03Vlt7D3MiovleiyRFQMv4qzXb7Lf_6CarphRrlWXan8-jE-YesNiAiT8tk0b-i8TKHGrcgT1VQ
-        privacyPolicyVersion:
-          type: string
-          description: The version of the privacy policy which the API call is being conducted under, this can be retrieved from the MIDS Core SDK.
-          minLength: 1
-          maxLength: 20
-          example: 1.0.0
-        privacyPolicyUrl:
-          type: string
-          description: Privacy policy static URL.
-          minLength: 1
-          maxLength: 255
-          example: https://www.mastercard.us/en-us/vision/corp-responsibility/commitment-to-privacy/privacy.html
-        privacyPolicyVersionUpdated:
-          type: boolean
-          description: Flag indicating if the privacy policy has been updated.
-          example: true
-        rotatedPds:
-          type: string
-          description: A rotated PDS is created and returned when the encryption key expires and a new key is generated.
-          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
-          minLength: 1
-          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-    PDS:
-      type: string
-      description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
-      pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
-      minLength: 1
-      example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
     DeviceInfo:
       description: Object containing the details of the device from which the enrollment is being conducted.
       required:
@@ -180,6 +89,148 @@ components:
           minLength: 1
           maxLength: 255
           example: S8
+    UserConsent:
+      enum:
+      - ACCEPT
+      - DECLINE
+      - REVOKE
+      - EXPIRE
+      type: string
+      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
+      pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+      minLength: 6
+      maxLength: 7
+      example: ACCEPT
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      description: The error response model used by all the API endpoints.
+      properties:
+        Errors:
+          required:
+          - Error
+          type: object
+          description: The error response model used by all the API endpoints.
+          properties:
+            Error:
+              type: array
+              description: A list of Error objects.
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The source of the problem. That is where the error occurred.
+                    example: mids
+                  ReasonCode:
+                    type: string
+                    description: A code defining the error, as defined in documentation.
+                    example: USER_PROFILE_ID_NOT_FOUND
+                  Description:
+                    type: string
+                    description: A description of this specific occurrence of the Reason code.
+                    example: The provided user profile ID does not exist.
+                  Recoverable:
+                    type: boolean
+                    description: Whether or not retrying this request could result in a successful response.
+                    example: false
+                  Details:
+                    type: string
+                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+                    example: User X was not found
+                  redirectUri:
+                    type: string
+                    description: TP will use this URI to redirect to RP.
+                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    InitializeAuthentications:
+      required:
+      - countryCode
+      - sdkVersion
+      - userProfileId
+      - userConsent
+      - channelType
+      - pds
+      - locale
+      type: object
+      properties:
+        deviceInfo:
+          $ref: '#/components/schemas/DeviceInfo'
+        isNewDeviceAppId:
+          type: boolean
+          description: A flag indicating that this is the first time the identity is being accessed on a new device, usually as a result of a backup and restore.
+          example: false
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+        userProfileId:
+          type: string
+          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        locale:
+          $ref: '#/components/schemas/Locale'
+        channelType:
+          type: string
+          description: The platform from where the request is originating Web/SDK.
+          enum:
+          - WEB
+          - SDK
+          minLength: 3
+          maxLength: 3
+          example: WEB
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+    InitPremiumAuthentications:
+      required:
+      - countryCode
+      - sdkVersion
+      - userProfileId
+      - userConsent
+      - channelType
+      - pds
+      - locale
+      allOf:
+      - $ref: '#/components/schemas/InitializeAuthentications'
+    ARID:
+      type: string
+      description: A unique identifier for any activity being executed arising out of a Claim Share request. This value is passed as a parameter in the URL redirecting a User to the TP Flow during a Claim Share.
+      format: uuid
+      pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+      minLength: 36
+      maxLength: 36
+      example: a15fa6de-b199-11eb-8529-0242ac130003
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
+    Locale:
+      type: string
+      description: IETF BCP 47 code which identifies the language to be used in any dialogs being shown to the user during the flow.  The default value is "en-US".
+      pattern: ^[a-z]{2}-[a-zA-Z]{2}$
+      example: en-US
+    CountryCode:
+      type: string
+      description: The country code of the country where the transaction originates from.
+      pattern: ^[a-zA-Z]{2}$
+      example: US
     AuditEventsItem:
       type: object
       properties:
@@ -312,11 +363,6 @@ components:
               type: object
               description: Response Details.
               example: Response Data
-    Locale:
-      type: string
-      description: IETF BCP 47 code which identifies the language to be used in any dialogs being shown to the user during the flow.  The default value is "en-US".
-      pattern: ^[a-z]{2}-[a-zA-Z]{2}$
-      example: en-US
     TpAuditMetadata:
       required:
       - sessionId
@@ -338,105 +384,109 @@ components:
           minLength: 36
           maxLength: 36
           example: be3ad617-04ad-43e1-a438-79425b6511b6
-    InitializeAuthentications:
-      required:
-      - countryCode
-      - sdkVersion
-      - userProfileId
-      - userConsent
-      - channelType
-      - pds
-      - locale
-      type: object
-      properties:
-        deviceInfo:
-          $ref: '#/components/schemas/DeviceInfo'
-        isNewDeviceAppId:
-          type: boolean
-          description: A flag indicating that this is the first time the identity is being accessed on a new device, usually as a result of a backup and restore.
-          example: false
-        countryCode:
-          $ref: '#/components/schemas/CountryCode'
-        sdkVersion:
-          $ref: '#/components/schemas/SdkVersion'
-        userProfileId:
-          type: string
-          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
-          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-          example: df52649e-4096-456a-bca0-751ee470009f
-        pds:
-          $ref: '#/components/schemas/PDS'
-        userConsent:
-          $ref: '#/components/schemas/UserConsent'
-        locale:
-          $ref: '#/components/schemas/Locale'
-        channelType:
-          type: string
-          description: The platform from where the request is originating Web/SDK.
-          enum:
-          - WEB
-          - SDK
-          minLength: 3
-          maxLength: 3
-          example: WEB
-        sdkAuditEvents:
-          type: array
-          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
-          items:
-            $ref: '#/components/schemas/AuditEventsItem'
-        tpAuditMetadata:
-          $ref: '#/components/schemas/TpAuditMetadata'
-        arid:
-          $ref: '#/components/schemas/ARID'
-    ErrorResponse:
-      required:
-      - Errors
-      type: object
-      description: The error response model used by all the API endpoints.
-      properties:
-        Errors:
-          required:
-          - Error
-          type: object
-          description: The error response model used by all the API endpoints.
-          properties:
-            Error:
-              type: array
-              description: A list of Error objects.
-              minItems: 1
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    description: The source of the problem. That is where the error occurred.
-                    example: mids
-                  ReasonCode:
-                    type: string
-                    description: A code defining the error, as defined in documentation.
-                    example: USER_PROFILE_ID_NOT_FOUND
-                  Description:
-                    type: string
-                    description: A description of this specific occurrence of the Reason code.
-                    example: The provided user profile ID does not exist.
-                  Recoverable:
-                    type: boolean
-                    description: Whether or not retrying this request could result in a successful response.
-                    example: false
-                  Details:
-                    type: string
-                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
-                    example: User X was not found
-                  redirectUri:
-                    type: string
-                    description: TP will use this URI to redirect to RP.
-                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
-                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
-    CountryCode:
+    PDS:
       type: string
-      description: The country code of the country where the transaction originates from.
-      pattern: ^[a-zA-Z]{2}$
-      example: US
+      description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
+      pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+      minLength: 1
+      example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    Authentications:
+      required:
+      - transactionId
+      - apiDataCenter
+      - sdkToken
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: A random 128-bit UUID represents the MIDS transaction.
+          minLength: 36
+          maxLength: 36
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+        apiDataCenter:
+          type: string
+          description: Identity verification vendor SDK datacenter to be used by API. Possible values.
+          example: SG
+          minLength: 1
+          maxLength: 2
+        sdkToken:
+          type: string
+          description: Passed into the MIDS verification SDK for authentication.
+          minLength: 1
+          maxLength: 400
+          example: eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAB3NQQpCMQwE0Lt0baBJ0yZ159KtN0jTBgTBjYgg3t3__3KGN8w3rc_llc4JG6KUhrmoYjolc7_OvWfPKJ2hUzNgagE2hcC5hsYIUeOdH7gStVr6AtElwNUcrBNDFppYMjqxb9hvKzb9fNzfa4_HVkORomdoggsYp8HgPqAWF43VtsOcfn_stx4UsAAAAA.tDRVowYYcpQ03Vlt7D3MiovleiyRFQMv4qzXb7Lf_6CarphRrlWXan8-jE-YesNiAiT8tk0b-i8TKHGrcgT1VQ
+        privacyPolicyVersion:
+          type: string
+          description: The version of the privacy policy which the API call is being conducted under, this can be retrieved from the MIDS Core SDK.
+          minLength: 1
+          maxLength: 20
+          example: 1.0.0
+        privacyPolicyUrl:
+          type: string
+          description: Privacy policy static URL.
+          minLength: 1
+          maxLength: 255
+          example: https://www.mastercard.us/en-us/vision/corp-responsibility/commitment-to-privacy/privacy.html
+        privacyPolicyVersionUpdated:
+          type: boolean
+          description: Flag indicating if the privacy policy has been updated.
+          example: true
+        rotatedPds:
+          type: string
+          description: A rotated PDS is created and returned when the encryption key expires and a new key is generated.
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          minLength: 1
+          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+  responses:
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    InitiateAuthenticationsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Authentications'
+          examples:
+            InitiateAuthenticationsUnencryptedResponse:
+              $ref: '#/components/examples/AuthenticationsExample'
+            InitiateAuthenticationsEncryptedResponse:
+              $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
+  requestBodies:
+    InitializePremiumAuthenticationsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InitPremiumAuthentications'
+      required: true
+    InitializeAuthenticationsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InitializeAuthentications'
+      required: true
   examples:
     UserProfileDeletedErrorExample:
       value:
@@ -447,10 +497,6 @@ components:
             Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
             Recoverable: false
             redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
-    EncryptedPayloadWithRotatedPDSExample:
-      value:
-        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IoxNTE2MjM5MDIyf
-        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
     ForbiddenExampleUnauthorizedScopedFields:
       value:
         Errors:
@@ -468,6 +514,10 @@ components:
         privacyPolicyUrl: https://www.mastercard.us/en-us/vision/corp-responsibility/commitment-to-privacy/privacy.html
         privacyPolicyVersionUpdated: true
         rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    EncryptedPayloadWithRotatedPDSExample:
+      value:
+        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IoxNTE2MjM5MDIyf
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
     ForbiddenExample:
       value:
         Errors:
@@ -476,19 +526,6 @@ components:
             ReasonCode: CONSENT_NOT_GIVEN
             Description: User Consent Not Given.
             Recoverable: false
-  requestBodies:
-    InitializePremiumAuthenticationsRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/InitPremiumAuthentications'
-      required: true
-    InitializeAuthenticationsRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/InitializeAuthentications'
-      required: true
   parameters:
     XEncryptedPayload:
       in: header
@@ -499,40 +536,3 @@ components:
         '
       example: true
       schema: null
-  responses:
-    ForbiddenError:
-      description: Consent not given.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            ForbiddenExample:
-              $ref: '#/components/examples/ForbiddenExample'
-            ForbiddenExampleUnauthorizedScopedFields:
-              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
-    BadRequestError:
-      description: Something was wrong with the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            UserProfileDeletedErrorExample:
-              $ref: '#/components/examples/UserProfileDeletedErrorExample'
-    InitiateAuthenticationsResponse:
-      description: Success.
-      headers:
-        X-Transaction-ID:
-          schema:
-            type: string
-          description: A random 128-bit UUID represents the transaction.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Authentications'
-          examples:
-            InitiateAuthenticationsUnencryptedResponse:
-              $ref: '#/components/examples/AuthenticationsExample'
-            InitiateAuthenticationsEncryptedResponse:
-              $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'

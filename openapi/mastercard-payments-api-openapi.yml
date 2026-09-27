@@ -279,73 +279,22 @@ paths:
       description: Production server
 components:
   schemas:
-    AgreementAcknowledgement:
-      type: object
+    Amount:
       required:
-      - agreementId
-      - agreementStatus
-      properties:
-        agreementId:
-          type: string
-          example: a3e2a749088440eab8b40c926efe2931
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned by Mastercard to the agreement.
-        agreementStatus:
-          type: string
-          example: INPR
-          minLength: 4
-          maxLength: 4
-          description: Agreement Status returned by Mastercard. * Refer to Codes and Formats section for more details.
-    ErrorWrapper:
-      description: A top level object for errors
+      - currency
+      - value
       type: object
-      required:
-      - Errors
       properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    TransactionAckForPAL:
-      type: object
-      required:
-      - paymentRequestLifecycleId
-      - confirmationExpiryTimeInterval
-      - paymentRequestStatus
-      properties:
-        paymentRequestLifecycleId:
+        currency:
           type: string
-          example: '923123123123123100'
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
-        paymentRequestReferenceNumber:
-          type: string
-          example: '789563'
-          minLength: 6
-          maxLength: 6
-          description: Unique 6 character reference provided by Mastercard to the CSP to be conveyed to the Debtor in order to make a payment. This value is only returned for payment request without agreement.
-        accountServicerReference:
-          type: string
-          example: '12254935976349875'
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned by Mastercard, to identify a particular payment (also referred to as settlement identifier) associated with a Payment Request.
-        confirmationExpiryTimeInterval:
+          example: GBP
+          maxLength: 3
+          minLength: 3
+          description: ISO 4217 code for Currency.
+        value:
           type: number
-          example: 430
-          description: Time window given in seconds within which the Payment Confirmation must be received by the Creditor.
-        reconId:
-          type: string
-          example: RECON1201202201
-          minLength: 1
-          maxLength: 15
-          description: Reconciliation identifier assigned by Mastercard to the transaction.
-        paymentRequestStatus:
-          type: string
-          example: INPR
-          minLength: 4
-          maxLength: 4
-          description: Status of the Payment Request returned by Mastercard. * Refer to Codes and Formats section for more details.
+          example: 100.25
+          description: Amount value.
     MessageRequestBlock:
       type: object
       required:
@@ -377,6 +326,73 @@ components:
           minimum: 1
           maximum: 999
           description: Unique identifier assigned by Mastercard to define the commercial product construct. * Refer to Codes and Formats section for more details.
+    Errors:
+      description: Object that contains the list of errors
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorList:
+      description: The list of errors
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    AgreementAcknowledgement:
+      type: object
+      required:
+      - agreementId
+      - agreementStatus
+      properties:
+        agreementId:
+          type: string
+          example: a3e2a749088440eab8b40c926efe2931
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard to the agreement.
+        agreementStatus:
+          type: string
+          example: INPR
+          minLength: 4
+          maxLength: 4
+          description: Agreement Status returned by Mastercard. * Refer to Codes and Formats section for more details.
+    NewPaymentRequest:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - transaction
+        - creditor
+        properties:
+          creditor:
+            $ref: '#/components/schemas/CreditorForPAL'
+          agreementId:
+            type: string
+            example: a3e2a749088440eab8b40c926efe2931
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard to the agreement. Agreement Id is mandatory for payment with agreement request.
+          transaction:
+            $ref: '#/components/schemas/TransactionForPAL'
+          agreementType:
+            type: string
+            example: AOF
+            minLength: 1
+            maxLength: 4
+            description: Creditor requesting DSP to display to Debtor to setup Agreement during payment confirmation. * Refer to Codes and Formats section for more details.
+    PaymentRequest:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock'
+      - type: object
+        required:
+        - transaction
+        properties:
+          transaction:
+            $ref: '#/components/schemas/TransactionAckForPAL'
+          agreement:
+            $ref: '#/components/schemas/AgreementAcknowledgement'
     Error:
       description: A single error
       type: object
@@ -451,6 +467,78 @@ components:
               maxLength: 35
               description: Creditor or CSP requested real-time settlement method. * Refer to Codes and Formats section for more details.
           example: example_value
+    TransactionAckForPAL:
+      type: object
+      required:
+      - paymentRequestLifecycleId
+      - confirmationExpiryTimeInterval
+      - paymentRequestStatus
+      properties:
+        paymentRequestLifecycleId:
+          type: string
+          example: '923123123123123100'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+        paymentRequestReferenceNumber:
+          type: string
+          example: '789563'
+          minLength: 6
+          maxLength: 6
+          description: Unique 6 character reference provided by Mastercard to the CSP to be conveyed to the Debtor in order to make a payment. This value is only returned for payment request without agreement.
+        accountServicerReference:
+          type: string
+          example: '12254935976349875'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard, to identify a particular payment (also referred to as settlement identifier) associated with a Payment Request.
+        confirmationExpiryTimeInterval:
+          type: number
+          example: 430
+          description: Time window given in seconds within which the Payment Confirmation must be received by the Creditor.
+        reconId:
+          type: string
+          example: RECON1201202201
+          minLength: 1
+          maxLength: 15
+          description: Reconciliation identifier assigned by Mastercard to the transaction.
+        paymentRequestStatus:
+          type: string
+          example: INPR
+          minLength: 4
+          maxLength: 4
+          description: Status of the Payment Request returned by Mastercard. * Refer to Codes and Formats section for more details.
+    MessageResponseBlock:
+      type: object
+      required:
+      - messageId
+      - creationDateTime
+      - initiatingPartyId
+      - originalMessageId
+      properties:
+        initiatingPartyId:
+          type: string
+          example: ZAPP
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the message sender.
+        messageId:
+          type: string
+          example: 3bef00e542ec4be583b1b5d449799084
+          minLength: 1
+          maxLength: 35
+          description: A point-to-point unique identifier is assigned to every message by the message initiator.
+        creationDateTime:
+          type: string
+          example: '2020-11-20T06:57:24.465Z'
+          format: date-time
+          description: ISO 8601 format date and time in Coordinated Universal Time (UTC) when this message was created.
+        originalMessageId:
+          type: string
+          example: 7eab4eab35a542e085add0363a49c035
+          minLength: 1
+          maxLength: 35
+          description: "Original message identifier generated and sent by the initiator of\n the request message."
     TransactionForPAL:
       type: object
       required:
@@ -516,223 +604,211 @@ components:
           type: boolean
           example: true
           description: Indicates a request from Creditor to DSP to step-up authentication for the transaction.
-    Amount:
-      required:
-      - currency
-      - value
+    ErrorWrapper:
+      description: A top level object for errors
       type: object
-      properties:
-        currency:
-          type: string
-          example: GBP
-          maxLength: 3
-          minLength: 3
-          description: ISO 4217 code for Currency.
-        value:
-          type: number
-          example: 100.25
-          description: Amount value.
-    Errors:
-      description: Object that contains the list of errors
-      type: object
-      required:
-      - Error
-      properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList'
-    ErrorList:
-      description: The list of errors
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
-    PaymentRequest:
-      allOf:
-      - $ref: '#/components/schemas/MessageResponseBlock'
-      - type: object
-        required:
-        - transaction
-        properties:
-          transaction:
-            $ref: '#/components/schemas/TransactionAckForPAL'
-          agreement:
-            $ref: '#/components/schemas/AgreementAcknowledgement'
-    NewPaymentRequest:
-      allOf:
-      - $ref: '#/components/schemas/MessageRequestBlock'
-      - type: object
-        required:
-        - transaction
-        - creditor
-        properties:
-          creditor:
-            $ref: '#/components/schemas/CreditorForPAL'
-          agreementId:
-            type: string
-            example: a3e2a749088440eab8b40c926efe2931
-            minLength: 1
-            maxLength: 35
-            description: Unique identifier assigned by Mastercard to the agreement. Agreement Id is mandatory for payment with agreement request.
-          transaction:
-            $ref: '#/components/schemas/TransactionForPAL'
-          agreementType:
-            type: string
-            example: AOF
-            minLength: 1
-            maxLength: 4
-            description: Creditor requesting DSP to display to Debtor to setup Agreement during payment confirmation. * Refer to Codes and Formats section for more details.
-    MessageResponseBlock:
-      type: object
-      required:
-      - messageId
-      - creationDateTime
-      - initiatingPartyId
-      - originalMessageId
-      properties:
-        initiatingPartyId:
-          type: string
-          example: ZAPP
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier of the message sender.
-        messageId:
-          type: string
-          example: 3bef00e542ec4be583b1b5d449799084
-          minLength: 1
-          maxLength: 35
-          description: A point-to-point unique identifier is assigned to every message by the message initiator.
-        creationDateTime:
-          type: string
-          example: '2020-11-20T06:57:24.465Z'
-          format: date-time
-          description: ISO 8601 format date and time in Coordinated Universal Time (UTC) when this message was created.
-        originalMessageId:
-          type: string
-          example: 7eab4eab35a542e085add0363a49c035
-          minLength: 1
-          maxLength: 35
-          description: "Original message identifier generated and sent by the initiator of\n the request message."
-    CrossPANAggregation:
-      title: CrossPANAggregation
-      description: Cross PAN aggregated carbon footprint for given aggregate type.
-      properties:
-        aggregateValue:
-          type: string
-          minLength: 10
-          maxLength: 25
-          description: 'Aggregate duration for which aggregate has been calculated.
-
-            * Weekly = Week-26|2019 (i.e.,Starting from week 1 to week 26).
-
-            * Monthly = July|2019
-
-            '
-          example: Week-26|2019
-      allOf:
-      - $ref: '#/components/schemas/CarbonUsage'
-    ErrorWrapper_2:
-      title: ErrorWrapper
-      type: object
-      description: The error response object gets returned in case of any error.
       required:
       - Errors
       properties:
         Errors:
-          $ref: '#/components/schemas/Errors_2'
-    X-MC-Correlation-ID:
-      type: string
-      example: X-MC-Correlation-ID:5e4b7f904d2820f688c67ef9fc0035
-    AggregateTransactionFootprints:
-      title: AggregateTransactionFootprints
-      type: object
-      description: List of AggregateTransactionFootprint.
-      required:
-      - aggregateTransactionFootprints
-      properties:
-        aggregateTransactionFootprints:
-          description: Array of `crossPANAggregations` based on given aggregation level.
-          type: array
-          minItems: 1
-          maxItems: 100
-          items:
-            $ref: '#/components/schemas/AggregateTransactionFootprint'
-        crossPANAggregations:
-          description: Array of `crossPANAggregations` based on given aggregation level.
-          type: array
-          minItems: 1
-          maxItems: 100
-          items:
-            $ref: '#/components/schemas/CrossPANAggregation'
+          $ref: '#/components/schemas/Errors'
     CurrencyCode:
       type: string
       description: Currency code as per ISO 4217
       minLength: 3
       maxLength: 3
       pattern: ^[A-Za-z]{3}$
-    TransactionId:
-      type: string
-      description: A unique ID associated with a payment transaction, For example, original payment transaction ID. The same ID will be returned in the response corresponding to its payment transaction.
-      minLength: 1
-      maxLength: 100
-      pattern: ^[\w\-\_]{1,100}
-    Error_2:
-      title: Error
+    FootprintAggregation:
+      title: FootprintAggregation
       type: object
-      description: Error object which contains details about the error.
-      required:
-      - Source
-      - ReasonCode
-      - Description
-      - Recoverable
-      properties:
-        Source:
-          type: string
-          description: The application name that generated this error. Every error message that is generated and returned by the gateway will have this field equal to Gateway. Other possible values are 'Carbon-Calculator' and 'Service-Provider'.
-          minLength: 1
-          maxLength: 100
-          example: Service-Provider-Mgmt
-        ReasonCode:
-          type: string
-          description: A unique constant identifying the error case encountered during request processing.
-          minLength: 1
-          maxLength: 100
-          example: INVALID_REQUEST_PARAMETER
-        Description:
-          type: string
-          description: Short description of the ReasonCode field.
-          minLength: 10
-          maxLength: 1000
-          example: One of the request parameters is invalid, try again with correct request.
-        Recoverable:
-          type: boolean
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
-          example: false
-        Details:
-          type: string
-          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
-          minLength: 0
-          maxLength: 5000
-          example: paymentCardId size must be between 36 and 36
-    PaymentCard:
-      title: PaymentCard
+      description: Aggregation of carbon score for a payment card ID and given aggregation level.
+      allOf:
+      - $ref: '#/components/schemas/CarbonUsage'
+      - type: object
+        properties:
+          aggregateValue:
+            type: string
+            minLength: 10
+            maxLength: 25
+            description: 'Aggregate duration for which aggregate has been calculated.
+
+              * Weekly = Week-22|2019 (i.e., Week of the year).
+
+              * Monthly = July|2019
+
+              '
+    Errors_2:
+      title: Errors
       type: object
-      description: The request object for registering a new Payment Card. This object will be encrypted before sending it to the server.
+      description: Error object which returns a list of Error objects.
       required:
-      - fpan
-      - cardBaseCurrency
+      - Error
       properties:
-        fpan:
+        Error:
+          $ref: '#/components/schemas/ErrorList_2'
+    PaymentCardReference:
+      title: PaymentCardReference
+      type: object
+      description: Reference information for a Payment Card generated after a successful registration. This information should be used to perform the further operation for that card.
+      required:
+      - paymentCardId
+      - status
+      - bin
+      - last4fpan
+      properties:
+        paymentCardId:
+          $ref: '#/components/schemas/PaymentCardId'
+        bin:
           type: string
-          minLength: 16
-          maxLength: 16
-          pattern: ^\d{16}
-          description: Original payment card number in full.
-          example: '5344035171229750'
-        cardBaseCurrency:
-          $ref: '#/components/schemas/CurrencyCode'
+          minLength: 4
+          maxLength: 8
+          pattern: ^\d{4,8}
+          description: First 4 to 8 digits of a payment card number.
+          example: '534403'
+        last4fpan:
+          type: string
+          minLength: 4
+          maxLength: 4
+          pattern: ^\d{4}
+          description: Last 4 digits of a payment card number.
+          example: '9750'
+        status:
+          type: string
+          minLength: 6
+          maxLength: 7
+          description: Status of a Payment Card on the server. Possible values are ACTIVE & PENDING. The cards that are in PENDING state will move to ACTIVE state in background as soon as their enrolment is complete. The paymentCardId will remain same.
+          example: ACTIVE
+    AggregateSearchCriteria:
+      title: AggregateSearchCriteria
+      type: object
+      description: Request object which holds the criteria (that is, list of payment card IDs and aggregate type) for retrieving aggregate transactions.
+      required:
+      - paymentCardIds
+      - aggregateType
+      properties:
+        paymentCardIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentCardId'
+          minItems: 1
+          maxItems: 5
+          example: c5d88571-ac15-465a-a0d8-1ad1327b9a06
+          description: Unique ID provided in the response while registering a payment card.
+        aggregateType:
+          type: integer
+          minimum: 1
+          maximum: 3
+          example: 1
+          description: 'Aggregate type for which aggregate needs to be calculated. Supported values are:
+
+            <li> 1 = Weekly Transactions aggregated for last 26 weeks <li> 2 = Monthly transactions aggregated for last 12 months <li> 3 = Monthly category-wise transactions aggregated for last 12 months
+
+            '
+        crossPANAggregate:
+          type: string
+          minLength: 1
+          maxLength: 1
+          pattern: ^(?:Y|N|y|n)$
+          example: Y
+          description: 'Wheter to retrieve cross PAN aggregate carbon footprint or not. Supported values are:
+
+            <li> Y = Retrieve cross PAN aggregate. <li> N = Do not retrieve cross PAN aggregate. <br> If not provided then default will be considered as ''N''.
+
+            '
+        fromDate:
+          $ref: '#/components/schemas/Day'
+        toDate:
+          $ref: '#/components/schemas/Day'
       example:
-        fpan: '5344035171229750'
-        cardBaseCurrency: EUR
+        aggregateType: 1
+        crossPANAggregate: Y
+        paymentCardIds:
+        - 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+        - b86fd2ba-c095-4acb-b9df-f3805655ba24
+        fromDate: '2020-07-01'
+        toDate: '2020-08-30'
+    Day:
+      type: string
+      minLength: 10
+      maxLength: 10
+      pattern: ^((?:19|20)[0-9][0-9])-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$
+      example: '2020-09-19'
+    TransactionFootprint:
+      title: TransactionFootprint
+      type: object
+      description: A single transaction footprint calculated for a corresponding payment transaction.
+      required:
+      - transactionId
+      - mcc
+      allOf:
+      - $ref: '#/components/schemas/CarbonUsage'
+      - type: object
+        properties:
+          transactionId:
+            $ref: '#/components/schemas/TransactionId'
+          mcc:
+            type: string
+            description: Merchant category code of a payment transaction that uniquely defines a merchant business (same as in request).
+            minLength: 1
+            maxLength: 4
+            pattern: ^\d{1,4}
+          category:
+            $ref: '#/components/schemas/Category'
+          scoreReference:
+            type: string
+            description: Score Reference defines transaction scoring type, based on which score has been generated. Possible values are MCC or AIIA.
+            minLength: 3
+            maxLength: 4
+    Category:
+      title: Category
+      type: object
+      description: User understandable information about an MCC categorization.
+      properties:
+        mainCategory:
+          title: mainCategory
+          type: string
+          description: Main category to which an MCC belongs.
+          minLength: 5
+          maxLength: 100
+          pattern: ^[\w\-\_\&\,]+[\w\-\_\&\,\ ]{5,100}
+          example: Shopping
+        subCategory:
+          title: subCategory
+          type: string
+          description: Sub-category of a category to which an MCC belongs.
+          minLength: 5
+          maxLength: 100
+          pattern: ^[\w\-\_\&\,]+[\w\-\_\&\,\ ]{5,100}
+          example: Department Store
+        sector:
+          title: sector
+          type: string
+          description: Sector of a category to which an MCC belongs.
+          minLength: 5
+          maxLength: 100
+          pattern: ^[\w\-\_\&\,]+[\w\-\_\&\,\ ]{5,100}
+          example: Specialty Retail & Services
+        sectorCode:
+          title: sectorCode
+          type: string
+          description: Unique code assigned to each sector.
+          minLength: 3
+          maxLength: 3
+          pattern: ^\d{3}
+          example: '302'
+    ErrorList_2:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error_2'
+    PaymentCardEnrolments:
+      title: PaymentCardEnrolments
+      type: array
+      minItems: 1
+      maxItems: 500
+      description: List of payment card enrolments corresponding to each of the payment cards. This information should be used to identify the success and failure enrolments and take appropriate next steps.
+      items:
+        $ref: '#/components/schemas/PaymentCardEnrolment'
     TransactionMetadata:
       title: TransactionMetadata
       type: object
@@ -846,71 +922,6 @@ components:
           maxLength: 8
           minLength: 2
           example: CL
-    Day:
-      type: string
-      minLength: 10
-      maxLength: 10
-      pattern: ^((?:19|20)[0-9][0-9])-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$
-      example: '2020-09-19'
-    PaymentCardReference:
-      title: PaymentCardReference
-      type: object
-      description: Reference information for a Payment Card generated after a successful registration. This information should be used to perform the further operation for that card.
-      required:
-      - paymentCardId
-      - status
-      - bin
-      - last4fpan
-      properties:
-        paymentCardId:
-          $ref: '#/components/schemas/PaymentCardId'
-        bin:
-          type: string
-          minLength: 4
-          maxLength: 8
-          pattern: ^\d{4,8}
-          description: First 4 to 8 digits of a payment card number.
-          example: '534403'
-        last4fpan:
-          type: string
-          minLength: 4
-          maxLength: 4
-          pattern: ^\d{4}
-          description: Last 4 digits of a payment card number.
-          example: '9750'
-        status:
-          type: string
-          minLength: 6
-          maxLength: 7
-          description: Status of a Payment Card on the server. Possible values are ACTIVE & PENDING. The cards that are in PENDING state will move to ACTIVE state in background as soon as their enrolment is complete. The paymentCardId will remain same.
-          example: ACTIVE
-    FootprintAggregation:
-      title: FootprintAggregation
-      type: object
-      description: Aggregation of carbon score for a payment card ID and given aggregation level.
-      allOf:
-      - $ref: '#/components/schemas/CarbonUsage'
-      - type: object
-        properties:
-          aggregateValue:
-            type: string
-            minLength: 10
-            maxLength: 25
-            description: 'Aggregate duration for which aggregate has been calculated.
-
-              * Weekly = Week-22|2019 (i.e., Week of the year).
-
-              * Monthly = July|2019
-
-              '
-    PaymentCardEnrolments:
-      title: PaymentCardEnrolments
-      type: array
-      minItems: 1
-      maxItems: 500
-      description: List of payment card enrolments corresponding to each of the payment cards. This information should be used to identify the success and failure enrolments and take appropriate next steps.
-      items:
-        $ref: '#/components/schemas/PaymentCardEnrolment'
     PaymentCardId:
       type: string
       minLength: 36
@@ -918,52 +929,6 @@ components:
       pattern: ^[0-9A-Fa-f\-]{36}
       description: Unique ID provided in the response while registering a payment card.
       example: c5d88571-ac15-465a-a0d8-1ad1327b9a06
-    Category:
-      title: Category
-      type: object
-      description: User understandable information about an MCC categorization.
-      properties:
-        mainCategory:
-          title: mainCategory
-          type: string
-          description: Main category to which an MCC belongs.
-          minLength: 5
-          maxLength: 100
-          pattern: ^[\w\-\_\&\,]+[\w\-\_\&\,\ ]{5,100}
-          example: Shopping
-        subCategory:
-          title: subCategory
-          type: string
-          description: Sub-category of a category to which an MCC belongs.
-          minLength: 5
-          maxLength: 100
-          pattern: ^[\w\-\_\&\,]+[\w\-\_\&\,\ ]{5,100}
-          example: Department Store
-        sector:
-          title: sector
-          type: string
-          description: Sector of a category to which an MCC belongs.
-          minLength: 5
-          maxLength: 100
-          pattern: ^[\w\-\_\&\,]+[\w\-\_\&\,\ ]{5,100}
-          example: Specialty Retail & Services
-        sectorCode:
-          title: sectorCode
-          type: string
-          description: Unique code assigned to each sector.
-          minLength: 3
-          maxLength: 3
-          pattern: ^\d{3}
-          example: '302'
-    Errors_2:
-      title: Errors
-      type: object
-      description: Error object which returns a list of Error objects.
-      required:
-      - Error
-      properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList_2'
     PaymentCardEnrolment:
       title: PaymentCardEnrolment
       type: object
@@ -1004,37 +969,6 @@ components:
             * INVALID_CARD_BASE_CURRENCY = The card base currency in the request is either invalid or does not match with your currently supported card base currency range. Try again with a valid card base currency.
 
             * UNSUPPORTED_CURRENCY = The currency in the request is not supported, try again with a different one.'
-    TransactionFootprint:
-      title: TransactionFootprint
-      type: object
-      description: A single transaction footprint calculated for a corresponding payment transaction.
-      required:
-      - transactionId
-      - mcc
-      allOf:
-      - $ref: '#/components/schemas/CarbonUsage'
-      - type: object
-        properties:
-          transactionId:
-            $ref: '#/components/schemas/TransactionId'
-          mcc:
-            type: string
-            description: Merchant category code of a payment transaction that uniquely defines a merchant business (same as in request).
-            minLength: 1
-            maxLength: 4
-            pattern: ^\d{1,4}
-          category:
-            $ref: '#/components/schemas/Category'
-          scoreReference:
-            type: string
-            description: Score Reference defines transaction scoring type, based on which score has been generated. Possible values are MCC or AIIA.
-            minLength: 3
-            maxLength: 4
-    ErrorList_2:
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error_2'
     CarbonUsage:
       title: CarbonUsage
       type: object
@@ -1050,6 +984,77 @@ components:
           type: number
           description: The transaction's CO2 emission in ounces.
           example: 1.71
+    CrossPANAggregation:
+      title: CrossPANAggregation
+      description: Cross PAN aggregated carbon footprint for given aggregate type.
+      properties:
+        aggregateValue:
+          type: string
+          minLength: 10
+          maxLength: 25
+          description: 'Aggregate duration for which aggregate has been calculated.
+
+            * Weekly = Week-26|2019 (i.e.,Starting from week 1 to week 26).
+
+            * Monthly = July|2019
+
+            '
+          example: Week-26|2019
+      allOf:
+      - $ref: '#/components/schemas/CarbonUsage'
+    X-MC-Correlation-ID:
+      type: string
+      example: X-MC-Correlation-ID:5e4b7f904d2820f688c67ef9fc0035
+    Error_2:
+      title: Error
+      type: object
+      description: Error object which contains details about the error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error. Every error message that is generated and returned by the gateway will have this field equal to Gateway. Other possible values are 'Carbon-Calculator' and 'Service-Provider'.
+          minLength: 1
+          maxLength: 100
+          example: Service-Provider-Mgmt
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: INVALID_REQUEST_PARAMETER
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+    HistoricalTransactionFootprint:
+      title: HistoricalTransactionFootprint
+      type: object
+      description: A single transaction footprint along with transaction info for a corresponding payment transaction.
+      required:
+      - transactionMetadata
+      - transactionFootprint
+      properties:
+        transactionMetadata:
+          $ref: '#/components/schemas/TransactionMetadata'
+        transactionFootprint:
+          $ref: '#/components/schemas/TransactionFootprint'
     AggregateTransactionFootprint:
       title: AggregateTransactionFootprint
       type: object
@@ -1067,6 +1072,27 @@ components:
           maxItems: 186
           items:
             $ref: '#/components/schemas/FootprintAggregation'
+    AggregateTransactionFootprints:
+      title: AggregateTransactionFootprints
+      type: object
+      description: List of AggregateTransactionFootprint.
+      required:
+      - aggregateTransactionFootprints
+      properties:
+        aggregateTransactionFootprints:
+          description: Array of `crossPANAggregations` based on given aggregation level.
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/AggregateTransactionFootprint'
+        crossPANAggregations:
+          description: Array of `crossPANAggregations` based on given aggregation level.
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/CrossPANAggregation'
     HistoricalTransactionFootprints:
       title: HistoricalTransactionFootprints
       description: Response object which holds all the transaction footprints for historical transactions.
@@ -1099,128 +1125,61 @@ components:
           maxItems: 5000
           items:
             $ref: '#/components/schemas/HistoricalTransactionFootprint'
-    AggregateSearchCriteria:
-      title: AggregateSearchCriteria
+    TransactionId:
+      type: string
+      description: A unique ID associated with a payment transaction, For example, original payment transaction ID. The same ID will be returned in the response corresponding to its payment transaction.
+      minLength: 1
+      maxLength: 100
+      pattern: ^[\w\-\_]{1,100}
+    ErrorWrapper_2:
+      title: ErrorWrapper
       type: object
-      description: Request object which holds the criteria (that is, list of payment card IDs and aggregate type) for retrieving aggregate transactions.
+      description: The error response object gets returned in case of any error.
       required:
-      - paymentCardIds
-      - aggregateType
+      - Errors
       properties:
-        paymentCardIds:
-          type: array
-          items:
-            $ref: '#/components/schemas/PaymentCardId'
-          minItems: 1
-          maxItems: 5
-          example: c5d88571-ac15-465a-a0d8-1ad1327b9a06
-          description: Unique ID provided in the response while registering a payment card.
-        aggregateType:
-          type: integer
-          minimum: 1
-          maximum: 3
-          example: 1
-          description: 'Aggregate type for which aggregate needs to be calculated. Supported values are:
-
-            <li> 1 = Weekly Transactions aggregated for last 26 weeks <li> 2 = Monthly transactions aggregated for last 12 months <li> 3 = Monthly category-wise transactions aggregated for last 12 months
-
-            '
-        crossPANAggregate:
+        Errors:
+          $ref: '#/components/schemas/Errors_2'
+    PaymentCard:
+      title: PaymentCard
+      type: object
+      description: The request object for registering a new Payment Card. This object will be encrypted before sending it to the server.
+      required:
+      - fpan
+      - cardBaseCurrency
+      properties:
+        fpan:
           type: string
-          minLength: 1
-          maxLength: 1
-          pattern: ^(?:Y|N|y|n)$
-          example: Y
-          description: 'Wheter to retrieve cross PAN aggregate carbon footprint or not. Supported values are:
-
-            <li> Y = Retrieve cross PAN aggregate. <li> N = Do not retrieve cross PAN aggregate. <br> If not provided then default will be considered as ''N''.
-
-            '
-        fromDate:
-          $ref: '#/components/schemas/Day'
-        toDate:
-          $ref: '#/components/schemas/Day'
+          minLength: 16
+          maxLength: 16
+          pattern: ^\d{16}
+          description: Original payment card number in full.
+          example: '5344035171229750'
+        cardBaseCurrency:
+          $ref: '#/components/schemas/CurrencyCode'
       example:
-        aggregateType: 1
-        crossPANAggregate: Y
-        paymentCardIds:
-        - 328b62d4-287c-4c9f-a05d-6d4a67f208d8
-        - b86fd2ba-c095-4acb-b9df-f3805655ba24
-        fromDate: '2020-07-01'
-        toDate: '2020-08-30'
-    HistoricalTransactionFootprint:
-      title: HistoricalTransactionFootprint
+        fpan: '5344035171229750'
+        cardBaseCurrency: EUR
+    OneTimePaymentSuccess:
       type: object
-      description: A single transaction footprint along with transaction info for a corresponding payment transaction.
-      required:
-      - transactionMetadata
-      - transactionFootprint
       properties:
-        transactionMetadata:
-          $ref: '#/components/schemas/TransactionMetadata'
-        transactionFootprint:
-          $ref: '#/components/schemas/TransactionFootprint'
-    Donation:
-      type: object
-      required:
-      - amount
-      - charityId
-      - donationType
-      properties:
-        amount:
+        transactionId:
           type: string
-          example: '11'
-          minLength: 1
-          maxLength: 20
-          description: Amount
-        charityId:
-          type: string
-          example: ae3c5f35-084a-4df9-a2af-7e0efd512fc0
-          minLength: 36
+          minLength: 13
           maxLength: 36
-          description: Charity Id (UUID)
-        donationType:
+          description: Transaction Id
+        transactionMessage:
           type: string
-          example: ONE-TIME
+          minLength: 3
+          maxLength: 30
+          description: Transaction Message
+        transactionStatus:
+          type: string
           minLength: 5
           maxLength: 20
-          description: Donation Type
-      title: Donation
-    GuestDonate:
-      type: object
-      required:
-      - card
-      - donation
-      - user
-      properties:
-        card:
-          $ref: '#/components/schemas/CardCvcGuest'
-        donation:
-          $ref: '#/components/schemas/Donation'
-        user:
-          $ref: '#/components/schemas/User'
-        sessionDetails:
-          $ref: '#/components/schemas/SessionDetails'
-        authPayerResponse:
-          $ref: '#/components/schemas/AuthPayerResponse'
-      title: GuestDonateRequest
-    cardExpiry:
-      type: object
-      properties:
-        month:
-          type: string
-          example: 10
-          minLength: 2
-          maxLength: 2
-          description: Month
-        year:
-          type: string
-          example: 2025
-          minLength: 4
-          maxLength: 4
-          description: Year
-      title: Card Expiry Details
-    Error-500:
+          description: Transaction Status
+      title: OneTimePaymentSuccess
+    Error-404:
       type: object
       required:
       - Errors
@@ -1229,25 +1188,25 @@ components:
           type: object
           required:
           - Error
-          description: Contains all errors caused due to server error
+          description: Contains all errors caused due to resource not found
           properties:
             Error:
               type: array
-              description: Only returned in the event of an server issue.
+              description: Only returned in the event of an resource not found.
               items:
                 type: object
                 properties:
                   Source:
                     type: string
-                    example: DONATE_SERVICE
+                    example: Gateway
                     description: The application that generated this error
                   ReasonCode:
                     type: string
-                    example: PROGRAM_ID_NOT_FOUND
+                    example: NOT_FOUND
                     description: A unique constant identifying the error case encountered during API processing
                   Description:
                     type: string
-                    example: Program id is required as this client is mapped to multiple programs.
+                    example: The signing certificate is not valid.
                     description: Short description of the ReasonCode field
                   Recoverable:
                     type: boolean
@@ -1257,6 +1216,60 @@ components:
                     type: string
                     example: 'null'
                     description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Authentication:
+      type: object
+      properties:
+        3ds:
+          $ref: '#/components/schemas/3ds'
+        3ds2:
+          $ref: '#/components/schemas/3ds2'
+    GuestDonation:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          minLength: 13
+          maxLength: 36
+          description: Transaction Id
+        transactionMessage:
+          type: string
+          minLength: 3
+          maxLength: 30
+          description: Transaction Message
+        transactionStatus:
+          type: string
+          minLength: 5
+          maxLength: 20
+          description: Transaction Status
+      title: GuestDonationResponse
+    CardCvcGuest:
+      type: object
+      properties:
+        cvc:
+          type: string
+          example: 100
+          minLength: 3
+          maxLength: 4
+          description: CVC
+        expiryInfo:
+          $ref: '#/components/schemas/cardExpiry'
+        primaryAccountNumber:
+          type: string
+          example: 5450985888403538
+          minLength: 12
+          maxLength: 19
+          description: The Primary Account Number (PAN).
+      title: Card
+    SessionDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          example: SESSION0002692172456I23783337L2
+          minLength: 31
+          maxLength: 35
+          description: Id
+      title: SessionDetails
     RealTimePayment:
       type: object
       required:
@@ -1296,7 +1309,7 @@ components:
           description: Source
         authPayerResponse:
           $ref: '#/components/schemas/AuthPayerResponse'
-    Error-201:
+    Error-415:
       type: object
       required:
       - Errors
@@ -1315,52 +1328,15 @@ components:
                 properties:
                   Source:
                     type: string
-                    example: Gateway
+                    example: DONATE_SERVICE
                     description: The application that generated this error
                   ReasonCode:
                     type: string
-                    example: CREATED
+                    example: UNSUPPORTED_CONTENT_TYPE
                     description: A unique constant identifying the error case encountered during API processing
                   Description:
                     type: string
-                    example: OAuth signatures did not match.
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example: 'null'
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    Error-403:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          description: Contains all errors caused due to forbidden requests
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of forbidden request.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: Gateway
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: INVALID_KEY
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: The signing certificate is not valid.
+                    example: The request Content-Type (<request content-type value>) is not supported for this service
                     description: Short description of the ReasonCode field
                   Recoverable:
                     type: boolean
@@ -1402,7 +1378,58 @@ components:
           maxLength: 20
           description: version
       description: Required If authPayerResponse object is passed.
-    Error_3:
+    Donation:
+      type: object
+      required:
+      - amount
+      - charityId
+      - donationType
+      properties:
+        amount:
+          type: string
+          example: '11'
+          minLength: 1
+          maxLength: 20
+          description: Amount
+        charityId:
+          type: string
+          example: ae3c5f35-084a-4df9-a2af-7e0efd512fc0
+          minLength: 36
+          maxLength: 36
+          description: Charity Id (UUID)
+        donationType:
+          type: string
+          example: ONE-TIME
+          minLength: 5
+          maxLength: 20
+          description: Donation Type
+      title: Donation
+    User:
+      type: object
+      required:
+      - email
+      - firstName
+      properties:
+        email:
+          type: string
+          example: John.Doe@mail.com
+          minLength: 8
+          maxLength: 30
+          description: Email
+        firstName:
+          type: string
+          example: John
+          minLength: 3
+          maxLength: 30
+          description: First Name
+        lastName:
+          type: string
+          example: Doe
+          minLength: 3
+          maxLength: 30
+          description: Last Name
+      title: User
+    Error-500:
       type: object
       required:
       - Errors
@@ -1411,10 +1438,11 @@ components:
           type: object
           required:
           - Error
+          description: Contains all errors caused due to server error
           properties:
             Error:
               type: array
-              description: Only returned in the event of an error condition.
+              description: Only returned in the event of an server issue.
               items:
                 type: object
                 properties:
@@ -1424,11 +1452,11 @@ components:
                     description: The application that generated this error
                   ReasonCode:
                     type: string
-                    example: DONOR_ID_INVALID
+                    example: PROGRAM_ID_NOT_FOUND
                     description: A unique constant identifying the error case encountered during API processing
                   Description:
                     type: string
-                    example: Invalid donorId, it must be a valid UUID.
+                    example: Program id is required as this client is mapped to multiple programs.
                     description: Short description of the ReasonCode field
                   Recoverable:
                     type: boolean
@@ -1436,39 +1464,45 @@ components:
                     description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
                   Details:
                     type: string
-                    example: Provided donorId is not valid, Please check and provide valid Unique Id.
+                    example: 'null'
                     description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    Authentication:
+    GuestDonate:
       type: object
+      required:
+      - card
+      - donation
+      - user
       properties:
-        3ds:
-          $ref: '#/components/schemas/3ds'
-        3ds2:
-          $ref: '#/components/schemas/3ds2'
-    AuthPayerResponse:
+        card:
+          $ref: '#/components/schemas/CardCvcGuest'
+        donation:
+          $ref: '#/components/schemas/Donation'
+        user:
+          $ref: '#/components/schemas/User'
+        sessionDetails:
+          $ref: '#/components/schemas/SessionDetails'
+        authPayerResponse:
+          $ref: '#/components/schemas/AuthPayerResponse'
+      title: GuestDonateRequest
+    CardCVC:
       type: object
+      description: Cvc is a unique number.***NOTE*** In case of card not added already then primaryAccountNumber and cardExpiry are required and cardCvc is conditional, optional for Stripe and MPGS payment gateways and required by other payment gateways.
       properties:
-        authentication:
-          $ref: '#/components/schemas/Authentication'
-    GuestDonation:
-      type: object
-      properties:
-        transactionId:
+        primaryAccountNumber:
           type: string
-          minLength: 13
-          maxLength: 36
-          description: Transaction Id
-        transactionMessage:
+          example: 5450985888403538
+          minLength: 12
+          maxLength: 19
+          description: The Primary Account Number (PAN).
+        expiryInfo:
+          $ref: '#/components/schemas/cardExpiry'
+        cvc:
           type: string
+          example: 100
           minLength: 3
-          maxLength: 30
-          description: Transaction Message
-        transactionStatus:
-          type: string
-          minLength: 5
-          maxLength: 20
-          description: Transaction Status
-      title: GuestDonationResponse
+          maxLength: 4
+          description: CVC
+      title: CardCVC
     Error-401:
       type: object
       required:
@@ -1506,51 +1540,28 @@ components:
                     type: string
                     example: 'null'
                     description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    User:
+    cardExpiry:
       type: object
-      required:
-      - email
-      - firstName
       properties:
-        email:
+        month:
           type: string
-          example: John.Doe@mail.com
-          minLength: 8
-          maxLength: 30
-          description: Email
-        firstName:
+          example: 10
+          minLength: 2
+          maxLength: 2
+          description: Month
+        year:
           type: string
-          example: John
-          minLength: 3
-          maxLength: 30
-          description: First Name
-        lastName:
-          type: string
-          example: Doe
-          minLength: 3
-          maxLength: 30
-          description: Last Name
-      title: User
-    CardCVC:
-      type: object
-      description: Cvc is a unique number.***NOTE*** In case of card not added already then primaryAccountNumber and cardExpiry are required and cardCvc is conditional, optional for Stripe and MPGS payment gateways and required by other payment gateways.
-      properties:
-        primaryAccountNumber:
-          type: string
-          example: 5450985888403538
-          minLength: 12
-          maxLength: 19
-          description: The Primary Account Number (PAN).
-        expiryInfo:
-          $ref: '#/components/schemas/cardExpiry'
-        cvc:
-          type: string
-          example: 100
-          minLength: 3
+          example: 2025
+          minLength: 4
           maxLength: 4
-          description: CVC
-      title: CardCVC
-    Error-415:
+          description: Year
+      title: Card Expiry Details
+    AuthPayerResponse:
+      type: object
+      properties:
+        authentication:
+          $ref: '#/components/schemas/Authentication'
+    Error-201:
       type: object
       required:
       - Errors
@@ -1569,15 +1580,15 @@ components:
                 properties:
                   Source:
                     type: string
-                    example: DONATE_SERVICE
+                    example: Gateway
                     description: The application that generated this error
                   ReasonCode:
                     type: string
-                    example: UNSUPPORTED_CONTENT_TYPE
+                    example: CREATED
                     description: A unique constant identifying the error case encountered during API processing
                   Description:
                     type: string
-                    example: The request Content-Type (<request content-type value>) is not supported for this service
+                    example: OAuth signatures did not match.
                     description: Short description of the ReasonCode field
                   Recoverable:
                     type: boolean
@@ -1586,6 +1597,42 @@ components:
                   Details:
                     type: string
                     example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error_3:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an error condition.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: DONOR_ID_INVALID
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Invalid donorId, it must be a valid UUID.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: Provided donorId is not valid, Please check and provide valid Unique Id.
                     description: Where appropriate, indicates detailed information about data received and calculated during request processing.
     3ds2:
       type: object
@@ -1605,7 +1652,7 @@ components:
           maxLength: 20
           description: Protocol Version
       description: Required If authPayerResponse object is passed, only for MPGS.
-    Error-404:
+    Error-403:
       type: object
       required:
       - Errors
@@ -1614,11 +1661,11 @@ components:
           type: object
           required:
           - Error
-          description: Contains all errors caused due to resource not found
+          description: Contains all errors caused due to forbidden requests
           properties:
             Error:
               type: array
-              description: Only returned in the event of an resource not found.
+              description: Only returned in the event of forbidden request.
               items:
                 type: object
                 properties:
@@ -1628,7 +1675,7 @@ components:
                     description: The application that generated this error
                   ReasonCode:
                     type: string
-                    example: NOT_FOUND
+                    example: INVALID_KEY
                     description: A unique constant identifying the error case encountered during API processing
                   Description:
                     type: string
@@ -1642,54 +1689,331 @@ components:
                     type: string
                     example: 'null'
                     description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    SessionDetails:
-      type: object
-      properties:
-        id:
-          type: string
-          example: SESSION0002692172456I23783337L2
-          minLength: 31
-          maxLength: 35
-          description: Id
-      title: SessionDetails
-    OneTimePaymentSuccess:
-      type: object
-      properties:
-        transactionId:
-          type: string
-          minLength: 13
-          maxLength: 36
-          description: Transaction Id
-        transactionMessage:
-          type: string
-          minLength: 3
-          maxLength: 30
-          description: Transaction Message
-        transactionStatus:
-          type: string
-          minLength: 5
-          maxLength: 20
-          description: Transaction Status
-      title: OneTimePaymentSuccess
-    CardCvcGuest:
-      type: object
-      properties:
-        cvc:
-          type: string
-          example: 100
-          minLength: 3
-          maxLength: 4
-          description: CVC
-        expiryInfo:
-          $ref: '#/components/schemas/cardExpiry'
-        primaryAccountNumber:
-          type: string
-          example: 5450985888403538
-          minLength: 12
-          maxLength: 19
-          description: The Primary Account Number (PAN).
-      title: Card
+  headers:
+    X-Product-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product construct by Mastercard and given to the participant.
+    X-Participant-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: '000545'
+      description: Unique identifier assigned to the participant by Mastercard during onboarding.
+    X-JWS-Signature:
+      required: true
+      description: JWS detached signature is applied to ensure data integrity.
+      schema:
+        type: string
+        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
+        minLength: 1
+        maxLength: 512
+    X-Request-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: 7eab4eab35a542e085add0363a49c035
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and used for tracing, troubleshooting and analysis purposes.
+    X-MC-Correlation-ID:
+      description: This id is unique per request and is used to co-relate a request to its response. Customers must share this id while raising any incident for this API.
+      schema:
+        $ref: '#/components/schemas/X-MC-Correlation-ID'
+    Location:
+      description: The URL to check on status of resource
+      schema:
+        type: string
+  responses:
+    BadRequestErrorResponse:
+      description: 'Invalid structure: The header or payload fails syntax or structural validation.'
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestErrorExample:
+              $ref: '#/components/examples/BadRequestErrorExample'
+    UnauthorisedErrorResponse:
+      description: Invalid signature. The service fails signature validation.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/UnauthorisedExample'
+    PaymentRequestCreationResponse:
+      description: Payment request creation successful.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+        X-JWS-Signature:
+          $ref: '#/components/headers/X-JWS-Signature'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentRequest'
+    PaymentCardDeletionsNotFoundError:
+      description: This response code is returned when the server cannot find the account or one or more paymentcards which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+            PaymentCardNotFoundError:
+              $ref: '#/components/examples/PaymentCardNotFoundError'
+    PaymentCardReference:
+      description: The response object that contains Payment Card information after a successful registration.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentCardReference'
+          examples:
+            PaymentCardReference:
+              $ref: '#/components/examples/PaymentCardReference'
+    HistoricalTransactionFootprints:
+      description: This response code is returned when a request is accepted and successfully processed. A corresponding response will be returned for the API caller.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HistoricalTransactionFootprints'
+          examples:
+            HistoricalTransactionFootprints:
+              $ref: '#/components/examples/HistoricalTransactionFootprints'
+    PaymentCardEnrolmentsBadRequestError:
+      description: This response code is returned when a request is invalid, or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            PaymentCardEnrolmentsRequestValidationError:
+              $ref: '#/components/examples/RegisterPaymentCardRequestValidationError'
+            PaymentCardEnrolmentsRequestDecryptionError:
+              $ref: '#/components/examples/RegisterPaymentCardRequestDecryptionError'
+    PaymentCardDeletionsBadRequestError:
+      description: This response code is returned when either a request is invalid or one or more paymentCardIds are invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            PaymentCardDeletionsRequestValidationError:
+              $ref: '#/components/examples/PaymentCardDeletionsRequestValidationError'
+            PaymentCardDeletionsInvalidCardIdError:
+              $ref: '#/components/examples/PaymentCardDeletionsInvalidCardIdError'
+    TransactionHistoryBadRequestError:
+      description: This response code is returned when a request is invalid or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            TransactionHistoryPaymentCardNotFoundError:
+              $ref: '#/components/examples/TransactionHistoryPaymentCardNotFoundError'
+            TransactionHistoryInvalidDateRangeError:
+              $ref: '#/components/examples/TransactionHistoryInvalidDateRangeError'
+            TransactionHistoryInvalidDateFormatError:
+              $ref: '#/components/examples/TransactionHistoryInvalidDateFormatError'
+    AggregateTransactionFootprints:
+      description: This response code is returned when a request is accepted and successfully processed.  A corresponding response will be returned for the API caller.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AggregateTransactionFootprints'
+          examples:
+            WeeklyAggregateTransactionFootprints:
+              $ref: '#/components/examples/WeeklyAggregateTransactionFootprints'
+            MonthlyAggregateTransactionFootprints:
+              $ref: '#/components/examples/MonthlyAggregateTransactionFootprints'
+            MonthlyCategoryAggregateTransactionFootprints:
+              $ref: '#/components/examples/MonthlyCategoryAggregateTransactionFootprints'
+    Accepted:
+      description: Accepted
+      headers:
+        Location:
+          $ref: '#/components/headers/Location'
+    PaymentCardEnrolments:
+      description: The response object that contains the list of payment cards information after batch registration.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentCardEnrolments'
+          examples:
+            PaymentCardEnrolments:
+              $ref: '#/components/examples/PaymentCardEnrolments'
+    AggregateTransactionBadRequestError:
+      description: This response code is returned when a request is invalid or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            InvalidPaymentCardError:
+              $ref: '#/components/examples/InvalidPaymentCardError'
+            AggregateTransactionInvalidDateFormatError:
+              $ref: '#/components/examples/AggregateTransactionInvalidDateFormatError'
+            AggregateTransactionInvalidDateRangeError:
+              $ref: '#/components/examples/AggregateTransactionInvalidDateRangeError'
+            AggregateTransactionInvalidAggregateTypeError:
+              $ref: '#/components/examples/AggregateTransactionInvalidAggregateTypeError'
+    ServiceProviderUnsupportedMediaTypeError:
+      description: This response code is returned when the value of provided Content-Type parameter is other than expected.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            ServiceProviderUnsupportedMediaTypeError:
+              $ref: '#/components/examples/ServiceProviderUnsupportedMediaTypeError'
+    RegisterPaymentCardBadRequestError:
+      description: This response code is returned when a request is invalid or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            RegisterPaymentCardRequestValidationError:
+              $ref: '#/components/examples/RegisterPaymentCardRequestValidationError'
+            RegisterPaymentCardUnsupportedCardCurrencyError:
+              $ref: '#/components/examples/RegisterPaymentCardUnsupportedCardCurrencyError'
+            RegisterPaymentCardInvalidFPANError:
+              $ref: '#/components/examples/RegisterPaymentCardInvalidFPANError'
+            RegisterPaymentCardRequestDecryptionError:
+              $ref: '#/components/examples/RegisterPaymentCardRequestDecryptionError'
+    ServiceProviderNotFoundError:
+      description: This response code is returned when the server cannot find the account which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper_2'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error_3'
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-500'
+    Unauthorized:
+      description: Unauthorised
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-401'
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-404'
+    Unsupported:
+      description: Unsupported Content Type
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-415'
+    OneTimePayment:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OneTimePaymentSuccess'
+          examples:
+            SUCCESS:
+              $ref: '#/components/examples/oneTimePaymentSuccess'
+            FAILURE:
+              $ref: '#/components/examples/oneTimePaymentFail'
+    GuestDonation:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GuestDonation'
+          examples:
+            SUCCESS:
+              $ref: '#/components/examples/oneTimePaymentSuccess'
+            FAILURE:
+              $ref: '#/components/examples/oneTimePaymentFail'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-403'
+    Created:
+      description: The specified resource was created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-201'
   parameters:
+    X-Product-ID:
+      name: X-Product-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        example: PBARFP
+        minLength: 1
+        maxLength: 50
+      description: Unique identifier assigned to the product construct by Mastercard and given to the participant.
+    X-JWS-Signature:
+      name: X-JWS-Signature
+      in: header
+      required: true
+      description: JWS detached signature is applied to ensure data integrity.
+      schema:
+        type: string
+        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
+        minLength: 1
+        maxLength: 512
     X-Request-ID:
       name: X-Request-ID
       in: header
@@ -1700,6 +2024,16 @@ components:
         minLength: 1
         maxLength: 50
       description: Each API request has an associated request identifier. It can be used to match the response to the request and used for tracing, troubleshooting and analysis purposes.
+    X-Participant-ID:
+      name: X-Participant-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        example: '000545'
+        minLength: 1
+        maxLength: 50
+      description: Unique identifier assigned to the participant by Mastercard during onboarding.
     Idempotency-Key:
       name: Idempotency-Key
       in: header
@@ -1711,36 +2045,25 @@ components:
         example: 7da7a728-f910-11e6-942a-68f728c1ba70
         minLength: 1
         maxLength: 36
-    X-JWS-Signature:
-      name: X-JWS-Signature
-      in: header
+    FromDate:
+      name: from_date
+      in: query
+      description: Start date for searching transaction (Format- YYYY-MM-DD).
       required: true
-      description: JWS detached signature is applied to ensure data integrity.
+      example: '2018-05-07'
       schema:
-        type: string
-        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
-        minLength: 1
-        maxLength: 512
-    X-Participant-ID:
-      name: X-Participant-ID
-      in: header
-      required: true
+        $ref: '#/components/schemas/Day'
+    Limit:
+      name: limit
+      in: query
+      description: The number of items you asked the list to be limited to.
+      required: false
+      example: 50
       schema:
-        type: string
-        example: '000545'
-        minLength: 1
-        maxLength: 50
-      description: Unique identifier assigned to the participant by Mastercard during onboarding.
-    X-Product-ID:
-      name: X-Product-ID
-      in: header
-      required: true
-      schema:
-        type: string
-        example: PBARFP
-        minLength: 1
-        maxLength: 50
-      description: Unique identifier assigned to the product construct by Mastercard and given to the participant.
+        type: integer
+        default: 50
+        minimum: 5
+        maximum: 50
     Offset:
       name: offset
       in: query
@@ -1767,25 +2090,6 @@ components:
       example: 83c0711e-1851-4771-950a-055dded7f168
       schema:
         $ref: '#/components/schemas/PaymentCardId'
-    Limit:
-      name: limit
-      in: query
-      description: The number of items you asked the list to be limited to.
-      required: false
-      example: 50
-      schema:
-        type: integer
-        default: 50
-        minimum: 5
-        maximum: 50
-    FromDate:
-      name: from_date
-      in: query
-      description: Start date for searching transaction (Format- YYYY-MM-DD).
-      required: true
-      example: '2018-05-07'
-      schema:
-        $ref: '#/components/schemas/Day'
     ProgramId:
       name: ProgramId
       in: header
@@ -1821,22 +2125,114 @@ components:
             Description: Invalid structure
             Recoverable: false
             Details: Invalid structure
-    RegisterPaymentCardInvalidFPANError:
+    PaymentCardReference:
       value:
-        Errors:
-          Error:
-          - Source: Service-Provider-Mgmt
-            ReasonCode: INVALID_FPAN
-            Description: The card number in the request is either invalid or it does not match with your currently supported account range. Try again with a valid card number or update the supported account range.
-            Recoverable: false
-            Details: ''
-    InvalidPaymentCardError:
+        paymentCardId: c5d88571-ac15-465a-a0d8-1ad1327b9a06
+        bin: '534403'
+        last4fpan: '9750'
+        status: ACTIVE
+    TransactionHistoryInvalidDateFormatError:
       value:
         Errors:
           Error:
           - Source: Service-Provider-Mgmt
             ReasonCode: INVALID_REQUEST_PARAMETER
-            Description: Payment card id - [b86fd2ba-c095-4acb-b9df-f3805655ba24,d30f6223-b15d-4663-8e6a-247475c596dd ] is/are invalid or not found. Please try again with a valid payment card id.
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: 'getPaymentCardTransactionHistory.fromDate: must match "^((?:19|20)[0-9][0-9])-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$"'
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request..
+            Recoverable: false
+            Details: 'getPaymentCardTransactionHistory.fromDate: size must be between 10 and 10'
+    PaymentCardEnrolments:
+      value:
+      - bin: '545502'
+        last4fpan: '8351'
+        status: ACTIVE
+        paymentCardId: 9f12f385-0b47-4cca-9e9d-baced21bca63
+      - bin: '545502'
+        last4fpan: '0762'
+        status: ACTIVE
+        paymentCardId: f506521c-38c6-4e87-bf1a-14023ce10d4e
+      - bin: '545502'
+        last4fpan: '2834'
+        status: PENDING
+        paymentCardId: 2da9571f-0cf2-458d-bc4b-9218578ce50d
+      - bin: '520402'
+        last4fpan: '2824'
+        errorCode: INVALID_FPAN
+    MonthlyCategoryAggregateTransactionFootprints:
+      value:
+        aggregateTransactionFootprint:
+        - paymentCardId: 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+          footprintAggregation:
+          - carbonEmissionInGrams: 345.35
+            carbonEmissionInOunces: 15.28
+            aggregateValue: October|2019|Shopping
+          - carbonEmissionInGrams: 261.64
+            carbonEmissionInOunces: 16.54
+            aggregateValue: October|2019|Hospital
+          - carbonEmissionInGrams: 898.64
+            carbonEmissionInOunces: 32.54
+            aggregateValue: September|2019|Shopping
+        - paymentCardId: 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+          footprintAggregation:
+          - carbonEmissionInGrams: 614.24
+            carbonEmissionInOunces: 32.21
+            aggregateValue: October|2019|Foods
+          - carbonEmissionInGrams: 612.24
+            carbonEmissionInOunces: 33.65
+            aggregateValue: September|2019|Hospital
+        crossPANAggregation:
+        - carbonEmissionInGrams: 345.35
+          carbonEmissionInOunces: 15.28
+          aggregateValue: October|2019|Shopping
+        - carbonEmissionInGrams: 898.64
+          carbonEmissionInOunces: 32.54
+          aggregateValue: October|2019|Hospital
+        - carbonEmissionInGrams: 614.24
+          carbonEmissionInOunces: 32.21
+          aggregateValue: October|2019|Foods
+        - carbonEmissionInGrams: 898.64
+          carbonEmissionInOunces: 32.54
+          aggregateValue: September|2019|Shopping
+        - carbonEmissionInGrams: 612.24
+          carbonEmissionInOunces: 33.65
+          aggregateValue: September|2019|Hospital
+    MonthlyAggregateTransactionFootprints:
+      value:
+        aggregateTransactionFootprint:
+        - paymentCardId: 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+          footprintAggregation:
+          - carbonEmissionInGrams: 616.35
+            carbonEmissionInOunces: 31.28
+            aggregateValue: October|2019
+          - carbonEmissionInGrams: 898.64
+            carbonEmissionInOunces: 32.54
+            aggregateValue: September|2019
+        - paymentCardId: 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+          footprintAggregation:
+          - carbonEmissionInGrams: 614.24
+            carbonEmissionInOunces: 32.21
+            aggregateValue: October|2019
+          - carbonEmissionInGrams: 612.24
+            carbonEmissionInOunces: 33.65
+            aggregateValue: September|2019
+        crossPANAggregation:
+        - carbonEmissionInGrams: 1230.59
+          carbonEmissionInOunces: 63.49
+          aggregateValue: October|2019
+        - carbonEmissionInGrams: 1510.88
+          carbonEmissionInOunces: 66.19
+          aggregateValue: September|2019
+    RegisterPaymentCardUnsupportedCardCurrencyError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: UNSUPPORTED_CURRENCY
+            Description: The currency in the request is not supported, try again with a different one.
             Recoverable: false
             Details: ''
     TransactionHistoryPaymentCardNotFoundError:
@@ -1848,68 +2244,6 @@ components:
             Description: Payment card id - c2c76ec0-4056-44ba-b14f-6654c9ba5722 is/are invalid or not found. Please try again with valid payment card id.
             Recoverable: false
             Details: ''
-    ServiceProviderNotFoundError:
-      value:
-        Errors:
-          Error:
-          - Source: Service-Provider-Mgmt
-            ReasonCode: ACCOUNT_NOT_FOUND
-            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
-            Recoverable: false
-            Details: ''
-    RegisterPaymentCardUnsupportedCardCurrencyError:
-      value:
-        Errors:
-          Error:
-          - Source: Service-Provider-Mgmt
-            ReasonCode: UNSUPPORTED_CURRENCY
-            Description: The currency in the request is not supported, try again with a different one.
-            Recoverable: false
-            Details: ''
-    WeeklyAggregateTransactionFootprints:
-      value:
-        aggregateTransactionFootprint:
-        - paymentCardId: 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
-          footprintAggregation:
-          - carbonEmissionInGrams: 140.52
-            carbonEmissionInOunces: 7.19
-            aggregateValue: Week-26|2019
-          - carbonEmissionInGrams: 142.67
-            carbonEmissionInOunces: 6.94
-            aggregateValue: Week-25|2019
-        - paymentCardId: 328b62d4-287c-4c9f-a05d-6d4a67f208d8
-          footprintAggregation:
-          - carbonEmissionInGrams: 143.64
-            carbonEmissionInOunces: 6.97
-            aggregateValue: Week-26|2019
-          - carbonEmissionInGrams: 218.31
-            carbonEmissionInOunces: 7.19
-            aggregateValue: Week-25|2019
-        crossPANAggregation:
-        - carbonEmissionInGrams: 284.16
-          carbonEmissionInOunces: 14.16
-          aggregateValue: Week-26|2019
-        - carbonEmissionInGrams: 360.98
-          carbonEmissionInOunces: 14.13
-          aggregateValue: Week-25|2019
-    ServiceProviderUnsupportedMediaTypeError:
-      value:
-        Errors:
-          Error:
-          - Source: Service-Provider-Mgmt
-            ReasonCode: UNSUPPORTED_MEDIA_TYPE
-            Description: Requested media type is not supported, try again with the supported media type.
-            Recoverable: false
-            Details: ''
-    AggregateTransactionInvalidAggregateTypeError:
-      value:
-        Errors:
-          Error:
-          - Source: Service-Provider-Mgmt
-            ReasonCode: INVALID_REQUEST_PARAMETER
-            Description: One of the request parameters is invalid, try again with correct request.
-            Recoverable: false
-            Details: aggregateType must be less than or equal to 3
     HistoricalTransactionFootprints:
       value:
         count: 2
@@ -1993,13 +2327,49 @@ components:
               sector: Government Services
               sectorCode: '801'
             scoreReference: MCC
-    PaymentCardNotFoundError:
+    InvalidPaymentCardError:
       value:
         Errors:
           Error:
           - Source: Service-Provider-Mgmt
-            ReasonCode: PAYMENT_CARD_NOT_FOUND
-            Description: Paymentcards not found for the given payment card ids.
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: Payment card id - [b86fd2ba-c095-4acb-b9df-f3805655ba24,d30f6223-b15d-4663-8e6a-247475c596dd ] is/are invalid or not found. Please try again with a valid payment card id.
+            Recoverable: false
+            Details: ''
+    TransactionHistoryInvalidDateRangeError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_DATE_RANGE
+            Description: Requested date range is either invalid or exceeds one year limits. Try again with a valid date range.
+            Recoverable: false
+            Details: ''
+    ServiceProviderUnsupportedMediaTypeError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: UNSUPPORTED_MEDIA_TYPE
+            Description: Requested media type is not supported, try again with the supported media type.
+            Recoverable: false
+            Details: ''
+    RegisterPaymentCardInvalidFPANError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_FPAN
+            Description: The card number in the request is either invalid or it does not match with your currently supported account range. Try again with a valid card number or update the supported account range.
+            Recoverable: false
+            Details: ''
+    ServiceProviderNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: ACCOUNT_NOT_FOUND
+            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
             Recoverable: false
             Details: ''
     PaymentCardDeletionsRequestValidationError:
@@ -2011,135 +2381,32 @@ components:
             Description: One of the request parameters is invalid, try again with the correct request.
             Recoverable: false
             Details: ''
-    MonthlyCategoryAggregateTransactionFootprints:
+    WeeklyAggregateTransactionFootprints:
       value:
         aggregateTransactionFootprint:
         - paymentCardId: 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
           footprintAggregation:
-          - carbonEmissionInGrams: 345.35
-            carbonEmissionInOunces: 15.28
-            aggregateValue: October|2019|Shopping
-          - carbonEmissionInGrams: 261.64
-            carbonEmissionInOunces: 16.54
-            aggregateValue: October|2019|Hospital
-          - carbonEmissionInGrams: 898.64
-            carbonEmissionInOunces: 32.54
-            aggregateValue: September|2019|Shopping
+          - carbonEmissionInGrams: 140.52
+            carbonEmissionInOunces: 7.19
+            aggregateValue: Week-26|2019
+          - carbonEmissionInGrams: 142.67
+            carbonEmissionInOunces: 6.94
+            aggregateValue: Week-25|2019
         - paymentCardId: 328b62d4-287c-4c9f-a05d-6d4a67f208d8
           footprintAggregation:
-          - carbonEmissionInGrams: 614.24
-            carbonEmissionInOunces: 32.21
-            aggregateValue: October|2019|Foods
-          - carbonEmissionInGrams: 612.24
-            carbonEmissionInOunces: 33.65
-            aggregateValue: September|2019|Hospital
+          - carbonEmissionInGrams: 143.64
+            carbonEmissionInOunces: 6.97
+            aggregateValue: Week-26|2019
+          - carbonEmissionInGrams: 218.31
+            carbonEmissionInOunces: 7.19
+            aggregateValue: Week-25|2019
         crossPANAggregation:
-        - carbonEmissionInGrams: 345.35
-          carbonEmissionInOunces: 15.28
-          aggregateValue: October|2019|Shopping
-        - carbonEmissionInGrams: 898.64
-          carbonEmissionInOunces: 32.54
-          aggregateValue: October|2019|Hospital
-        - carbonEmissionInGrams: 614.24
-          carbonEmissionInOunces: 32.21
-          aggregateValue: October|2019|Foods
-        - carbonEmissionInGrams: 898.64
-          carbonEmissionInOunces: 32.54
-          aggregateValue: September|2019|Shopping
-        - carbonEmissionInGrams: 612.24
-          carbonEmissionInOunces: 33.65
-          aggregateValue: September|2019|Hospital
-    RegisterPaymentCardRequestDecryptionError:
-      value:
-        Errors:
-          Error:
-          - Source: Service-Provider-Mgmt
-            ReasonCode: CRYPTO_ERROR
-            Description: We are unable to decipher your request, kindly verify your request before trying again. If the problem persists then reach out to your Mastercard associate.
-            Recoverable: false
-            Details: ''
-    MonthlyAggregateTransactionFootprints:
-      value:
-        aggregateTransactionFootprint:
-        - paymentCardId: 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
-          footprintAggregation:
-          - carbonEmissionInGrams: 616.35
-            carbonEmissionInOunces: 31.28
-            aggregateValue: October|2019
-          - carbonEmissionInGrams: 898.64
-            carbonEmissionInOunces: 32.54
-            aggregateValue: September|2019
-        - paymentCardId: 328b62d4-287c-4c9f-a05d-6d4a67f208d8
-          footprintAggregation:
-          - carbonEmissionInGrams: 614.24
-            carbonEmissionInOunces: 32.21
-            aggregateValue: October|2019
-          - carbonEmissionInGrams: 612.24
-            carbonEmissionInOunces: 33.65
-            aggregateValue: September|2019
-        crossPANAggregation:
-        - carbonEmissionInGrams: 1230.59
-          carbonEmissionInOunces: 63.49
-          aggregateValue: October|2019
-        - carbonEmissionInGrams: 1510.88
-          carbonEmissionInOunces: 66.19
-          aggregateValue: September|2019
-    TransactionHistoryInvalidDateFormatError:
-      value:
-        Errors:
-          Error:
-          - Source: Service-Provider-Mgmt
-            ReasonCode: INVALID_REQUEST_PARAMETER
-            Description: One of the request parameters is invalid, try again with correct request.
-            Recoverable: false
-            Details: 'getPaymentCardTransactionHistory.fromDate: must match "^((?:19|20)[0-9][0-9])-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$"'
-          - Source: Service-Provider-Mgmt
-            ReasonCode: INVALID_REQUEST_PARAMETER
-            Description: One of the request parameters is invalid, try again with correct request..
-            Recoverable: false
-            Details: 'getPaymentCardTransactionHistory.fromDate: size must be between 10 and 10'
-    PaymentCardDeletionsInvalidCardIdError:
-      value:
-        Errors:
-          Error:
-          - Source: Service-Provider-Mgmt
-            ReasonCode: INVALID_REQUEST_PARAMETER
-            Description: One or more payment card IDs in the request are invalid, try again by sending valid Ids.
-            Recoverable: false
-            Details: paymentCardId must match "^[0-9A-Fa-f\-]{36}"
-    AggregateTransactionInvalidDateRangeError:
-      value:
-        Errors:
-          Error:
-          - Source: Service-Provider-Mgmt
-            ReasonCode: INVALID_DATE_RANGE
-            Description: Requested date range is either invalid or exceeds supported limit (i.e. 26 weeks for weekly aggregate and 12 months for monthly aggregate).
-            Recoverable: false
-            Details: ''
-    PaymentCardReference:
-      value:
-        paymentCardId: c5d88571-ac15-465a-a0d8-1ad1327b9a06
-        bin: '534403'
-        last4fpan: '9750'
-        status: ACTIVE
-    TransactionHistoryInvalidDateRangeError:
-      value:
-        Errors:
-          Error:
-          - Source: Service-Provider-Mgmt
-            ReasonCode: INVALID_DATE_RANGE
-            Description: Requested date range is either invalid or exceeds one year limits. Try again with a valid date range.
-            Recoverable: false
-            Details: ''
-    RegisterPaymentCardRequestValidationError:
-      value:
-        Errors:
-          Error:
-          - Source: Service-Provider-Mgmt
-            ReasonCode: INVALID_REQUEST_PARAMETER
-            Description: One of the request parameters is invalid, try again with the correct request.
-            Recoverable: false
-            Details: ''
+        - carbonEmissionInGrams: 284.16
+          carbonEmissionInOunces: 14.16
+          aggregateValue: Week-26|2019
+        - carbonEmissionInGrams: 360.98
+          carbonEmissionInOunces: 14.13
+          aggregateValue: Week-25|2019
     AggregateTransactionInvalidDateFormatError:
       value:
         Errors:
@@ -2154,23 +2421,66 @@ components:
             Description: One of the request parameters is invalid, try again with correct request.
             Recoverable: false
             Details: fromDate size must be between 10 and 10
-    PaymentCardEnrolments:
+    AggregateTransactionInvalidDateRangeError:
       value:
-      - bin: '545502'
-        last4fpan: '8351'
-        status: ACTIVE
-        paymentCardId: 9f12f385-0b47-4cca-9e9d-baced21bca63
-      - bin: '545502'
-        last4fpan: '0762'
-        status: ACTIVE
-        paymentCardId: f506521c-38c6-4e87-bf1a-14023ce10d4e
-      - bin: '545502'
-        last4fpan: '2834'
-        status: PENDING
-        paymentCardId: 2da9571f-0cf2-458d-bc4b-9218578ce50d
-      - bin: '520402'
-        last4fpan: '2824'
-        errorCode: INVALID_FPAN
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_DATE_RANGE
+            Description: Requested date range is either invalid or exceeds supported limit (i.e. 26 weeks for weekly aggregate and 12 months for monthly aggregate).
+            Recoverable: false
+            Details: ''
+    RegisterPaymentCardRequestDecryptionError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: CRYPTO_ERROR
+            Description: We are unable to decipher your request, kindly verify your request before trying again. If the problem persists then reach out to your Mastercard associate.
+            Recoverable: false
+            Details: ''
+    AggregateTransactionInvalidAggregateTypeError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: aggregateType must be less than or equal to 3
+    PaymentCardDeletionsInvalidCardIdError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One or more payment card IDs in the request are invalid, try again by sending valid Ids.
+            Recoverable: false
+            Details: paymentCardId must match "^[0-9A-Fa-f\-]{36}"
+    PaymentCardNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: PAYMENT_CARD_NOT_FOUND
+            Description: Paymentcards not found for the given payment card ids.
+            Recoverable: false
+            Details: ''
+    RegisterPaymentCardRequestValidationError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with the correct request.
+            Recoverable: false
+            Details: ''
+    oneTimePaymentSuccess:
+      summary: Payment success
+      value:
+        transactionId: OTBVMrlAQa6Ecl7PlKSDyw
+        transactionStatus: SUCCESS
+        transactionMessage: Transaction APPROVED
     oneTimePaymentFail:
       summary: Payment failure
       value:
@@ -2179,316 +2489,6 @@ components:
         transactionMessage: Transaction declined
         reasonCode: DECLINE
         reasonMessage: Your payment was declined.  Please use a different card or contact your issuer for more information.
-    oneTimePaymentSuccess:
-      summary: Payment success
-      value:
-        transactionId: OTBVMrlAQa6Ecl7PlKSDyw
-        transactionStatus: SUCCESS
-        transactionMessage: Transaction APPROVED
-  headers:
-    X-Request-ID:
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: 7eab4eab35a542e085add0363a49c035
-      description: Each API request has an associated request identifier. It can be used to match the response to the request and used for tracing, troubleshooting and analysis purposes.
-    X-JWS-Signature:
-      required: true
-      description: JWS detached signature is applied to ensure data integrity.
-      schema:
-        type: string
-        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
-        minLength: 1
-        maxLength: 512
-    X-Participant-ID:
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: '000545'
-      description: Unique identifier assigned to the participant by Mastercard during onboarding.
-    X-Product-ID:
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: PBARFP
-      description: Unique identifier assigned to the product construct by Mastercard and given to the participant.
-    X-MC-Correlation-ID:
-      description: This id is unique per request and is used to co-relate a request to its response. Customers must share this id while raising any incident for this API.
-      schema:
-        $ref: '#/components/schemas/X-MC-Correlation-ID'
-    Location:
-      description: The URL to check on status of resource
-      schema:
-        type: string
-  responses:
-    UnauthorisedErrorResponse:
-      description: Invalid signature. The service fails signature validation.
-      headers:
-        X-Request-ID:
-          $ref: '#/components/headers/X-Request-ID'
-        X-Product-ID:
-          $ref: '#/components/headers/X-Product-ID'
-        X-Participant-ID:
-          $ref: '#/components/headers/X-Participant-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            BadRequestExample:
-              $ref: '#/components/examples/UnauthorisedExample'
-    PaymentRequestCreationResponse:
-      description: Payment request creation successful.
-      headers:
-        X-Request-ID:
-          $ref: '#/components/headers/X-Request-ID'
-        X-Product-ID:
-          $ref: '#/components/headers/X-Product-ID'
-        X-Participant-ID:
-          $ref: '#/components/headers/X-Participant-ID'
-        X-JWS-Signature:
-          $ref: '#/components/headers/X-JWS-Signature'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PaymentRequest'
-    BadRequestErrorResponse:
-      description: 'Invalid structure: The header or payload fails syntax or structural validation.'
-      headers:
-        X-Request-ID:
-          $ref: '#/components/headers/X-Request-ID'
-        X-Product-ID:
-          $ref: '#/components/headers/X-Product-ID'
-        X-Participant-ID:
-          $ref: '#/components/headers/X-Participant-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            BadRequestErrorExample:
-              $ref: '#/components/examples/BadRequestErrorExample'
-    RegisterPaymentCardBadRequestError:
-      description: This response code is returned when a request is invalid or data in the request is not valid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper_2'
-          examples:
-            RegisterPaymentCardRequestValidationError:
-              $ref: '#/components/examples/RegisterPaymentCardRequestValidationError'
-            RegisterPaymentCardUnsupportedCardCurrencyError:
-              $ref: '#/components/examples/RegisterPaymentCardUnsupportedCardCurrencyError'
-            RegisterPaymentCardInvalidFPANError:
-              $ref: '#/components/examples/RegisterPaymentCardInvalidFPANError'
-            RegisterPaymentCardRequestDecryptionError:
-              $ref: '#/components/examples/RegisterPaymentCardRequestDecryptionError'
-    AggregateTransactionFootprints:
-      description: This response code is returned when a request is accepted and successfully processed.  A corresponding response will be returned for the API caller.
-      headers:
-        X-MC-Correlation-ID:
-          $ref: '#/components/headers/X-MC-Correlation-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AggregateTransactionFootprints'
-          examples:
-            WeeklyAggregateTransactionFootprints:
-              $ref: '#/components/examples/WeeklyAggregateTransactionFootprints'
-            MonthlyAggregateTransactionFootprints:
-              $ref: '#/components/examples/MonthlyAggregateTransactionFootprints'
-            MonthlyCategoryAggregateTransactionFootprints:
-              $ref: '#/components/examples/MonthlyCategoryAggregateTransactionFootprints'
-    ServiceProviderUnsupportedMediaTypeError:
-      description: This response code is returned when the value of provided Content-Type parameter is other than expected.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper_2'
-          examples:
-            ServiceProviderUnsupportedMediaTypeError:
-              $ref: '#/components/examples/ServiceProviderUnsupportedMediaTypeError'
-    HistoricalTransactionFootprints:
-      description: This response code is returned when a request is accepted and successfully processed. A corresponding response will be returned for the API caller.
-      headers:
-        X-MC-Correlation-ID:
-          $ref: '#/components/headers/X-MC-Correlation-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/HistoricalTransactionFootprints'
-          examples:
-            HistoricalTransactionFootprints:
-              $ref: '#/components/examples/HistoricalTransactionFootprints'
-    PaymentCardDeletionsBadRequestError:
-      description: This response code is returned when either a request is invalid or one or more paymentCardIds are invalid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper_2'
-          examples:
-            PaymentCardDeletionsRequestValidationError:
-              $ref: '#/components/examples/PaymentCardDeletionsRequestValidationError'
-            PaymentCardDeletionsInvalidCardIdError:
-              $ref: '#/components/examples/PaymentCardDeletionsInvalidCardIdError'
-    PaymentCardEnrolmentsBadRequestError:
-      description: This response code is returned when a request is invalid, or data in the request is not valid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper_2'
-          examples:
-            PaymentCardEnrolmentsRequestValidationError:
-              $ref: '#/components/examples/RegisterPaymentCardRequestValidationError'
-            PaymentCardEnrolmentsRequestDecryptionError:
-              $ref: '#/components/examples/RegisterPaymentCardRequestDecryptionError'
-    ServiceProviderNotFoundError:
-      description: This response code is returned when the server cannot find the account which has been used to call this API.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper_2'
-          examples:
-            ServiceProviderNotFoundError:
-              $ref: '#/components/examples/ServiceProviderNotFoundError'
-    AggregateTransactionBadRequestError:
-      description: This response code is returned when a request is invalid or data in the request is not valid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper_2'
-          examples:
-            InvalidPaymentCardError:
-              $ref: '#/components/examples/InvalidPaymentCardError'
-            AggregateTransactionInvalidDateFormatError:
-              $ref: '#/components/examples/AggregateTransactionInvalidDateFormatError'
-            AggregateTransactionInvalidDateRangeError:
-              $ref: '#/components/examples/AggregateTransactionInvalidDateRangeError'
-            AggregateTransactionInvalidAggregateTypeError:
-              $ref: '#/components/examples/AggregateTransactionInvalidAggregateTypeError'
-    PaymentCardReference:
-      description: The response object that contains Payment Card information after a successful registration.
-      headers:
-        X-MC-Correlation-ID:
-          $ref: '#/components/headers/X-MC-Correlation-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PaymentCardReference'
-          examples:
-            PaymentCardReference:
-              $ref: '#/components/examples/PaymentCardReference'
-    PaymentCardEnrolments:
-      description: The response object that contains the list of payment cards information after batch registration.
-      headers:
-        X-MC-Correlation-ID:
-          $ref: '#/components/headers/X-MC-Correlation-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PaymentCardEnrolments'
-          examples:
-            PaymentCardEnrolments:
-              $ref: '#/components/examples/PaymentCardEnrolments'
-    Accepted:
-      description: Accepted
-      headers:
-        Location:
-          $ref: '#/components/headers/Location'
-    PaymentCardDeletionsNotFoundError:
-      description: This response code is returned when the server cannot find the account or one or more paymentcards which has been used to call this API.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper_2'
-          examples:
-            ServiceProviderNotFoundError:
-              $ref: '#/components/examples/ServiceProviderNotFoundError'
-            PaymentCardNotFoundError:
-              $ref: '#/components/examples/PaymentCardNotFoundError'
-    TransactionHistoryBadRequestError:
-      description: This response code is returned when a request is invalid or data in the request is not valid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper_2'
-          examples:
-            TransactionHistoryPaymentCardNotFoundError:
-              $ref: '#/components/examples/TransactionHistoryPaymentCardNotFoundError'
-            TransactionHistoryInvalidDateRangeError:
-              $ref: '#/components/examples/TransactionHistoryInvalidDateRangeError'
-            TransactionHistoryInvalidDateFormatError:
-              $ref: '#/components/examples/TransactionHistoryInvalidDateFormatError'
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error_3'
-    NotFound:
-      description: The specified resource was not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-404'
-    Created:
-      description: The specified resource was created
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-201'
-    Unauthorized:
-      description: Unauthorised
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-401'
-    GuestDonation:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/GuestDonation'
-          examples:
-            SUCCESS:
-              $ref: '#/components/examples/oneTimePaymentSuccess'
-            FAILURE:
-              $ref: '#/components/examples/oneTimePaymentFail'
-    Unsupported:
-      description: Unsupported Content Type
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-415'
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-403'
-    OneTimePayment:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/OneTimePaymentSuccess'
-          examples:
-            SUCCESS:
-              $ref: '#/components/examples/oneTimePaymentSuccess'
-            FAILURE:
-              $ref: '#/components/examples/oneTimePaymentFail'
-    InternalServerError:
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-500'
   requestBodies:
     PaymentRequestCreationRequest:
       required: true
@@ -2497,6 +2497,22 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/NewPaymentRequest'
+    PaymentCardIds:
+      description: List of paymentCardIds for which all associated data needs to be deleted.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PaymentCardId'
+            minItems: 1
+            maxItems: 100
+          example:
+          - c5d88571-ac15-465a-a0d8-1ad1327b9a06
+          - 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+          - 328b62d4-287c-4c9f-a05d-6d4a67f208d8
+          - b86fd2ba-c095-4acb-b9df-f3805655ba24
     PaymentCards:
       required: true
       description: List of payment cards to be enroled.
@@ -2517,29 +2533,6 @@ components:
               cardBaseCurrency: USD
             - fpan: '5455023979762824'
               cardBaseCurrency: USD
-    PaymentCardIds:
-      description: List of paymentCardIds for which all associated data needs to be deleted.
-      required: true
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/PaymentCardId'
-            minItems: 1
-            maxItems: 100
-          example:
-          - c5d88571-ac15-465a-a0d8-1ad1327b9a06
-          - 8a581a55-bcea-4c3e-8e0f-9b4726e5e6d3
-          - 328b62d4-287c-4c9f-a05d-6d4a67f208d8
-          - b86fd2ba-c095-4acb-b9df-f3805655ba24
-    PaymentCard:
-      description: Payment card to be enroled.
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PaymentCard'
     AggregateSearchCriteria:
       description: "The request should contain a list of *paymentCardIds* for which aggregate carbon score needs to be retrieved and *aggregateType* as one of the following:\n<li> 1 = Weekly Transactions aggregated for last 26 weeks <li> 2 = Monthly transactions aggregated for last 12 months <li> 3 = Monthly category-wise transactions aggregated for last 12 months\n\n\n In order to retrieve aggregate for custom duration, please provide `fromDate` and `toDate`. Note that the duration should not exceed 26 weeks (for weekly aggregate) and 12 months (for monthly aggregate).\n"
       required: true
@@ -2547,19 +2540,26 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AggregateSearchCriteria'
-    GuestDonate:
-      description: guestDonateRequest
+    PaymentCard:
+      description: Payment card to be enroled.
+      required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/GuestDonate'
-      required: false
+            $ref: '#/components/schemas/PaymentCard'
     RealTimePayment:
       description: realTimePaymentRequest
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/RealTimePayment'
+      required: false
+    GuestDonate:
+      description: guestDonateRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GuestDonate'
       required: false
 externalDocs:
   description: ISO 4217 - Currency Code

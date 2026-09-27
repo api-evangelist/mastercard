@@ -656,15 +656,12 @@ paths:
       description: Production server
 components:
   responses:
-    ResourceNotFoundError:
-      description: The requested resource does not exist
+    GetConsentsSuccess:
+      description: The success response for retrieving user consent
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            ResourceNotFoundExample:
-              $ref: '#/components/examples/ResourceNotFoundExample'
+            $ref: '#/components/schemas/UserConsent'
     UnAuthorizedMerchantError:
       description: Requestor is not authorised to perform requested operation.
       content:
@@ -674,23 +671,6 @@ components:
           examples:
             UnAuthorizedMerchantRequest:
               $ref: '#/components/examples/UnAuthorizedMerchantRequest'
-    DeleteConsentsBadRequestError:
-      description: Server is unable to parse the request data due to malformed json.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            InvalidMerchantRequest:
-              $ref: '#/components/examples/InvalidMerchantRequest'
-            BadRequestExample:
-              $ref: '#/components/examples/BadRequestExample'
-    GetConsentsSuccess:
-      description: The success response for retrieving user consent
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UserConsent'
     GetConsentsBadRequestError:
       description: Server is unable to parse the request data due to malformed json.
       content:
@@ -702,19 +682,53 @@ components:
               $ref: '#/components/examples/InvalidMerchantRequest'
             BadRequestExample:
               $ref: '#/components/examples/BadRequestExample'
+    DeleteConsentsBadRequestError:
+      description: Server is unable to parse the request data due to malformed json.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            InvalidMerchantRequest:
+              $ref: '#/components/examples/InvalidMerchantRequest'
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    ResourceNotFoundError:
+      description: The requested resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ResourceNotFoundExample:
+              $ref: '#/components/examples/ResourceNotFoundExample'
     DeleteConsentsSuccess:
       description: The server successfully processed the request
-    BadRequestErrorClaimSharing:
+    UserProfilesResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+    NotFoundErrorClaimSharing:
+      description: The request didn't match an existing resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse_2'
+          examples:
+            NotFoundExampleARIDnotExists:
+              $ref: '#/components/examples/NotFoundExampleARIDnotExists'
+    BadRequestError:
       description: Something was wrong with the request.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse_2'
           examples:
-            BadRequestARIDErrorExample:
-              $ref: '#/components/examples/BadRequestARIDErrorExample'
-            BadRequestPDSErrorExample:
-              $ref: '#/components/examples/BadRequestPDSErrorExample'
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
     UnauthorizedError:
       description: Unauthorized request.
       content:
@@ -724,7 +738,7 @@ components:
           examples:
             UnauthorizedExample:
               $ref: '#/components/examples/UnauthorizedExample'
-    UserConsentResponse:
+    RPClaimsDataResponse:
       description: Success.
       headers:
         X-Transaction-ID:
@@ -734,12 +748,29 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/RPClaimsUserConsentData'
+            $ref: '#/components/schemas/RPClaimsUserData'
           examples:
-            RPClaimsUserConsentDataSuccess:
-              $ref: '#/components/examples/RPClaimsUserConsentDataSuccessExample'
-            RPClaimsUserDataConsentNotGiven:
-              $ref: '#/components/examples/RPClaimsUserConsentDataExampleConsentNotGiven'
+            RPClaimsUserDataUnencryptedSuccess:
+              $ref: '#/components/examples/RPClaimsUserDataSuccessExample'
+            RPClaimsUserDataEncryptedSuccess:
+              $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
+            RPClaimsUserDataClaimsNotSatisfied:
+              $ref: '#/components/examples/RPClaimsUserDataExampleClaimsNotSatisfied'
+    IdentityAttributeDeletionsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentityAttributeDeleted'
     IdentitySearchResponse:
       description: Success.
       headers:
@@ -760,32 +791,15 @@ components:
               $ref: '#/components/examples/ClientIdentitiesSuccessfulExample'
             ClientIdentitiesSuccessfulExampleEncrypted:
               $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
-    IdentityAttributeDeletionsResponse:
-      description: Success.
-      headers:
-        X-Transaction-ID:
-          schema:
-            type: string
-          description: A random 128-bit UUID represents the transaction.
-        X-User-Identity:
-          schema:
-            type: string
-          description: JWT token for session validation in subsequent API calls.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/IdentityAttributeDeleted'
-    ForbiddenError:
-      description: Consent not given.
+    NotFoundError:
+      description: The request didn't match an existing resource.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse_2'
           examples:
-            ForbiddenExample:
-              $ref: '#/components/examples/ForbiddenExample'
-            ForbiddenExampleUnauthorizedScopedFields:
-              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
     UserAccountActivitySearchesResponse:
       description: Success.
       headers:
@@ -806,41 +820,29 @@ components:
               $ref: '#/components/examples/UserAccountActivitiesExample'
             UserAccountActivitySearchesEncryptedResponse:
               $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
-    BadRequestError:
+    BadRequestErrorClaimSharing:
       description: Something was wrong with the request.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse_2'
           examples:
-            UserProfileDeletedErrorExample:
-              $ref: '#/components/examples/UserProfileDeletedErrorExample'
-    NotFoundErrorClaimSharing:
-      description: The request didn't match an existing resource.
+            BadRequestARIDErrorExample:
+              $ref: '#/components/examples/BadRequestARIDErrorExample'
+            BadRequestPDSErrorExample:
+              $ref: '#/components/examples/BadRequestPDSErrorExample'
+    ForbiddenError:
+      description: Consent not given.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse_2'
           examples:
-            NotFoundExampleARIDnotExists:
-              $ref: '#/components/examples/NotFoundExampleARIDnotExists'
-    UserProfilesResponse:
-      description: Success.
-      headers:
-        X-Transaction-ID:
-          schema:
-            type: string
-          description: A random 128-bit UUID represents the transaction.
-    NotFoundError:
-      description: The request didn't match an existing resource.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse_2'
-          examples:
-            NotFoundExample:
-              $ref: '#/components/examples/NotFoundExample'
-    RPClaimsDataResponse:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    UserConsentResponse:
       description: Success.
       headers:
         X-Transaction-ID:
@@ -850,45 +852,30 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/RPClaimsUserData'
+            $ref: '#/components/schemas/RPClaimsUserConsentData'
           examples:
-            RPClaimsUserDataUnencryptedSuccess:
-              $ref: '#/components/examples/RPClaimsUserDataSuccessExample'
-            RPClaimsUserDataEncryptedSuccess:
-              $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
-            RPClaimsUserDataClaimsNotSatisfied:
-              $ref: '#/components/examples/RPClaimsUserDataExampleClaimsNotSatisfied'
-    Token:
-      description: Token detail
+            RPClaimsUserConsentDataSuccess:
+              $ref: '#/components/examples/RPClaimsUserConsentDataSuccessExample'
+            RPClaimsUserDataConsentNotGiven:
+              $ref: '#/components/examples/RPClaimsUserConsentDataExampleConsentNotGiven'
+    VirtualCard:
+      description: Virtual card details
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Token'
+            $ref: '#/components/schemas/VirtualCardAccount'
           examples:
-            Token:
-              $ref: '#/components/examples/Token'
-    VirtualCards:
-      description: List of virtual cards
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/VirtualCardAccount'
-          examples:
-            UserCardsDetails:
+            VirtualCardAccount:
               $ref: '#/components/examples/CardDetails'
-    NOContentResponse:
-      description: No Content
-    ResourceCreated:
-      description: Resource Created
-      headers:
-        Location:
-          description: location of the resource
+    BadRequestError_2:
+      description: Invalid Request
+      content:
+        application/json:
+          examples:
+            BadRequest:
+              $ref: '#/components/examples/BadRequestError'
           schema:
-            type: string
-    OKResponse:
-      description: OK
+            $ref: '#/components/schemas/ErrorWrapper'
     UnauthorizedError_2:
       description: Authentication Required
       headers:
@@ -903,15 +890,17 @@ components:
               $ref: '#/components/examples/AuthorizationError'
           schema:
             $ref: '#/components/schemas/ErrorWrapper'
-    User:
-      description: User details
+    VirtualCards:
+      description: List of virtual cards
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/UserDetail'
+            type: array
+            items:
+              $ref: '#/components/schemas/VirtualCardAccount'
           examples:
-            UserDetail:
-              $ref: '#/components/examples/UserDetail'
+            UserCardsDetails:
+              $ref: '#/components/examples/CardDetails'
     ForbiddenError_2:
       description: Not Authorized
       content:
@@ -921,6 +910,26 @@ components:
               $ref: '#/components/examples/ForbiddenError'
           schema:
             $ref: '#/components/schemas/ErrorWrapper'
+    ResourceCreated:
+      description: Resource Created
+      headers:
+        Location:
+          description: location of the resource
+          schema:
+            type: string
+    Token:
+      description: Token detail
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Token'
+          examples:
+            Token:
+              $ref: '#/components/examples/Token'
+    OKResponse:
+      description: OK
+    NOContentResponse:
+      description: No Content
     ResourceIdentifier:
       description: Resource Created
       headers:
@@ -932,6 +941,15 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ResourceIdentifier'
+    User:
+      description: User details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserDetail'
+          examples:
+            UserDetail:
+              $ref: '#/components/examples/UserDetail'
     ResourceNotFoundError_2:
       description: Resource Not Found
       content:
@@ -941,30 +959,6 @@ components:
               $ref: '#/components/examples/NotFoundError'
           schema:
             $ref: '#/components/schemas/ErrorWrapper'
-    BadRequestError_2:
-      description: Invalid Request
-      content:
-        application/json:
-          examples:
-            BadRequest:
-              $ref: '#/components/examples/BadRequestError'
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-    VirtualCard:
-      description: Virtual card details
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/VirtualCardAccount'
-          examples:
-            VirtualCardAccount:
-              $ref: '#/components/examples/CardDetails'
-    UserDetailsResponse:
-      description: Successfully retrieved user.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UserDetails'
     ErrorsResponse:
       description: Bad Request
       content:
@@ -977,376 +971,137 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/VerifiedUser'
-    UserUpdateResponse:
-      description: Ok
+    UserDetailsResponse:
+      description: Successfully retrieved user.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserDetails'
     UserEnrollResponse:
       description: Successfully enrolled user.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/EnrolledUser'
-  examples:
-    UnAuthorizedMerchantRequest:
-      summary: When requestor is not authorized to perform requested operation
-      value:
-        Errors:
-          Error:
-          - Source: AUTHENTICATION_CONSENT_SERVICE
-            ReasonCode: unauthorized
-            Description: Unable to perform this operation as the requestor is unauthorized
-            Recoverable: false
-    ResourceNotFoundExample:
-      summary: When resource not found
-      value:
-        Errors:
-          Error:
-          - Source: AUTHENTICATION_CONSENT_SERVICE
-            ReasonCode: resource.not.found
-            Description: The requested resource was not found
-            Recoverable: false
-    BadRequestExample:
-      summary: When something went wrong with the request
-      value:
-        Errors:
-          Error:
-          - Source: AUTHENTICATION_CONSENT_SERVICE
-            ReasonCode: system.error
-            Description: Something went wrong with your request. Please try again later
-            Recoverable: false
-    InvalidMerchantRequest:
-      summary: When registration for the requestor does not exist
-      value:
-        Errors:
-          Error:
-          - Source: AUTHENTICATION_CONSENT_SERVICE
-            ReasonCode: invalid.requestor
-            Description: The registration for the requestor does not exist
-            Recoverable: false
-    UserAccountActivitiesExample:
-      value:
-        userAccountActivities:
-        - action: ID Created
-          createdDate: '2020-01-28T13:16:01.714-05:00'
-          values:
-          - attributeName: legalName
-            previousValue: John Doe
-            value: John Dow
-            source: passport
-        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-    UserProfileDeletedErrorExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: USER_PROFILE_DELETED
-            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
-            Recoverable: false
-            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
-    RPClaimsUserConsentDataSuccessExample:
-      value:
-        flow: APP2APP
-        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-        rpSpecificIdentifier: 46eb72430ffeca3daf31360264fa0424ba4facfdcb69c6f43e73063f290a75a8
-        redirectUri: https://sample-rp-redirect-uri.com/?arid=2cd8ed7e-0cbc-44cc-b393-45e42915d6db&code=eyJ4NXQjUzI1NiI6Ildvank5ekFZQzFCWlMxMTJDeTIzM&state=random%20string%22
-    UnauthorizedExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: UNAUTHORIZED_REQUEST
-            Description: Unauthorized request.
-            Recoverable: false
-    NotFoundExampleARIDnotExists:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: CLAIM_SHARING_ARID_DOES_NOT_EXIST
-            Description: 'CLAIM_SHARING_ARID_DOES_NOT_EXIST: ARID does not Exist'
-            Recoverable: false
-            Details: ARID does not exist.
-            redirectUri: https://sample-rp-redirect-uri.com/?arid=b6990018-73bb-4e8c-9658-556012c22a25&state=random%20string&error=server_error
-    BadRequestPDSErrorExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value null for PDS.
-            Recoverable: false
-            Details: Must not be null.
-            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
-    RPClaimsUserConsentDataExampleConsentNotGiven:
-      value:
-        flow: APP2APP
-        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-        rpSpecificIdentifier: null
-        redirectUri: https://sample-rp-redirect-uri.com/?arid=966eaf60-fa83-46d6-8ed5-7029609b4601&error_description=access_to_claims_denied&state=random%20string&error=access_denied
-    ClientIdentitiesSuccessfulExample:
-      value:
-        attributes:
-          dateOfBirth:
-            e95b7c68-ebcb-4a88-9978-c33d78cde128:
-              value: '1980-01-01'
-              lastVerifiedDate: '2022-04-04T02:49:27.915Z'
-        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-    NotFoundExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: USER_PROFILE_ID_NOT_FOUND
-            Description: The provided user profile ID does not exist.
-            Recoverable: false
-    ForbiddenExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: CONSENT_NOT_GIVEN
-            Description: User Consent Not Given.
-            Recoverable: false
-    RPClaimsUserDataExampleClaimsNotSatisfied:
-      value:
-        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
-        rpName: RP Name
-        rpLogoUrl: https://www.rpsite.com/logo.jpg
-        claimsData: null
-        redirectUri: https://sample-rp-redirect-uri.com/?arid=c00dc42f-fb5c-49a0-80c7-69faa65ac2af&error_description=scope_data_not_available&state=random%20string&error=invalid_scope
-        rotatedPds: null
-    EncryptedPayloadWithRotatedPDSExample:
-      value:
-        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IoxNTE2MjM5MDIyf
-        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-    ForbiddenExampleUnauthorizedScopedFields:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
-            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
-            Recoverable: false
-    RPClaimsUserDataSuccessExample:
-      value:
-        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
-        rpName: RP Name
-        rpLogoUrl: https://www.rpsite.com/logo.jpg
-        claimsData:
-          claimsAttributes:
-            postalCode:
-              claims:
-                postalCode: '63368'
-              dataMatch: FULL
-          dataMatch: FULL
-        redirectUri: null
-        rotatedPds: null
-    BadRequestARIDErrorExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value null for ARID.
-            Recoverable: false
-            Details: Must not be null.
-            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
-    CardDetails:
-      value:
-      - firstName: Emerson
-        lastName: Bloggs
-        phone: '+353871123456'
-        realCardAccountGuid: 123e4567-e89b-12d3-a456-426614174000
-        accountNumber: '1234567891234567'
-        expiry: 2021-11
-        accountGuid: 123e4567-e89b-12d3-a456-426614174000
-        description: This is the description of what the VCN will be used for
-        realCardBillingCurrencyCode: '840'
-        rules:
-        - action: A
-          alias: DAILY LIMIT
-          transactionLimits:
-          - amount: 12
-            negate: true
-          geographies:
-          - countryCodes:
-            - USA
-            negate: true
-          velocities:
-          - maxTrans: 12
-            cumulativeLimit: 1200
-            period: DAILY
-            availableBalance: 1200
-            currencyType: MERCHANT
-            currencyCode: '825'
-            endDate: '2020-10-06T11:09:42.10Z'
-            negate: true
-          validityPeriods:
-          - from: '2020-10-06T11:09:42.10Z'
-            to: '2020-11-06T11:09:42.10Z'
-            strictPreAuthCheck: true
-            negate: true
-          amountRanges:
-          - minAmount: 1000
-            maxAmount: 10000
-            strictPreAuthCheck: true
-            currencyType: MERCHANT
-            currencyCode: '825'
-            negate: true
-          merchantIds:
-          - acceptorId: '123456789012345'
-            acquirerId: '123456'
-            negate: true
-          ageingVelocities:
-          - authorizationHoldDays: 1234
-            cumulativeLimit: 1000
-            timeZone: UTC-06:00
-            availableBalance: 1000
-            currencyType: MERCHANT
-            currencyCode: '825'
-            negate: true
-          curfews:
-          - fromTime: 08:20
-            toTime: '11:00'
-            timeZone: UTC
-            days:
-            - SUNDAY
-            negate: true
-          timeOfDays:
-          - times:
-            - day: SUNDAY
-              fromTime: 08:21
-              toTime: '12:40'
-            timeZone: UTC
-            negate: true
-          merchantCategories:
-          - negate: true
-            mccs:
-            - 1234
-            - 5678
-    TokenUpdate:
-      value:
-        accountNumber: '1234567891234567'
-        expiry: 2021-11
-        status: ACTIVE
-    UpdateUserCardAndControl:
-      value:
-        firstName: Emerson
-        lastName: Bloggs
-        phone: '+353871123456'
-        expiry: 2021-11
-        description: This is the description of what the VCN will be used for
-        realCardBillingCurrencyCode: '840'
-        rules:
-        - action: A
-          alias: DAILY LIMIT
-          transactionLimits:
-          - amount: 12
-            negate: true
-          geographies:
-          - countryCodes:
-            - USA
-            negate: true
-          velocities:
-          - maxTrans: 12
-            cumulativeLimit: 1200
-            period: DAILY
-            availableBalance: 1200
-            currencyType: MERCHANT
-            currencyCode: '825'
-            negate: true
-          validityPeriods:
-          - from: '2020-10-06T11:09:42.10Z'
-            to: '2020-11-06T11:09:42.10Z'
-            strictPreAuthCheck: true
-            negate: true
-          amountRanges:
-          - minAmount: 1000
-            maxAmount: 10000
-            strictPreAuthCheck: true
-            currencyType: MERCHANT
-            currencyCode: '825'
-            negate: true
-          merchantIds:
-          - acceptorId: '123456789012345'
-            acquirerId: '123456'
-            negate: true
-          ageingVelocities:
-          - authorizationHoldDays: 1234
-            cumulativeLimit: 1000
-            timeZone: UTC-06:00
-            currencyType: MERCHANT
-            currencyCode: '825'
-            negate: true
-          curfews:
-          - fromTime: 08:20
-            toTime: '11:00'
-            timeZone: UTC
-            days:
-            - SUNDAY
-            negate: true
-          timeOfDays:
-          - times:
-            - day: SUNDAY
-              fromTime: 08:21
-              toTime: '12:40'
-            timeZone: UTC
-            negate: true
-          merchantCategories:
-          - negate: true
-            mccs:
-            - 1234
-            - 5678
-    ForbiddenError:
-      value:
-        Errors:
-          Error:
-          - Source: token-management-service
-            ReasonCode: authorization.forbidden
-            Description: Error description
-            Recoverable: true
-            Details: Detail information
-    BadRequestError:
-      value:
-        Errors:
-          Error:
-          - Source: token-management-service
-            ReasonCode: invalid.parameter
-            Description: Error description
-            Recoverable: true
-            Details: Detail information
-    Token:
-      value:
-        accountNumber: '1234567891234567'
-        expiry: 2021-11
-        accountGuid: 123e4567-e89b-12d3-a456-426614174000
-        tokenUniqueRef: DE9JOVYK6FVSO8I32DLDPHGTC9NZ7SLKPVLMDQ0RRGK3WYD2
-        paymentAppInstanceId: '128652974320250630'
-        status: ACTIVE
-    NotFoundError:
-      value:
-        Errors:
-          Error:
-          - Source: token-management-service
-            ReasonCode: not.found
-            Description: Error description
-            Recoverable: true
-            Details: Detail information
-    AuthorizationError:
-      value:
-        Errors:
-          Error:
-          - Source: token-management-service
-            ReasonCode: authorization.missing
-            Description: Error description
-            Recoverable: true
-            Details: Detail information
-    UserDetail:
-      value:
-        firstName: Emerson
-        lastName: Bloggs
-        phone: '+12345678910111'
-        email: emersonbloggs@gmail.com
+    UserUpdateResponse:
+      description: Ok
+  parameters:
+    user_consent_id:
+      in: path
+      name: user_consent_id
+      required: true
+      schema:
+        type: string
+        minLength: 36
+        maxLength: 36
+      description: User Consent Identifier
+      example: 2c0743c0-fe6a-41a6-88c4-2c94786fb9c2
+    UserConsentParameter:
+      name: user_consent
+      in: query
+      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
+      example: ACCEPT
+      required: true
+      schema:
+        type: string
+        pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+    XEncryptedPayload:
+      in: header
+      name: X-Encrypted-Payload
+      type: boolean
+      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
+
+        '
+      example: true
+      schema: null
+    XUserIdentityParameter:
+      in: header
+      name: X-User-Identity
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      description: 'JWT token for session validation. Returned as response header in previous API calls with key X-User-Identity.
+
+        '
+      schema:
+        type: string
+    UserProfileIdParameter:
+      name: user_profile_id
+      in: query
+      description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+      example: ee13a7ec-5a5a-4618-a55d-5e1ed016ccd5
+      required: true
+      schema:
+        type: string
+        pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+    userGUID:
+      name: user_guid
+      in: path
+      description: The globally unique identifier of the user being queried
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceIdentifier'
+      example: 8f242496-b71a-11eb-8529-0242ac130003
+    tokenGUID:
+      name: token_guid
+      in: path
+      description: The globally unique identifier of the token being queried
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceIdentifier'
+      example: 8f242496-b71a-11eb-8529-0242ac130003
+    accountGUID:
+      name: account_guid
+      in: path
+      description: The globally unique identifier of the card being queried
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceIdentifier'
+      example: 8f242496-b71a-11eb-8529-0242ac130003
+    UserId:
+      name: id
+      in: path
+      description: The unique identifier for the given user.
+      required: true
+      schema:
+        type: string
+      example: '268810378058708149455458707247'
+    VerifyUsersIdType:
+      name: user_id_type
+      in: query
+      description: Determines the type of user or account identification. Supported identifiers are RANAC or RANCU.
+      required: true
+      schema:
+        type: string
+      example: RANCU
+    IncludeVerificationDetails:
+      name: include_verification_details
+      in: query
+      description: Cardholder verification details are included in the response if true.
+      required: false
+      schema:
+        type: boolean
+      example: true
+    UsersIdType:
+      name: user_id_type
+      in: query
+      description: Determines the type of user or account identification. Supported identifiers are RANAC or RANCU.
+      required: false
+      schema:
+        type: string
+      example: RANCU
+    Language:
+      name: language
+      in: query
+      description: Cardholder verification details are returned in the language requested.
+      required: false
+      schema:
+        type: string
+      example: en_US
   schemas:
+    Errors:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
     UserConsent:
       type: object
       description: The user consent resource
@@ -1374,6 +1129,18 @@ components:
           example: '20200223000001'
           minLength: 14
           maxLength: 14
+    ErrorResponse:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              $ref: '#/components/schemas/Errors'
     Error:
       type: object
       required:
@@ -1409,53 +1176,337 @@ components:
           example: The provided acctNumber did not pass the Mod10 validation
           minLength: 0
           maxLength: 500
-    Errors:
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
-    ErrorResponse:
-      type: object
+    ErrorResponse_2:
       required:
       - Errors
+      type: object
+      description: The error response model used by all the API endpoints.
       properties:
         Errors:
-          type: object
           required:
           - Error
+          type: object
+          description: The error response model used by all the API endpoints.
           properties:
             Error:
-              $ref: '#/components/schemas/Errors'
-    UserAccountActivityItems:
+              type: array
+              description: A list of Error objects.
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The source of the problem. That is where the error occurred.
+                    example: mids
+                  ReasonCode:
+                    type: string
+                    description: A code defining the error, as defined in documentation.
+                    example: USER_PROFILE_ID_NOT_FOUND
+                  Description:
+                    type: string
+                    description: A description of this specific occurrence of the Reason code.
+                    example: The provided user profile ID does not exist.
+                  Recoverable:
+                    type: boolean
+                    description: Whether or not retrying this request could result in a successful response.
+                    example: false
+                  Details:
+                    type: string
+                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+                    example: User X was not found
+                  redirectUri:
+                    type: string
+                    description: TP will use this URI to redirect to RP.
+                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    Cnh:
+      allOf:
+      - $ref: '#/components/schemas/DriverLicenseCardNumber'
+    UserAccountActivities:
       required:
-      - action
-      - createdDate
+      - userAccountActivities
       properties:
-        action:
-          type: string
-          description: Type of the activity, possible values - ["ID Created", "Details Updated", "Add Drivers License", "Add Passport", "Add Health Card", "ID Backup", "ID Restore", "Attribute Deleted"].
-          minLength: 1
-          maxLength: 24
-          example: ID Created
-        createdDate:
-          type: string
-          description: Date of the event.
-          minLength: 1
-          maxLength: 29
-          example: '2020-01-28T13:16:01.714-05:00'
-        values:
+        userAccountActivities:
           type: array
-          description: Details of the activity.
+          description: User account activity items.
           items:
-            $ref: '#/components/schemas/UserAccountActivityItemContents'
-    ARID:
+            $ref: '#/components/schemas/UserAccountActivityItems'
+        rotatedPds:
+          type: string
+          description: A rotated PDS is created and returned when the encryption key expires and a new one is generated.
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          minLength: 1
+          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    DriverLicenseIdentity:
+      type: object
+      properties:
+        lastName:
+          type: string
+          description: Last name.
+          minLength: 1
+          maxLength: 255
+          example: Doe
+        firstName:
+          type: string
+          description: First name.
+          minLength: 1
+          maxLength: 255
+          example: John
+        dateOfBirth:
+          type: string
+          description: Date of birth.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+    Email:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: person@mastercard.com
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    RPClaimsUserConsentData:
+      required:
+      - flow
+      - pds
+      - rpSpecificIdentifier
+      - redirectUri
+      type: object
+      properties:
+        flow:
+          type: string
+          description: The user navigation flow for the RP Claim Sharing process.
+          minLength: 1
+          maxLength: 20
+          example: APP2APP
+        pds:
+          $ref: '#/components/schemas/PDS'
+        rpSpecificIdentifier:
+          type: string
+          description: The field rpSpecificIdentifier refers to a unique value for the Relying Party to identify the user for future reporting.
+          minLength: 64
+          maxLength: 64
+          example: 46eb72430ffeca3daf31360264fa0424ba4facfdcb69c6f43e73063f290a75a8
+        redirectUri:
+          type: string
+          description: TP will use this URI to redirect to RP.
+          pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+          minLength: 1
+          example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    Phone:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: 11234567890
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    VisaMatched:
+      type: boolean
+      description: Flag indicating if the documentDetails are to be checked against a visa for a particular country.
+      example: false
+    DateOfBirth:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: '1996-07-10T00:00:00.000Z'
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    IdentityAttributesByName:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/IdentityAttributesById'
+      description: Identity attributes keyed by IdentitySearch.scopedFields enum.
+      minLength: 1
+      example:
+        dateOfBirth:
+          e95b7c68-ebcb-4a88-9978-c33d78cde128:
+            value: '1980-01-01'
+            lastVerifiedDate: '2022-04-04T02:49:27.915Z'
+    DriverLicenseDetails:
+      properties:
+        expiryDate:
+          type: string
+          description: Expiry date.
+          minLength: 10
+          maxLength: 10
+          example: '1996-07-10T00:00:00.000Z'
+        issuingCountry:
+          type: string
+          description: Country code.
+          minLength: 1
+          maxLength: 255
+          example: USA
+        documentNumber:
+          type: string
+          description: Passport number.
+          minLength: 1
+          maxLength: 255
+          example: 1234567890
+    TpAuditMetadata:
+      required:
+      - sessionId
+      - transactionGroupId
+      type: object
+      description: Object containing metadata related to the request.
+      properties:
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+    Address:
+      required:
+      - lastVerifiedDate
+      allOf:
+      - $ref: '#/components/schemas/AddressData'
+      - type: object
+        properties:
+          value:
+            type: string
+            description: Formatted address.
+            minLength: 1
+            maxLength: 255
+            example: 36271 GrandRiver Ave Building no 2 48335 Farmington MI USA
+          lastVerifiedDate:
+            type: string
+            description: Last verified date and time.
+            format: date-time
+            example: '2021-02-19T10:55:58.165Z'
+    GovtId:
+      oneOf:
+      - $ref: '#/components/schemas/PassportIdentity'
+      - $ref: '#/components/schemas/DriverLicenseIdentity'
+    RPClaimsUserDetails:
+      required:
+      - arid
+      - pds
+      type: object
+      properties:
+        arid:
+          $ref: '#/components/schemas/ARID'
+        pds:
+          $ref: '#/components/schemas/PDS'
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+        locale:
+          $ref: '#/components/schemas/Locale'
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+    UserConsent_2:
+      enum:
+      - ACCEPT
+      - DECLINE
+      - REVOKE
+      - EXPIRE
       type: string
-      description: A unique identifier for any activity being executed arising out of a Claim Share request. This value is passed as a parameter in the URL redirecting a User to the TP Flow during a Claim Share.
-      format: uuid
-      pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-      minLength: 36
-      maxLength: 36
-      example: a15fa6de-b199-11eb-8529-0242ac130003
+      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
+      pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+      minLength: 6
+      maxLength: 7
+      example: ACCEPT
+    AddressData:
+      type: object
+      properties:
+        addressLine1:
+          type: string
+          description: Address line 1.
+          minLength: 1
+          maxLength: 255
+          example: 36271 GrandRiver Ave
+        addressLine2:
+          type: string
+          description: Address line 2.
+          minLength: 1
+          maxLength: 255
+          example: Building no 2
+        addressZipCode:
+          type: string
+          description: Zip code.
+          minLength: 1
+          maxLength: 255
+          example: 48335
+        addressCity:
+          type: string
+          description: City.
+          minLength: 1
+          maxLength: 255
+          example: Farmington
+        addressSubdivision:
+          type: string
+          description: Subdivision of the user address, possible values include county, state, province, and municipality.
+          minLength: 2
+          maxLength: 2
+          example: MO
+        addressCountry:
+          type: string
+          description: Country provided in the address from the scanned document.
+          minLength: 1
+          maxLength: 255
+          example: USA
+    LegalName:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: John Doe
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
     RPClaimsUserData:
       required:
       - transactionId
@@ -1496,70 +1547,30 @@ components:
           minLength: 1
           pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
           example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-    Selfie:
+    UserProfile:
       required:
-      - lastVerifiedDate
-      - value
+      - countryCode
+      - userProfileId
       type: object
       properties:
-        value:
+        userProfileId:
           type: string
-          description: Value.
-          minLength: 1
-          example: U29tZSBTdHJpbmc=
-        lastVerifiedDate:
-          type: string
-          description: Last verified date and time.
-          format: date-time
-          example: '2021-02-19T10:55:58.165Z'
-    Cnh:
-      allOf:
-      - $ref: '#/components/schemas/DriverLicenseCardNumber'
-    Scopes:
-      type: object
-      description: An object that represents a list of requested scopes and values.
-      properties:
-        claims:
-          type: object
-          description: The keys will be the scopes that come as part of the request and the data structure will be the data object named after the key.
-          example:
-            legalName: John
-          additionalProperties:
-            type: string
-        dataMatch:
-          description: The data match the status result of the individual scope.
-          type: string
-          minLength: 4
-          maxLength: 7
-          example: FULL
-    UserAccountActivityItemContents:
-      required:
-      - value
-      properties:
-        attributeName:
-          type: string
-          description: Name of the updated attribute.
-          minLength: 1
-          maxLength: 255
-          example: legalName
-        previousValue:
-          type: string
-          description: Value before the update.
-          minLength: 1
-          maxLength: 255
-          example: John Doe
-        value:
-          type: string
-          description: Value after the update.
-          minLength: 1
-          maxLength: 255
-          example: John Dow
-        source:
-          type: string
-          description: The source document for the update.
-          minLength: 1
-          maxLength: 29
-          example: passport
+          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: c908bc7c-9917-48fd-b862-d901a0880fef
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
     PassportImage:
       type: object
       description: Passport License Images.
@@ -1569,27 +1580,80 @@ components:
           description: Value.
           minLength: 1
           example: JH65ghKHG76KS=
-    PassportDetails:
+    UserAccountActivitySearch:
+      required:
+      - pds
+      - startIndex
+      - endIndex
+      - userConsent
       type: object
       properties:
-        expiryDate:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        startIndex:
+          type: integer
+          description: Start index of the user account activity.
+          format: int32
+          minimum: 1
+          maximum: 999
+          example: 3
+        endIndex:
+          type: integer
+          description: End index of the user account activity.
+          format: int32
+          minimum: 1
+          maximum: 999
+          example: 10
+        userConsent:
+          $ref: '#/components/schemas/UserConsent_2'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+    MothersName:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
           type: string
-          description: Expiry date.
-          minLength: 10
-          maxLength: 10
-          example: '1996-07-10T00:00:00.000Z'
-        issuingCountry:
-          type: string
-          description: Country code.
+          description: Value.
           minLength: 1
           maxLength: 255
-          example: USA
-        passportNumber:
+          example: Jane Doe
+        lastVerifiedDate:
           type: string
-          description: Passport number.
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    ClientIdentities:
+      required:
+      - attributes
+      type: object
+      properties:
+        rotatedPds:
+          type: string
+          description: A rotated PDS is created and returned when the encryption key expires and a new key is generated.
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
           minLength: 1
-          maxLength: 255
-          example: 1234567890
+          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        attributes:
+          $ref: '#/components/schemas/IdentityAttributesByName'
+    Locale:
+      type: string
+      description: IETF BCP 47 code which identifies the language to be used in any dialogs being shown to the user during the flow.  The default value is "en-US".
+      pattern: ^[a-z]{2}-[a-zA-Z]{2}$
+      example: en-US
+    DriverLicenseCardNumber:
+      type: string
+      description: Document number.
+      minLength: 1
+      maxLength: 255
+      example: 7435675436
+    CountryCode:
+      type: string
+      description: The country code of the country where the transaction originates from.
+      pattern: ^[a-zA-Z]{2}$
+      example: US
     AuditEventsItem:
       type: object
       properties:
@@ -1722,247 +1786,108 @@ components:
               type: object
               description: Response Details.
               example: Response Data
-    Locale:
-      type: string
-      description: IETF BCP 47 code which identifies the language to be used in any dialogs being shown to the user during the flow.  The default value is "en-US".
-      pattern: ^[a-z]{2}-[a-zA-Z]{2}$
-      example: en-US
-    IdentityAttributeDeleted:
+    Selfie:
       required:
-      - pds
+      - lastVerifiedDate
+      - value
       type: object
       properties:
-        pds:
-          $ref: '#/components/schemas/PDS'
-    Rg:
-      type: string
-      description: RG Number. This will only be available when the Brazilian DL is scanned.
-      minLength: 1
-      maxLength: 255
-      example: 12345
-    AddressData:
-      type: object
-      properties:
-        addressLine1:
+        value:
           type: string
-          description: Address line 1.
+          description: Value.
           minLength: 1
-          maxLength: 255
-          example: 36271 GrandRiver Ave
-        addressLine2:
+          example: U29tZSBTdHJpbmc=
+        lastVerifiedDate:
           type: string
-          description: Address line 2.
-          minLength: 1
-          maxLength: 255
-          example: Building no 2
-        addressZipCode:
-          type: string
-          description: Zip code.
-          minLength: 1
-          maxLength: 255
-          example: 48335
-        addressCity:
-          type: string
-          description: City.
-          minLength: 1
-          maxLength: 255
-          example: Farmington
-        addressSubdivision:
-          type: string
-          description: Subdivision of the user address, possible values include county, state, province, and municipality.
-          minLength: 2
-          maxLength: 2
-          example: MO
-        addressCountry:
-          type: string
-          description: Country provided in the address from the scanned document.
-          minLength: 1
-          maxLength: 255
-          example: USA
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
     IdentityAttributesById:
       type: object
       additionalProperties:
         $ref: '#/components/schemas/IdentityAttribute'
       description: Identity attributes are keyed by attribute IDs.
       minLength: 1
-    ErrorResponse_2:
+    UserAccountActivityItemContents:
       required:
-      - Errors
-      type: object
-      description: The error response model used by all the API endpoints.
+      - value
       properties:
-        Errors:
-          required:
-          - Error
+        attributeName:
+          type: string
+          description: Name of the updated attribute.
+          minLength: 1
+          maxLength: 255
+          example: legalName
+        previousValue:
+          type: string
+          description: Value before the update.
+          minLength: 1
+          maxLength: 255
+          example: John Doe
+        value:
+          type: string
+          description: Value after the update.
+          minLength: 1
+          maxLength: 255
+          example: John Dow
+        source:
+          type: string
+          description: The source document for the update.
+          minLength: 1
+          maxLength: 29
+          example: passport
+    PDS:
+      type: string
+      description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
+      pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+      minLength: 1
+      example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    UserAccountActivityItems:
+      required:
+      - action
+      - createdDate
+      properties:
+        action:
+          type: string
+          description: Type of the activity, possible values - ["ID Created", "Details Updated", "Add Drivers License", "Add Passport", "Add Health Card", "ID Backup", "ID Restore", "Attribute Deleted"].
+          minLength: 1
+          maxLength: 24
+          example: ID Created
+        createdDate:
+          type: string
+          description: Date of the event.
+          minLength: 1
+          maxLength: 29
+          example: '2020-01-28T13:16:01.714-05:00'
+        values:
+          type: array
+          description: Details of the activity.
+          items:
+            $ref: '#/components/schemas/UserAccountActivityItemContents'
+    ClaimsData:
+      type: object
+      properties:
+        dataMatch:
+          type: string
+          description: The overall data match the status result of the claim sharing request. Possible values are FULL or PARTIAL.
+          minLength: 4
+          maxLength: 7
+          example: FULL
+        claimsAttributes:
           type: object
-          description: The error response model used by all the API endpoints.
-          properties:
-            Error:
-              type: array
-              description: A list of Error objects.
-              minItems: 1
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    description: The source of the problem. That is where the error occurred.
-                    example: mids
-                  ReasonCode:
-                    type: string
-                    description: A code defining the error, as defined in documentation.
-                    example: USER_PROFILE_ID_NOT_FOUND
-                  Description:
-                    type: string
-                    description: A description of this specific occurrence of the Reason code.
-                    example: The provided user profile ID does not exist.
-                  Recoverable:
-                    type: boolean
-                    description: Whether or not retrying this request could result in a successful response.
-                    example: false
-                  Details:
-                    type: string
-                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
-                    example: User X was not found
-                  redirectUri:
-                    type: string
-                    description: TP will use this URI to redirect to RP.
-                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
-                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
-    UserConsent_2:
-      enum:
-      - ACCEPT
-      - DECLINE
-      - REVOKE
-      - EXPIRE
+          description: An object that represents the claims data.
+          example:
+            claims:
+              legalName: John
+            dataMatch: FULL
+          additionalProperties:
+            $ref: '#/components/schemas/Scopes'
+    Rg:
       type: string
-      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
-      pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
-      minLength: 6
-      maxLength: 7
-      example: ACCEPT
-    Phone:
-      required:
-      - lastVerifiedDate
-      - value
-      type: object
-      properties:
-        value:
-          type: string
-          description: Value.
-          minLength: 1
-          maxLength: 255
-          example: 11234567890
-        lastVerifiedDate:
-          type: string
-          description: Last verified date and time.
-          format: date-time
-          example: '2021-02-19T10:55:58.165Z'
-    DateOfBirth:
-      required:
-      - lastVerifiedDate
-      - value
-      type: object
-      properties:
-        value:
-          type: string
-          description: Value.
-          minLength: 1
-          maxLength: 255
-          example: '1996-07-10T00:00:00.000Z'
-        lastVerifiedDate:
-          type: string
-          description: Last verified date and time.
-          format: date-time
-          example: '2021-02-19T10:55:58.165Z'
-    Cpf:
-      type: string
-      description: CPF Number. This will only be available when the Brazilian DL is scanned.
+      description: RG Number. This will only be available when the Brazilian DL is scanned.
       minLength: 1
       maxLength: 255
       example: 12345
-    Email:
-      required:
-      - lastVerifiedDate
-      - value
-      type: object
-      properties:
-        value:
-          type: string
-          description: Value.
-          minLength: 1
-          maxLength: 255
-          example: person@mastercard.com
-        lastVerifiedDate:
-          type: string
-          description: Last verified date and time.
-          format: date-time
-          example: '2021-02-19T10:55:58.165Z'
-    Address:
-      required:
-      - lastVerifiedDate
-      allOf:
-      - $ref: '#/components/schemas/AddressData'
-      - type: object
-        properties:
-          value:
-            type: string
-            description: Formatted address.
-            minLength: 1
-            maxLength: 255
-            example: 36271 GrandRiver Ave Building no 2 48335 Farmington MI USA
-          lastVerifiedDate:
-            type: string
-            description: Last verified date and time.
-            format: date-time
-            example: '2021-02-19T10:55:58.165Z'
-    GovtId:
-      oneOf:
-      - $ref: '#/components/schemas/PassportIdentity'
-      - $ref: '#/components/schemas/DriverLicenseIdentity'
-    DriverLicenseDetails:
-      properties:
-        expiryDate:
-          type: string
-          description: Expiry date.
-          minLength: 10
-          maxLength: 10
-          example: '1996-07-10T00:00:00.000Z'
-        issuingCountry:
-          type: string
-          description: Country code.
-          minLength: 1
-          maxLength: 255
-          example: USA
-        documentNumber:
-          type: string
-          description: Passport number.
-          minLength: 1
-          maxLength: 255
-          example: 1234567890
-    RPClaimsUserDetails:
-      required:
-      - arid
-      - pds
-      type: object
-      properties:
-        arid:
-          $ref: '#/components/schemas/ARID'
-        pds:
-          $ref: '#/components/schemas/PDS'
-        sdkAuditEvents:
-          type: array
-          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
-          items:
-            $ref: '#/components/schemas/AuditEventsItem'
-        tpAuditMetadata:
-          $ref: '#/components/schemas/TpAuditMetadata'
-        sdkVersion:
-          $ref: '#/components/schemas/SdkVersion'
-        locale:
-          $ref: '#/components/schemas/Locale'
-        countryCode:
-          $ref: '#/components/schemas/CountryCode'
     IdentityAttributeDeletions:
       required:
       - pds
@@ -1997,262 +1922,33 @@ components:
           $ref: '#/components/schemas/TpAuditMetadata'
         sdkVersion:
           $ref: '#/components/schemas/SdkVersion'
-    ClientIdentities:
-      required:
-      - attributes
+    Cpf:
+      type: string
+      description: CPF Number. This will only be available when the Brazilian DL is scanned.
+      minLength: 1
+      maxLength: 255
+      example: 12345
+    PassportDetails:
       type: object
       properties:
-        rotatedPds:
+        expiryDate:
           type: string
-          description: A rotated PDS is created and returned when the encryption key expires and a new key is generated.
-          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
-          minLength: 1
-          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-        attributes:
-          $ref: '#/components/schemas/IdentityAttributesByName'
-    PassportIdentity:
-      type: object
-      properties:
-        lastName:
-          type: string
-          description: Last name.
-          minLength: 1
-          maxLength: 255
-          example: Doe
-        firstName:
-          type: string
-          description: First name.
-          minLength: 1
-          maxLength: 255
-          example: John
-        dateOfBirth:
-          type: string
-          description: Date of birth.
+          description: Expiry date.
           minLength: 10
           maxLength: 10
           example: '1996-07-10T00:00:00.000Z'
-    LegalName:
-      required:
-      - lastVerifiedDate
-      - value
-      type: object
-      properties:
-        value:
+        issuingCountry:
           type: string
-          description: Value.
+          description: Country code.
           minLength: 1
           maxLength: 255
-          example: John Doe
-        lastVerifiedDate:
+          example: USA
+        passportNumber:
           type: string
-          description: Last verified date and time.
-          format: date-time
-          example: '2021-02-19T10:55:58.165Z'
-    FathersName:
-      required:
-      - lastVerifiedDate
-      - value
-      type: object
-      properties:
-        value:
-          type: string
-          description: Value.
+          description: Passport number.
           minLength: 1
           maxLength: 255
-          example: Josh Doe
-        lastVerifiedDate:
-          type: string
-          description: Last verified date and time.
-          format: date-time
-          example: '2021-02-19T10:55:58.165Z'
-    UserProfile:
-      required:
-      - countryCode
-      - userProfileId
-      type: object
-      properties:
-        userProfileId:
-          type: string
-          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
-          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-          example: c908bc7c-9917-48fd-b862-d901a0880fef
-        countryCode:
-          $ref: '#/components/schemas/CountryCode'
-        sdkAuditEvents:
-          type: array
-          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
-          items:
-            $ref: '#/components/schemas/AuditEventsItem'
-        tpAuditMetadata:
-          $ref: '#/components/schemas/TpAuditMetadata'
-        arid:
-          $ref: '#/components/schemas/ARID'
-        sdkVersion:
-          $ref: '#/components/schemas/SdkVersion'
-    SdkVersion:
-      type: string
-      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
-      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
-      minLength: 5
-      maxLength: 255
-      example: 2.3.0
-    UserAccountActivities:
-      required:
-      - userAccountActivities
-      properties:
-        userAccountActivities:
-          type: array
-          description: User account activity items.
-          items:
-            $ref: '#/components/schemas/UserAccountActivityItems'
-        rotatedPds:
-          type: string
-          description: A rotated PDS is created and returned when the encryption key expires and a new one is generated.
-          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
-          minLength: 1
-          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-    ClaimsData:
-      type: object
-      properties:
-        dataMatch:
-          type: string
-          description: The overall data match the status result of the claim sharing request. Possible values are FULL or PARTIAL.
-          minLength: 4
-          maxLength: 7
-          example: FULL
-        claimsAttributes:
-          type: object
-          description: An object that represents the claims data.
-          example:
-            claims:
-              legalName: John
-            dataMatch: FULL
-          additionalProperties:
-            $ref: '#/components/schemas/Scopes'
-    RPClaimsUserConsentData:
-      required:
-      - flow
-      - pds
-      - rpSpecificIdentifier
-      - redirectUri
-      type: object
-      properties:
-        flow:
-          type: string
-          description: The user navigation flow for the RP Claim Sharing process.
-          minLength: 1
-          maxLength: 20
-          example: APP2APP
-        pds:
-          $ref: '#/components/schemas/PDS'
-        rpSpecificIdentifier:
-          type: string
-          description: The field rpSpecificIdentifier refers to a unique value for the Relying Party to identify the user for future reporting.
-          minLength: 64
-          maxLength: 64
-          example: 46eb72430ffeca3daf31360264fa0424ba4facfdcb69c6f43e73063f290a75a8
-        redirectUri:
-          type: string
-          description: TP will use this URI to redirect to RP.
-          pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
-          minLength: 1
-          example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
-    PDS:
-      type: string
-      description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
-      pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
-      minLength: 1
-      example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-    DriverLicenseImage:
-      type: object
-      description: Driver License Images.
-      properties:
-        front:
-          type: string
-          description: Value.
-          minLength: 1
-          example: U29tZSBTdHJpbmc=
-        back:
-          type: string
-          description: Value.
-          minLength: 1
-          example: YGS75JHSljhs86K=
-    MobileIdEligibility:
-      required:
-      - lastVerifiedDate
-      - value
-      type: object
-      properties:
-        value:
-          type: boolean
-          description: Value of whether user is eligible for mobile id enrollment.
-          example: true
-        lastVerifiedDate:
-          type: string
-          description: Last verified date and time.
-          format: date-time
-          example: '2021-02-19T10:55:58.165Z'
-    MothersName:
-      required:
-      - lastVerifiedDate
-      - value
-      type: object
-      properties:
-        value:
-          type: string
-          description: Value.
-          minLength: 1
-          maxLength: 255
-          example: Jane Doe
-        lastVerifiedDate:
-          type: string
-          description: Last verified date and time.
-          format: date-time
-          example: '2021-02-19T10:55:58.165Z'
-    GovtIdImage:
-      oneOf:
-      - $ref: '#/components/schemas/PassportImage'
-      - $ref: '#/components/schemas/DriverLicenseImage'
-    GovtIdDetails:
-      oneOf:
-      - $ref: '#/components/schemas/PassportDetails'
-      - $ref: '#/components/schemas/DriverLicenseDetails'
-    CountryCode:
-      type: string
-      description: The country code of the country where the transaction originates from.
-      pattern: ^[a-zA-Z]{2}$
-      example: US
-    VisaMatched:
-      type: boolean
-      description: Flag indicating if the documentDetails are to be checked against a visa for a particular country.
-      example: false
-    IdentityAttribute:
-      allOf:
-      - {}
-      - oneOf:
-        - $ref: '#/components/schemas/Address'
-        - $ref: '#/components/schemas/DateOfBirth'
-        - $ref: '#/components/schemas/Email'
-        - $ref: '#/components/schemas/FathersName'
-        - $ref: '#/components/schemas/MothersName'
-        - $ref: '#/components/schemas/LegalName'
-        - $ref: '#/components/schemas/Phone'
-        - $ref: '#/components/schemas/Selfie'
-        - $ref: '#/components/schemas/MobileIdEligibility'
-        - $ref: '#/components/schemas/GovtId'
-        - $ref: '#/components/schemas/GovtIdDetails'
-        - $ref: '#/components/schemas/GovtIdImage'
-        - $ref: '#/components/schemas/PassportIdentity'
-        - $ref: '#/components/schemas/PassportDetails'
-        - $ref: '#/components/schemas/PassportImage'
-        - $ref: '#/components/schemas/DriverLicenseIdentity'
-        - $ref: '#/components/schemas/DriverLicenseCardNumber'
-        - $ref: '#/components/schemas/DriverLicenseDetails'
-        - $ref: '#/components/schemas/DriverLicenseImage'
-        - $ref: '#/components/schemas/VisaMatched'
-        - $ref: '#/components/schemas/Cnh'
-        - $ref: '#/components/schemas/Cpf'
-        - $ref: '#/components/schemas/Rg'
+          example: 1234567890
     RPClaimsUserConsent:
       required:
       - arid
@@ -2285,41 +1981,7 @@ components:
           $ref: '#/components/schemas/Locale'
         countryCode:
           $ref: '#/components/schemas/CountryCode'
-    UserAccountActivitySearch:
-      required:
-      - pds
-      - startIndex
-      - endIndex
-      - userConsent
-      type: object
-      properties:
-        pds:
-          $ref: '#/components/schemas/PDS'
-        startIndex:
-          type: integer
-          description: Start index of the user account activity.
-          format: int32
-          minimum: 1
-          maximum: 999
-          example: 3
-        endIndex:
-          type: integer
-          description: End index of the user account activity.
-          format: int32
-          minimum: 1
-          maximum: 999
-          example: 10
-        userConsent:
-          $ref: '#/components/schemas/UserConsent_2'
-        sdkVersion:
-          $ref: '#/components/schemas/SdkVersion'
-    DriverLicenseCardNumber:
-      type: string
-      description: Document number.
-      minLength: 1
-      maxLength: 255
-      example: 7435675436
-    DriverLicenseIdentity:
+    PassportIdentity:
       type: object
       properties:
         lastName:
@@ -2340,27 +2002,74 @@ components:
           minLength: 10
           maxLength: 10
           example: '1996-07-10T00:00:00.000Z'
-    TpAuditMetadata:
+    MobileIdEligibility:
       required:
-      - sessionId
-      - transactionGroupId
+      - lastVerifiedDate
+      - value
       type: object
-      description: Object containing metadata related to the request.
       properties:
-        sessionId:
+        value:
+          type: boolean
+          description: Value of whether user is eligible for mobile id enrollment.
+          example: true
+        lastVerifiedDate:
           type: string
-          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
-          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-          minLength: 36
-          maxLength: 36
-          example: be3ad617-04ad-43e1-a438-79425b6511b6
-        transactionGroupId:
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
+    ARID:
+      type: string
+      description: A unique identifier for any activity being executed arising out of a Claim Share request. This value is passed as a parameter in the URL redirecting a User to the TP Flow during a Claim Share.
+      format: uuid
+      pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+      minLength: 36
+      maxLength: 36
+      example: a15fa6de-b199-11eb-8529-0242ac130003
+    IdentityAttributeDeleted:
+      required:
+      - pds
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
+    DriverLicenseImage:
+      type: object
+      description: Driver License Images.
+      properties:
+        front:
           type: string
-          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
-          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-          minLength: 36
-          maxLength: 36
-          example: be3ad617-04ad-43e1-a438-79425b6511b6
+          description: Value.
+          minLength: 1
+          example: U29tZSBTdHJpbmc=
+        back:
+          type: string
+          description: Value.
+          minLength: 1
+          example: YGS75JHSljhs86K=
+    FathersName:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: Josh Doe
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
     IdentitySearch:
       required:
       - pds
@@ -2387,157 +2096,117 @@ components:
             example: all
         sdkVersion:
           $ref: '#/components/schemas/SdkVersion'
-    IdentityAttributesByName:
+    IdentityAttribute:
+      allOf:
+      - {}
+      - oneOf:
+        - $ref: '#/components/schemas/Address'
+        - $ref: '#/components/schemas/DateOfBirth'
+        - $ref: '#/components/schemas/Email'
+        - $ref: '#/components/schemas/FathersName'
+        - $ref: '#/components/schemas/MothersName'
+        - $ref: '#/components/schemas/LegalName'
+        - $ref: '#/components/schemas/Phone'
+        - $ref: '#/components/schemas/Selfie'
+        - $ref: '#/components/schemas/MobileIdEligibility'
+        - $ref: '#/components/schemas/GovtId'
+        - $ref: '#/components/schemas/GovtIdDetails'
+        - $ref: '#/components/schemas/GovtIdImage'
+        - $ref: '#/components/schemas/PassportIdentity'
+        - $ref: '#/components/schemas/PassportDetails'
+        - $ref: '#/components/schemas/PassportImage'
+        - $ref: '#/components/schemas/DriverLicenseIdentity'
+        - $ref: '#/components/schemas/DriverLicenseCardNumber'
+        - $ref: '#/components/schemas/DriverLicenseDetails'
+        - $ref: '#/components/schemas/DriverLicenseImage'
+        - $ref: '#/components/schemas/VisaMatched'
+        - $ref: '#/components/schemas/Cnh'
+        - $ref: '#/components/schemas/Cpf'
+        - $ref: '#/components/schemas/Rg'
+    GovtIdDetails:
+      oneOf:
+      - $ref: '#/components/schemas/PassportDetails'
+      - $ref: '#/components/schemas/DriverLicenseDetails'
+    GovtIdImage:
+      oneOf:
+      - $ref: '#/components/schemas/PassportImage'
+      - $ref: '#/components/schemas/DriverLicenseImage'
+    Scopes:
       type: object
-      additionalProperties:
-        $ref: '#/components/schemas/IdentityAttributesById'
-      description: Identity attributes keyed by IdentitySearch.scopedFields enum.
-      minLength: 1
-      example:
-        dateOfBirth:
-          e95b7c68-ebcb-4a88-9978-c33d78cde128:
-            value: '1980-01-01'
-            lastVerifiedDate: '2022-04-04T02:49:27.915Z'
-    TimeOfDayControl:
+      description: An object that represents a list of requested scopes and values.
+      properties:
+        claims:
+          type: object
+          description: The keys will be the scopes that come as part of the request and the data structure will be the data object named after the key.
+          example:
+            legalName: John
+          additionalProperties:
+            type: string
+        dataMatch:
+          description: The data match the status result of the individual scope.
+          type: string
+          minLength: 4
+          maxLength: 7
+          example: FULL
+    Errors_2:
+      type: object
       required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    Token:
+      allOf:
+      - $ref: '#/components/schemas/Card'
+      properties:
+        accountGuid:
+          type: string
+          format: uuid
+          description: The globally unique identifier of the token
+          example: 123e4567-e89b-12d3-a456-426614174000
+        tokenUniqueRef:
+          type: string
+          maxLength: 64
+          description: The unique reference identifier of the token
+          example: DE9JOVYK6FVSO8I32DLDPHGTC9NZ7SLKPVLMDQ0RRGK3WYD2
+        paymentAppInstanceId:
+          type: string
+          maxLength: 64
+          description: The unique app device identifier
+          example: '128652974320250630'
+        status:
+          type: string
+          pattern: ^(ACTIVE|SUSPENDED)$
+          description: Token Status. Valid values are ACTIVE and SUSPENDED
+          example: ACTIVE
+    GeographyControl:
+      required:
+      - countryCodes
       - negate
-      - timeZone
-      - times
       type: object
       properties:
-        times:
-          maxItems: 7
+        countryCodes:
           minItems: 1
           type: array
-          description: Times of day
+          description: Country codes to be included in the rule
           items:
-            $ref: '#/components/schemas/TimeOfDay'
-        timeZone:
-          type: string
-          description: Time zone of the from and to times
-          example: UTC
+            type: string
+          example:
+          - '840'
         negate:
           type: boolean
           description: Defines if the rules should be negated
           example: false
-      description: The TimeOfDayControl provides the ability to limit authorization activity to defined time periods for each day
-    UpdateVirtualCardAccount:
-      type: object
-      required:
-      - expiry
-      allOf:
-      - $ref: '#/components/schemas/VcnUserDetail'
-      - $ref: '#/components/schemas/UpdateVCN'
-      - properties:
-          realCardBillingCurrencyCode:
-            pattern: ^[0-9]{3}$
-            type: string
-            description: Currency code of the RCN
-            example: '825'
-          rules:
-            $ref: '#/components/schemas/Controls'
-    Vcn:
+      description: The GeographicControl provides the ability to control where a card is physically used
+    TokenUpdate:
       allOf:
       - $ref: '#/components/schemas/Card'
-      - properties:
-          accountGuid:
-            type: string
-            format: uuid
-            description: The globally unique identifier of the virtual card account
-            example: 123e4567-e89b-12d3-a456-426614174000
-          description:
-            type: string
-            example: This is the description of what the VCN will be used for
-            description: The description of what the VCN will be used for
-    ErrorWrapper:
-      type: object
-      required:
-      - Errors
       properties:
-        Errors:
-          $ref: '#/components/schemas/Errors_2'
-    UserDetail:
-      type: object
-      required:
-      - firstName
-      - lastName
-      - phone
-      - email
-      properties:
-        firstName:
+        status:
           type: string
-          minLength: 1
-          maxLength: 100
-          pattern: .*\S.*
-          description: First Name of User
-          example: Emerson
-        lastName:
-          type: string
-          minLength: 1
-          maxLength: 100
-          pattern: .*\S.*
-          description: Last Name of User
-          example: Bloggs
-        phone:
-          type: string
-          minLength: 4
-          maxLength: 16
-          description: Phone number of User
-          example: '+12345678910111'
-        email:
-          type: string
-          minLength: 1
-          maxLength: 300
-          description: Email address of User
-          example: emersonbloggs@gmail.com
-    Card:
-      type: object
-      required:
-      - accountNumber
-      - expiry
-      properties:
-        accountNumber:
-          type: string
-          minLength: 12
-          maxLength: 19
-          pattern: ^[0-9]+
-          example: '1234567891234567'
-          description: Card Account Number
-        expiry:
-          minLength: 7
-          maxLength: 7
-          type: string
-          pattern: ^20[2-9][0-9]-(0[1-9]|1[012])$
-          description: Card expiry date in yyyy-MM format
-          example: 2021-11
-    TimeOfDay:
-      required:
-      - day
-      - fromTime
-      - toTime
-      type: object
-      properties:
-        day:
-          minLength: 6
-          maxLength: 9
-          type: string
-          example: SUNDAY
-          description: Days of week. Valid values are SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, and SATURDAY
-          pattern: ^(SUNDAY|MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY)
-        fromTime:
-          minLength: 5
-          maxLength: 5
-          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
-          type: string
-          description: The start time from which authorizations will be allowed
-          example: 08:21
-        toTime:
-          minLength: 5
-          maxLength: 5
-          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
-          type: string
-          description: The end time from which authorizations will be allowed
-          example: '12:00'
+          pattern: ^(ACTIVE|SUSPENDED)$
+          description: Token Status. Valid values are ACTIVE and SUSPENDED
+          example: ACTIVE
     TransactionLimitControl:
       required:
       - amount
@@ -2555,78 +2224,161 @@ components:
           description: Defines if the rules should be negated
           example: false
       description: The TransactionLimit control provides the ability to limit individual transaction authorizations to a maximum amount
-    CurfewControl:
+    VelocityControl:
       required:
-      - days
-      - fromTime
+      - period
       - negate
-      - toTime
       type: object
       properties:
-        fromTime:
+        maxTrans:
+          minimum: 1
+          type: integer
+          description: Maximum number of transactions allowed
+          format: int32
+          example: 12
+        cumulativeLimit:
+          minimum: 0
+          type: number
+          description: Maximum allowed cumulative amount
+          example: 1200
+          format: float
+        period:
           minLength: 5
-          maxLength: 5
-          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          maxLength: 10
           type: string
-          description: The start time from which authorizations will be allowed
-          example: 08:20
-        toTime:
-          minLength: 5
-          maxLength: 5
-          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          description: Velocity period. Valid values are DAILY, WEEKLY, QUARTERLY, CONTINUOUS, MONTHLY, and YEARLY
+          example: DAILY
+          pattern: ^(DAILY|WEEKLY|QUARTERLY|CONTINUOUS|MONTHLY|YEARLY)
+        availableBalance:
+          minimum: 0
+          type: number
+          description: The cumulative spend available for the velocity control for the specified period
+          example: 1200
+          format: float
+        currencyType:
+          minLength: 4
+          maxLength: 8
           type: string
-          description: The end time at which authorizations will be allowed
-          example: '11:00'
-        timeZone:
+          description: Type of the currency being used. Valid values are BASE and MERCHANT
+          pattern: ^(BASE|MERCHANT)
+          example: MERCHANT
+        currencyCode:
+          minLength: 3
+          maxLength: 3
+          pattern: ^[0-9]{3}$
           type: string
-          description: Time zone of the from and to times
-          example: UTC
-        days:
-          maxItems: 7
-          minItems: 1
-          type: array
-          description: Days of week. Valid values are SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, and SATURDAY
-          example: SUNDAY
-          pattern: ^(SUNDAY|MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY)$
-          items:
-            type: string
+          description: Mastercard supported International Organization for Standardization (ISO) 4217 currency codes
+          example: '825'
+        endDate:
+          type: string
+          format: date-time
+          description: End date until which the control is valid, in ISO 8601 extended format "YYYY-MM-DDThh:mm:ss[.sss]Z", where [.sss] is optional and can be 1 to 3 digits
+          example: '2020-10-06T11:09:42.10Z'
         negate:
           type: boolean
           description: Defines if the rules should be negated
           example: false
-      description: Curfew Control
-    Error_2:
+      description: The VelocityControl can limit the frequency, and the total cumulative amount of authorizations performed on the cardholders account within a specified time period
+    VcnUserDetail:
+      type: object
+      required:
+      - firstName
+      - lastName
+      - phone
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: First Name of User
+          example: Emerson
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Last Name of User
+          example: Bloggs
+        phone:
+          type: string
+          minLength: 4
+          maxLength: 16
+          description: Phone number of User
+          example: '+13556434378'
+    Controls:
+      type: array
+      description: In Control Card Controls
+      items:
+        $ref: '#/components/schemas/Control'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error_2'
+    VirtualCardAccount:
+      type: object
+      required:
+      - realCardAccountGuid
+      - accountGuid
+      allOf:
+      - $ref: '#/components/schemas/VcnUserDetail'
+      - $ref: '#/components/schemas/Vcn'
+      - properties:
+          realCardAccountGuid:
+            type: string
+            format: uuid
+            description: The globally unique identifier of the real card account
+            example: 123e4567-e89b-12d3-a456-426614174000
+          realCardBillingCurrencyCode:
+            pattern: ^[0-9]{3}$
+            type: string
+            description: Currency code of the RCN
+            example: '825'
+          rules:
+            $ref: '#/components/schemas/Controls'
+    AmountRangeControl:
+      required:
+      - currencyType
+      - maxAmount
+      - minAmount
+      - negate
       type: object
       properties:
-        Source:
-          type: string
-          example: source
-          description: Source of error
-        ReasonCode:
-          type: string
-          description: A unique constant identifying the error
-          example: '123'
-        Description:
-          type: string
-          example: Error desc
-          description: Short description of the error
-        Recoverable:
+        minAmount:
+          minimum: 0
+          type: number
+          description: Minimum allowed amount
+          format: float
+          example: 1000
+        maxAmount:
+          minimum: 0
+          type: number
+          description: Maximum allowed amount
+          format: float
+          example: 10000
+        strictPreAuthCheck:
           type: boolean
+          description: Defines if strict pre-auth check needs to be applied
+          default: false
           example: true
-          description: Is recoverable error
-        Details:
+        currencyType:
+          minLength: 4
+          maxLength: 8
           type: string
-          example: Detail information
-          description: Optional detailed description of the issue
-    TokenUpdate:
-      allOf:
-      - $ref: '#/components/schemas/Card'
-      properties:
-        status:
+          description: Type of the currency being used. Valid values are BASE and MERCHANT
+          example: MERCHANT
+          pattern: ^(BASE|MERCHANT)
+        currencyCode:
+          minLength: 3
+          maxLength: 3
+          pattern: ^[0-9]{3}$
           type: string
-          pattern: ^(ACTIVE|SUSPENDED)$
-          description: Token Status. Valid values are ACTIVE and SUSPENDED
-          example: ACTIVE
+          description: Mastercard supported International Organization for Standardization (ISO) 4217 currency codes
+          example: '825'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The exact amount range control will approve a transaction only if the requested amount is equal or greater than MinAmount and less than or equal to MaxAmount. In other words, if Min Amount <= Amount <= Max Amount
     Control:
       type: object
       required:
@@ -2701,6 +2453,220 @@ components:
           uniqueItems: true
           items:
             $ref: '#/components/schemas/MccControl'
+    ResourceIdentifier:
+      description: A UUID which uniquely identifies a resource
+      type: string
+      format: uuid
+      example: c63de020-a446-11eb-bcbc-0242ac130002
+    UpdateVCN:
+      type: object
+      properties:
+        expiry:
+          minLength: 7
+          maxLength: 7
+          type: string
+          pattern: ^20[2-9][0-9]-(0[1-9]|1[012])$
+          description: Expiry date in yyyy-MM format
+          example: 2021-11
+        description:
+          type: string
+          example: This is the description of what the VCN will be used for
+          description: The description of what the VCN will be used for
+    MccControl:
+      required:
+      - mccs
+      - negate
+      type: object
+      properties:
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+        mccs:
+          minItems: 1
+          type: array
+          description: List of merchant category codes
+          example:
+          - '1234'
+          - '5678'
+          items:
+            type: string
+            example: '1234'
+          uniqueItems: true
+      description: The Card Acceptor Business Codes (MCC) control can control the type of purchases for which a card is used
+    Card:
+      type: object
+      required:
+      - accountNumber
+      - expiry
+      properties:
+        accountNumber:
+          type: string
+          minLength: 12
+          maxLength: 19
+          pattern: ^[0-9]+
+          example: '1234567891234567'
+          description: Card Account Number
+        expiry:
+          minLength: 7
+          maxLength: 7
+          type: string
+          pattern: ^20[2-9][0-9]-(0[1-9]|1[012])$
+          description: Card expiry date in yyyy-MM format
+          example: 2021-11
+    TimeOfDay:
+      required:
+      - day
+      - fromTime
+      - toTime
+      type: object
+      properties:
+        day:
+          minLength: 6
+          maxLength: 9
+          type: string
+          example: SUNDAY
+          description: Days of week. Valid values are SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, and SATURDAY
+          pattern: ^(SUNDAY|MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY)
+        fromTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The start time from which authorizations will be allowed
+          example: 08:21
+        toTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The end time from which authorizations will be allowed
+          example: '12:00'
+    Vcn:
+      allOf:
+      - $ref: '#/components/schemas/Card'
+      - properties:
+          accountGuid:
+            type: string
+            format: uuid
+            description: The globally unique identifier of the virtual card account
+            example: 123e4567-e89b-12d3-a456-426614174000
+          description:
+            type: string
+            example: This is the description of what the VCN will be used for
+            description: The description of what the VCN will be used for
+    Error_2:
+      type: object
+      properties:
+        Source:
+          type: string
+          example: source
+          description: Source of error
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error
+          example: '123'
+        Description:
+          type: string
+          example: Error desc
+          description: Short description of the error
+        Recoverable:
+          type: boolean
+          example: true
+          description: Is recoverable error
+        Details:
+          type: string
+          example: Detail information
+          description: Optional detailed description of the issue
+    UserDetail:
+      type: object
+      required:
+      - firstName
+      - lastName
+      - phone
+      - email
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: .*\S.*
+          description: First Name of User
+          example: Emerson
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: .*\S.*
+          description: Last Name of User
+          example: Bloggs
+        phone:
+          type: string
+          minLength: 4
+          maxLength: 16
+          description: Phone number of User
+          example: '+12345678910111'
+        email:
+          type: string
+          minLength: 1
+          maxLength: 300
+          description: Email address of User
+          example: emersonbloggs@gmail.com
+    CurfewControl:
+      required:
+      - days
+      - fromTime
+      - negate
+      - toTime
+      type: object
+      properties:
+        fromTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The start time from which authorizations will be allowed
+          example: 08:20
+        toTime:
+          minLength: 5
+          maxLength: 5
+          pattern: ^([01][0-9]|2[0-3]):([0-5][0-9])$
+          type: string
+          description: The end time at which authorizations will be allowed
+          example: '11:00'
+        timeZone:
+          type: string
+          description: Time zone of the from and to times
+          example: UTC
+        days:
+          maxItems: 7
+          minItems: 1
+          type: array
+          description: Days of week. Valid values are SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, and SATURDAY
+          example: SUNDAY
+          pattern: ^(SUNDAY|MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY)$
+          items:
+            type: string
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: Curfew Control
+    UpdateVirtualCardAccount:
+      type: object
+      required:
+      - expiry
+      allOf:
+      - $ref: '#/components/schemas/VcnUserDetail'
+      - $ref: '#/components/schemas/UpdateVCN'
+      - properties:
+          realCardBillingCurrencyCode:
+            pattern: ^[0-9]{3}$
+            type: string
+            description: Currency code of the RCN
+            example: '825'
+          rules:
+            $ref: '#/components/schemas/Controls'
     ValidityPeriodControl:
       required:
       - from
@@ -2728,263 +2694,6 @@ components:
           description: Defines if the rules should be negated
           example: false
       description: The ValidityPeriod control provides the ability to limit authorization activity to a defined time period
-    GeographyControl:
-      required:
-      - countryCodes
-      - negate
-      type: object
-      properties:
-        countryCodes:
-          minItems: 1
-          type: array
-          description: Country codes to be included in the rule
-          items:
-            type: string
-          example:
-          - '840'
-        negate:
-          type: boolean
-          description: Defines if the rules should be negated
-          example: false
-      description: The GeographicControl provides the ability to control where a card is physically used
-    VirtualCardAccount:
-      type: object
-      required:
-      - realCardAccountGuid
-      - accountGuid
-      allOf:
-      - $ref: '#/components/schemas/VcnUserDetail'
-      - $ref: '#/components/schemas/Vcn'
-      - properties:
-          realCardAccountGuid:
-            type: string
-            format: uuid
-            description: The globally unique identifier of the real card account
-            example: 123e4567-e89b-12d3-a456-426614174000
-          realCardBillingCurrencyCode:
-            pattern: ^[0-9]{3}$
-            type: string
-            description: Currency code of the RCN
-            example: '825'
-          rules:
-            $ref: '#/components/schemas/Controls'
-    Token:
-      allOf:
-      - $ref: '#/components/schemas/Card'
-      properties:
-        accountGuid:
-          type: string
-          format: uuid
-          description: The globally unique identifier of the token
-          example: 123e4567-e89b-12d3-a456-426614174000
-        tokenUniqueRef:
-          type: string
-          maxLength: 64
-          description: The unique reference identifier of the token
-          example: DE9JOVYK6FVSO8I32DLDPHGTC9NZ7SLKPVLMDQ0RRGK3WYD2
-        paymentAppInstanceId:
-          type: string
-          maxLength: 64
-          description: The unique app device identifier
-          example: '128652974320250630'
-        status:
-          type: string
-          pattern: ^(ACTIVE|SUSPENDED)$
-          description: Token Status. Valid values are ACTIVE and SUSPENDED
-          example: ACTIVE
-    Errors_2:
-      type: object
-      required:
-      - Error
-      properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList'
-    VelocityControl:
-      required:
-      - period
-      - negate
-      type: object
-      properties:
-        maxTrans:
-          minimum: 1
-          type: integer
-          description: Maximum number of transactions allowed
-          format: int32
-          example: 12
-        cumulativeLimit:
-          minimum: 0
-          type: number
-          description: Maximum allowed cumulative amount
-          example: 1200
-          format: float
-        period:
-          minLength: 5
-          maxLength: 10
-          type: string
-          description: Velocity period. Valid values are DAILY, WEEKLY, QUARTERLY, CONTINUOUS, MONTHLY, and YEARLY
-          example: DAILY
-          pattern: ^(DAILY|WEEKLY|QUARTERLY|CONTINUOUS|MONTHLY|YEARLY)
-        availableBalance:
-          minimum: 0
-          type: number
-          description: The cumulative spend available for the velocity control for the specified period
-          example: 1200
-          format: float
-        currencyType:
-          minLength: 4
-          maxLength: 8
-          type: string
-          description: Type of the currency being used. Valid values are BASE and MERCHANT
-          pattern: ^(BASE|MERCHANT)
-          example: MERCHANT
-        currencyCode:
-          minLength: 3
-          maxLength: 3
-          pattern: ^[0-9]{3}$
-          type: string
-          description: Mastercard supported International Organization for Standardization (ISO) 4217 currency codes
-          example: '825'
-        endDate:
-          type: string
-          format: date-time
-          description: End date until which the control is valid, in ISO 8601 extended format "YYYY-MM-DDThh:mm:ss[.sss]Z", where [.sss] is optional and can be 1 to 3 digits
-          example: '2020-10-06T11:09:42.10Z'
-        negate:
-          type: boolean
-          description: Defines if the rules should be negated
-          example: false
-      description: The VelocityControl can limit the frequency, and the total cumulative amount of authorizations performed on the cardholders account within a specified time period
-    ErrorList:
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error_2'
-    ResourceIdentifier:
-      description: A UUID which uniquely identifies a resource
-      type: string
-      format: uuid
-      example: c63de020-a446-11eb-bcbc-0242ac130002
-    AmountRangeControl:
-      required:
-      - currencyType
-      - maxAmount
-      - minAmount
-      - negate
-      type: object
-      properties:
-        minAmount:
-          minimum: 0
-          type: number
-          description: Minimum allowed amount
-          format: float
-          example: 1000
-        maxAmount:
-          minimum: 0
-          type: number
-          description: Maximum allowed amount
-          format: float
-          example: 10000
-        strictPreAuthCheck:
-          type: boolean
-          description: Defines if strict pre-auth check needs to be applied
-          default: false
-          example: true
-        currencyType:
-          minLength: 4
-          maxLength: 8
-          type: string
-          description: Type of the currency being used. Valid values are BASE and MERCHANT
-          example: MERCHANT
-          pattern: ^(BASE|MERCHANT)
-        currencyCode:
-          minLength: 3
-          maxLength: 3
-          pattern: ^[0-9]{3}$
-          type: string
-          description: Mastercard supported International Organization for Standardization (ISO) 4217 currency codes
-          example: '825'
-        negate:
-          type: boolean
-          description: Defines if the rules should be negated
-          example: false
-      description: The exact amount range control will approve a transaction only if the requested amount is equal or greater than MinAmount and less than or equal to MaxAmount. In other words, if Min Amount <= Amount <= Max Amount
-    MccControl:
-      required:
-      - mccs
-      - negate
-      type: object
-      properties:
-        negate:
-          type: boolean
-          description: Defines if the rules should be negated
-          example: false
-        mccs:
-          minItems: 1
-          type: array
-          description: List of merchant category codes
-          example:
-          - '1234'
-          - '5678'
-          items:
-            type: string
-            example: '1234'
-          uniqueItems: true
-      description: The Card Acceptor Business Codes (MCC) control can control the type of purchases for which a card is used
-    VcnUserDetail:
-      type: object
-      required:
-      - firstName
-      - lastName
-      - phone
-      properties:
-        firstName:
-          type: string
-          minLength: 1
-          maxLength: 100
-          description: First Name of User
-          example: Emerson
-        lastName:
-          type: string
-          minLength: 1
-          maxLength: 100
-          description: Last Name of User
-          example: Bloggs
-        phone:
-          type: string
-          minLength: 4
-          maxLength: 16
-          description: Phone number of User
-          example: '+13556434378'
-    Controls:
-      type: array
-      description: In Control Card Controls
-      items:
-        $ref: '#/components/schemas/Control'
-    MerchantIdControl:
-      required:
-      - acquirerId
-      - acceptorId
-      - negate
-      type: object
-      properties:
-        acceptorId:
-          minLength: 15
-          maxLength: 15
-          type: string
-          description: The Merchant Id
-          example: '123456789012345'
-        acquirerId:
-          minLength: 1
-          maxLength: 10
-          pattern: .*\S.*
-          type: string
-          description: The Acquiring Institution ID Code which identifies the acquiring institution (for example, merchant bank) or its agent
-          example: '123456'
-        negate:
-          type: boolean
-          description: Defines if the rules should be negated
-          example: false
-      description: The Merchant ID control provides the ability to limit authorizations to particular merchants
     AgeingVelocityControl:
       required:
       - authorizationHoldDays
@@ -3035,20 +2744,61 @@ components:
           description: Defines if the rules should be negated
           example: false
       description: The AgingVelocityControl provides the requester with the ability to set a notional credit line through the CumulativeControl. This control keeps track of the current remaining available credit and approves a transaction only if the requested amount is less than or equal to the remaining available credit
-    UpdateVCN:
+    TimeOfDayControl:
+      required:
+      - negate
+      - timeZone
+      - times
       type: object
       properties:
-        expiry:
-          minLength: 7
-          maxLength: 7
+        times:
+          maxItems: 7
+          minItems: 1
+          type: array
+          description: Times of day
+          items:
+            $ref: '#/components/schemas/TimeOfDay'
+        timeZone:
           type: string
-          pattern: ^20[2-9][0-9]-(0[1-9]|1[012])$
-          description: Expiry date in yyyy-MM format
-          example: 2021-11
-        description:
+          description: Time zone of the from and to times
+          example: UTC
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The TimeOfDayControl provides the ability to limit authorization activity to defined time periods for each day
+    ErrorWrapper:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors_2'
+    MerchantIdControl:
+      required:
+      - acquirerId
+      - acceptorId
+      - negate
+      type: object
+      properties:
+        acceptorId:
+          minLength: 15
+          maxLength: 15
           type: string
-          example: This is the description of what the VCN will be used for
-          description: The description of what the VCN will be used for
+          description: The Merchant Id
+          example: '123456789012345'
+        acquirerId:
+          minLength: 1
+          maxLength: 10
+          pattern: .*\S.*
+          type: string
+          description: The Acquiring Institution ID Code which identifies the acquiring institution (for example, merchant bank) or its agent
+          example: '123456'
+        negate:
+          type: boolean
+          description: Defines if the rules should be negated
+          example: false
+      description: The Merchant ID control provides the ability to limit authorizations to particular merchants
     VerifyUser:
       required:
       - userVerificationDetails
@@ -3059,208 +2809,168 @@ components:
           description: User Verification Details
           items:
             $ref: '#/components/schemas/UserVerificationDetails'
-    UserEnroll:
+    Errors_3:
       required:
-      - account
-      - companyIca
-      - userId
-      - userIdType
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error Details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    UserDetails:
       type: object
       properties:
         companyIca:
           type: integer
-          description: Interbank Card Association number assigned by Mastercard to the financial institution or partner. This is typically a 4-6 digit value.
+          description: The unique identifier of the company.
           format: int64
-          example: 9989
+          example: 611532
         userId:
-          maxLength: 30
-          minLength: 0
           type: string
-          description: Unique identifier for the user.  This is typically referred to as the Bank  Customer Number (BCN).
-          example: '5600000000000003000'
+          description: A system generated unique User identifier such as random customer number.
+          example: '282947573008198049562610279575'
         userIdType:
           type: string
-          description: Identifier type for the given user. Supported identifier is BCN.
-          example: BCN
+          description: User identifier type. Supported identifier is RANCU.
+          example: RANCU
+        namePrefix:
+          type: string
+          description: User's name prefix.
+          example: R
         firstName:
-          maxLength: 25
-          minLength: 0
           type: string
           description: User's first name.
           example: John
+        middleName:
+          type: string
+          description: User's middle name.
+          example: Robert
         lastName:
-          maxLength: 25
-          minLength: 0
           type: string
           description: User's last name.
           example: Smith
         motherMaidenName:
-          maxLength: 30
-          minLength: 0
           type: string
-          description: User's mother's maiden name. This field should be provided if Mother's Maiden  Name will be used as a security data point.
+          description: User's mother maiden name.
           example: Jennifer
+        authorizedUser1:
+          type: string
+          description: First authorized user in primary cardholder's account.
+          example: testUser1
+        authorizedUser2:
+          type: string
+          description: Second authorized user in primary cardholder's account.
+          example: testUser2
         birthDate:
-          maxLength: 10
-          minLength: 0
-          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
           type: string
-          description: User's date of birth. This field should be provided if Date of Birth will be  used as a security data point.
-          example: '1975-03-10'
-          format: date
+          description: User's Date of Birth.
+          example: Mon Mar 10 19:00:00 CDT 1975
         nationalIdentifier:
-          maxLength: 11
-          minLength: 0
           type: string
-          description: User's unique identifier assigned by the national or government system. For example, passport number or tax identification number.
+          description: National Identifier of the User.
           example: 324-56-7574
         businessPhoneNumber:
-          maxLength: 25
-          minLength: 0
           type: string
-          description: User's unformatted business phone number. Provide an unformatted  phone number, except for a leading "+" if including a country code.
-          example: '+11234567890'
+          description: Valid business phone number used by the User.
+          example: +1(0)1234567890
         mobilePhoneNumber:
-          maxLength: 25
-          minLength: 0
           type: string
-          description: User's unformatted mobile phone number. Provide an  unformatted phone number, except for a leading "+" if including a country code.
-          example: '+11234567890'
+          description: Valid mobile phone number used by the User.
+          example: +1(0)1234567891
         homePhoneNumber:
           type: string
-          description: User's unformatted home phone number. Provide an unformatted phone number,  except for a leading "+" if including a country code.
-          example: '+11234567890'
+          description: Valid home phone number used by the User.
+          example: +1(0)1234567891
         faxPhoneNumber:
           type: string
-          description: Valid fax phone number used by the user.
+          description: Valid fax phone number used by the User.
           example: +1(0)1234567891
         emailAddress:
-          maxLength: 120
-          minLength: 0
           type: string
-          description: User's email address.
-          example: john.smith@mastercard.com
+          description: Valid email address used by the User.
+          example: abc@example.com
         vip:
           type: boolean
-          description: Used to assign VIP status to a user. The default value is false.
+          description: Allows the user to hold VIP status, default value is false.
           example: true
         employee:
           type: boolean
-          description: Used to assign Employee status to a user. The default value is false.
+          description: Allows the user to hold EMPLOYEE status, default value is false.
           example: false
         acceptEmails:
           type: boolean
-          description: Specifies if the user allows contact via email for promotional purposes.  The default value is false.
+          description: Specifies if the account holder can be contacted via email, default value is false.
           example: false
         acceptSms:
           type: boolean
-          description: Specifies if the user allows contact to their mobile phone for promotional  purposes. The default value is false.
+          description: Specifies if the account holder can be contacted via SMS, default value is false.
           example: false
         acceptPromotionalInfo:
           type: boolean
-          description: Specifies if the user is interested in receiving promotional information.  The default value is false.
-          example: false
+          description: Specifies if the account holder is interested in receiving promotional information, the default value is false.
+          example: true
+        acceptTracking:
+          type: boolean
+          description: Specifies whether or not a particular customer has accepted tracking.
+          example: true
         genericIdentification:
-          maxLength: 15
-          minLength: 0
           type: string
-          description: Answer to the user's bank-provided custom verification question. Can be used as a Security Question data point by the Internet Redemptions website, Customer Service, or web services.
+          description: Answer to the user's verification question.
           example: Duster
         genericIdentificationDescription:
-          maxLength: 25
-          minLength: 0
           type: string
-          description: The descriptive label for the user's bank-provided custom verification question. Can be used as a Security Question data point by the Internet Redemptions website, Customer Service, or web services.
+          description: The user's custom verification question.
           example: Pet's name
         userDefined1:
           maxLength: 40
           minLength: 0
           type: string
-          description: User Defined Fields can be used to store partner-specific data that  can be used for promotions and other business rules.
+          description: User Defined Field 1
           example: UDF 1 Example
         userDefined2:
           maxLength: 40
           minLength: 0
           type: string
-          description: User Defined Fields can be used to store partner-specific data that  can be used for promotions and other business rules.
+          description: User Defined Field 2
           example: UDF 2 Example
         userDefined3:
           maxLength: 40
           minLength: 0
           type: string
-          description: User Defined Fields can be used to store partner-specific data that  can be used for promotions and other business rules.
+          description: User Defined Field 3
           example: UDF 3 Example
         userDefined4:
           maxLength: 40
           minLength: 0
           type: string
-          description: User Defined Fields can be used to store partner-specific data that  can be used for promotions and other business rules.
+          description: User Defined Field 4
           example: UDF 4 Example
         pcloUser:
           $ref: '#/components/schemas/PCLOUser'
+        preferredLanguage:
+          type: string
+          description: Customer's preferred language.
+          example: en_US
         address:
           $ref: '#/components/schemas/UserAddress'
-        account:
-          $ref: '#/components/schemas/AccountBase'
-    VerifiedUser:
+        verificationDetails:
+          type: array
+          description: Cardholder verification details.
+          items:
+            $ref: '#/components/schemas/VerificationDetails'
+    UserVerificationDetails:
       type: object
       properties:
-        message:
+        code:
           type: string
-          description: result
-          example: Successfully verified user
-    UserAddress:
-      type: object
-      description: This object will define the users default shipping/mailing address.
-      properties:
-        addressLine1:
-          maxLength: 80
-          minLength: 0
+          description: User verification question. Supported question codes are VALID_CUST_SSN_LAST_4, VALID_CUST_BIRTHDATE, VALID_CUST_MOTHERS_MAIDEN_NAME, VALID_CUST_POSTAL_CODE, VALID_CUST_GENERIC_IDENTIFIER_SW, VALID_CUST_GENERIC_IDENTIFIER_TXT - VALID_CUST_SSN_LAST_4  Verify the user SSN value. - VALID_CUST_BIRTHDATE  Verify the user Birthdate. - VALID_CUST_MOTHERS_MAIDEN_NAME  Verify the user Mothers Maiden Name. - VALID_CUST_POSTAL_CODE  Verify the user Postal code. - VALID_CUST_GENERIC_IDENTIFIER_SW/VALID_CUST_GENERIC_IDENTIFIER_TXT  Verify the user Generic Identifier description.
+          example: VALID_CUST_POSTAL_CODE
+        answer:
           type: string
-          description: Address Line 1 of the User's address.
-          example: 10 Upper Bank Street
-        addressLine2:
-          maxLength: 80
-          minLength: 0
-          type: string
-          description: Address Line 2 of the User's address.
-          example: Chesterfield
-        addressLine3:
-          maxLength: 80
-          minLength: 0
-          type: string
-          description: Address Line 3 of the User's address.
-          example: Canary Wharf
-        addressLine4:
-          maxLength: 80
-          minLength: 0
-          type: string
-          description: Address Line 4 of the User's address.
-          example: Tower Hamlets
-        city:
-          maxLength: 30
-          minLength: 0
-          type: string
-          description: City name as per User's address.
-          example: London
-        countryCode:
-          maxLength: 3
-          minLength: 2
-          type: string
-          description: This value should be the 3-character ISO Country Code for the user.
-          example: ENG
-        postalCode:
-          maxLength: 14
-          minLength: 0
-          type: string
-          description: Postal Code as per User's address.
-          example: '63368'
-        stateProvinceCode:
-          maxLength: 3
-          minLength: 2
-          type: string
-          description: State Code as per User's address.
-          example: JS
+          description: Answer to the User verification question
+          example: '638001'
     UserUpdate:
       required:
       - userId
@@ -3489,6 +3199,225 @@ components:
           $ref: '#/components/schemas/PCLOUser'
         address:
           $ref: '#/components/schemas/UserAddress'
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of the error
+          example: user-management
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during API request processing.
+          example: INVALID_FIELD_FORMAT
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Email Address must be in the valid format.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about the data received.
+          example: Invalid Details
+      description: Error Details
+    UserEnroll:
+      required:
+      - account
+      - companyIca
+      - userId
+      - userIdType
+      type: object
+      properties:
+        companyIca:
+          type: integer
+          description: Interbank Card Association number assigned by Mastercard to the financial institution or partner. This is typically a 4-6 digit value.
+          format: int64
+          example: 9989
+        userId:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: Unique identifier for the user.  This is typically referred to as the Bank  Customer Number (BCN).
+          example: '5600000000000003000'
+        userIdType:
+          type: string
+          description: Identifier type for the given user. Supported identifier is BCN.
+          example: BCN
+        firstName:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: User's first name.
+          example: John
+        lastName:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: User's last name.
+          example: Smith
+        motherMaidenName:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: User's mother's maiden name. This field should be provided if Mother's Maiden  Name will be used as a security data point.
+          example: Jennifer
+        birthDate:
+          maxLength: 10
+          minLength: 0
+          pattern: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+          type: string
+          description: User's date of birth. This field should be provided if Date of Birth will be  used as a security data point.
+          example: '1975-03-10'
+          format: date
+        nationalIdentifier:
+          maxLength: 11
+          minLength: 0
+          type: string
+          description: User's unique identifier assigned by the national or government system. For example, passport number or tax identification number.
+          example: 324-56-7574
+        businessPhoneNumber:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: User's unformatted business phone number. Provide an unformatted  phone number, except for a leading "+" if including a country code.
+          example: '+11234567890'
+        mobilePhoneNumber:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: User's unformatted mobile phone number. Provide an  unformatted phone number, except for a leading "+" if including a country code.
+          example: '+11234567890'
+        homePhoneNumber:
+          type: string
+          description: User's unformatted home phone number. Provide an unformatted phone number,  except for a leading "+" if including a country code.
+          example: '+11234567890'
+        faxPhoneNumber:
+          type: string
+          description: Valid fax phone number used by the user.
+          example: +1(0)1234567891
+        emailAddress:
+          maxLength: 120
+          minLength: 0
+          type: string
+          description: User's email address.
+          example: john.smith@mastercard.com
+        vip:
+          type: boolean
+          description: Used to assign VIP status to a user. The default value is false.
+          example: true
+        employee:
+          type: boolean
+          description: Used to assign Employee status to a user. The default value is false.
+          example: false
+        acceptEmails:
+          type: boolean
+          description: Specifies if the user allows contact via email for promotional purposes.  The default value is false.
+          example: false
+        acceptSms:
+          type: boolean
+          description: Specifies if the user allows contact to their mobile phone for promotional  purposes. The default value is false.
+          example: false
+        acceptPromotionalInfo:
+          type: boolean
+          description: Specifies if the user is interested in receiving promotional information.  The default value is false.
+          example: false
+        genericIdentification:
+          maxLength: 15
+          minLength: 0
+          type: string
+          description: Answer to the user's bank-provided custom verification question. Can be used as a Security Question data point by the Internet Redemptions website, Customer Service, or web services.
+          example: Duster
+        genericIdentificationDescription:
+          maxLength: 25
+          minLength: 0
+          type: string
+          description: The descriptive label for the user's bank-provided custom verification question. Can be used as a Security Question data point by the Internet Redemptions website, Customer Service, or web services.
+          example: Pet's name
+        userDefined1:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that  can be used for promotions and other business rules.
+          example: UDF 1 Example
+        userDefined2:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that  can be used for promotions and other business rules.
+          example: UDF 2 Example
+        userDefined3:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that  can be used for promotions and other business rules.
+          example: UDF 3 Example
+        userDefined4:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that  can be used for promotions and other business rules.
+          example: UDF 4 Example
+        pcloUser:
+          $ref: '#/components/schemas/PCLOUser'
+        address:
+          $ref: '#/components/schemas/UserAddress'
+        account:
+          $ref: '#/components/schemas/AccountBase'
+    UserAddress:
+      type: object
+      description: This object will define the users default shipping/mailing address.
+      properties:
+        addressLine1:
+          maxLength: 80
+          minLength: 0
+          type: string
+          description: Address Line 1 of the User's address.
+          example: 10 Upper Bank Street
+        addressLine2:
+          maxLength: 80
+          minLength: 0
+          type: string
+          description: Address Line 2 of the User's address.
+          example: Chesterfield
+        addressLine3:
+          maxLength: 80
+          minLength: 0
+          type: string
+          description: Address Line 3 of the User's address.
+          example: Canary Wharf
+        addressLine4:
+          maxLength: 80
+          minLength: 0
+          type: string
+          description: Address Line 4 of the User's address.
+          example: Tower Hamlets
+        city:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: City name as per User's address.
+          example: London
+        countryCode:
+          maxLength: 3
+          minLength: 2
+          type: string
+          description: This value should be the 3-character ISO Country Code for the user.
+          example: ENG
+        postalCode:
+          maxLength: 14
+          minLength: 0
+          type: string
+          description: Postal Code as per User's address.
+          example: '63368'
+        stateProvinceCode:
+          maxLength: 3
+          minLength: 2
+          type: string
+          description: State Code as per User's address.
+          example: JS
     PCLOUser:
       type: object
       description: This object should only be used by Personal Card Linked Offers (PCLO) users. This object  will define the users communications preferences for PCLO.
@@ -3505,17 +3434,54 @@ components:
           type: boolean
           description: Specifies if the PCLO user allows contact to their mobile phone for promotional purposes.
           example: false
-    UserVerificationDetails:
+    EnrolledUser:
       type: object
       properties:
+        userId:
+          type: string
+          description: Unique identifier of the user.
+          example: '282947573008198049562610279575'
+        userIdType:
+          type: string
+          description: Identifier type for the given user.
+          example: RANCU
+        accountId:
+          type: string
+          description: The unique identifier for the given account.
+          example: '609330255453162553303101469598'
+        accountIdType:
+          type: string
+          description: Identifier type for the given account.
+          example: RANAC
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors_3'
+    VerifiedUser:
+      type: object
+      properties:
+        message:
+          type: string
+          description: result
+          example: Successfully verified user
+    VerificationDetails:
+      type: object
+      properties:
+        question:
+          type: string
+          description: Verification question description.
+          example: Zip Code
         code:
           type: string
-          description: User verification question. Supported question codes are VALID_CUST_SSN_LAST_4, VALID_CUST_BIRTHDATE, VALID_CUST_MOTHERS_MAIDEN_NAME, VALID_CUST_POSTAL_CODE, VALID_CUST_GENERIC_IDENTIFIER_SW, VALID_CUST_GENERIC_IDENTIFIER_TXT - VALID_CUST_SSN_LAST_4  Verify the user SSN value. - VALID_CUST_BIRTHDATE  Verify the user Birthdate. - VALID_CUST_MOTHERS_MAIDEN_NAME  Verify the user Mothers Maiden Name. - VALID_CUST_POSTAL_CODE  Verify the user Postal code. - VALID_CUST_GENERIC_IDENTIFIER_SW/VALID_CUST_GENERIC_IDENTIFIER_TXT  Verify the user Generic Identifier description.
+          description: Verification question code
           example: VALID_CUST_POSTAL_CODE
         answer:
           type: string
-          description: Answer to the User verification question
-          example: '638001'
+          description: Answer to the Verification question
+          example: '1234'
     AccountBase:
       required:
       - accountId
@@ -3663,334 +3629,380 @@ components:
           - CANCELLED
           - ON_HOLD
           - INACTIVE
-    ErrorItem:
-      type: object
-      properties:
-        Source:
-          type: string
-          description: Source of the error
-          example: user-management
-        ReasonCode:
-          type: string
-          description: A unique constant identifying the error case encountered during API request processing.
-          example: INVALID_FIELD_FORMAT
-        Description:
-          type: string
-          description: Short description of the ReasonCode field.
-          example: Email Address must be in the valid format.
-        Recoverable:
-          type: boolean
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
-          example: false
-        Details:
-          type: string
-          description: Where appropriate, indicates detailed information about the data received.
-          example: Invalid Details
-      description: Error Details
-    VerificationDetails:
-      type: object
-      properties:
-        question:
-          type: string
-          description: Verification question description.
-          example: Zip Code
-        code:
-          type: string
-          description: Verification question code
-          example: VALID_CUST_POSTAL_CODE
-        answer:
-          type: string
-          description: Answer to the Verification question
-          example: '1234'
-    Errors_3:
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          type: array
-          description: Error Details
-          items:
-            $ref: '#/components/schemas/ErrorItem'
-    UserDetails:
-      type: object
-      properties:
-        companyIca:
-          type: integer
-          description: The unique identifier of the company.
-          format: int64
-          example: 611532
-        userId:
-          type: string
-          description: A system generated unique User identifier such as random customer number.
-          example: '282947573008198049562610279575'
-        userIdType:
-          type: string
-          description: User identifier type. Supported identifier is RANCU.
-          example: RANCU
-        namePrefix:
-          type: string
-          description: User's name prefix.
-          example: R
-        firstName:
-          type: string
-          description: User's first name.
-          example: John
-        middleName:
-          type: string
-          description: User's middle name.
-          example: Robert
-        lastName:
-          type: string
-          description: User's last name.
-          example: Smith
-        motherMaidenName:
-          type: string
-          description: User's mother maiden name.
-          example: Jennifer
-        authorizedUser1:
-          type: string
-          description: First authorized user in primary cardholder's account.
-          example: testUser1
-        authorizedUser2:
-          type: string
-          description: Second authorized user in primary cardholder's account.
-          example: testUser2
-        birthDate:
-          type: string
-          description: User's Date of Birth.
-          example: Mon Mar 10 19:00:00 CDT 1975
-        nationalIdentifier:
-          type: string
-          description: National Identifier of the User.
-          example: 324-56-7574
-        businessPhoneNumber:
-          type: string
-          description: Valid business phone number used by the User.
-          example: +1(0)1234567890
-        mobilePhoneNumber:
-          type: string
-          description: Valid mobile phone number used by the User.
-          example: +1(0)1234567891
-        homePhoneNumber:
-          type: string
-          description: Valid home phone number used by the User.
-          example: +1(0)1234567891
-        faxPhoneNumber:
-          type: string
-          description: Valid fax phone number used by the User.
-          example: +1(0)1234567891
-        emailAddress:
-          type: string
-          description: Valid email address used by the User.
-          example: abc@example.com
-        vip:
-          type: boolean
-          description: Allows the user to hold VIP status, default value is false.
-          example: true
-        employee:
-          type: boolean
-          description: Allows the user to hold EMPLOYEE status, default value is false.
-          example: false
-        acceptEmails:
-          type: boolean
-          description: Specifies if the account holder can be contacted via email, default value is false.
-          example: false
-        acceptSms:
-          type: boolean
-          description: Specifies if the account holder can be contacted via SMS, default value is false.
-          example: false
-        acceptPromotionalInfo:
-          type: boolean
-          description: Specifies if the account holder is interested in receiving promotional information, the default value is false.
-          example: true
-        acceptTracking:
-          type: boolean
-          description: Specifies whether or not a particular customer has accepted tracking.
-          example: true
-        genericIdentification:
-          type: string
-          description: Answer to the user's verification question.
-          example: Duster
-        genericIdentificationDescription:
-          type: string
-          description: The user's custom verification question.
-          example: Pet's name
-        userDefined1:
-          maxLength: 40
-          minLength: 0
-          type: string
-          description: User Defined Field 1
-          example: UDF 1 Example
-        userDefined2:
-          maxLength: 40
-          minLength: 0
-          type: string
-          description: User Defined Field 2
-          example: UDF 2 Example
-        userDefined3:
-          maxLength: 40
-          minLength: 0
-          type: string
-          description: User Defined Field 3
-          example: UDF 3 Example
-        userDefined4:
-          maxLength: 40
-          minLength: 0
-          type: string
-          description: User Defined Field 4
-          example: UDF 4 Example
-        pcloUser:
-          $ref: '#/components/schemas/PCLOUser'
-        preferredLanguage:
-          type: string
-          description: Customer's preferred language.
-          example: en_US
-        address:
-          $ref: '#/components/schemas/UserAddress'
-        verificationDetails:
-          type: array
-          description: Cardholder verification details.
-          items:
-            $ref: '#/components/schemas/VerificationDetails'
-    EnrolledUser:
-      type: object
-      properties:
-        userId:
-          type: string
-          description: Unique identifier of the user.
-          example: '282947573008198049562610279575'
-        userIdType:
-          type: string
-          description: Identifier type for the given user.
-          example: RANCU
-        accountId:
-          type: string
-          description: The unique identifier for the given account.
-          example: '609330255453162553303101469598'
-        accountIdType:
-          type: string
-          description: Identifier type for the given account.
-          example: RANAC
-    ErrorsWrapper:
-      required:
-      - Errors
-      type: object
-      properties:
+  examples:
+    ResourceNotFoundExample:
+      summary: When resource not found
+      value:
         Errors:
-          $ref: '#/components/schemas/Errors_3'
-  parameters:
-    user_consent_id:
-      in: path
-      name: user_consent_id
-      required: true
-      schema:
-        type: string
-        minLength: 36
-        maxLength: 36
-      description: User Consent Identifier
-      example: 2c0743c0-fe6a-41a6-88c4-2c94786fb9c2
-    UserProfileIdParameter:
-      name: user_profile_id
-      in: query
-      description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
-      example: ee13a7ec-5a5a-4618-a55d-5e1ed016ccd5
-      required: true
-      schema:
-        type: string
-        pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-    UserConsentParameter:
-      name: user_consent
-      in: query
-      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
-      example: ACCEPT
-      required: true
-      schema:
-        type: string
-        pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
-    XEncryptedPayload:
-      in: header
-      name: X-Encrypted-Payload
-      type: boolean
-      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
-
-        '
-      example: true
-      schema: null
-    XUserIdentityParameter:
-      in: header
-      name: X-User-Identity
-      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-      description: 'JWT token for session validation. Returned as response header in previous API calls with key X-User-Identity.
-
-        '
-      schema:
-        type: string
-    userGUID:
-      name: user_guid
-      in: path
-      description: The globally unique identifier of the user being queried
-      required: true
-      schema:
-        $ref: '#/components/schemas/ResourceIdentifier'
-      example: 8f242496-b71a-11eb-8529-0242ac130003
-    tokenGUID:
-      name: token_guid
-      in: path
-      description: The globally unique identifier of the token being queried
-      required: true
-      schema:
-        $ref: '#/components/schemas/ResourceIdentifier'
-      example: 8f242496-b71a-11eb-8529-0242ac130003
-    accountGUID:
-      name: account_guid
-      in: path
-      description: The globally unique identifier of the card being queried
-      required: true
-      schema:
-        $ref: '#/components/schemas/ResourceIdentifier'
-      example: 8f242496-b71a-11eb-8529-0242ac130003
-    UsersIdType:
-      name: user_id_type
-      in: query
-      description: Determines the type of user or account identification. Supported identifiers are RANAC or RANCU.
-      required: false
-      schema:
-        type: string
-      example: RANCU
-    UserId:
-      name: id
-      in: path
-      description: The unique identifier for the given user.
-      required: true
-      schema:
-        type: string
-      example: '268810378058708149455458707247'
-    IncludeVerificationDetails:
-      name: include_verification_details
-      in: query
-      description: Cardholder verification details are included in the response if true.
-      required: false
-      schema:
-        type: boolean
-      example: true
-    Language:
-      name: language
-      in: query
-      description: Cardholder verification details are returned in the language requested.
-      required: false
-      schema:
-        type: string
-      example: en_US
-    VerifyUsersIdType:
-      name: user_id_type
-      in: query
-      description: Determines the type of user or account identification. Supported identifiers are RANAC or RANCU.
-      required: true
-      schema:
-        type: string
-      example: RANCU
+          Error:
+          - Source: AUTHENTICATION_CONSENT_SERVICE
+            ReasonCode: resource.not.found
+            Description: The requested resource was not found
+            Recoverable: false
+    BadRequestExample:
+      summary: When something went wrong with the request
+      value:
+        Errors:
+          Error:
+          - Source: AUTHENTICATION_CONSENT_SERVICE
+            ReasonCode: system.error
+            Description: Something went wrong with your request. Please try again later
+            Recoverable: false
+    InvalidMerchantRequest:
+      summary: When registration for the requestor does not exist
+      value:
+        Errors:
+          Error:
+          - Source: AUTHENTICATION_CONSENT_SERVICE
+            ReasonCode: invalid.requestor
+            Description: The registration for the requestor does not exist
+            Recoverable: false
+    UnAuthorizedMerchantRequest:
+      summary: When requestor is not authorized to perform requested operation
+      value:
+        Errors:
+          Error:
+          - Source: AUTHENTICATION_CONSENT_SERVICE
+            ReasonCode: unauthorized
+            Description: Unable to perform this operation as the requestor is unauthorized
+            Recoverable: false
+    ClientIdentitiesSuccessfulExample:
+      value:
+        attributes:
+          dateOfBirth:
+            e95b7c68-ebcb-4a88-9978-c33d78cde128:
+              value: '1980-01-01'
+              lastVerifiedDate: '2022-04-04T02:49:27.915Z'
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided user profile ID does not exist.
+            Recoverable: false
+    RPClaimsUserConsentDataExampleConsentNotGiven:
+      value:
+        flow: APP2APP
+        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        rpSpecificIdentifier: null
+        redirectUri: https://sample-rp-redirect-uri.com/?arid=966eaf60-fa83-46d6-8ed5-7029609b4601&error_description=access_to_claims_denied&state=random%20string&error=access_denied
+    UserProfileDeletedErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_DELETED
+            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
+            Recoverable: false
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
+            Recoverable: false
+    RPClaimsUserConsentDataSuccessExample:
+      value:
+        flow: APP2APP
+        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        rpSpecificIdentifier: 46eb72430ffeca3daf31360264fa0424ba4facfdcb69c6f43e73063f290a75a8
+        redirectUri: https://sample-rp-redirect-uri.com/?arid=2cd8ed7e-0cbc-44cc-b393-45e42915d6db&code=eyJ4NXQjUzI1NiI6Ildvank5ekFZQzFCWlMxMTJDeTIzM&state=random%20string%22
+    BadRequestARIDErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value null for ARID.
+            Recoverable: false
+            Details: Must not be null.
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+    RPClaimsUserDataExampleClaimsNotSatisfied:
+      value:
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+        rpName: RP Name
+        rpLogoUrl: https://www.rpsite.com/logo.jpg
+        claimsData: null
+        redirectUri: https://sample-rp-redirect-uri.com/?arid=c00dc42f-fb5c-49a0-80c7-69faa65ac2af&error_description=scope_data_not_available&state=random%20string&error=invalid_scope
+        rotatedPds: null
+    NotFoundExampleARIDnotExists:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CLAIM_SHARING_ARID_DOES_NOT_EXIST
+            Description: 'CLAIM_SHARING_ARID_DOES_NOT_EXIST: ARID does not Exist'
+            Recoverable: false
+            Details: ARID does not exist.
+            redirectUri: https://sample-rp-redirect-uri.com/?arid=b6990018-73bb-4e8c-9658-556012c22a25&state=random%20string&error=server_error
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+    UserAccountActivitiesExample:
+      value:
+        userAccountActivities:
+        - action: ID Created
+          createdDate: '2020-01-28T13:16:01.714-05:00'
+          values:
+          - attributeName: legalName
+            previousValue: John Doe
+            value: John Dow
+            source: passport
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    EncryptedPayloadWithRotatedPDSExample:
+      value:
+        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IoxNTE2MjM5MDIyf
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    BadRequestPDSErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value null for PDS.
+            Recoverable: false
+            Details: Must not be null.
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    RPClaimsUserDataSuccessExample:
+      value:
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+        rpName: RP Name
+        rpLogoUrl: https://www.rpsite.com/logo.jpg
+        claimsData:
+          claimsAttributes:
+            postalCode:
+              claims:
+                postalCode: '63368'
+              dataMatch: FULL
+          dataMatch: FULL
+        redirectUri: null
+        rotatedPds: null
+    CardDetails:
+      value:
+      - firstName: Emerson
+        lastName: Bloggs
+        phone: '+353871123456'
+        realCardAccountGuid: 123e4567-e89b-12d3-a456-426614174000
+        accountNumber: '1234567891234567'
+        expiry: 2021-11
+        accountGuid: 123e4567-e89b-12d3-a456-426614174000
+        description: This is the description of what the VCN will be used for
+        realCardBillingCurrencyCode: '840'
+        rules:
+        - action: A
+          alias: DAILY LIMIT
+          transactionLimits:
+          - amount: 12
+            negate: true
+          geographies:
+          - countryCodes:
+            - USA
+            negate: true
+          velocities:
+          - maxTrans: 12
+            cumulativeLimit: 1200
+            period: DAILY
+            availableBalance: 1200
+            currencyType: MERCHANT
+            currencyCode: '825'
+            endDate: '2020-10-06T11:09:42.10Z'
+            negate: true
+          validityPeriods:
+          - from: '2020-10-06T11:09:42.10Z'
+            to: '2020-11-06T11:09:42.10Z'
+            strictPreAuthCheck: true
+            negate: true
+          amountRanges:
+          - minAmount: 1000
+            maxAmount: 10000
+            strictPreAuthCheck: true
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          merchantIds:
+          - acceptorId: '123456789012345'
+            acquirerId: '123456'
+            negate: true
+          ageingVelocities:
+          - authorizationHoldDays: 1234
+            cumulativeLimit: 1000
+            timeZone: UTC-06:00
+            availableBalance: 1000
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          curfews:
+          - fromTime: 08:20
+            toTime: '11:00'
+            timeZone: UTC
+            days:
+            - SUNDAY
+            negate: true
+          timeOfDays:
+          - times:
+            - day: SUNDAY
+              fromTime: 08:21
+              toTime: '12:40'
+            timeZone: UTC
+            negate: true
+          merchantCategories:
+          - negate: true
+            mccs:
+            - 1234
+            - 5678
+    AuthorizationError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: authorization.missing
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    BadRequestError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: invalid.parameter
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    NotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: not.found
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    Token:
+      value:
+        accountNumber: '1234567891234567'
+        expiry: 2021-11
+        accountGuid: 123e4567-e89b-12d3-a456-426614174000
+        tokenUniqueRef: DE9JOVYK6FVSO8I32DLDPHGTC9NZ7SLKPVLMDQ0RRGK3WYD2
+        paymentAppInstanceId: '128652974320250630'
+        status: ACTIVE
+    ForbiddenError:
+      value:
+        Errors:
+          Error:
+          - Source: token-management-service
+            ReasonCode: authorization.forbidden
+            Description: Error description
+            Recoverable: true
+            Details: Detail information
+    UserDetail:
+      value:
+        firstName: Emerson
+        lastName: Bloggs
+        phone: '+12345678910111'
+        email: emersonbloggs@gmail.com
+    UpdateUserCardAndControl:
+      value:
+        firstName: Emerson
+        lastName: Bloggs
+        phone: '+353871123456'
+        expiry: 2021-11
+        description: This is the description of what the VCN will be used for
+        realCardBillingCurrencyCode: '840'
+        rules:
+        - action: A
+          alias: DAILY LIMIT
+          transactionLimits:
+          - amount: 12
+            negate: true
+          geographies:
+          - countryCodes:
+            - USA
+            negate: true
+          velocities:
+          - maxTrans: 12
+            cumulativeLimit: 1200
+            period: DAILY
+            availableBalance: 1200
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          validityPeriods:
+          - from: '2020-10-06T11:09:42.10Z'
+            to: '2020-11-06T11:09:42.10Z'
+            strictPreAuthCheck: true
+            negate: true
+          amountRanges:
+          - minAmount: 1000
+            maxAmount: 10000
+            strictPreAuthCheck: true
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          merchantIds:
+          - acceptorId: '123456789012345'
+            acquirerId: '123456'
+            negate: true
+          ageingVelocities:
+          - authorizationHoldDays: 1234
+            cumulativeLimit: 1000
+            timeZone: UTC-06:00
+            currencyType: MERCHANT
+            currencyCode: '825'
+            negate: true
+          curfews:
+          - fromTime: 08:20
+            toTime: '11:00'
+            timeZone: UTC
+            days:
+            - SUNDAY
+            negate: true
+          timeOfDays:
+          - times:
+            - day: SUNDAY
+              fromTime: 08:21
+              toTime: '12:40'
+            timeZone: UTC
+            negate: true
+          merchantCategories:
+          - negate: true
+            mccs:
+            - 1234
+            - 5678
+    TokenUpdate:
+      value:
+        accountNumber: '1234567891234567'
+        expiry: 2021-11
+        status: ACTIVE
   requestBodies:
+    UserAccountActivitySearchRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserAccountActivitySearch'
+      required: true
+    UserProfilesRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserProfile'
+      required: true
     IdentitySearchRequest:
       content:
         application/json:
@@ -4009,24 +4021,21 @@ components:
           schema:
             $ref: '#/components/schemas/RPClaimsUserDetails'
       required: true
-    UserProfilesRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UserProfile'
-      required: true
     IdentityAttributeDeletionsRequest:
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/IdentityAttributeDeletions'
       required: true
-    UserAccountActivitySearchRequest:
+    NewToken:
+      required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/UserAccountActivitySearch'
-      required: true
+            $ref: '#/components/schemas/Token'
+          examples:
+            Token:
+              $ref: '#/components/examples/Token'
     UpdatedVirtualCard:
       required: true
       content:
@@ -4036,15 +4045,6 @@ components:
           examples:
             UpdateVirtualCardAccount:
               $ref: '#/components/examples/UpdateUserCardAndControl'
-    User:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UserDetail'
-          examples:
-            UserDetail:
-              $ref: '#/components/examples/UserDetail'
     NewVirtualCard:
       required: true
       content:
@@ -4063,21 +4063,15 @@ components:
           examples:
             TokenUpdate:
               $ref: '#/components/examples/TokenUpdate'
-    NewToken:
+    User:
       required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Token'
+            $ref: '#/components/schemas/UserDetail'
           examples:
-            Token:
-              $ref: '#/components/examples/Token'
-    UserUpdateRequest:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UserUpdate'
+            UserDetail:
+              $ref: '#/components/examples/UserDetail'
     VerifyUserRequest:
       required: true
       content:
@@ -4090,6 +4084,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UserEnroll'
+    UserUpdateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserUpdate'
 x-refined-from:
 - mastercard-authentication-consent-openapi.yml
 - mastercard-id-for-trust-providers-openapi.yml

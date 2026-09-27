@@ -140,96 +140,59 @@ paths:
         delay: 0
         dispatcher: FALLBACK
 components:
-  responses:
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            InvalidData:
-              $ref: '#/components/examples/InvalidData'
-            AlertsInvalidData:
-              $ref: '#/components/examples/AlertsInvalidData'
-            InvalidParameterSet:
-              $ref: '#/components/examples/InvalidParameterSet'
-            FormatInvalid:
-              $ref: '#/components/examples/FormatInvalid'
-            AlertsFormatInvalid:
-              $ref: '#/components/examples/AlertsFormatInvalid'
-            MissingRequiredHeader:
-              $ref: '#/components/examples/MissingRequiredHeader'
-    Default:
-      description: Unexpected error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            ServerError:
-              $ref: '#/components/examples/ServerError'
-    NotFound:
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            ResourceNotFound:
-              $ref: '#/components/examples/ResourceNotFound'
-            EntityNotFound:
-              $ref: '#/components/examples/EntityNotFound'
-            AlertsEntityNotFound:
-              $ref: '#/components/examples/AlertsEntityNotFound'
-    PermissionDenied:
-      description: Permission Denied
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            PermissionDenied:
-              $ref: '#/components/examples/PermissionDenied'
-    AlertsPageableSubMerchants:
-      description: Pageable list of sub-merchants with all details
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AlertsPageableSubMerchantResource'
-          examples:
-            AlertsPageableSubMerchants:
-              $ref: '#/components/examples/AlertsPageableSubMerchants'
-    ValidationFailed:
-      description: Validation Failed
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            ValidationFailed:
-              $ref: '#/components/examples/ValidationFailed'
-    AlertsSubMerchantSuccess:
-      description: Sub-merchant with all details
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AlertsSubMerchantResource'
-          examples:
-            AlertsSubMerchantActivated:
-              $ref: '#/components/examples/AlertsSubMerchantActivated'
-            AlertsSubMerchantDeactivated:
-              $ref: '#/components/examples/AlertsSubMerchantDeactivated'
-    ForbiddenOperation:
-      description: Forbidden Operation
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            ForbiddenOperation:
-              $ref: '#/components/examples/ForbiddenOperation'
   schemas:
+    FirstName:
+      title: First Name
+      maxLength: 30
+      minLength: 1
+      type:
+      - string
+      - 'null'
+      description: The individual's first name
+      example: Michael
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: List of error objects
+          items:
+            $ref: '#/components/schemas/Error'
+          example: []
+      description: Errors object
+    ResponseTime:
+      type: string
+      description: Total response time in ms
+      minLength: 0
+      maxLength: 10
+      example: 300 ms
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+      description: Error Response object
+    AlertsMerchantMemberId:
+      title: Unique identifier for merchants
+      description: Internal Universally Unique Identifier (UUID) which uniquely identifies the merchants
+      type: string
+      format: uuid
+      example: 99ca4b15-72a6-41dd-8127-573d4b07669c
+    AlertsSubMerchantDetailsUpdate:
+      description: Request used to update sub-merchant details
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/MerchantName'
+        merchantCategoryCode:
+          $ref: '#/components/schemas/MerchantCategoryCode'
+      required:
+      - name
+      - merchantCategoryCode
     MerchantStatus:
       title: Merchant's Status
       type: string
@@ -237,13 +200,44 @@ components:
       minLength: 1
       maxLength: 50
       example: ACTIVATED
-    MerchantType:
-      title: Merchant's Type
-      description: Merchant Type must be one of - PARTNER, ACQUIRER, SUBMERCHANT
+    User:
+      description: Username for the user creating or modifying a resource
       type: string
+      minLength: 0
+      maxLength: 200
+      example: John Doe
+    AlertsPageableSubMerchantResource:
+      description: Pageable response containing sub-merchants with their details
+      type: object
+      properties:
+        responseHeader:
+          $ref: '#/components/schemas/ResponseHeader'
+        subMerchants:
+          type: array
+          description: List of sub-merchants with all details
+          items:
+            $ref: '#/components/schemas/AlertsSubMerchantResource'
+          example: []
+    AlertsSubMerchantCreate:
+      description: Request used to create sub-merchants
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/MerchantName'
+        merchantCategoryCode:
+          $ref: '#/components/schemas/MerchantCategoryCode'
+      required:
+      - name
+      - merchantCategoryCode
+    LastName:
+      title: Last Name
+      maxLength: 30
       minLength: 1
-      maxLength: 50
-      example: SUBMERCHANT
+      type:
+      - string
+      - 'null'
+      description: The individual's last name
+      example: Fox
     Error:
       type: object
       properties:
@@ -287,69 +281,29 @@ components:
           description: Optional detailed description of the issue
           example: Detailed description of the error
       description: Error object
-    AlertsPageableSubMerchantResource:
-      description: Pageable response containing sub-merchants with their details
+    CreatedOrModifiedBy:
+      description: Timestamp and user responsible for creation or modification of the resource
       type: object
       properties:
-        responseHeader:
-          $ref: '#/components/schemas/ResponseHeader'
-        subMerchants:
-          type: array
-          description: List of sub-merchants with all details
-          items:
-            $ref: '#/components/schemas/AlertsSubMerchantResource'
-          example: []
-    Timestamp:
-      description: Timestamp of the creation or modification of the resource
+        timestamp:
+          $ref: '#/components/schemas/Timestamp'
+        user:
+          $ref: '#/components/schemas/User'
+    MerchantCategoryCode:
+      title: Merchant Category Code
+      description: A four-digit number listed in ISO 18245 for retail financial services. MCC is used to classify the business by the type of goods or services it provides.
       type: string
+      maxLength: 4
       minLength: 0
-      maxLength: 50
-      format: date-time
-      example: '2023-04-28T10:30:00.000Z'
-    User:
-      description: Username for the user creating or modifying a resource
+      pattern: ^[0-9]*$
+      example: '3002'
+    MerchantType:
+      title: Merchant's Type
+      description: Merchant Type must be one of - PARTNER, ACQUIRER, SUBMERCHANT
       type: string
-      minLength: 0
-      maxLength: 200
-      example: John Doe
-    Errors:
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          type: array
-          description: List of error objects
-          items:
-            $ref: '#/components/schemas/Error'
-          example: []
-      description: Errors object
-    FirstName:
-      title: First Name
-      maxLength: 30
       minLength: 1
-      type:
-      - string
-      - 'null'
-      description: The individual's first name
-      example: Michael
-    AlertsMerchantMemberId:
-      title: Unique identifier for merchants
-      description: Internal Universally Unique Identifier (UUID) which uniquely identifies the merchants
-      type: string
-      format: uuid
-      example: 99ca4b15-72a6-41dd-8127-573d4b07669c
-    AlertsSubMerchantCreate:
-      description: Request used to create sub-merchants
-      type: object
-      properties:
-        name:
-          $ref: '#/components/schemas/MerchantName'
-        merchantCategoryCode:
-          $ref: '#/components/schemas/MerchantCategoryCode'
-      required:
-      - name
-      - merchantCategoryCode
+      maxLength: 50
+      example: SUBMERCHANT
     ResponseHeader:
       type: object
       properties:
@@ -381,15 +335,13 @@ components:
       type: string
       description: Merchant's partial or full name.
       example: Merchant 1
-    LastName:
-      title: Last Name
-      maxLength: 30
-      minLength: 1
-      type:
-      - string
-      - 'null'
-      description: The individual's last name
-      example: Fox
+    Timestamp:
+      description: Timestamp of the creation or modification of the resource
+      type: string
+      minLength: 0
+      maxLength: 50
+      format: date-time
+      example: '2023-04-28T10:30:00.000Z'
     UserId:
       title: User Id
       maxLength: 300
@@ -397,17 +349,6 @@ components:
       type: string
       description: The user id of the submitter/technical contact.
       example: princess.diana
-    AlertsSubMerchantDetailsUpdate:
-      description: Request used to update sub-merchant details
-      type: object
-      properties:
-        name:
-          $ref: '#/components/schemas/MerchantName'
-        merchantCategoryCode:
-          $ref: '#/components/schemas/MerchantCategoryCode'
-      required:
-      - name
-      - merchantCategoryCode
     AlertsSubMerchantResource:
       description: Response containing a specific sub-merchant with details
       type: object
@@ -430,48 +371,40 @@ components:
           $ref: '#/components/schemas/CreatedOrModifiedBy'
         statusUpdateTs:
           $ref: '#/components/schemas/Timestamp'
-    CreatedOrModifiedBy:
-      description: Timestamp and user responsible for creation or modification of the resource
-      type: object
-      properties:
-        timestamp:
-          $ref: '#/components/schemas/Timestamp'
-        user:
-          $ref: '#/components/schemas/User'
-    ResponseTime:
-      type: string
-      description: Total response time in ms
-      minLength: 0
-      maxLength: 10
-      example: 300 ms
-    ErrorResponse:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-      description: Error Response object
-    MerchantCategoryCode:
-      title: Merchant Category Code
-      description: A four-digit number listed in ISO 18245 for retail financial services. MCC is used to classify the business by the type of goods or services it provides.
-      type: string
-      maxLength: 4
-      minLength: 0
-      pattern: ^[0-9]*$
-      example: '3002'
   examples:
-    ResourceNotFound:
-      summary: Resource Not Found Error Response
-      description: If request URI doesn't match with any available endpoints, then ResourceNotFound error response is returned the caller with HTTP Status code 404.
+    ForbiddenOperation:
+      summary: Member does not have permission to add/update/delete a resource
+      description: If the merchant tries operate on a resource that is not related to them or if they are not allowed perform a specific operation on their resource, then ForbiddenOperation error response is returned to the caller with HTTP Status code 403.
       value:
         Errors:
           Error:
           - Source: service
-            ReasonCode: resource.not.found
-            Description: Not Found
+            ReasonCode: operation.not.allowed
+            Description: Member is not allowed to perform a specific operation on a particular resource
             Recoverable: false
-            Details: /merchant-self-services/sub-merchantTs/
+            Details: ''
+    ValidationFailed:
+      summary: Validation of the request failed
+      description: If the fields in the request did not pass the validation, a ValidationFailed error response is returned to the caller with HTTP Status code 422.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: validation.failed
+            Description: Validation of the request fields failed
+            Recoverable: false
+            Details: ''
+    FormatInvalid:
+      summary: Format Invalid Error Response For Consumer Clarity
+      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: format.invalid
+            Description: orderHistoryMonths
+            Recoverable: false
+            Details: ''
     AlertsSubMerchantDeactivated:
       summary: Alerts Merchant - Deactivated
       value:
@@ -488,15 +421,37 @@ components:
           timestamp: '2023-04-30T10:30:00.000Z'
           user: princess.diana
         statusUpdateTs: '2023-04-30T10:30:00.000Z'
-    InvalidData:
-      summary: Invalid Data Error Response For Consumer Clarity
+    ServerError:
+      summary: Server Error Response
+      description: If an unexpected internal server error occurs, then ServerError response is returned to the caller with HTTP Status code 500.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: server.error
+            Description: Internal Server Error
+            Recoverable: false
+            Details: ''
+    ResourceNotFound:
+      summary: Resource Not Found Error Response
+      description: If request URI doesn't match with any available endpoints, then ResourceNotFound error response is returned the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: resource.not.found
+            Description: Not Found
+            Recoverable: false
+            Details: /merchant-self-services/sub-merchantTs/
+    AlertsInvalidData:
+      summary: Invalid Data Field Error Response For Alerts
       description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
       value:
         Errors:
           Error:
           - Source: service
-            ReasonCode: 'invalid data: merchantType'
-            Description: must not be blank
+            ReasonCode: 'invalid data: name'
+            Description: size must be between 3 and 200
             Recoverable: false
             Details: ''
     AlertsFormatInvalid:
@@ -510,15 +465,26 @@ components:
             Description: must match \"^[0-9]*$\"
             Recoverable: false
             Details: ''
-    FormatInvalid:
-      summary: Format Invalid Error Response For Consumer Clarity
-      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
+    InvalidData:
+      summary: Invalid Data Error Response For Consumer Clarity
+      description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
       value:
         Errors:
           Error:
           - Source: service
-            ReasonCode: format.invalid
-            Description: orderHistoryMonths
+            ReasonCode: 'invalid data: merchantType'
+            Description: must not be blank
+            Recoverable: false
+            Details: ''
+    AlertsEntityNotFound:
+      summary: Entity Not Found Error Response For Alerts
+      description: If a requested entity(e.g. Sub-Merchant or Card Acceptor ID or Card Acceptor Name) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: subMerchantId'
+            Description: Sub-Merchant 99ca4b15-72a6-41dd-8127-573d4b07669c not found
             Recoverable: false
             Details: ''
     PermissionDenied:
@@ -530,28 +496,6 @@ components:
           - Source: service
             ReasonCode: permission.denied
             Description: Member does not have permission to perform any operation
-            Recoverable: false
-            Details: ''
-    ValidationFailed:
-      summary: Validation of the request failed
-      description: If the fields in the request did not pass the validation, a ValidationFailed error response is returned to the caller with HTTP Status code 422.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: validation.failed
-            Description: Validation of the request fields failed
-            Recoverable: false
-            Details: ''
-    EntityNotFound:
-      summary: Entity Not Found Error Response For Consumer Clarity
-      description: If a requested entity(e.g. Merchant or Logo) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: 'invalid data: GUID'
-            Description: Merchant 1E37M8VSX1D28QYX not found
             Recoverable: false
             Details: ''
     AlertsSubMerchantActivated:
@@ -570,15 +514,26 @@ components:
           timestamp: '2023-04-28T10:30:00.000Z'
           user: princess.diana
         statusUpdateTs: '2023-04-28T10:30:00.000Z'
-    AlertsEntityNotFound:
-      summary: Entity Not Found Error Response For Alerts
-      description: If a requested entity(e.g. Sub-Merchant or Card Acceptor ID or Card Acceptor Name) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
+    EntityNotFound:
+      summary: Entity Not Found Error Response For Consumer Clarity
+      description: If a requested entity(e.g. Merchant or Logo) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
       value:
         Errors:
           Error:
           - Source: service
-            ReasonCode: 'invalid data: subMerchantId'
-            Description: Sub-Merchant 99ca4b15-72a6-41dd-8127-573d4b07669c not found
+            ReasonCode: 'invalid data: GUID'
+            Description: Merchant 1E37M8VSX1D28QYX not found
+            Recoverable: false
+            Details: ''
+    InvalidParameterSet:
+      summary: Invalid Parameter Set Error Response
+      description: If request body is malformed or missing, then InvalidParameterSet error response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: invalid.parameter.set
+            Description: request body is malformed
             Recoverable: false
             Details: ''
     AlertsPageableSubMerchants:
@@ -616,50 +571,6 @@ components:
             timestamp: '2023-02-02T10:30:00.000Z'
             user: John Doe
           statusUpdateTs: '2023-02-02T10:30:00.000Z'
-    ForbiddenOperation:
-      summary: Member does not have permission to add/update/delete a resource
-      description: If the merchant tries operate on a resource that is not related to them or if they are not allowed perform a specific operation on their resource, then ForbiddenOperation error response is returned to the caller with HTTP Status code 403.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: operation.not.allowed
-            Description: Member is not allowed to perform a specific operation on a particular resource
-            Recoverable: false
-            Details: ''
-    InvalidParameterSet:
-      summary: Invalid Parameter Set Error Response
-      description: If request body is malformed or missing, then InvalidParameterSet error response is returned to the caller with HTTP Status code 400.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: invalid.parameter.set
-            Description: request body is malformed
-            Recoverable: false
-            Details: ''
-    ServerError:
-      summary: Server Error Response
-      description: If an unexpected internal server error occurs, then ServerError response is returned to the caller with HTTP Status code 500.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: server.error
-            Description: Internal Server Error
-            Recoverable: false
-            Details: ''
-    AlertsInvalidData:
-      summary: Invalid Data Field Error Response For Alerts
-      description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: 'invalid data: name'
-            Description: size must be between 3 and 200
-            Recoverable: false
-            Details: ''
     MissingRequiredHeader:
       summary: Missing Required Header Error Response
       description: If a required request header is missing or null, then MissingRequiredHeader error response is returned to the caller with HTTP Status code 400.
@@ -671,57 +582,109 @@ components:
             Description: Submitter-First-Name
             Recoverable: false
             Details: ''
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            InvalidData:
+              $ref: '#/components/examples/InvalidData'
+            AlertsInvalidData:
+              $ref: '#/components/examples/AlertsInvalidData'
+            InvalidParameterSet:
+              $ref: '#/components/examples/InvalidParameterSet'
+            FormatInvalid:
+              $ref: '#/components/examples/FormatInvalid'
+            AlertsFormatInvalid:
+              $ref: '#/components/examples/AlertsFormatInvalid'
+            MissingRequiredHeader:
+              $ref: '#/components/examples/MissingRequiredHeader'
+    PermissionDenied:
+      description: Permission Denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            PermissionDenied:
+              $ref: '#/components/examples/PermissionDenied'
+    Default:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ServerError:
+              $ref: '#/components/examples/ServerError'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ResourceNotFound:
+              $ref: '#/components/examples/ResourceNotFound'
+            EntityNotFound:
+              $ref: '#/components/examples/EntityNotFound'
+            AlertsEntityNotFound:
+              $ref: '#/components/examples/AlertsEntityNotFound'
+    ForbiddenOperation:
+      description: Forbidden Operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ForbiddenOperation:
+              $ref: '#/components/examples/ForbiddenOperation'
+    AlertsSubMerchantSuccess:
+      description: Sub-merchant with all details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsSubMerchantResource'
+          examples:
+            AlertsSubMerchantActivated:
+              $ref: '#/components/examples/AlertsSubMerchantActivated'
+            AlertsSubMerchantDeactivated:
+              $ref: '#/components/examples/AlertsSubMerchantDeactivated'
+    ValidationFailed:
+      description: Validation Failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ValidationFailed:
+              $ref: '#/components/examples/ValidationFailed'
+    AlertsPageableSubMerchants:
+      description: Pageable list of sub-merchants with all details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsPageableSubMerchantResource'
+          examples:
+            AlertsPageableSubMerchants:
+              $ref: '#/components/examples/AlertsPageableSubMerchants'
+  requestBodies:
+    AlertsSubMerchantCreateRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsSubMerchantCreate'
+    AlertsSubMerchantDetailsUpdateRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsSubMerchantDetailsUpdate'
   parameters:
-    SubmitterFirstNameParam:
-      name: Submitter-First-Name
-      in: header
-      required: true
-      example: Diana
-      description: The first name of the submitter/technical contact.
-      schema:
-        $ref: '#/components/schemas/FirstName'
-    UserIdParam:
-      name: User-Id
-      in: header
-      required: true
-      example: princess.diana
-      description: The user id of the submitter/technical contact.
-      schema:
-        $ref: '#/components/schemas/UserId'
-    SubmitterLastNameParam:
-      name: Submitter-Last-Name
-      in: header
-      required: true
-      example: Princess
-      description: The last name of the submitter/technical contact.
-      schema:
-        $ref: '#/components/schemas/LastName'
-    OffsetParam:
-      name: offset
-      in: query
-      required: false
-      description: Number of items per page
-      schema:
-        type: integer
-        default: 25
-        maximum: 25
-      example: 25
-    MerchantNameParam:
-      name: name
-      in: query
-      required: true
-      description: The name of the merchant
-      example: Merchant 1
-      schema:
-        $ref: '#/components/schemas/MerchantName'
-    MemberIdParam:
-      name: member_id
-      in: path
-      required: true
-      description: Merchant member ID (parent of the sub-merchant)
-      example: 99ca4b15-72a6-41dd-8127-573d4b07669c
-      schema:
-        $ref: '#/components/schemas/AlertsMerchantMemberId'
     SubMerchantIdParam:
       name: sub_merchant_id
       in: path
@@ -730,6 +693,14 @@ components:
       example: cc2cac41-d127-4c06-9646-c0f2ad76c444
       schema:
         $ref: '#/components/schemas/AlertsMerchantMemberId'
+    SubmitterFirstNameParam:
+      name: Submitter-First-Name
+      in: header
+      required: true
+      example: Diana
+      description: The first name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/FirstName'
     MerchantStatusParam:
       name: status
       in: query
@@ -748,16 +719,45 @@ components:
         default: 1
         minimum: 1
       example: 1
-  requestBodies:
-    AlertsSubMerchantCreateRequestBody:
+    SubmitterLastNameParam:
+      name: Submitter-Last-Name
+      in: header
       required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AlertsSubMerchantCreate'
-    AlertsSubMerchantDetailsUpdateRequestBody:
+      example: Princess
+      description: The last name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/LastName'
+    MerchantNameParam:
+      name: name
+      in: query
       required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AlertsSubMerchantDetailsUpdate'
+      description: The name of the merchant
+      example: Merchant 1
+      schema:
+        $ref: '#/components/schemas/MerchantName'
+    MemberIdParam:
+      name: member_id
+      in: path
+      required: true
+      description: Merchant member ID (parent of the sub-merchant)
+      example: 99ca4b15-72a6-41dd-8127-573d4b07669c
+      schema:
+        $ref: '#/components/schemas/AlertsMerchantMemberId'
+    OffsetParam:
+      name: offset
+      in: query
+      required: false
+      description: Number of items per page
+      schema:
+        type: integer
+        default: 25
+        maximum: 25
+      example: 25
+    UserIdParam:
+      name: User-Id
+      in: header
+      required: true
+      example: princess.diana
+      description: The user id of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/UserId'

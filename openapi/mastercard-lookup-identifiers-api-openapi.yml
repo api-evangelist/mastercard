@@ -33,6 +33,16 @@ paths:
           $ref: '#/components/responses/ErrorsResponse'
 components:
   schemas:
+    UserReferences:
+      required:
+      - userReference
+      type: object
+      properties:
+        userReferences:
+          type: array
+          description: User Reference
+          items:
+            $ref: '#/components/schemas/UserReference'
     ErrorItem:
       type: object
       properties:
@@ -57,6 +67,51 @@ components:
           description: Where appropriate, indicates detailed information about the data received.
           example: Invalid Details
       description: Error Details
+    UserSearch:
+      required:
+      - userId
+      - userIdType
+      type: object
+      properties:
+        userId:
+          maxLength: 50
+          minLength: 0
+          type: string
+          description: Unique identifier of the User.
+          example: '5444163200000015000'
+        userIdType:
+          type: string
+          description: Identifier type for the given user. Supported identifiers are BAN or BCN or RANCU or RANAC.
+          example: BAN
+        includeSensitiveIdentifiers:
+          type: boolean
+          description: When set to true, authorized clients will also receive sensitive identifiers in response.
+          example: true
+        programIdentifier:
+          type: string
+          description: Filter response to include only accounts that belong to the program.
+          example: PGM42051
+        includeOnlyPrimary:
+          type: boolean
+          description: When set to true, only primary accounts details are included in the response.
+          example: true
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error Details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
     AccountDetails:
       type: object
       properties:
@@ -93,61 +148,6 @@ components:
           description: Account Details
           items:
             $ref: '#/components/schemas/AccountDetails'
-    UserReferences:
-      required:
-      - userReference
-      type: object
-      properties:
-        userReferences:
-          type: array
-          description: User Reference
-          items:
-            $ref: '#/components/schemas/UserReference'
-    Errors:
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          type: array
-          description: Error Details
-          items:
-            $ref: '#/components/schemas/ErrorItem'
-    UserSearch:
-      required:
-      - userId
-      - userIdType
-      type: object
-      properties:
-        userId:
-          maxLength: 50
-          minLength: 0
-          type: string
-          description: Unique identifier of the User.
-          example: '5444163200000015000'
-        userIdType:
-          type: string
-          description: Identifier type for the given user. Supported identifiers are BAN or BCN or RANCU or RANAC.
-          example: BAN
-        includeSensitiveIdentifiers:
-          type: boolean
-          description: When set to true, authorized clients will also receive sensitive identifiers in response.
-          example: true
-        programIdentifier:
-          type: string
-          description: Filter response to include only accounts that belong to the program.
-          example: PGM42051
-        includeOnlyPrimary:
-          type: boolean
-          description: When set to true, only primary accounts details are included in the response.
-          example: true
-    ErrorsWrapper:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
   responses:
     ErrorsResponse:
       description: Bad Request

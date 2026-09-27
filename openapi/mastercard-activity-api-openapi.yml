@@ -47,6 +47,120 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/RPActivitySearchRequest'
 components:
+  examples:
+    EncryptedPayloadNoPDSExample:
+      value:
+        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyf
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+    UserProfileDeletedErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_DELETED
+            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
+            Recoverable: false
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided user profile ID does not exist.
+            Recoverable: false
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
+            Recoverable: false
+    RPActivitiesResponseExample:
+      value:
+        rpActivities:
+        - rpName: Toys Inc
+          consentType: OneTime
+          createdDate: '2020-01-28T18:16:01.714Z'
+          attributesConsented:
+            passport.firstName: John
+            passport.lastName: Doe
+        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+  responses:
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
+    UnauthorizedError:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    RPActivitySearchResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RPActivities'
+          examples:
+            UnencryptedResponseExample:
+              $ref: '#/components/examples/RPActivitiesResponseExample'
+            EncryptedResponseExample:
+              $ref: '#/components/examples/EncryptedPayloadNoPDSExample'
+    NotFoundError:
+      description: The request didn't match an existing resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
   schemas:
     UserConsent:
       enum:
@@ -60,6 +174,50 @@ components:
       minLength: 6
       maxLength: 7
       example: ACCEPT
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      description: The error response model used by all the API endpoints.
+      properties:
+        Errors:
+          required:
+          - Error
+          type: object
+          description: The error response model used by all the API endpoints.
+          properties:
+            Error:
+              type: array
+              description: A list of Error objects.
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The source of the problem. That is where the error occurred.
+                    example: mids
+                  ReasonCode:
+                    type: string
+                    description: A code defining the error, as defined in documentation.
+                    example: USER_PROFILE_ID_NOT_FOUND
+                  Description:
+                    type: string
+                    description: A description of this specific occurrence of the Reason code.
+                    example: The provided user profile ID does not exist.
+                  Recoverable:
+                    type: boolean
+                    description: Whether or not retrying this request could result in a successful response.
+                    example: false
+                  Details:
+                    type: string
+                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+                    example: User X was not found
+                  redirectUri:
+                    type: string
+                    description: TP will use this URI to redirect to RP.
+                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
     RPActivities:
       required:
       - rpActivities
@@ -149,105 +307,6 @@ components:
           example:
             passport.firstName: John
             passport.lastName: Doe
-    ErrorResponse:
-      required:
-      - Errors
-      type: object
-      description: The error response model used by all the API endpoints.
-      properties:
-        Errors:
-          required:
-          - Error
-          type: object
-          description: The error response model used by all the API endpoints.
-          properties:
-            Error:
-              type: array
-              description: A list of Error objects.
-              minItems: 1
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    description: The source of the problem. That is where the error occurred.
-                    example: mids
-                  ReasonCode:
-                    type: string
-                    description: A code defining the error, as defined in documentation.
-                    example: USER_PROFILE_ID_NOT_FOUND
-                  Description:
-                    type: string
-                    description: A description of this specific occurrence of the Reason code.
-                    example: The provided user profile ID does not exist.
-                  Recoverable:
-                    type: boolean
-                    description: Whether or not retrying this request could result in a successful response.
-                    example: false
-                  Details:
-                    type: string
-                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
-                    example: User X was not found
-                  redirectUri:
-                    type: string
-                    description: TP will use this URI to redirect to RP.
-                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
-                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
-  examples:
-    EncryptedPayloadNoPDSExample:
-      value:
-        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyf
-    UserProfileDeletedErrorExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: USER_PROFILE_DELETED
-            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
-            Recoverable: false
-            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
-    NotFoundExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: USER_PROFILE_ID_NOT_FOUND
-            Description: The provided user profile ID does not exist.
-            Recoverable: false
-    RPActivitiesResponseExample:
-      value:
-        rpActivities:
-        - rpName: Toys Inc
-          consentType: OneTime
-          createdDate: '2020-01-28T18:16:01.714Z'
-          attributesConsented:
-            passport.firstName: John
-            passport.lastName: Doe
-        rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-    ForbiddenExampleUnauthorizedScopedFields:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
-            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
-            Recoverable: false
-    UnauthorizedExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: UNAUTHORIZED_REQUEST
-            Description: Unauthorized request.
-            Recoverable: false
-    ForbiddenExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: CONSENT_NOT_GIVEN
-            Description: User Consent Not Given.
-            Recoverable: false
   parameters:
     XEncryptedPayload:
       in: header
@@ -267,65 +326,6 @@ components:
         '
       schema:
         type: string
-  responses:
-    UnauthorizedError:
-      description: Unauthorized request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedExample'
-    RPActivitySearchResponse:
-      description: Success.
-      headers:
-        X-Transaction-ID:
-          schema:
-            type: string
-          description: A random 128-bit UUID represents the transaction.
-        X-User-Identity:
-          schema:
-            type: string
-          description: JWT token for session validation in subsequent API calls.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/RPActivities'
-          examples:
-            UnencryptedResponseExample:
-              $ref: '#/components/examples/RPActivitiesResponseExample'
-            EncryptedResponseExample:
-              $ref: '#/components/examples/EncryptedPayloadNoPDSExample'
-    ForbiddenError:
-      description: Consent not given.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            ForbiddenExample:
-              $ref: '#/components/examples/ForbiddenExample'
-            ForbiddenExampleUnauthorizedScopedFields:
-              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
-    NotFoundError:
-      description: The request didn't match an existing resource.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            NotFoundExample:
-              $ref: '#/components/examples/NotFoundExample'
-    BadRequestError:
-      description: Something was wrong with the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            UserProfileDeletedErrorExample:
-              $ref: '#/components/examples/UserProfileDeletedErrorExample'
   requestBodies:
     RPActivitySearchRequest:
       content:

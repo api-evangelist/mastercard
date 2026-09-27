@@ -38,15 +38,25 @@ paths:
         dispatcher: FALLBACK
 components:
   schemas:
-    ErrorWrapper:
-      title: ErrorWrapper
+    Errors:
+      title: Errors
       type: object
-      description: The error response object gets returned in case of error.
+      description: Error object which contains a list of error objects.
       required:
-      - Errors
+      - Error
       properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
+        Error:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+          example: []
+    UserID:
+      type: string
+      minLength: 36
+      maxLength: 36
+      pattern: ^[0-9A-Fa-f-]{36}
+      description: Unique identifier for a user enrolled in the Carbon Calculator Experience platform.
+      example: f5d88571-ac15-465a-a0d8-1ad1327b9a06
     AggregateCarbonScore:
       type: object
       required:
@@ -103,53 +113,63 @@ components:
           minLength: 0
           maxLength: 5000
           example: email must not be null.
-    Errors:
-      title: Errors
+    ErrorWrapper:
+      title: ErrorWrapper
       type: object
-      description: Error object which contains a list of error objects.
+      description: The error response object gets returned in case of error.
       required:
-      - Error
+      - Errors
       properties:
-        Error:
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-          example: []
-    UserID:
-      type: string
-      minLength: 36
-      maxLength: 36
-      pattern: ^[0-9A-Fa-f-]{36}
-      description: Unique identifier for a user enrolled in the Carbon Calculator Experience platform.
-      example: f5d88571-ac15-465a-a0d8-1ad1327b9a06
-  parameters:
-    UserID:
-      in: path
-      name: userid
-      description: Unique identifier for a user enrolled into Carbon Calculator Experience platform.
-      required: true
-      example: f5d88571-ac15-465a-a0d8-1ad1327b9a06
-      schema:
-        $ref: '#/components/schemas/UserID'
+        Errors:
+          $ref: '#/components/schemas/Errors'
+  responses:
+    AggregateCarbonScoreBadRequestError:
+      description: This response code is returned when a request is invalid or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidUserIdError:
+              $ref: '#/components/examples/InvalidUserIdError'
+    AggregateCarbonScoreNotFoundError:
+      description: This response code is returned when a user or Issuer is not present.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            UserNotFoundError:
+              $ref: '#/components/examples/UserNotFoundError'
+            IssuerNotFoundError:
+              $ref: '#/components/examples/IssuerNotFoundError'
+    AggregateCarbonScoreUnauthorisedError:
+      description: This response code is returned when a user is terminated or inactive.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            IssuerInactiveError:
+              $ref: '#/components/examples/IssuerInactiveError'
+            UserInactiveError:
+              $ref: '#/components/examples/UserInactiveError'
+            UserTerminatedError:
+              $ref: '#/components/examples/UserTerminatedError'
+            IssuerSuspendedError:
+              $ref: '#/components/examples/IssuerSuspendedError'
+            IssuerTerminatedError:
+              $ref: '#/components/examples/IssuerTerminatedError'
+    AggregateCarbonScore:
+      description: The response object contains an aggregation of carbon footprint.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AggregateCarbonScore'
+          examples:
+            AggregateCarbonScores:
+              $ref: '#/components/examples/AggregateCarbonScore'
   examples:
-    UserNotFoundError:
-      value:
-        Errors:
-          Error:
-          - Source: CARBON CALCULATOR EXPERIENCE
-            ReasonCode: USER_NOT_FOUND
-            Description: We cannot find user details for provided userId. Kindly register the user through the enrollment process.
-            Recoverable: false
-            Details: Make sure the user is enrolled through /issuers/users API endpoint.
-    IssuerSuspendedError:
-      value:
-        Errors:
-          Error:
-          - Source: CARBON CALCULATOR EXPERIENCE
-            ReasonCode: ACCOUNT_SUSPENDED
-            Description: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
-            Recoverable: false
-            Details: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
     InvalidUserIdError:
       value:
         Errors:
@@ -168,15 +188,15 @@ components:
             Description: Your account has been terminated, you won't be able to access any service. Kindly register yourself again.
             Recoverable: false
             Details: Your account has been terminated, you won't be able to access any service. Kindly register yourself again.
-    IssuerInactiveError:
+    UserNotFoundError:
       value:
         Errors:
           Error:
           - Source: CARBON CALCULATOR EXPERIENCE
-            ReasonCode: ACCOUNT_INACTIVE
-            Description: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+            ReasonCode: USER_NOT_FOUND
+            Description: We cannot find user details for provided userId. Kindly register the user through the enrollment process.
             Recoverable: false
-            Details: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+            Details: Make sure the user is enrolled through /issuers/users API endpoint.
     UserTerminatedError:
       value:
         Errors:
@@ -208,50 +228,30 @@ components:
       value:
         carbonEmissionInGrams: '32.45'
         aggregateDate: november-2020
-  responses:
-    AggregateCarbonScore:
-      description: The response object contains an aggregation of carbon footprint.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AggregateCarbonScore'
-          examples:
-            AggregateCarbonScores:
-              $ref: '#/components/examples/AggregateCarbonScore'
-    AggregateCarbonScoreNotFoundError:
-      description: This response code is returned when a user or Issuer is not present.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            UserNotFoundError:
-              $ref: '#/components/examples/UserNotFoundError'
-            IssuerNotFoundError:
-              $ref: '#/components/examples/IssuerNotFoundError'
-    AggregateCarbonScoreBadRequestError:
-      description: This response code is returned when a request is invalid or data in the request is not valid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            InvalidUserIdError:
-              $ref: '#/components/examples/InvalidUserIdError'
-    AggregateCarbonScoreUnauthorisedError:
-      description: This response code is returned when a user is terminated or inactive.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            IssuerInactiveError:
-              $ref: '#/components/examples/IssuerInactiveError'
-            UserInactiveError:
-              $ref: '#/components/examples/UserInactiveError'
-            UserTerminatedError:
-              $ref: '#/components/examples/UserTerminatedError'
-            IssuerSuspendedError:
-              $ref: '#/components/examples/IssuerSuspendedError'
-            IssuerTerminatedError:
-              $ref: '#/components/examples/IssuerTerminatedError'
+    IssuerInactiveError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_INACTIVE
+            Description: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+    IssuerSuspendedError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_SUSPENDED
+            Description: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
+  parameters:
+    UserID:
+      in: path
+      name: userid
+      description: Unique identifier for a user enrolled into Carbon Calculator Experience platform.
+      required: true
+      example: f5d88571-ac15-465a-a0d8-1ad1327b9a06
+      schema:
+        $ref: '#/components/schemas/UserID'

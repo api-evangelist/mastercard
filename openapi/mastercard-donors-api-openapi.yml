@@ -51,6 +51,314 @@ paths:
       deprecated: false
 components:
   schemas:
+    Identification:
+      type: object
+      properties:
+        country:
+          type: string
+          example: MX
+          minLength: 2
+          maxLength: 3
+          description: Country
+        type:
+          type: string
+          example: GovtId
+          minLength: 3
+          maxLength: 20
+          description: Type
+        value:
+          type: string
+          example: '16367222222'
+          minLength: 11
+          maxLength: 20
+          description: Value
+      title: Identification
+    Error-AddUser:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an error condition.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: USER_ALREADY_PRESENT
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Username already exists.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: array
+                    items:
+                      type: string
+                      example: 'DonorId: ac9208b9-65cc-4d64-85c1-63ea703e3252'
+    UserName:
+      type: object
+      required:
+      - firstName
+      - lastName
+      properties:
+        firstName:
+          type: string
+          example: John
+          minLength: 3
+          maxLength: 30
+          description: First Name
+        lastName:
+          type: string
+          example: Doe
+          minLength: 3
+          maxLength: 30
+          description: Last Name
+        honorificPrefix:
+          type: string
+          example: Mr
+          minLength: 2
+          maxLength: 30
+          description: Honorific Prefix
+        honorificSuffix:
+          type: string
+          example: Jr.
+          minLength: 2
+          maxLength: 30
+          description: Honorific Suffix
+      title: UserName
+    ConsumerEmail:
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          example: home
+          description: The type must be "home" for at least one email address.
+          minLength: 4
+          maxLength: 20
+        value:
+          type: string
+          example: John.Doe@mail.com
+          description: Email Id
+          minLength: 10
+          maxLength: 30
+      title: ConsumerEmail
+    AcceptedConsent:
+      type: object
+      required:
+      - marketingEmailSubscribed
+      - privacyNoticeVersion
+      - tncVersion
+      properties:
+        marketingEmailSubscribed:
+          type: string
+          example: Y
+          minLength: 1
+          maxLength: 1
+          description: Marketing Email Subscribed
+        privacyNoticeVersion:
+          type: string
+          example: PN.2-#-xr.en-us.99.01
+          minLength: 21
+          maxLength: 21
+          description: Privacy Notice Version
+        tncVersion:
+          type: string
+          example: TC.##r#12.EN-Us.99.99
+          minLength: 21
+          maxLength: 21
+          description: Tnc Version
+      title: AcceptedConsent
+    Error-415:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: UNSUPPORTED_CONTENT_TYPE
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The request Content-Type (<request content-type value>) is not supported for this service
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    PersonalInformation:
+      title: PersonalInformation
+      type: object
+      properties:
+        identifications:
+          type: array
+          description: identifications
+          items:
+            $ref: '#/components/schemas/Identification'
+    DonorPhoneNumber:
+      type: object
+      properties:
+        type:
+          type: string
+          example: home
+          minLength: 3
+          maxLength: 20
+          description: Type
+        value:
+          type: string
+          example: '+16367222222'
+          minLength: 11
+          maxLength: 20
+          description: Phone number with country code.
+      title: DonorPhoneNumber
+    Error-500:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to server error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an server issue.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: PROGRAM_ID_NOT_FOUND
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Program id is required as this client is mapped to multiple programs.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error-401:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to authorization failure
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: AUTHENTICATION_FAILED
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: OAuth signatures did not match.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error-403:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to forbidden requests
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of forbidden request.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: INVALID_KEY
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The signing certificate is not valid.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
     DonateUserAddress:
       required:
       - type
@@ -101,322 +409,6 @@ components:
           maxLength: 20
           description: Type
       title: DonateUserAddress
-    Error-500:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          description: Contains all errors caused due to server error
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of an server issue.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: DONATE_SERVICE
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: PROGRAM_ID_NOT_FOUND
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: Program id is required as this client is mapped to multiple programs.
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example: 'null'
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    Identification:
-      type: object
-      properties:
-        country:
-          type: string
-          example: MX
-          minLength: 2
-          maxLength: 3
-          description: Country
-        type:
-          type: string
-          example: GovtId
-          minLength: 3
-          maxLength: 20
-          description: Type
-        value:
-          type: string
-          example: '16367222222'
-          minLength: 11
-          maxLength: 20
-          description: Value
-      title: Identification
-    Error-403:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          description: Contains all errors caused due to forbidden requests
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of forbidden request.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: Gateway
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: INVALID_KEY
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: The signing certificate is not valid.
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example: 'null'
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    DonorPhoneNumber:
-      type: object
-      properties:
-        type:
-          type: string
-          example: home
-          minLength: 3
-          maxLength: 20
-          description: Type
-        value:
-          type: string
-          example: '+16367222222'
-          minLength: 11
-          maxLength: 20
-          description: Phone number with country code.
-      title: DonorPhoneNumber
-    UserName:
-      type: object
-      required:
-      - firstName
-      - lastName
-      properties:
-        firstName:
-          type: string
-          example: John
-          minLength: 3
-          maxLength: 30
-          description: First Name
-        lastName:
-          type: string
-          example: Doe
-          minLength: 3
-          maxLength: 30
-          description: Last Name
-        honorificPrefix:
-          type: string
-          example: Mr
-          minLength: 2
-          maxLength: 30
-          description: Honorific Prefix
-        honorificSuffix:
-          type: string
-          example: Jr.
-          minLength: 2
-          maxLength: 30
-          description: Honorific Suffix
-      title: UserName
-    Error-401:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          description: Contains all errors caused due to authorization failure
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of an authorization is failed.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: Gateway
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: AUTHENTICATION_FAILED
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: OAuth signatures did not match.
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example: 'null'
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    ConsumerEmail:
-      type: object
-      required:
-      - type
-      properties:
-        type:
-          type: string
-          example: home
-          description: The type must be "home" for at least one email address.
-          minLength: 4
-          maxLength: 20
-        value:
-          type: string
-          example: John.Doe@mail.com
-          description: Email Id
-          minLength: 10
-          maxLength: 30
-      title: ConsumerEmail
-    DonateUser:
-      type: object
-      properties:
-        donorId:
-          type: string
-          minLength: 36
-          maxLength: 36
-          example: 652ce9ff-fa5f-4e9f-8151-c73fa20088f7
-          format: uuid
-          description: Valid UUID.
-        userName:
-          type: string
-          example: John.Doe@mail.com
-          minLength: 5
-          maxLength: 30
-          description: User Name
-      title: DonateUserResponse
-    Error-415:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          description: Contains all errors caused
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of an authorization is failed.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: DONATE_SERVICE
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: UNSUPPORTED_CONTENT_TYPE
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: The request Content-Type (<request content-type value>) is not supported for this service
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example: 'null'
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    Error-AddUser:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          description: Contains all errors caused
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of an error condition.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: DONATE_SERVICE
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: USER_ALREADY_PRESENT
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: Username already exists.
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: array
-                    items:
-                      type: string
-                      example: 'DonorId: ac9208b9-65cc-4d64-85c1-63ea703e3252'
-    AcceptedConsent:
-      type: object
-      required:
-      - marketingEmailSubscribed
-      - privacyNoticeVersion
-      - tncVersion
-      properties:
-        marketingEmailSubscribed:
-          type: string
-          example: Y
-          minLength: 1
-          maxLength: 1
-          description: Marketing Email Subscribed
-        privacyNoticeVersion:
-          type: string
-          example: PN.2-#-xr.en-us.99.01
-          minLength: 21
-          maxLength: 21
-          description: Privacy Notice Version
-        tncVersion:
-          type: string
-          example: TC.##r#12.EN-Us.99.99
-          minLength: 21
-          maxLength: 21
-          description: Tnc Version
-      title: AcceptedConsent
     AddUser:
       type: object
       required:
@@ -479,15 +471,23 @@ components:
           maxLength: 20
           description: User Type
       title: AddUserRequest
-    PersonalInformation:
-      title: PersonalInformation
+    DonateUser:
       type: object
       properties:
-        identifications:
-          type: array
-          description: identifications
-          items:
-            $ref: '#/components/schemas/Identification'
+        donorId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          example: 652ce9ff-fa5f-4e9f-8151-c73fa20088f7
+          format: uuid
+          description: Valid UUID.
+        userName:
+          type: string
+          example: John.Doe@mail.com
+          minLength: 5
+          maxLength: 30
+          description: User Name
+      title: DonateUserResponse
   parameters:
     ProgramId:
       name: ProgramId
@@ -514,12 +514,12 @@ components:
         type: string
         example: 03f8c4e8-8bdc-4a30-a2b4-b6f989e96ca3
   responses:
-    DonateUser:
-      description: Success
+    InternalServerError:
+      description: Internal Server Error
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/DonateUser'
+            $ref: '#/components/schemas/Error-500'
     Unauthorized:
       description: Unauthorised
       content:
@@ -532,18 +532,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error-415'
+    DonateUser:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DonateUser'
     Forbidden:
       description: Forbidden
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error-403'
-    InternalServerError:
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-500'
   requestBodies:
     AddUser:
       description: addUserRequest

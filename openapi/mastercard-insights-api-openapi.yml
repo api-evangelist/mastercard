@@ -61,6 +61,124 @@ paths:
           $ref: '#/components/responses/InsightNotFoundError'
 components:
   schemas:
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns a list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    InsightItem:
+      properties:
+        heading:
+          description: Heading of the item
+          type: string
+          example: insight
+        id:
+          description: Id of the item
+          type: string
+          example: T1
+        mainCategory:
+          description: Main Category of the item
+          type: string
+          example: Shopping
+        seen:
+          description: whether or not item has been seen
+          type: boolean
+          example: false
+        spendingAreaId:
+          description: Spending Area Id
+          type: string
+          example: '678'
+        subCategory:
+          description: Sub Category of the item
+          type: string
+          example: hardware
+        version:
+          description: Version of the item
+          type: string
+          example: '1.1'
+      required:
+      - id
+      - mainCategory
+      - seen
+      - spendingAreaId
+      - subCategory
+      - version
+      type: object
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    InsightsResponseById:
+      properties:
+        insightsByIdPayload:
+          properties:
+            content:
+              description: The details of the insight
+              type: string
+              example: Voluptate eiusmod culpa incididunt excepteur anim ipsum et ex elit laboris esse. Nostrud proident culpa exercitation eu dolore consectetur sit amet cillum veniam enim duis ut. Qui mollit fugiat tempor deserunt occaecat fugiat adipisicing ex cupidatat duis commodo id ea. Dolor laboris eu commodo ea reprehenderit in nisi proident. Fugiat cupidatat excepteur et ullamco anim. Cillum fugiat commodo ipsum consequat irure proident tempor nisi tempor ad.\nOccaecat est pariatur cillum commodo incididunt exercitation laboris consectetur eu mollit incididunt. Adipisicing quis incididunt mollit esse officia dolore fugiat reprehenderit nisi do velit ea. Id cillum consectetur mollit eu laborum nostrud nulla sint Lorem voluptate elit id.
+            heading:
+              description: Title of insight
+              type: string
+              example: Recycle your e-waste
+            id:
+              description: The Insight Id
+              type: string
+              example: T101
+            mainCategory:
+              description: Main category of this insight
+              type: string
+              example: home
+            notification:
+              description: Summary user for tool tips or similar
+              type: string
+              example: A balanced diet is good for your health and that of the planet.
+            source:
+              description: Entity used as source for this insight
+              type: string
+              example: The Global E-waste Monitor 2020
+            sourceDate:
+              description: Date of source
+              type: string
+              example: '2020-07-01T00:00:00.000Z'
+            sourceDescription:
+              description: The source description
+              type: string
+              example: The Global E-waste Monitor 2020
+            sourceLink:
+              description: Link to source (if available)
+              type: string
+              example: https://ewastemonitor.info/wp-content/uploads/2020/11/GEM_2020_def_july1_low.pdf
+            spendingAreaId:
+              description: Spending Area Id
+              type: string
+              example: 10
+            subCategory:
+              description: The sub category
+              type: string
+              example: electronics
+            version:
+              description: Version for this profile
+              type: string
+              example: 1.1
+          required:
+          - content
+          - heading
+          - id
+          - mainCategory
+          - spendingAreaId
+          - subCategory
+          - version
+          type: object
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
+      required:
+      - insightPayload
+      type: object
     InsightsData:
       properties:
         insightPayload:
@@ -105,20 +223,34 @@ components:
       required:
       - insightPayload
       type: object
-    ErrorWrapper:
-      title: ErrorWrapper
+    InsightsRequestPayload:
+      title: InsightsRequestPayload
       type: object
-      description: The error response object gets returned in case of any error.
-      required:
-      - Errors
+      description: The request object which contains climate Profile and payload
       properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    InsightsByIdRequestPayload:
-      title: InsightsByIdRequestPayload
-      type: object
-      description: The request object which contains climate Profile
-      properties:
+        insightsPayload:
+          properties:
+            docc:
+              type: string
+              description: document of insights
+              example: Eat more greens - for the planet
+            main:
+              type: string
+              description: description of main category
+              example: shopping
+            mainCategory:
+              type: string
+              description: details of main category
+              example: shopping
+            spendingAreaId:
+              type: string
+              description: area of category in which expenditure was made
+              example: '30'
+            subCategory:
+              type: string
+              description: details of sub category
+              example: clothes
+          type: object
         profile:
           $ref: '#/components/schemas/ClimateProfile'
     ClimateProfile:
@@ -238,44 +370,11 @@ components:
       - traits
       - version
       type: object
-    InsightItem:
-      properties:
-        heading:
-          description: Heading of the item
-          type: string
-          example: insight
-        id:
-          description: Id of the item
-          type: string
-          example: T1
-        mainCategory:
-          description: Main Category of the item
-          type: string
-          example: Shopping
-        seen:
-          description: whether or not item has been seen
-          type: boolean
-          example: false
-        spendingAreaId:
-          description: Spending Area Id
-          type: string
-          example: '678'
-        subCategory:
-          description: Sub Category of the item
-          type: string
-          example: hardware
-        version:
-          description: Version of the item
-          type: string
-          example: '1.1'
-      required:
-      - id
-      - mainCategory
-      - seen
-      - spendingAreaId
-      - subCategory
-      - version
-      type: object
+    LanguageCode:
+      description: ISO 639-1 format language code
+      example: es
+      pattern: ^[a-z]{2}$
+      type: string
     Error:
       title: Error
       type: object
@@ -314,161 +413,136 @@ components:
           minLength: 0
           maxLength: 5000
           example: paymentCardId size must be between 36 and 36
-    InsightsResponseById:
+    InsightsByIdRequestPayload:
+      title: InsightsByIdRequestPayload
+      type: object
+      description: The request object which contains climate Profile
       properties:
-        insightsByIdPayload:
-          properties:
-            content:
-              description: The details of the insight
-              type: string
-              example: Voluptate eiusmod culpa incididunt excepteur anim ipsum et ex elit laboris esse. Nostrud proident culpa exercitation eu dolore consectetur sit amet cillum veniam enim duis ut. Qui mollit fugiat tempor deserunt occaecat fugiat adipisicing ex cupidatat duis commodo id ea. Dolor laboris eu commodo ea reprehenderit in nisi proident. Fugiat cupidatat excepteur et ullamco anim. Cillum fugiat commodo ipsum consequat irure proident tempor nisi tempor ad.\nOccaecat est pariatur cillum commodo incididunt exercitation laboris consectetur eu mollit incididunt. Adipisicing quis incididunt mollit esse officia dolore fugiat reprehenderit nisi do velit ea. Id cillum consectetur mollit eu laborum nostrud nulla sint Lorem voluptate elit id.
-            heading:
-              description: Title of insight
-              type: string
-              example: Recycle your e-waste
-            id:
-              description: The Insight Id
-              type: string
-              example: T101
-            mainCategory:
-              description: Main category of this insight
-              type: string
-              example: home
-            notification:
-              description: Summary user for tool tips or similar
-              type: string
-              example: A balanced diet is good for your health and that of the planet.
-            source:
-              description: Entity used as source for this insight
-              type: string
-              example: The Global E-waste Monitor 2020
-            sourceDate:
-              description: Date of source
-              type: string
-              example: '2020-07-01T00:00:00.000Z'
-            sourceDescription:
-              description: The source description
-              type: string
-              example: The Global E-waste Monitor 2020
-            sourceLink:
-              description: Link to source (if available)
-              type: string
-              example: https://ewastemonitor.info/wp-content/uploads/2020/11/GEM_2020_def_july1_low.pdf
-            spendingAreaId:
-              description: Spending Area Id
-              type: string
-              example: 10
-            subCategory:
-              description: The sub category
-              type: string
-              example: electronics
-            version:
-              description: Version for this profile
-              type: string
-              example: 1.1
-          required:
-          - content
-          - heading
-          - id
-          - mainCategory
-          - spendingAreaId
-          - subCategory
-          - version
-          type: object
         profile:
           $ref: '#/components/schemas/ClimateProfile'
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of any error.
       required:
-      - insightPayload
-      type: object
-    InsightsRequestPayload:
-      title: InsightsRequestPayload
-      type: object
-      description: The request object which contains climate Profile and payload
+      - Errors
       properties:
-        insightsPayload:
-          properties:
-            docc:
-              type: string
-              description: document of insights
-              example: Eat more greens - for the planet
-            main:
-              type: string
-              description: description of main category
-              example: shopping
-            mainCategory:
-              type: string
-              description: details of main category
-              example: shopping
-            spendingAreaId:
-              type: string
-              description: area of category in which expenditure was made
-              example: '30'
-            subCategory:
-              type: string
-              description: details of sub category
-              example: clothes
-          type: object
-        profile:
-          $ref: '#/components/schemas/ClimateProfile'
-    Errors:
-      title: Errors
-      type: object
-      description: Error object which returns a list of Error objects.
-      required:
-      - Error
-      properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList'
-    ErrorList:
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
-    LanguageCode:
-      description: ISO 639-1 format language code
-      example: es
-      pattern: ^[a-z]{2}$
-      type: string
-  requestBodies:
-    InsightsByIdRequest:
-      description: Represents a Climate Profile for a User.
+        Errors:
+          $ref: '#/components/schemas/Errors'
+  responses:
+    MissingInsightAttributesBadRequestError:
+      description: This response code is returned when one or more request parameters is either missing or is invalid.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/InsightsByIdRequestPayload'
+            $ref: '#/components/schemas/ErrorWrapper'
           examples:
-            InsightsByIdRequest:
-              $ref: '#/components/examples/InsightsByIdRequest'
-      required: true
-    InsightsRequest:
-      description: Insights for climate profile.
+            BadRequestError:
+              $ref: '#/components/examples/MissingInsightAttributesBadRequestError'
+    InsightsByIdResponse:
+      description: ''
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/InsightsRequestPayload'
+            $ref: '#/components/schemas/InsightsResponseById'
           examples:
-            InsightsRequest:
-              $ref: '#/components/examples/InsightsRequest'
-      required: true
-  examples:
+            InsightsByIdResponse:
+              $ref: '#/components/examples/InsightsByIdResponse'
+    InsightNotFoundError:
+      description: This response code is returned when one or more request parameters is either missing or is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+            InsightItemNotFoundError:
+              $ref: '#/components/examples/InsightItemNotFoundError'
+            InsightItemNotFoundInVersionError:
+              $ref: '#/components/examples/InsightItemNotFoundInVersionError'
+            UnsupportedLanguageError:
+              $ref: '#/components/examples/UnsupportedLanguageError'
+    Insights:
+      description: ''
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InsightsData'
+          examples:
+            InsightsResponseData:
+              $ref: '#/components/examples/InsightsResponseData'
     ServiceProviderNotFoundError:
-      value:
-        Errors:
-          Error:
-          - Source: Service-Provider-Mgmt
-            ReasonCode: ACCOUNT_NOT_FOUND
-            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
-            Recoverable: false
-            Details: ''
-    UnsupportedLanguageError:
-      value:
-        Errors:
-          Error:
-          - Source: Carbon-Calculator
-            ReasonCode: LANGUAGE_NOT_FOUND
-            Description: Unsupported language
-            Recoverable: false
-            Details: ''
+      description: This response code is returned when the server cannot find the account which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: Page number of the page whose data should be present in response
+      required: false
+      example: 2
+      schema:
+        type: integer
+        minimum: 1
+    Branding:
+      name: branding
+      in: query
+      description: If you have a branded content version, please supply it here
+      required: false
+      example: branding
+      schema:
+        type: string
+    Version:
+      name: version
+      in: query
+      description: version of insights
+      required: false
+      example: 1.1
+      schema:
+        type: string
+        minimum: 1
+    InsightsId:
+      name: id
+      in: path
+      description: for specific insight Id user wants to see insight to their climate profile
+      required: true
+      example: T101
+      schema:
+        type: string
+    Heading:
+      name: heading
+      in: query
+      description: If you want to display heading of the insights content
+      required: false
+      example: false
+      schema:
+        type: boolean
+    PageSize:
+      name: page_size
+      in: query
+      description: size of page upto which data should be present
+      required: false
+      example: 20
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+    Language:
+      name: language
+      in: query
+      description: language in which user wants to see insights to their climate profile
+      required: false
+      example: en
+      schema:
+        $ref: '#/components/schemas/LanguageCode'
+  examples:
     InsightsResponseData:
       value:
         insightPayload:
@@ -598,20 +672,72 @@ components:
               key2: 1
               key3: 2
           version: '1.0'
-    MissingInsightAttributesBadRequestError:
+    ServiceProviderNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: ACCOUNT_NOT_FOUND
+            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
+            Recoverable: false
+            Details: ''
+    UnsupportedLanguageError:
       value:
         Errors:
           Error:
           - Source: Carbon-Calculator
-            ReasonCode: INVALID_REQUEST_PARAMETER
-            Description: One of the request parameters is invalid, try again with correct request.
+            ReasonCode: LANGUAGE_NOT_FOUND
+            Description: Unsupported language
             Recoverable: false
-            Details: profile.userAttributes must not be null
-          - Source: Carbon-Calculator
-            ReasonCode: INVALID_REQUEST_PARAMETER
-            Description: One of the request parameters is invalid, try again with correct request
-            Recoverable: false
-            Details: profile.traits must not be null
+            Details: ''
+    InsightsByIdResponse:
+      value:
+        insightsByIdPayload:
+          id: T101
+          version: 1.1
+          language: en
+          heading: Recycle your e-waste
+          content: 'Voluptate eiusmod culpa incididunt excepteur anim ipsum et ex elit laboris esse. Nostrud proident culpa exercitation eu dolore consectetur sit amet cillum veniam enim duis ut. Qui mollit fugiat tempor deserunt occaecat fugiat adipisicing ex cupidatat duis commodo id ea. Dolor laboris eu commodo ea reprehenderit in nisi proident. Fugiat cupidatat excepteur et ullamco anim. Cillum fugiat commodo ipsum consequat irure proident tempor nisi tempor ad.
+
+            Occaecat est pariatur cillum commodo incididunt exercitation laboris consectetur eu mollit incididunt. Adipisicing quis incididunt mollit esse officia dolore fugiat reprehenderit nisi do velit ea. Id cillum consectetur mollit eu laborum nostrud nulla sint Lorem voluptate elit id.'
+          notification: ''
+          mainCategory: home
+          subCategory: electronics
+          spendingAreaId: '10'
+          source: The Global E-waste Monitor 2020
+          sourceDescription: The Global E-waste Monitor 2020
+          sourceLink: https://ewastemonitor.info/wp-content/uploads/2020/11/GEM_2020_def_july1_low.pdf
+          sourceDate: '2020-07-01'
+        profile:
+          traits:
+            knowledge: 0.65
+            lifestyle: 0.445
+            motivated: 0.683
+          userAttributes:
+            demo: 66
+            diet: 256
+            lifestyle: 4
+            energy: 12288
+            transport: 36933
+            country: AX
+          created: '2024-01-31T10:57:36.161Z'
+          surveys:
+            viewed:
+              onboardingVersion: 1
+          persona: '3'
+          benchmarks:
+            key1:
+              key2: 1
+              key3: 2
+          comparisons:
+            key1:
+              key2: 1
+              key3: 2
+          insights:
+            key1:
+              key2: 1
+              key3: 2
+          version: '1.0'
     InsightsRequest:
       value:
         insightsPayload:
@@ -701,167 +827,41 @@ components:
             Description: Insight Item not found for the provided id
             Recoverable: false
             Details: ''
-    InsightsByIdResponse:
-      value:
-        insightsByIdPayload:
-          id: T101
-          version: 1.1
-          language: en
-          heading: Recycle your e-waste
-          content: 'Voluptate eiusmod culpa incididunt excepteur anim ipsum et ex elit laboris esse. Nostrud proident culpa exercitation eu dolore consectetur sit amet cillum veniam enim duis ut. Qui mollit fugiat tempor deserunt occaecat fugiat adipisicing ex cupidatat duis commodo id ea. Dolor laboris eu commodo ea reprehenderit in nisi proident. Fugiat cupidatat excepteur et ullamco anim. Cillum fugiat commodo ipsum consequat irure proident tempor nisi tempor ad.
-
-            Occaecat est pariatur cillum commodo incididunt exercitation laboris consectetur eu mollit incididunt. Adipisicing quis incididunt mollit esse officia dolore fugiat reprehenderit nisi do velit ea. Id cillum consectetur mollit eu laborum nostrud nulla sint Lorem voluptate elit id.'
-          notification: ''
-          mainCategory: home
-          subCategory: electronics
-          spendingAreaId: '10'
-          source: The Global E-waste Monitor 2020
-          sourceDescription: The Global E-waste Monitor 2020
-          sourceLink: https://ewastemonitor.info/wp-content/uploads/2020/11/GEM_2020_def_july1_low.pdf
-          sourceDate: '2020-07-01'
-        profile:
-          traits:
-            knowledge: 0.65
-            lifestyle: 0.445
-            motivated: 0.683
-          userAttributes:
-            demo: 66
-            diet: 256
-            lifestyle: 4
-            energy: 12288
-            transport: 36933
-            country: AX
-          created: '2024-01-31T10:57:36.161Z'
-          surveys:
-            viewed:
-              onboardingVersion: 1
-          persona: '3'
-          benchmarks:
-            key1:
-              key2: 1
-              key3: 2
-          comparisons:
-            key1:
-              key2: 1
-              key3: 2
-          insights:
-            key1:
-              key2: 1
-              key3: 2
-          version: '1.0'
-  parameters:
-    Page:
-      name: page
-      in: query
-      description: Page number of the page whose data should be present in response
-      required: false
-      example: 2
-      schema:
-        type: integer
-        minimum: 1
-    PageSize:
-      name: page_size
-      in: query
-      description: size of page upto which data should be present
-      required: false
-      example: 20
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-    Branding:
-      name: branding
-      in: query
-      description: If you have a branded content version, please supply it here
-      required: false
-      example: branding
-      schema:
-        type: string
-    InsightsId:
-      name: id
-      in: path
-      description: for specific insight Id user wants to see insight to their climate profile
-      required: true
-      example: T101
-      schema:
-        type: string
-    Language:
-      name: language
-      in: query
-      description: language in which user wants to see insights to their climate profile
-      required: false
-      example: en
-      schema:
-        $ref: '#/components/schemas/LanguageCode'
-    Heading:
-      name: heading
-      in: query
-      description: If you want to display heading of the insights content
-      required: false
-      example: false
-      schema:
-        type: boolean
-    Version:
-      name: version
-      in: query
-      description: version of insights
-      required: false
-      example: 1.1
-      schema:
-        type: string
-        minimum: 1
-  responses:
-    InsightsByIdResponse:
-      description: ''
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/InsightsResponseById'
-          examples:
-            InsightsByIdResponse:
-              $ref: '#/components/examples/InsightsByIdResponse'
-    Insights:
-      description: ''
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/InsightsData'
-          examples:
-            InsightsResponseData:
-              $ref: '#/components/examples/InsightsResponseData'
-    ServiceProviderNotFoundError:
-      description: This response code is returned when the server cannot find the account which has been used to call this API.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            ServiceProviderNotFoundError:
-              $ref: '#/components/examples/ServiceProviderNotFoundError'
-    InsightNotFoundError:
-      description: This response code is returned when one or more request parameters is either missing or is invalid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            ServiceProviderNotFoundError:
-              $ref: '#/components/examples/ServiceProviderNotFoundError'
-            InsightItemNotFoundError:
-              $ref: '#/components/examples/InsightItemNotFoundError'
-            InsightItemNotFoundInVersionError:
-              $ref: '#/components/examples/InsightItemNotFoundInVersionError'
-            UnsupportedLanguageError:
-              $ref: '#/components/examples/UnsupportedLanguageError'
     MissingInsightAttributesBadRequestError:
-      description: This response code is returned when one or more request parameters is either missing or is invalid.
+      value:
+        Errors:
+          Error:
+          - Source: Carbon-Calculator
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: profile.userAttributes must not be null
+          - Source: Carbon-Calculator
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request
+            Recoverable: false
+            Details: profile.traits must not be null
+  requestBodies:
+    InsightsRequest:
+      description: Insights for climate profile.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorWrapper'
+            $ref: '#/components/schemas/InsightsRequestPayload'
           examples:
-            BadRequestError:
-              $ref: '#/components/examples/MissingInsightAttributesBadRequestError'
+            InsightsRequest:
+              $ref: '#/components/examples/InsightsRequest'
+      required: true
+    InsightsByIdRequest:
+      description: Represents a Climate Profile for a User.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InsightsByIdRequestPayload'
+          examples:
+            InsightsByIdRequest:
+              $ref: '#/components/examples/InsightsByIdRequest'
+      required: true
 externalDocs:
   description: ISO 4217 - Currency Code
   url: https://en.wikipedia.org/wiki/ISO_4217

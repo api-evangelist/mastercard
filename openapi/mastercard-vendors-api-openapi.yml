@@ -35,26 +35,21 @@ paths:
           $ref: '#/components/responses/UnauthorizedOrderErrorResponse'
 components:
   schemas:
-    OrderStatus:
+    OrderItemError:
       type: object
       properties:
-        orderId:
+        fieldName:
           type: string
-          description: Order Id of Vendor
-          example: 656afd7-2396-54345-34545
-        mcOrderId:
+          description: field name
+          example: address1
+        code:
           type: string
-          description: Order Id of Mastercard
-          example: afd72396-b9c0-11ed-afa1-0242ac120002
-        orderItems:
-          type: array
-          description: order items list
-          items:
-            $ref: '#/components/schemas/OrderItemStatus'
-        status:
+          description: errorcode
+          example: GRS_1001
+        message:
           type: string
-          description: Order Status
-          example: Pending
+          description: error message
+          example: address1 is required
     ErrorItem:
       type: object
       properties:
@@ -79,6 +74,23 @@ components:
           description: Where appropriate, indicates detailed information about the data received.
           example: Invalid Details
       description: Error Details
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
     History:
       type: object
       properties:
@@ -131,52 +143,32 @@ components:
           description: history detail of order item
           items:
             $ref: '#/components/schemas/History'
-    OrderItemError:
-      type: object
-      properties:
-        fieldName:
-          type: string
-          description: field name
-          example: address1
-        code:
-          type: string
-          description: errorcode
-          example: GRS_1001
-        message:
-          type: string
-          description: error message
-          example: address1 is required
-    Errors:
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          type: array
-          description: Error details
-          items:
-            $ref: '#/components/schemas/ErrorItem'
-    ErrorsWrapper:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
     OrderStatusArray:
       type: array
       description: order status array list
       items:
         $ref: '#/components/schemas/OrderStatus'
+    OrderStatus:
+      type: object
+      properties:
+        orderId:
+          type: string
+          description: Order Id of Vendor
+          example: 656afd7-2396-54345-34545
+        mcOrderId:
+          type: string
+          description: Order Id of Mastercard
+          example: afd72396-b9c0-11ed-afa1-0242ac120002
+        orderItems:
+          type: array
+          description: order items list
+          items:
+            $ref: '#/components/schemas/OrderItemStatus'
+        status:
+          type: string
+          description: Order Status
+          example: Pending
   examples:
-    BadOrderRequestExample:
-      value:
-        Errors:
-          Error:
-          - Source: rewards-order-management
-            ReasonCode: MISSING_REQUIRED_FIELD_VENDORS_UPDATE_ORDER_REQUEST_LIST[0].MC_ORDER_ID
-            Description: McOrderId is blank or null.
-            Recoverable: false
     OrderStatusExample:
       value:
       - orderId: 656afd7-2396-54345-34545
@@ -192,16 +184,15 @@ components:
             ReasonCode: INVALID_CLIENT_ID
             Description: ClientId doesn't have access to the requested service.
             Recoverable: false
+    BadOrderRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: rewards-order-management
+            ReasonCode: MISSING_REQUIRED_FIELD_VENDORS_UPDATE_ORDER_REQUEST_LIST[0].MC_ORDER_ID
+            Description: McOrderId is blank or null.
+            Recoverable: false
   responses:
-    BadRequestOrderErrorResponse:
-      description: Something was wrong with the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorsWrapper'
-          examples:
-            BadRequestExample:
-              $ref: '#/components/examples/BadOrderRequestExample'
     UnauthorizedOrderErrorResponse:
       description: User does not have access to the resource
       content:
@@ -220,6 +211,15 @@ components:
           examples:
             SuccessRequestExample:
               $ref: '#/components/examples/OrderStatusExample'
+    BadRequestOrderErrorResponse:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadOrderRequestExample'
   parameters:
     VendorId:
       name: vendor_id

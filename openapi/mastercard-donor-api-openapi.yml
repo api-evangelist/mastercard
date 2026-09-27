@@ -414,480 +414,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       deprecated: false
 components:
-  responses:
-    BadRequest:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    RetrieveUser:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/RetrieveUser'
-    DonateCardRetrieve:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DonateCardRetrieve'
-    Unsupported:
-      description: Unsupported Content Type
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-415'
-    PagedResultRetrieveDonateSetUpDetails:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PagedResultRetrieveDonateSetUpDetails'
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-403'
-    DonationHistoryPaged:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DonationHistoryPaged'
-          examples:
-            success:
-              $ref: '#/components/examples/DonationHistoryPagedExample'
-    DonateGetAllCards:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DonateGetAllCards'
-    DonateCard:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DonateCard'
-    DonateSetups:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DonateSetups'
-          examples:
-            SUCCESS:
-              $ref: '#/components/examples/monthlySetupSuccess'
-            FAILURE:
-              $ref: '#/components/examples/monthlySetupFail'
-    DonateCardUpdate:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DonateCardUpdate'
-    Created:
-      description: The specified resource was created
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-201'
-    Unauthorized:
-      description: Unauthorised
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-401'
-    NoContent:
-      description: The Setup is successfully deleted.
-    InternalServerError:
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-500'
-    RetrieveDonateSetUpDetails:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/RetrieveDonateSetUpDetails'
-    NotFound:
-      description: The specified resource was not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error-404'
-    DonateSetup:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DonateSetup'
-    DonateUser:
-      description: Success
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DonateUser'
-  parameters:
-    Offset:
-      name: offset
-      in: query
-      description: offset
-      required: false
-      schema:
-        type: integer
-        format: int32
-        example: 10
-    ProgramId:
-      name: ProgramId
-      in: header
-      description: ProgramId is an optional field, but if a client has more than one program associated to it, then this field becomes mandatory.
-      required: false
-      schema:
-        type: string
-        example: 80380ef2-5037-4e57-86bf-1bdd1efb0ae2
-    ClientId:
-      name: x-openapi-clientid
-      in: header
-      description: ClientId is a unique and a mandatory ID shared while creating a project on Mastercard Developers Portal.
-      required: true
-      schema:
-        type: string
-        example: 0a7e433a-63fc-4557-8cf4
-    Card:
-      name: card_id
-      in: path
-      description: card_id
-      required: true
-      schema:
-        type: string
-        example: ebee3d81-18d4-409a-8330-73db083f2cfc
-    Limit:
-      name: limit
-      in: query
-      description: limit
-      required: false
-      schema:
-        type: integer
-        format: int32
-        example: 25
-    DonationSetup:
-      name: donation_setup_id
-      in: path
-      description: donation_setup_id
-      required: true
-      schema:
-        type: string
-        example: 4a520af0-8e47-44cd-8925-9f3ecd09baff
-    CorrelationId:
-      name: x-correlation-id
-      in: header
-      description: CorrelationId is a unique donation request ID. It is recommended to pass the x-correlation-id by the customer and to use the format "bankname_UUID" (bank name can be indicated using the first 4 digits). Maximum length of this field should be 100 alphanumeric characters. If not passed, Mastercard will generate it.
-      required: false
-      schema:
-        type: string
-        example: 03f8c4e8-8bdc-4a30-a2b4-b6f989e96ca3
-    Donor:
-      name: donor_id
-      in: path
-      description: donor_id
-      required: true
-      schema:
-        type: string
-        example: 652ce9ff-fa5f-4e9f-8151-c73fa20088f7
   schemas:
-    cardExpiry:
-      type: object
-      properties:
-        month:
-          type: string
-          example: 10
-          minLength: 2
-          maxLength: 2
-          description: Month
-        year:
-          type: string
-          example: 2025
-          minLength: 4
-          maxLength: 4
-          description: Year
-      title: Card Expiry Details
-    Error-201:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          description: Contains all errors caused
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of an authorization is failed.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: Gateway
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: CREATED
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: OAuth signatures did not match.
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example: 'null'
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    DonateCard:
-      type: object
-      properties:
-        cardId:
-          type: string
-          example: ebee3d81-18d4-409a-8330-73db083f2cfc
-          minLength: 36
-          maxLength: 36
-          description: Card id (UUID)
-        primaryAccountNumberSuffix:
-          type: string
-          example: '3538'
-          minLength: 4
-          maxLength: 4
-          description: PAN Suffix
-      title: DonateCardResponse
-    Error:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of an error condition.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: DONATE_SERVICE
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: DONOR_ID_INVALID
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: Invalid donorId, it must be a valid UUID.
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example: Provided donorId is not valid, Please check and provide valid Unique Id.
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    Authentication:
-      type: object
-      properties:
-        3ds:
-          $ref: '#/components/schemas/3ds'
-        3ds2:
-          $ref: '#/components/schemas/3ds2'
-    AuthPayerResponse:
-      type: object
-      properties:
-        authentication:
-          $ref: '#/components/schemas/Authentication'
-    UserName:
-      type: object
-      required:
-      - firstName
-      - lastName
-      properties:
-        firstName:
-          type: string
-          example: John
-          minLength: 3
-          maxLength: 30
-          description: First Name
-        lastName:
-          type: string
-          example: Doe
-          minLength: 3
-          maxLength: 30
-          description: Last Name
-        honorificPrefix:
-          type: string
-          example: Mr
-          minLength: 2
-          maxLength: 30
-          description: Honorific Prefix
-        honorificSuffix:
-          type: string
-          example: Jr.
-          minLength: 2
-          maxLength: 30
-          description: Honorific Suffix
-      title: UserName
-    RetrieveDonateSetUpDetails:
-      type: object
-      properties:
-        amount:
-          type: string
-          example: '11'
-          minLength: 1
-          maxLength: 10
-          description: Fixed amount incase of Monthly and Per Real-Transaction incase of Micro
-        cardId:
-          type: string
-          minLength: 36
-          maxLength: 36
-          description: Card Id
-          example: ebee3d81-18d4-409a-8330-73db083f2cfc
-        charityId:
-          type: string
-          minLength: 36
-          maxLength: 36
-          example: ae3c5f35-084a-4df9-a2af-7e0efd512fc0
-          format: uuid
-          description: Charity Id
-        donationSetupId:
-          type: string
-          minLength: 36
-          maxLength: 36
-          example: 4a520af0-8e47-44cd-8925-9f3ecd09baff
-          format: uuid
-          description: Donation SetupId
-        donationType:
-          type: string
-          example: Micro
-          minLength: 3
-          maxLength: 20
-          description: Can be either Micro or Monthly
-        donorId:
-          type: string
-          minLength: 36
-          maxLength: 36
-          example: 652ce9ff-fa5f-4e9f-8151-c73fa20088f7
-          format: uuid
-          description: Valid UUID.
-        maxCap:
-          type: string
-          example: '50'
-          minLength: 1
-          maxLength: 10
-          description: Max limit is applicable only for Micro Donations
-        setupStatus:
-          type: string
-          example: ACTIVE
-          minLength: 3
-          maxLength: 20
-          description: Can be ACTIVE / DELETED / INACTIVE
-      title: RetrieveDonateSetUpDetailsResponse
-    Error-401:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          description: Contains all errors caused due to authorization failure
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of an authorization is failed.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: Gateway
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: AUTHENTICATION_FAILED
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: OAuth signatures did not match.
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example: 'null'
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    DonationSetup:
-      type: object
-      required:
-      - amount
-      - charityId
-      - cardId
-      - donationType
-      properties:
-        amount:
-          type: string
-          example: '11'
-          minLength: 1
-          maxLength: 20
-          description: Fixed amount incase of Monthly and Per Real-Transaction incase of Micro
-        cardId:
-          type: string
-          minLength: 36
-          maxLength: 36
-          example: ebee3d81-18d4-409a-8330-73db083f2cfc
-          description: Card Id (UUID)
-        charityId:
-          type: string
-          minLength: 36
-          maxLength: 36
-          example: ae3c5f35-084a-4df9-a2af-7e0efd512fc0
-          description: Charity Id (UUID)
-        donationType:
-          type: string
-          example: Monthly
-          minLength: 5
-          maxLength: 20
-          description: Can be either Micro or Monthly
-        maxCap:
-          type: string
-          example: '100'
-          minLength: 1
-          maxLength: 20
-          description: Max Cap
-        authPayerResponse:
-          $ref: '#/components/schemas/AuthPayerResponse'
-        source:
-          type: string
-          example: SOURCE
-          minLength: 3
-          maxLength: 20
-          description: Source
-      title: DonationSetupRequest
     DonationHistory:
       type: object
       required:
@@ -931,568 +458,6 @@ components:
           maxLength: 30
           description: Transaction Status
       title: DonationHistoryRequest
-    Error-415:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          description: Contains all errors caused
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of an authorization is failed.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: DONATE_SERVICE
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: UNSUPPORTED_CONTENT_TYPE
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: The request Content-Type (<request content-type value>) is not supported for this service
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example: 'null'
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    DonateSetups:
-      type: object
-      properties:
-        donationSetupId:
-          type: string
-          format: uuid
-          minLength: 36
-          maxLength: 36
-          description: Donation SetupId
-        donorId:
-          type: string
-          minLength: 36
-          maxLength: 36
-          format: uuid
-          description: Valid UUID.
-        setupStatus:
-          type: string
-          minLength: 5
-          maxLength: 20
-          description: Can be ACTIVE / DELETED / INACTIVE
-        transactionId:
-          type: string
-          minLength: 36
-          maxLength: 36
-          description: Generated upon successful donation setup.
-        transactionMessage:
-          type: string
-          minLength: 3
-          maxLength: 30
-          description: Message for donation setup transaction.
-        transactionStatus:
-          type: string
-          minLength: 3
-          maxLength: 30
-          description: Status of transaction.
-      title: DonateSetup-Response
-    UpdateCard:
-      type: object
-      required:
-      - cardholderName
-      - expiryInfo
-      - primaryAccountNumberSource
-      - primaryAccountNumber
-      properties:
-        billingAddress:
-          $ref: '#/components/schemas/CardBillingAddress'
-        cardAlias:
-          type: string
-          example: CardB
-          minLength: 3
-          maxLength: 20
-          description: Card Alias
-        cardholderName:
-          type: string
-          example: John Doe
-          minLength: 3
-          maxLength: 20
-          description: Card Holder Name
-        CardExpiry:
-          $ref: '#/components/schemas/cardExpiry'
-        primaryAccountNumberSource:
-          type: string
-          example: CARD_ON_FILE
-          description: PAN
-          minLength: 3
-          maxLength: 20
-        primaryAccountNumber:
-          type: string
-          example: '5450985888403538'
-          minLength: 16
-          maxLength: 16
-          description: PAN number
-      title: UpdateCardRequest
-    DonateUserAddress:
-      required:
-      - type
-      - country
-      - streetAddress
-      type: object
-      properties:
-        country:
-          type: string
-          example: USA
-          minLength: 3
-          maxLength: 3
-          description: Country
-        formatted:
-          type: string
-          minLength: 3
-          maxLength: 150
-          example: 7832 West Elm Street Huntington Station, NY 11746
-          description: Address
-        locality:
-          type: string
-          minLength: 3
-          maxLength: 30
-          example: Rly Station
-          description: Locality
-        postalCode:
-          type: string
-          example: 11746
-          minLength: 5
-          maxLength: 5
-          description: Postal Code
-        region:
-          type: string
-          example: Huntington
-          minLength: 3
-          maxLength: 20
-          description: Region
-        streetAddress:
-          type: string
-          example: 7832 West Elm Street
-          minLength: 3
-          maxLength: 30
-          description: Street Address
-        type:
-          type: string
-          example: work
-          minLength: 3
-          maxLength: 20
-          description: Type
-      title: DonateUserAddress
-    RetrieveUser:
-      type: object
-      properties:
-        acceptedConsents:
-          $ref: '#/components/schemas/AcceptedConsent'
-        addresses:
-          type: array
-          description: Address
-          items:
-            $ref: '#/components/schemas/DonateUserAddress'
-        emails:
-          type: array
-          description: Emails
-          items:
-            $ref: '#/components/schemas/DonorEmail'
-        locale:
-          type: string
-          description: Locale
-          example: en-us
-          minLength: 5
-          maxLength: 5
-        name:
-          $ref: '#/components/schemas/ConsumerName'
-        personalInformation:
-          $ref: '#/components/schemas/PersonalInformation'
-        phoneNumbers:
-          type: array
-          description: Phone Numbers
-          items:
-            $ref: '#/components/schemas/DonorPhoneNumber'
-        timezone:
-          type: string
-          description: Timezone
-          example: UTC-06:00
-          minLength: 8
-          maxLength: 20
-        title:
-          type: string
-          description: Title
-          example: Mr
-          minLength: 2
-          maxLength: 20
-        userName:
-          type: string
-          description: User Name
-          example: John.Doe@mail.com
-          minLength: 3
-          maxLength: 30
-        userType:
-          type: string
-          description: User Type
-          example: API
-          minLength: 6
-          maxLength: 20
-      title: RetrieveUserResponse
-    UpdateUser:
-      type: object
-      required:
-      - acceptedConsents
-      - emails
-      - locale
-      - name
-      - username
-      properties:
-        acceptedConsents:
-          $ref: '#/components/schemas/AcceptedConsent'
-        addresses:
-          type: array
-          description: Address
-          items:
-            $ref: '#/components/schemas/DonateUserAddress'
-        emails:
-          type: array
-          description: Emails
-          items:
-            $ref: '#/components/schemas/ConsumerEmail'
-        locale:
-          type: string
-          example: en-us
-          minLength: 5
-          maxLength: 5
-          description: Locale
-        name:
-          $ref: '#/components/schemas/UserName'
-        password:
-          type: string
-          example: WzzX3GjXAmjYCLdz
-          minLength: 8
-          maxLength: 30
-          description: Password
-        personalInformation:
-          $ref: '#/components/schemas/PersonalInformation'
-        phoneNumbers:
-          type: array
-          description: Phone numbers
-          items:
-            $ref: '#/components/schemas/DonorPhoneNumber'
-        timezone:
-          type: string
-          description: Timezone
-          example: UTC-06:00
-          minLength: 8
-          maxLength: 30
-        title:
-          type: string
-          example: Mr
-          minLength: 2
-          maxLength: 30
-          description: Title
-        username:
-          type: string
-          example: test1203@yopmail.com
-          minLength: 2
-          maxLength: 30
-          description: UserName
-      title: UpdateUserRequest
-    PagedResult_RecurringTransaction_DonationHistoryResponse_:
-      type: object
-      properties:
-        items:
-          type: array
-          description: Items
-          items:
-            $ref: '#/components/schemas/DonationHistoryRes'
-        limit:
-          type: integer
-          example: 25
-          format: int32
-          minLength: 1
-          maxLength: 5
-          description: Limit
-        offset:
-          type: integer
-          example: 10
-          format: int32
-          minLength: 1
-          maxLength: 10
-          description: Offset
-        totalItems:
-          type: integer
-          example: 60
-          format: int64
-          minLength: 1
-          maxLength: 10
-          description: Total Items
-      title: PagedResult�DonationHistoryResponse�
-      description: All Micro OR Monthly transactions will be returned in list
-    DonateGetAllCards:
-      type: object
-      properties:
-        items:
-          type: array
-          description: Items
-          items:
-            $ref: '#/components/schemas/DonateCardRetrieve'
-      title: DonateGetAllCardsResponse
-    DonorPhoneNumber:
-      type: object
-      properties:
-        type:
-          type: string
-          example: home
-          minLength: 3
-          maxLength: 20
-          description: Type
-        value:
-          type: string
-          example: '+16367222222'
-          minLength: 11
-          maxLength: 20
-          description: Phone number with country code.
-      title: DonorPhoneNumber
-    DonateCardUpdate:
-      type: object
-      properties:
-        cardId:
-          type: string
-          example: ebee3d81-18d4-409a-8330-73db083f2cfc
-          minLength: 36
-          maxLength: 36
-          description: Card Id (UUID)
-        primaryAccountNumberSuffix:
-          type: string
-          example: '3538'
-          minLength: 4
-          maxLength: 4
-          description: PAN Suffix
-      title: DonateCardUpdateResponse
-    AddCard:
-      type: object
-      required:
-      - cardholderName
-      - expiryInfo
-      - primaryAccountNumber
-      - primaryAccountNumberSource
-      properties:
-        billingAddress:
-          $ref: '#/components/schemas/CardBillingAddress'
-        cardAlias:
-          type: string
-          example: CardA
-          minLength: 3
-          maxLength: 20
-          description: Card Alias
-        cardholderName:
-          type: string
-          example: John Doe
-          minLength: 3
-          maxLength: 20
-          description: Card holder name
-        expiryInfo:
-          $ref: '#/components/schemas/cardExpiry'
-        primaryAccountNumber:
-          type: string
-          example: '5450985888403538'
-          minLength: 16
-          maxLength: 16
-          description: PAN number
-        primaryAccountNumberSource:
-          type: string
-          example: CARD_ON_FILE
-          minLength: 3
-          maxLength: 20
-          description: PAN Source
-      title: AddCard
-    PagedResult_RealTimeTransaction_DonationHistoryResponse_:
-      type: object
-      properties:
-        items:
-          type: array
-          description: Items
-          items:
-            $ref: '#/components/schemas/DonationHistoryRes'
-        limit:
-          type: integer
-          example: 25
-          format: int32
-          minLength: 1
-          maxLength: 5
-          description: Limit
-        offset:
-          type: integer
-          example: 10
-          format: int32
-          minLength: 1
-          maxLength: 10
-          description: Offset
-        totalItems:
-          type: integer
-          example: 60
-          format: int64
-          minLength: 1
-          maxLength: 10
-          description: Total Items
-      title: PagedResult�DonationHistoryResponse�
-      description: ONE-TIME or Monthly transactions will be returned in list,because for monthly setup one real time transaction happens and then monthly donation is started
-    DonateCardRetrieve:
-      type: object
-      properties:
-        billingAddress:
-          $ref: '#/components/schemas/CardBillingAddress'
-        cardAlias:
-          type: string
-          example: CardA
-          minLength: 3
-          maxLength: 30
-          description: The card alias
-        cardId:
-          type: string
-          example: ebee3d81-18d4-409a-8330-73db083f2cfc
-          minLength: 36
-          maxLength: 36
-          description: Card Id (UUID)
-        cardholderName:
-          type: string
-          example: John Doe
-          minLength: 3
-          maxLength: 30
-          description: Cardholder Name
-        cardExpiry:
-          $ref: '#/components/schemas/cardExpiry'
-        paymentNetworkName:
-          type: string
-          example: Mastercard
-          minLength: 3
-          maxLength: 20
-          description: Payment Network Name
-        primaryAccountNumber:
-          type: string
-          example: '5450985888403538'
-          minLength: 16
-          maxLength: 16
-          description: PAN
-        primaryAccountNumberSource:
-          type: string
-          example: CARD_ON_FILE
-          minLength: 3
-          maxLength: 20
-          description: PAN Source
-        primaryAccountNumberSuffix:
-          type: string
-          example: '3538'
-          minLength: 4
-          maxLength: 4
-          description: PAN Suffix
-        status:
-          type: string
-          example: ACTIVE
-          minLength: 5
-          maxLength: 20
-          description: Status
-      title: DonateCardRetrieveResponse
-    Error-404:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          description: Contains all errors caused due to resource not found
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of an resource not found.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: Gateway
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: NOT_FOUND
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: The signing certificate is not valid.
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example: 'null'
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    DonorEmail:
-      type: object
-      properties:
-        type:
-          type: string
-          example: home
-          minLength: 3
-          maxLength: 20
-          description: Type
-        value:
-          type: string
-          example: John.Doe@mail.com
-          minLength: 5
-          maxLength: 30
-          description: Email Id
-      title: DonorEmail
-    Error-500:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          description: Contains all errors caused due to server error
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of an server issue.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: DONATE_SERVICE
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: PROGRAM_ID_NOT_FOUND
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: Program id is required as this client is mapped to multiple programs.
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example: 'null'
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
     Error-AddCard:
       type: object
       required:
@@ -1531,113 +496,6 @@ components:
                     items:
                       type: string
                       example: 'CardId: 327ebf98-f3cc-4733-a041-c60e7d743b04'
-    Error-403:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          description: Contains all errors caused due to forbidden requests
-          properties:
-            Error:
-              type: array
-              description: Only returned in the event of forbidden request.
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    example: Gateway
-                    description: The application that generated this error
-                  ReasonCode:
-                    type: string
-                    example: INVALID_KEY
-                    description: A unique constant identifying the error case encountered during API processing
-                  Description:
-                    type: string
-                    example: The signing certificate is not valid.
-                    description: Short description of the ReasonCode field
-                  Recoverable:
-                    type: boolean
-                    example: false
-                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-                  Details:
-                    type: string
-                    example: 'null'
-                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
-    ConsumerName:
-      type: object
-      properties:
-        lastName:
-          type: string
-          example: Doe
-          minLength: 3
-          maxLength: 30
-          description: Family Name
-        firstName:
-          type: string
-          example: John
-          minLength: 3
-          maxLength: 30
-          description: Given Name
-        honorificPrefix:
-          type: string
-          example: Mr
-          minLength: 2
-          maxLength: 20
-          description: Honorific Prefix
-        honorificSuffix:
-          type: string
-          example: Jr.
-          minLength: 2
-          maxLength: 20
-          description: Honorific Suffix
-      title: ConsumerName
-    DonateSetup:
-      type: object
-      properties:
-        donationSetupId:
-          type: string
-          example: 4a520af0-8e47-44cd-8925-9f3ecd09baff
-          format: uuid
-          minLength: 36
-          maxLength: 36
-          description: Donation SetupId
-        donorId:
-          type: string
-          minLength: 36
-          maxLength: 36
-          example: 652ce9ff-fa5f-4e9f-8151-c73fa20088f7
-          format: uuid
-          description: Valid UUID.
-        setupStatus:
-          type: string
-          example: ACTIVE
-          minLength: 5
-          maxLength: 20
-          description: Can be ACTIVE / DELETED / INACTIVE
-        transactionId:
-          type: string
-          example: 3311e859-3ee4-4155-a640-8cae447c27ca
-          minLength: 36
-          maxLength: 36
-          description: Generated upon successful donation setup.
-        transactionMessage:
-          type: string
-          example: Transaction APPROVED.
-          minLength: 3
-          maxLength: 30
-          description: Message for donation setup transaction.
-        transactionStatus:
-          type: string
-          example: SUCCESS
-          minLength: 3
-          maxLength: 30
-          description: Status of transaction.
-      title: DonateSetupResponse
     PagedResultRetrieveDonateSetUpDetails:
       type: object
       properties:
@@ -1668,153 +526,6 @@ components:
           maxLength: 10
           description: Total Items
       title: PagedResult�RetrieveDonateSetUpDetailsResponse�
-    DonationHistoryPaged:
-      type: object
-      properties:
-        realTimeTransaction:
-          $ref: '#/components/schemas/PagedResult_RealTimeTransaction_DonationHistoryResponse_'
-        recurringTransaction:
-          $ref: '#/components/schemas/PagedResult_RecurringTransaction_DonationHistoryResponse_'
-      title: DonationHistoryPagedResponse
-    3ds2:
-      type: object
-      required:
-      - transactionStatus
-      properties:
-        transactionStatus:
-          type: string
-          example: Y
-          minLength: 1
-          maxLength: 1
-          description: Status of Transaction (recommended - Y)
-        protocolVersion:
-          type: string
-          example: 2.2.2
-          minLength: 5
-          maxLength: 20
-          description: Protocol Version
-      description: Required If authPayerResponse object is passed, only for MPGS.
-    CardBillingAddress:
-      type: object
-      properties:
-        city:
-          type: string
-          example: Brooklyn
-          minLength: 3
-          maxLength: 20
-          description: Billing Address city
-        countryCode:
-          type: string
-          example: USA
-          minLength: 3
-          maxLength: 3
-          description: Billing Address country code
-        line1:
-          type: string
-          example: 83 Mayfair Street
-          minLength: 3
-          maxLength: 20
-          description: Billing Address line1
-        line2:
-          type: string
-          example: Main Road
-          minLength: 3
-          maxLength: 20
-          description: Billing Address line2
-        line3:
-          type: string
-          example: Snake Hill Ave
-          minLength: 3
-          maxLength: 20
-          description: Billing Address line3
-        postalCode:
-          type: string
-          example: 11235
-          minLength: 5
-          maxLength: 20
-          description: Billing Address postal code
-        state:
-          type: string
-          example: NY
-          minLength: 2
-          maxLength: 20
-          description: Billing Address state
-      title: CardBillingAddress
-    SearchCard:
-      required:
-      - primaryAccountNumber
-      type: object
-      properties:
-        primaryAccountNumber:
-          type: string
-          description: PAN
-          minLength: 16
-          maxLength: 16
-          example: '5450985888403538'
-      title: SearchCardRequest
-    PersonalInformation:
-      title: PersonalInformation
-      type: object
-      properties:
-        identifications:
-          type: array
-          description: identifications
-          items:
-            $ref: '#/components/schemas/Identification'
-    Identification:
-      type: object
-      properties:
-        country:
-          type: string
-          example: MX
-          minLength: 2
-          maxLength: 3
-          description: Country
-        type:
-          type: string
-          example: GovtId
-          minLength: 3
-          maxLength: 20
-          description: Type
-        value:
-          type: string
-          example: '16367222222'
-          minLength: 11
-          maxLength: 20
-          description: Value
-      title: Identification
-    3ds:
-      type: object
-      required:
-      - authenticationToken
-      - transactionId
-      - version
-      properties:
-        acsEci:
-          type: string
-          example: 2
-          minLength: 1
-          maxLength: 2
-          description: ascEci
-        authenticationToken:
-          type: string
-          example: kHyn+7YFi1EUAREAAAAvNUe6Hv8=
-          minLength: 28
-          maxLength: 32
-          description: Authentication Token
-        transactionId:
-          type: string
-          example: 9f343e5d-fc28-4818-88d4-17a35fb7dea9
-          minLength: 36
-          maxLength: 36
-          description: transaction ID (UUID)
-        version:
-          type: string
-          example: 1.0.2
-          minLength: 5
-          maxLength: 20
-          description: version
-      description: Required If authPayerResponse object is passed.
     DonationHistoryRes:
       type: object
       properties:
@@ -1918,6 +629,874 @@ components:
           maxLength: 10
           description: Updated Date
       title: DonationHistoryResponse
+    DonorEmail:
+      type: object
+      properties:
+        type:
+          type: string
+          example: home
+          minLength: 3
+          maxLength: 20
+          description: Type
+        value:
+          type: string
+          example: John.Doe@mail.com
+          minLength: 5
+          maxLength: 30
+          description: Email Id
+      title: DonorEmail
+    cardExpiry:
+      type: object
+      properties:
+        month:
+          type: string
+          example: 10
+          minLength: 2
+          maxLength: 2
+          description: Month
+        year:
+          type: string
+          example: 2025
+          minLength: 4
+          maxLength: 4
+          description: Year
+      title: Card Expiry Details
+    PagedResult_RecurringTransaction_DonationHistoryResponse_:
+      type: object
+      properties:
+        items:
+          type: array
+          description: Items
+          items:
+            $ref: '#/components/schemas/DonationHistoryRes'
+        limit:
+          type: integer
+          example: 25
+          format: int32
+          minLength: 1
+          maxLength: 5
+          description: Limit
+        offset:
+          type: integer
+          example: 10
+          format: int32
+          minLength: 1
+          maxLength: 10
+          description: Offset
+        totalItems:
+          type: integer
+          example: 60
+          format: int64
+          minLength: 1
+          maxLength: 10
+          description: Total Items
+      title: PagedResult�DonationHistoryResponse�
+      description: All Micro OR Monthly transactions will be returned in list
+    Error-201:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: CREATED
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: OAuth signatures did not match.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    RetrieveDonateSetUpDetails:
+      type: object
+      properties:
+        amount:
+          type: string
+          example: '11'
+          minLength: 1
+          maxLength: 10
+          description: Fixed amount incase of Monthly and Per Real-Transaction incase of Micro
+        cardId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          description: Card Id
+          example: ebee3d81-18d4-409a-8330-73db083f2cfc
+        charityId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          example: ae3c5f35-084a-4df9-a2af-7e0efd512fc0
+          format: uuid
+          description: Charity Id
+        donationSetupId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          example: 4a520af0-8e47-44cd-8925-9f3ecd09baff
+          format: uuid
+          description: Donation SetupId
+        donationType:
+          type: string
+          example: Micro
+          minLength: 3
+          maxLength: 20
+          description: Can be either Micro or Monthly
+        donorId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          example: 652ce9ff-fa5f-4e9f-8151-c73fa20088f7
+          format: uuid
+          description: Valid UUID.
+        maxCap:
+          type: string
+          example: '50'
+          minLength: 1
+          maxLength: 10
+          description: Max limit is applicable only for Micro Donations
+        setupStatus:
+          type: string
+          example: ACTIVE
+          minLength: 3
+          maxLength: 20
+          description: Can be ACTIVE / DELETED / INACTIVE
+      title: RetrieveDonateSetUpDetailsResponse
+    UpdateCard:
+      type: object
+      required:
+      - cardholderName
+      - expiryInfo
+      - primaryAccountNumberSource
+      - primaryAccountNumber
+      properties:
+        billingAddress:
+          $ref: '#/components/schemas/CardBillingAddress'
+        cardAlias:
+          type: string
+          example: CardB
+          minLength: 3
+          maxLength: 20
+          description: Card Alias
+        cardholderName:
+          type: string
+          example: John Doe
+          minLength: 3
+          maxLength: 20
+          description: Card Holder Name
+        CardExpiry:
+          $ref: '#/components/schemas/cardExpiry'
+        primaryAccountNumberSource:
+          type: string
+          example: CARD_ON_FILE
+          description: PAN
+          minLength: 3
+          maxLength: 20
+        primaryAccountNumber:
+          type: string
+          example: '5450985888403538'
+          minLength: 16
+          maxLength: 16
+          description: PAN number
+      title: UpdateCardRequest
+    DonateUserAddress:
+      required:
+      - type
+      - country
+      - streetAddress
+      type: object
+      properties:
+        country:
+          type: string
+          example: USA
+          minLength: 3
+          maxLength: 3
+          description: Country
+        formatted:
+          type: string
+          minLength: 3
+          maxLength: 150
+          example: 7832 West Elm Street Huntington Station, NY 11746
+          description: Address
+        locality:
+          type: string
+          minLength: 3
+          maxLength: 30
+          example: Rly Station
+          description: Locality
+        postalCode:
+          type: string
+          example: 11746
+          minLength: 5
+          maxLength: 5
+          description: Postal Code
+        region:
+          type: string
+          example: Huntington
+          minLength: 3
+          maxLength: 20
+          description: Region
+        streetAddress:
+          type: string
+          example: 7832 West Elm Street
+          minLength: 3
+          maxLength: 30
+          description: Street Address
+        type:
+          type: string
+          example: work
+          minLength: 3
+          maxLength: 20
+          description: Type
+      title: DonateUserAddress
+    DonateGetAllCards:
+      type: object
+      properties:
+        items:
+          type: array
+          description: Items
+          items:
+            $ref: '#/components/schemas/DonateCardRetrieve'
+      title: DonateGetAllCardsResponse
+    UserName:
+      type: object
+      required:
+      - firstName
+      - lastName
+      properties:
+        firstName:
+          type: string
+          example: John
+          minLength: 3
+          maxLength: 30
+          description: First Name
+        lastName:
+          type: string
+          example: Doe
+          minLength: 3
+          maxLength: 30
+          description: Last Name
+        honorificPrefix:
+          type: string
+          example: Mr
+          minLength: 2
+          maxLength: 30
+          description: Honorific Prefix
+        honorificSuffix:
+          type: string
+          example: Jr.
+          minLength: 2
+          maxLength: 30
+          description: Honorific Suffix
+      title: UserName
+    Error-404:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to resource not found
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an resource not found.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: NOT_FOUND
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The signing certificate is not valid.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    DonateCardRetrieve:
+      type: object
+      properties:
+        billingAddress:
+          $ref: '#/components/schemas/CardBillingAddress'
+        cardAlias:
+          type: string
+          example: CardA
+          minLength: 3
+          maxLength: 30
+          description: The card alias
+        cardId:
+          type: string
+          example: ebee3d81-18d4-409a-8330-73db083f2cfc
+          minLength: 36
+          maxLength: 36
+          description: Card Id (UUID)
+        cardholderName:
+          type: string
+          example: John Doe
+          minLength: 3
+          maxLength: 30
+          description: Cardholder Name
+        cardExpiry:
+          $ref: '#/components/schemas/cardExpiry'
+        paymentNetworkName:
+          type: string
+          example: Mastercard
+          minLength: 3
+          maxLength: 20
+          description: Payment Network Name
+        primaryAccountNumber:
+          type: string
+          example: '5450985888403538'
+          minLength: 16
+          maxLength: 16
+          description: PAN
+        primaryAccountNumberSource:
+          type: string
+          example: CARD_ON_FILE
+          minLength: 3
+          maxLength: 20
+          description: PAN Source
+        primaryAccountNumberSuffix:
+          type: string
+          example: '3538'
+          minLength: 4
+          maxLength: 4
+          description: PAN Suffix
+        status:
+          type: string
+          example: ACTIVE
+          minLength: 5
+          maxLength: 20
+          description: Status
+      title: DonateCardRetrieveResponse
+    PagedResult_RealTimeTransaction_DonationHistoryResponse_:
+      type: object
+      properties:
+        items:
+          type: array
+          description: Items
+          items:
+            $ref: '#/components/schemas/DonationHistoryRes'
+        limit:
+          type: integer
+          example: 25
+          format: int32
+          minLength: 1
+          maxLength: 5
+          description: Limit
+        offset:
+          type: integer
+          example: 10
+          format: int32
+          minLength: 1
+          maxLength: 10
+          description: Offset
+        totalItems:
+          type: integer
+          example: 60
+          format: int64
+          minLength: 1
+          maxLength: 10
+          description: Total Items
+      title: PagedResult�DonationHistoryResponse�
+      description: ONE-TIME or Monthly transactions will be returned in list,because for monthly setup one real time transaction happens and then monthly donation is started
+    Error-415:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: UNSUPPORTED_CONTENT_TYPE
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The request Content-Type (<request content-type value>) is not supported for this service
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    RetrieveUser:
+      type: object
+      properties:
+        acceptedConsents:
+          $ref: '#/components/schemas/AcceptedConsent'
+        addresses:
+          type: array
+          description: Address
+          items:
+            $ref: '#/components/schemas/DonateUserAddress'
+        emails:
+          type: array
+          description: Emails
+          items:
+            $ref: '#/components/schemas/DonorEmail'
+        locale:
+          type: string
+          description: Locale
+          example: en-us
+          minLength: 5
+          maxLength: 5
+        name:
+          $ref: '#/components/schemas/ConsumerName'
+        personalInformation:
+          $ref: '#/components/schemas/PersonalInformation'
+        phoneNumbers:
+          type: array
+          description: Phone Numbers
+          items:
+            $ref: '#/components/schemas/DonorPhoneNumber'
+        timezone:
+          type: string
+          description: Timezone
+          example: UTC-06:00
+          minLength: 8
+          maxLength: 20
+        title:
+          type: string
+          description: Title
+          example: Mr
+          minLength: 2
+          maxLength: 20
+        userName:
+          type: string
+          description: User Name
+          example: John.Doe@mail.com
+          minLength: 3
+          maxLength: 30
+        userType:
+          type: string
+          description: User Type
+          example: API
+          minLength: 6
+          maxLength: 20
+      title: RetrieveUserResponse
+    CardBillingAddress:
+      type: object
+      properties:
+        city:
+          type: string
+          example: Brooklyn
+          minLength: 3
+          maxLength: 20
+          description: Billing Address city
+        countryCode:
+          type: string
+          example: USA
+          minLength: 3
+          maxLength: 3
+          description: Billing Address country code
+        line1:
+          type: string
+          example: 83 Mayfair Street
+          minLength: 3
+          maxLength: 20
+          description: Billing Address line1
+        line2:
+          type: string
+          example: Main Road
+          minLength: 3
+          maxLength: 20
+          description: Billing Address line2
+        line3:
+          type: string
+          example: Snake Hill Ave
+          minLength: 3
+          maxLength: 20
+          description: Billing Address line3
+        postalCode:
+          type: string
+          example: 11235
+          minLength: 5
+          maxLength: 20
+          description: Billing Address postal code
+        state:
+          type: string
+          example: NY
+          minLength: 2
+          maxLength: 20
+          description: Billing Address state
+      title: CardBillingAddress
+    DonateCard:
+      type: object
+      properties:
+        cardId:
+          type: string
+          example: ebee3d81-18d4-409a-8330-73db083f2cfc
+          minLength: 36
+          maxLength: 36
+          description: Card id (UUID)
+        primaryAccountNumberSuffix:
+          type: string
+          example: '3538'
+          minLength: 4
+          maxLength: 4
+          description: PAN Suffix
+      title: DonateCardResponse
+    DonationHistoryPaged:
+      type: object
+      properties:
+        realTimeTransaction:
+          $ref: '#/components/schemas/PagedResult_RealTimeTransaction_DonationHistoryResponse_'
+        recurringTransaction:
+          $ref: '#/components/schemas/PagedResult_RecurringTransaction_DonationHistoryResponse_'
+      title: DonationHistoryPagedResponse
+    SearchCard:
+      required:
+      - primaryAccountNumber
+      type: object
+      properties:
+        primaryAccountNumber:
+          type: string
+          description: PAN
+          minLength: 16
+          maxLength: 16
+          example: '5450985888403538'
+      title: SearchCardRequest
+    DonateCardUpdate:
+      type: object
+      properties:
+        cardId:
+          type: string
+          example: ebee3d81-18d4-409a-8330-73db083f2cfc
+          minLength: 36
+          maxLength: 36
+          description: Card Id (UUID)
+        primaryAccountNumberSuffix:
+          type: string
+          example: '3538'
+          minLength: 4
+          maxLength: 4
+          description: PAN Suffix
+      title: DonateCardUpdateResponse
+    Error:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an error condition.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: DONOR_ID_INVALID
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Invalid donorId, it must be a valid UUID.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: Provided donorId is not valid, Please check and provide valid Unique Id.
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    3ds2:
+      type: object
+      required:
+      - transactionStatus
+      properties:
+        transactionStatus:
+          type: string
+          example: Y
+          minLength: 1
+          maxLength: 1
+          description: Status of Transaction (recommended - Y)
+        protocolVersion:
+          type: string
+          example: 2.2.2
+          minLength: 5
+          maxLength: 20
+          description: Protocol Version
+      description: Required If authPayerResponse object is passed, only for MPGS.
+    DonationSetup:
+      type: object
+      required:
+      - amount
+      - charityId
+      - cardId
+      - donationType
+      properties:
+        amount:
+          type: string
+          example: '11'
+          minLength: 1
+          maxLength: 20
+          description: Fixed amount incase of Monthly and Per Real-Transaction incase of Micro
+        cardId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          example: ebee3d81-18d4-409a-8330-73db083f2cfc
+          description: Card Id (UUID)
+        charityId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          example: ae3c5f35-084a-4df9-a2af-7e0efd512fc0
+          description: Charity Id (UUID)
+        donationType:
+          type: string
+          example: Monthly
+          minLength: 5
+          maxLength: 20
+          description: Can be either Micro or Monthly
+        maxCap:
+          type: string
+          example: '100'
+          minLength: 1
+          maxLength: 20
+          description: Max Cap
+        authPayerResponse:
+          $ref: '#/components/schemas/AuthPayerResponse'
+        source:
+          type: string
+          example: SOURCE
+          minLength: 3
+          maxLength: 20
+          description: Source
+      title: DonationSetupRequest
+    UpdateUser:
+      type: object
+      required:
+      - acceptedConsents
+      - emails
+      - locale
+      - name
+      - username
+      properties:
+        acceptedConsents:
+          $ref: '#/components/schemas/AcceptedConsent'
+        addresses:
+          type: array
+          description: Address
+          items:
+            $ref: '#/components/schemas/DonateUserAddress'
+        emails:
+          type: array
+          description: Emails
+          items:
+            $ref: '#/components/schemas/ConsumerEmail'
+        locale:
+          type: string
+          example: en-us
+          minLength: 5
+          maxLength: 5
+          description: Locale
+        name:
+          $ref: '#/components/schemas/UserName'
+        password:
+          type: string
+          example: WzzX3GjXAmjYCLdz
+          minLength: 8
+          maxLength: 30
+          description: Password
+        personalInformation:
+          $ref: '#/components/schemas/PersonalInformation'
+        phoneNumbers:
+          type: array
+          description: Phone numbers
+          items:
+            $ref: '#/components/schemas/DonorPhoneNumber'
+        timezone:
+          type: string
+          description: Timezone
+          example: UTC-06:00
+          minLength: 8
+          maxLength: 30
+        title:
+          type: string
+          example: Mr
+          minLength: 2
+          maxLength: 30
+          description: Title
+        username:
+          type: string
+          example: test1203@yopmail.com
+          minLength: 2
+          maxLength: 30
+          description: UserName
+      title: UpdateUserRequest
+    ConsumerName:
+      type: object
+      properties:
+        lastName:
+          type: string
+          example: Doe
+          minLength: 3
+          maxLength: 30
+          description: Family Name
+        firstName:
+          type: string
+          example: John
+          minLength: 3
+          maxLength: 30
+          description: Given Name
+        honorificPrefix:
+          type: string
+          example: Mr
+          minLength: 2
+          maxLength: 20
+          description: Honorific Prefix
+        honorificSuffix:
+          type: string
+          example: Jr.
+          minLength: 2
+          maxLength: 20
+          description: Honorific Suffix
+      title: ConsumerName
+    DonateUser:
+      type: object
+      properties:
+        donorId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          example: 652ce9ff-fa5f-4e9f-8151-c73fa20088f7
+          format: uuid
+          description: Valid UUID.
+        userName:
+          type: string
+          example: John.Doe@mail.com
+          minLength: 5
+          maxLength: 30
+          description: User Name
+      title: DonateUserResponse
+    Identification:
+      type: object
+      properties:
+        country:
+          type: string
+          example: MX
+          minLength: 2
+          maxLength: 3
+          description: Country
+        type:
+          type: string
+          example: GovtId
+          minLength: 3
+          maxLength: 20
+          description: Type
+        value:
+          type: string
+          example: '16367222222'
+          minLength: 11
+          maxLength: 20
+          description: Value
+      title: Identification
+    Authentication:
+      type: object
+      properties:
+        3ds:
+          $ref: '#/components/schemas/3ds'
+        3ds2:
+          $ref: '#/components/schemas/3ds2'
+    DonateSetups:
+      type: object
+      properties:
+        donationSetupId:
+          type: string
+          format: uuid
+          minLength: 36
+          maxLength: 36
+          description: Donation SetupId
+        donorId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          format: uuid
+          description: Valid UUID.
+        setupStatus:
+          type: string
+          minLength: 5
+          maxLength: 20
+          description: Can be ACTIVE / DELETED / INACTIVE
+        transactionId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          description: Generated upon successful donation setup.
+        transactionMessage:
+          type: string
+          minLength: 3
+          maxLength: 30
+          description: Message for donation setup transaction.
+        transactionStatus:
+          type: string
+          minLength: 3
+          maxLength: 30
+          description: Status of transaction.
+      title: DonateSetup-Response
     ConsumerEmail:
       type: object
       required:
@@ -1936,23 +1515,6 @@ components:
           minLength: 10
           maxLength: 30
       title: ConsumerEmail
-    DonateUser:
-      type: object
-      properties:
-        donorId:
-          type: string
-          minLength: 36
-          maxLength: 36
-          example: 652ce9ff-fa5f-4e9f-8151-c73fa20088f7
-          format: uuid
-          description: Valid UUID.
-        userName:
-          type: string
-          example: John.Doe@mail.com
-          minLength: 5
-          maxLength: 30
-          description: User Name
-      title: DonateUserResponse
     AcceptedConsent:
       type: object
       required:
@@ -1979,6 +1541,205 @@ components:
           maxLength: 21
           description: Tnc Version
       title: AcceptedConsent
+    DonateSetup:
+      type: object
+      properties:
+        donationSetupId:
+          type: string
+          example: 4a520af0-8e47-44cd-8925-9f3ecd09baff
+          format: uuid
+          minLength: 36
+          maxLength: 36
+          description: Donation SetupId
+        donorId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          example: 652ce9ff-fa5f-4e9f-8151-c73fa20088f7
+          format: uuid
+          description: Valid UUID.
+        setupStatus:
+          type: string
+          example: ACTIVE
+          minLength: 5
+          maxLength: 20
+          description: Can be ACTIVE / DELETED / INACTIVE
+        transactionId:
+          type: string
+          example: 3311e859-3ee4-4155-a640-8cae447c27ca
+          minLength: 36
+          maxLength: 36
+          description: Generated upon successful donation setup.
+        transactionMessage:
+          type: string
+          example: Transaction APPROVED.
+          minLength: 3
+          maxLength: 30
+          description: Message for donation setup transaction.
+        transactionStatus:
+          type: string
+          example: SUCCESS
+          minLength: 3
+          maxLength: 30
+          description: Status of transaction.
+      title: DonateSetupResponse
+    3ds:
+      type: object
+      required:
+      - authenticationToken
+      - transactionId
+      - version
+      properties:
+        acsEci:
+          type: string
+          example: 2
+          minLength: 1
+          maxLength: 2
+          description: ascEci
+        authenticationToken:
+          type: string
+          example: kHyn+7YFi1EUAREAAAAvNUe6Hv8=
+          minLength: 28
+          maxLength: 32
+          description: Authentication Token
+        transactionId:
+          type: string
+          example: 9f343e5d-fc28-4818-88d4-17a35fb7dea9
+          minLength: 36
+          maxLength: 36
+          description: transaction ID (UUID)
+        version:
+          type: string
+          example: 1.0.2
+          minLength: 5
+          maxLength: 20
+          description: version
+      description: Required If authPayerResponse object is passed.
+    AddCard:
+      type: object
+      required:
+      - cardholderName
+      - expiryInfo
+      - primaryAccountNumber
+      - primaryAccountNumberSource
+      properties:
+        billingAddress:
+          $ref: '#/components/schemas/CardBillingAddress'
+        cardAlias:
+          type: string
+          example: CardA
+          minLength: 3
+          maxLength: 20
+          description: Card Alias
+        cardholderName:
+          type: string
+          example: John Doe
+          minLength: 3
+          maxLength: 20
+          description: Card holder name
+        expiryInfo:
+          $ref: '#/components/schemas/cardExpiry'
+        primaryAccountNumber:
+          type: string
+          example: '5450985888403538'
+          minLength: 16
+          maxLength: 16
+          description: PAN number
+        primaryAccountNumberSource:
+          type: string
+          example: CARD_ON_FILE
+          minLength: 3
+          maxLength: 20
+          description: PAN Source
+      title: AddCard
+    PersonalInformation:
+      title: PersonalInformation
+      type: object
+      properties:
+        identifications:
+          type: array
+          description: identifications
+          items:
+            $ref: '#/components/schemas/Identification'
+    Error-500:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to server error
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an server issue.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: DONATE_SERVICE
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: PROGRAM_ID_NOT_FOUND
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: Program id is required as this client is mapped to multiple programs.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    Error-401:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to authorization failure
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of an authorization is failed.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: AUTHENTICATION_FAILED
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: OAuth signatures did not match.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    AuthPayerResponse:
+      type: object
+      properties:
+        authentication:
+          $ref: '#/components/schemas/Authentication'
     DonateSetupUpdate:
       type: object
       required:
@@ -1999,56 +1760,245 @@ components:
         authPayerResponse:
           $ref: '#/components/schemas/AuthPayerResponse'
       title: DonateSetupUpdateRequest
-  requestBodies:
-    UpdateUser:
-      description: updateUserRequest
+    Error-403:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          description: Contains all errors caused due to forbidden requests
+          properties:
+            Error:
+              type: array
+              description: Only returned in the event of forbidden request.
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    example: Gateway
+                    description: The application that generated this error
+                  ReasonCode:
+                    type: string
+                    example: INVALID_KEY
+                    description: A unique constant identifying the error case encountered during API processing
+                  Description:
+                    type: string
+                    example: The signing certificate is not valid.
+                    description: Short description of the ReasonCode field
+                  Recoverable:
+                    type: boolean
+                    example: false
+                    description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+                  Details:
+                    type: string
+                    example: 'null'
+                    description: Where appropriate, indicates detailed information about data received and calculated during request processing.
+    DonorPhoneNumber:
+      type: object
+      properties:
+        type:
+          type: string
+          example: home
+          minLength: 3
+          maxLength: 20
+          description: Type
+        value:
+          type: string
+          example: '+16367222222'
+          minLength: 11
+          maxLength: 20
+          description: Phone number with country code.
+      title: DonorPhoneNumber
+  responses:
+    BadRequest:
+      description: Bad Request
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/UpdateUser'
-      required: false
-    DonateSetupUpdate:
-      description: donateSetupUpdateRequest
+            $ref: '#/components/schemas/Error'
+    DonateSetup:
+      description: Success
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/DonateSetupUpdate'
+            $ref: '#/components/schemas/DonateSetup'
+    RetrieveUser:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RetrieveUser'
+    Unsupported:
+      description: Unsupported Content Type
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-415'
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-404'
+    NoContent:
+      description: The Setup is successfully deleted.
+    DonateCardRetrieve:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DonateCardRetrieve'
+    DonateCardUpdate:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DonateCardUpdate'
+    Created:
+      description: The specified resource was created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-201'
+    DonationHistoryPaged:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DonationHistoryPaged'
+          examples:
+            success:
+              $ref: '#/components/examples/DonationHistoryPagedExample'
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-500'
+    DonateGetAllCards:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DonateGetAllCards'
+    DonateSetups:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DonateSetups'
+          examples:
+            SUCCESS:
+              $ref: '#/components/examples/monthlySetupSuccess'
+            FAILURE:
+              $ref: '#/components/examples/monthlySetupFail'
+    DonateCard:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DonateCard'
+    PagedResultRetrieveDonateSetUpDetails:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PagedResultRetrieveDonateSetUpDetails'
+    DonateUser:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DonateUser'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-403'
+    Unauthorized:
+      description: Unauthorised
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error-401'
+    RetrieveDonateSetUpDetails:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RetrieveDonateSetUpDetails'
+  parameters:
+    ClientId:
+      name: x-openapi-clientid
+      in: header
+      description: ClientId is a unique and a mandatory ID shared while creating a project on Mastercard Developers Portal.
+      required: true
+      schema:
+        type: string
+        example: 0a7e433a-63fc-4557-8cf4
+    CorrelationId:
+      name: x-correlation-id
+      in: header
+      description: CorrelationId is a unique donation request ID. It is recommended to pass the x-correlation-id by the customer and to use the format "bankname_UUID" (bank name can be indicated using the first 4 digits). Maximum length of this field should be 100 alphanumeric characters. If not passed, Mastercard will generate it.
       required: false
+      schema:
+        type: string
+        example: 03f8c4e8-8bdc-4a30-a2b4-b6f989e96ca3
+    Limit:
+      name: limit
+      in: query
+      description: limit
+      required: false
+      schema:
+        type: integer
+        format: int32
+        example: 25
+    Card:
+      name: card_id
+      in: path
+      description: card_id
+      required: true
+      schema:
+        type: string
+        example: ebee3d81-18d4-409a-8330-73db083f2cfc
+    ProgramId:
+      name: ProgramId
+      in: header
+      description: ProgramId is an optional field, but if a client has more than one program associated to it, then this field becomes mandatory.
+      required: false
+      schema:
+        type: string
+        example: 80380ef2-5037-4e57-86bf-1bdd1efb0ae2
+    Donor:
+      name: donor_id
+      in: path
+      description: donor_id
+      required: true
+      schema:
+        type: string
+        example: 652ce9ff-fa5f-4e9f-8151-c73fa20088f7
+    Offset:
+      name: offset
+      in: query
+      description: offset
+      required: false
+      schema:
+        type: integer
+        format: int32
+        example: 10
     DonationSetup:
-      description: donationSetupRequest
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DonationSetup'
+      name: donation_setup_id
+      in: path
+      description: donation_setup_id
       required: true
-    UpdateCard:
-      description: updateCardRequest
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UpdateCard'
-      required: false
-    SearchCard:
-      description: searchCardRequest
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/SearchCard'
-      required: false
-    AddCard:
-      description: addCardRequest
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AddCard'
-      required: false
-    DonationHistory:
-      description: donationHistoryRequest
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DonationHistory'
-      required: true
+      schema:
+        type: string
+        example: 4a520af0-8e47-44cd-8925-9f3ecd09baff
   examples:
     DonationHistoryPagedExample:
       value:
@@ -2169,3 +2119,53 @@ components:
         donationSetupId: 21434906-596e-4216-b843-e0315eab8923
         reasonCode: STOLEN_CARD
         reasonMessage: Your card was declined. Please try again using a different card or contact your card issuer for more information.
+  requestBodies:
+    DonateSetupUpdate:
+      description: donateSetupUpdateRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DonateSetupUpdate'
+      required: false
+    UpdateUser:
+      description: updateUserRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateUser'
+      required: false
+    AddCard:
+      description: addCardRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AddCard'
+      required: false
+    DonationSetup:
+      description: donationSetupRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DonationSetup'
+      required: true
+    UpdateCard:
+      description: updateCardRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateCard'
+      required: false
+    SearchCard:
+      description: searchCardRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SearchCard'
+      required: false
+    DonationHistory:
+      description: donationHistoryRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DonationHistory'
+      required: true

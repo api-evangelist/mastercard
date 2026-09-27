@@ -38,60 +38,44 @@ paths:
         delay: 0
         dispatcher: FALLBACK
 components:
-  responses:
-    Dashboard:
-      description: The response object after decryption contains a short-lived URL along with an authentication token and its expiry time.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Dashboard'
-    DashboardBadRequestError:
-      description: This response code is returned when a request is invalid or data in the request is not valid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            InvalidUserIdError:
-              $ref: '#/components/examples/InvalidUserIdError'
-    DashboardNotFoundError:
-      description: This response code is returned when a user or Issuer is not present.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            UserNotFoundError:
-              $ref: '#/components/examples/UserNotFoundError'
-            IssuerNotFoundError:
-              $ref: '#/components/examples/IssuerNotFoundError'
-    DashboardsUnauthorisedError:
-      description: This response code is returned when a user and the Issuer are unauthorized.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            IssuerInactiveError:
-              $ref: '#/components/examples/IssuerInactiveError'
-            UserInactiveError:
-              $ref: '#/components/examples/UserInactiveError'
-            IssuerSuspendedError:
-              $ref: '#/components/examples/IssuerSuspendedError'
-            UserTerminatedError:
-              $ref: '#/components/examples/UserTerminatedError'
-            IssuerTerminatedError:
-              $ref: '#/components/examples/IssuerTerminatedError'
   schemas:
-    ErrorWrapper:
-      title: ErrorWrapper
+    Errors:
+      title: Errors
       type: object
-      description: The error response object gets returned in case of error.
+      description: Error object which contains a list of error objects.
       required:
-      - Errors
+      - Error
       properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
+        Error:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+          example: []
+    Dashboard:
+      type: object
+      required:
+      - url
+      - expiryInMillis
+      properties:
+        url:
+          type: string
+          description: This is the URL that needs to be rendered in web view with language code send by the issuer appended at the end of the URL.
+          minLength: 1
+          maxLength: 5000
+          example: https://ppctwebview.b221.net/home/?auth_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c&lang=en-US
+        expiryInMillis:
+          type: string
+          description: Denotes expiry limit for the URL.
+          minLength: 1
+          maxLength: 10
+          example: '300000'
+    UserID:
+      type: string
+      minLength: 36
+      maxLength: 36
+      pattern: ^[0-9A-Fa-f-]{36}
+      description: Unique identifier for a user enrolled in the Carbon Calculator Experience platform.
+      example: f5d88571-ac15-465a-a0d8-1ad1327b9a06
     Error:
       title: Error
       type: object
@@ -130,83 +114,20 @@ components:
           minLength: 0
           maxLength: 5000
           example: email must not be null.
-    Errors:
-      title: Errors
+    ErrorWrapper:
+      title: ErrorWrapper
       type: object
-      description: Error object which contains a list of error objects.
+      description: The error response object gets returned in case of error.
       required:
-      - Error
+      - Errors
       properties:
-        Error:
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-          example: []
-    UserID:
-      type: string
-      minLength: 36
-      maxLength: 36
-      pattern: ^[0-9A-Fa-f-]{36}
-      description: Unique identifier for a user enrolled in the Carbon Calculator Experience platform.
-      example: f5d88571-ac15-465a-a0d8-1ad1327b9a06
+        Errors:
+          $ref: '#/components/schemas/Errors'
     Lang:
       type: string
       description: Language for the issuer.
       example: en-US
-    Dashboard:
-      type: object
-      required:
-      - url
-      - expiryInMillis
-      properties:
-        url:
-          type: string
-          description: This is the URL that needs to be rendered in web view with language code send by the issuer appended at the end of the URL.
-          minLength: 1
-          maxLength: 5000
-          example: https://ppctwebview.b221.net/home/?auth_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c&lang=en-US
-        expiryInMillis:
-          type: string
-          description: Denotes expiry limit for the URL.
-          minLength: 1
-          maxLength: 10
-          example: '300000'
-  parameters:
-    UserID:
-      in: path
-      name: userid
-      description: Unique identifier for a user enrolled into Carbon Calculator Experience platform.
-      required: true
-      example: f5d88571-ac15-465a-a0d8-1ad1327b9a06
-      schema:
-        $ref: '#/components/schemas/UserID'
-    Lang:
-      in: query
-      name: lang
-      description: Language preference (en-US - English, es-cr - Spanish (Costa Rica), es-cl - Spanish (Chile), sv - Swedish, pl-PL - Polish (Poland))
-      required: false
-      example: en-US
-      schema:
-        $ref: '#/components/schemas/Lang'
   examples:
-    UserNotFoundError:
-      value:
-        Errors:
-          Error:
-          - Source: CARBON CALCULATOR EXPERIENCE
-            ReasonCode: USER_NOT_FOUND
-            Description: We cannot find user details for provided userId. Kindly register the user through the enrollment process.
-            Recoverable: false
-            Details: Make sure the user is enrolled through /issuers/users API endpoint.
-    IssuerSuspendedError:
-      value:
-        Errors:
-          Error:
-          - Source: CARBON CALCULATOR EXPERIENCE
-            ReasonCode: ACCOUNT_SUSPENDED
-            Description: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
-            Recoverable: false
-            Details: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
     InvalidUserIdError:
       value:
         Errors:
@@ -225,15 +146,15 @@ components:
             Description: Your account has been terminated, you won't be able to access any service. Kindly register yourself again.
             Recoverable: false
             Details: Your account has been terminated, you won't be able to access any service. Kindly register yourself again.
-    IssuerInactiveError:
+    UserNotFoundError:
       value:
         Errors:
           Error:
           - Source: CARBON CALCULATOR EXPERIENCE
-            ReasonCode: ACCOUNT_INACTIVE
-            Description: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+            ReasonCode: USER_NOT_FOUND
+            Description: We cannot find user details for provided userId. Kindly register the user through the enrollment process.
             Recoverable: false
-            Details: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+            Details: Make sure the user is enrolled through /issuers/users API endpoint.
     UserTerminatedError:
       value:
         Errors:
@@ -261,3 +182,82 @@ components:
             Description: The user is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
             Recoverable: false
             Details: The user is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+    IssuerInactiveError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_INACTIVE
+            Description: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+    IssuerSuspendedError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_SUSPENDED
+            Description: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
+  responses:
+    DashboardBadRequestError:
+      description: This response code is returned when a request is invalid or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidUserIdError:
+              $ref: '#/components/examples/InvalidUserIdError'
+    Dashboard:
+      description: The response object after decryption contains a short-lived URL along with an authentication token and its expiry time.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Dashboard'
+    DashboardNotFoundError:
+      description: This response code is returned when a user or Issuer is not present.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            UserNotFoundError:
+              $ref: '#/components/examples/UserNotFoundError'
+            IssuerNotFoundError:
+              $ref: '#/components/examples/IssuerNotFoundError'
+    DashboardsUnauthorisedError:
+      description: This response code is returned when a user and the Issuer are unauthorized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            IssuerInactiveError:
+              $ref: '#/components/examples/IssuerInactiveError'
+            UserInactiveError:
+              $ref: '#/components/examples/UserInactiveError'
+            IssuerSuspendedError:
+              $ref: '#/components/examples/IssuerSuspendedError'
+            UserTerminatedError:
+              $ref: '#/components/examples/UserTerminatedError'
+            IssuerTerminatedError:
+              $ref: '#/components/examples/IssuerTerminatedError'
+  parameters:
+    UserID:
+      in: path
+      name: userid
+      description: Unique identifier for a user enrolled into Carbon Calculator Experience platform.
+      required: true
+      example: f5d88571-ac15-465a-a0d8-1ad1327b9a06
+      schema:
+        $ref: '#/components/schemas/UserID'
+    Lang:
+      in: query
+      name: lang
+      description: Language preference (en-US - English, es-cr - Spanish (Costa Rica), es-cl - Spanish (Chile), sv - Swedish, pl-PL - Polish (Poland))
+      required: false
+      example: en-US
+      schema:
+        $ref: '#/components/schemas/Lang'

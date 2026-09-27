@@ -75,29 +75,6 @@ paths:
                   $ref: '#/components/examples/RateIssuedNotFoundResponse'
 components:
   schemas:
-    EcbError:
-      type: object
-      properties:
-        Description:
-          type: string
-          description: Short description of the ReasonCode field.
-          example: Not Found
-        Details:
-          type: string
-          description: Where appropriate, indicates detailed information about data received and calculated during request processing, to help the user with diagnosing errors.
-          example: Mastercard and ECB rates are not available for this date. Resubmit for a date within the last 365 days inclusive of current day.
-        ReasonCode:
-          type: string
-          description: A unique constant identifying the error case encountered during transaction processing. For example, INVALID_SIGNATURE is used when the request signature does not match the expected one.
-          example: NOT_FOUND
-        Recoverable:
-          type: boolean
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome. For example, if the request contains an invalid   signature, retrying will never result in a success. However, if the error is related to some unexpected timeout with the service, retrying the call could result in a successful response.
-          example: false
-        Source:
-          type: string
-          description: The name of the application that generated this error
-          example: Gateway
     EnhancedSettlementRateIssued:
       type: object
       properties:
@@ -134,6 +111,29 @@ components:
           type: string
           description: Provides rate status as yes/No
           example: 'yes'
+    EcbError:
+      type: object
+      properties:
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Not Found
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about data received and calculated during request processing, to help the user with diagnosing errors.
+          example: Mastercard and ECB rates are not available for this date. Resubmit for a date within the last 365 days inclusive of current day.
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during transaction processing. For example, INVALID_SIGNATURE is used when the request signature does not match the expected one.
+          example: NOT_FOUND
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome. For example, if the request contains an invalid   signature, retrying will never result in a success. However, if the error is related to some unexpected timeout with the service, retrying the call could result in a successful response.
+          example: false
+        Source:
+          type: string
+          description: The name of the application that generated this error
+          example: Gateway
     ErrorResponse:
       type: object
       required:
@@ -168,6 +168,15 @@ components:
             Description: Data is not accesssible
             Recoverable: false
             Details: Rate issuance for requested date not supported - Please use a date within the last 365 days inclusive of current day.
+    UnauthorizedResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: UNAUTHORIZED
+            Description: Invalid Client ID
+            Recoverable: false
+            Details: You do not have access to this service. Please visit the Enhanced Currency Conversion Calculator page for details.
     BadRequestResponse:
       value:
         Errors:
@@ -186,12 +195,3 @@ components:
             Description: Data not available
             Recoverable: false
             Details: Rate issuance for future date not supported.
-    UnauthorizedResponse:
-      value:
-        Errors:
-          Error:
-          - Source: Enhanced Currency Conversion Calculator
-            ReasonCode: UNAUTHORIZED
-            Description: Invalid Client ID
-            Recoverable: false
-            Details: You do not have access to this service. Please visit the Enhanced Currency Conversion Calculator page for details.

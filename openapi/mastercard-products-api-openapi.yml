@@ -33,32 +33,100 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 components:
-  responses:
-    SearchProducts:
-      description: Returns Products that match the search criteria
+  requestBodies:
+    ProductSearch:
+      required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/SearchProducts'
-    UnauthorizedError:
-      description: Unauthorized - Access Not Granted
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedExample'
-    BadRequestError:
-      description: Something was wrong with the request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            BadRequestExample:
-              $ref: '#/components/examples/BadRequestExample'
+            $ref: '#/components/schemas/Products'
   schemas:
+    Products:
+      type: object
+      properties:
+        effectiveDate:
+          description: Date for which benefits are to be determined. Defaults to the current date if not provided. Date is in YYYY-MM-DD format
+          type: string
+          example: '2022-12-15'
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        cardNumber:
+          description: Full card number or BIN number
+          type: string
+          example: '5308780000000000'
+          minLength: 6
+          maxLength: 19
+      required:
+      - cardNumber
+    Errors:
+      description: Object that contains the list of errors
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorList:
+      description: The list of errors
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    ErrorWrapper:
+      description: A top level object for errors
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Product:
+      type: object
+      properties:
+        productCode:
+          description: 3 alpha character code of MasterCard Product. This is required if the BIN or card number has multiple Products associated with it.
+          type: string
+          example: MCC
+          minLength: 3
+          maxLength: 3
+          pattern: ^[A-Z]{3}$
+        productName:
+          description: Name that corresponds to the Mastercard product
+          type: string
+          example: Mixed Product
+          minLength: 1
+          maxLength: 100
+    Error:
+      description: A single error
+      type: object
+      properties:
+        Source:
+          type: string
+          minLength: 0
+          maxLength: 200
+          description: Information about where the error happened
+          example: ELIGIBILITY_BENEFITS_API
+        ReasonCode:
+          type: string
+          minLength: 0
+          maxLength: 200
+          description: An error code
+          example: BAD_REQUEST
+        Description:
+          type: string
+          minLength: 0
+          maxLength: 10000
+          description: A description of the error
+          example: We couldn't handle your request
+        Recoverable:
+          type: boolean
+          description: Indicates if the request can be presented again for processing
+          example: false
+        Details:
+          type: string
+          minLength: 0
+          maxLength: 10000
+          description: More details about the error
+          example: Invalid JSON payload
     SearchProducts:
       type: object
       properties:
@@ -109,99 +177,31 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Product'
-    Products:
-      type: object
-      properties:
-        effectiveDate:
-          description: Date for which benefits are to be determined. Defaults to the current date if not provided. Date is in YYYY-MM-DD format
-          type: string
-          example: '2022-12-15'
-          pattern: ^\d{4}-\d{2}-\d{2}$
-        cardNumber:
-          description: Full card number or BIN number
-          type: string
-          example: '5308780000000000'
-          minLength: 6
-          maxLength: 19
-      required:
-      - cardNumber
-    ErrorWrapper:
-      description: A top level object for errors
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    Error:
-      description: A single error
-      type: object
-      properties:
-        Source:
-          type: string
-          minLength: 0
-          maxLength: 200
-          description: Information about where the error happened
-          example: ELIGIBILITY_BENEFITS_API
-        ReasonCode:
-          type: string
-          minLength: 0
-          maxLength: 200
-          description: An error code
-          example: BAD_REQUEST
-        Description:
-          type: string
-          minLength: 0
-          maxLength: 10000
-          description: A description of the error
-          example: We couldn't handle your request
-        Recoverable:
-          type: boolean
-          description: Indicates if the request can be presented again for processing
-          example: false
-        Details:
-          type: string
-          minLength: 0
-          maxLength: 10000
-          description: More details about the error
-          example: Invalid JSON payload
-    Errors:
-      description: Object that contains the list of errors
-      type: object
-      required:
-      - Error
-      properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList'
-    Product:
-      type: object
-      properties:
-        productCode:
-          description: 3 alpha character code of MasterCard Product. This is required if the BIN or card number has multiple Products associated with it.
-          type: string
-          example: MCC
-          minLength: 3
-          maxLength: 3
-          pattern: ^[A-Z]{3}$
-        productName:
-          description: Name that corresponds to the Mastercard product
-          type: string
-          example: Mixed Product
-          minLength: 1
-          maxLength: 100
-    ErrorList:
-      description: The list of errors
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
-  requestBodies:
-    ProductSearch:
-      required: true
+  responses:
+    BadRequestError:
+      description: Something was wrong with the request
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Products'
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    UnauthorizedError:
+      description: Unauthorized - Access Not Granted
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    SearchProducts:
+      description: Returns Products that match the search criteria
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SearchProducts'
   examples:
     BadRequestExample:
       value:

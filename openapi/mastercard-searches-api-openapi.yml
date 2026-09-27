@@ -78,125 +78,7 @@ components:
       schema:
         type: integer
       example: 1
-  responses:
-    ForbiddenError:
-      description: Insufficient permissions for interacting with the resource.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            Errors:
-            - Error:
-                Source: locations-merchants-api
-                ReasonCode: PERMISSION_DENIED
-                Description: You don't seem authorized to do that
-                Recoverable: false
-                Details: Reading merchant information requires read-only permissions
-    Merchants:
-      description: List of Merchant details
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Merchants'
-    UnauthorizedError:
-      description: Authentication information was missing or invalid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            Errors:
-            - Error:
-                Source: locations-merchants-api
-                ReasonCode: UNAUTHORIZED
-                Description: We couldn't recognize you
-                Recoverable: false
-                Details: Full authentication is required to access this resource
-    BadRequestError:
-      description: Something was wrong with the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            Errors:
-            - Error:
-                Source: latitude
-                ReasonCode: INVALID_INPUT_VALUE
-                Description: Latitude is missing, invalid, or could not be determined from address fields.
-                Recoverable: false
-                Details: null
   schemas:
-    Merchants:
-      title: Merchants
-      type: object
-      properties:
-        count:
-          type: integer
-          format: int32
-          description: The number of items in the retrieved data set
-          example: 10
-        limit:
-          type: integer
-          format: int32
-          description: The number of items requested to be retrieved
-          example: 10
-        offset:
-          type: integer
-          format: int32
-          description: The page offset used for the query
-          example: 1
-        total:
-          type: integer
-          format: int32
-          description: The total number of merchants available to be retrieved
-          example: 210
-        merchants:
-          type: array
-          description: The list of merchants retrieved
-          items:
-            $ref: '#/components/schemas/Merchant'
-          example: []
-    Error:
-      description: Details of the error condition such as the source of the error, reason code for the error, if the error is recoverable, and details about the error
-      required:
-      - Description
-      - ReasonCode
-      - Recoverable
-      - Source
-      type: object
-      properties:
-        Source:
-          description: The application that generated this error
-          type: string
-          minLength: 0
-          maxLength: 150
-          example: latitude
-        ReasonCode:
-          description: A unique constant identifying the error case encountered during transaction processing
-          type: string
-          minLength: 0
-          maxLength: 150
-          example: INVALID_INPUT_VALUE
-        Description:
-          description: Short description of the ReasonCode field
-          type: string
-          minLength: 0
-          maxLength: 150
-          example: Latitude is missing, invalid, or could not be determined from address fields.
-        Recoverable:
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-          type: boolean
-          example: 'false'
-        Details:
-          description: Description of the issue
-          example: Latitude is missing, invalid, or could not be determined from address fields.
-          type:
-          - string
-          - 'null'
-          minLength: 0
-          maxLength: 150
     Errors:
       description: Only returned in the event of an error condition
       required:
@@ -272,6 +154,53 @@ components:
           type: string
           description: The zip code or postal code for a Merchant location. This parameter is ignored if latitude and longitude are provided. If you provide this parameter you must also provide the Country parameter.
           example: '63376'
+    ErrorResponse:
+      description: Only returned in the event of an error condition
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Error:
+      description: Details of the error condition such as the source of the error, reason code for the error, if the error is recoverable, and details about the error
+      required:
+      - Description
+      - ReasonCode
+      - Recoverable
+      - Source
+      type: object
+      properties:
+        Source:
+          description: The application that generated this error
+          type: string
+          minLength: 0
+          maxLength: 150
+          example: latitude
+        ReasonCode:
+          description: A unique constant identifying the error case encountered during transaction processing
+          type: string
+          minLength: 0
+          maxLength: 150
+          example: INVALID_INPUT_VALUE
+        Description:
+          description: Short description of the ReasonCode field
+          type: string
+          minLength: 0
+          maxLength: 150
+          example: Latitude is missing, invalid, or could not be determined from address fields.
+        Recoverable:
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+          type: boolean
+          example: 'false'
+        Details:
+          description: Description of the issue
+          example: Latitude is missing, invalid, or could not be determined from address fields.
+          type:
+          - string
+          - 'null'
+          minLength: 0
+          maxLength: 150
     Merchant:
       title: Merchant
       description: Merchant detail information
@@ -399,14 +328,85 @@ components:
           type: string
           description: Merchant's website URL address
           example: www.mcdondalds.com
-    ErrorResponse:
-      description: Only returned in the event of an error condition
-      required:
-      - Errors
+    Merchants:
+      title: Merchants
       type: object
       properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
+        count:
+          type: integer
+          format: int32
+          description: The number of items in the retrieved data set
+          example: 10
+        limit:
+          type: integer
+          format: int32
+          description: The number of items requested to be retrieved
+          example: 10
+        offset:
+          type: integer
+          format: int32
+          description: The page offset used for the query
+          example: 1
+        total:
+          type: integer
+          format: int32
+          description: The total number of merchants available to be retrieved
+          example: 210
+        merchants:
+          type: array
+          description: The list of merchants retrieved
+          items:
+            $ref: '#/components/schemas/Merchant'
+          example: []
+  responses:
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            Errors:
+            - Error:
+                Source: latitude
+                ReasonCode: INVALID_INPUT_VALUE
+                Description: Latitude is missing, invalid, or could not be determined from address fields.
+                Recoverable: false
+                Details: null
+    Merchants:
+      description: List of Merchant details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Merchants'
+    UnauthorizedError:
+      description: Authentication information was missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            Errors:
+            - Error:
+                Source: locations-merchants-api
+                ReasonCode: UNAUTHORIZED
+                Description: We couldn't recognize you
+                Recoverable: false
+                Details: Full authentication is required to access this resource
+    ForbiddenError:
+      description: Insufficient permissions for interacting with the resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            Errors:
+            - Error:
+                Source: locations-merchants-api
+                ReasonCode: PERMISSION_DENIED
+                Description: You don't seem authorized to do that
+                Recoverable: false
+                Details: Reading merchant information requires read-only permissions
   requestBodies:
     MerchantSearch:
       description: A JSON object containing item data

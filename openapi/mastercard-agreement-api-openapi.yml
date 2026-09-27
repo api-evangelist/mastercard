@@ -140,32 +140,6 @@ paths:
       description: Production environment.
 components:
   schemas:
-    CreditorForSRR:
-      type: object
-      required:
-      - creditorId
-      - creditorServiceProviderId
-      properties:
-        creditorId:
-          type: string
-          example: VerizonoMobile000588
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned to the Creditor by the CSP.
-        creditorServiceProviderId:
-          type: string
-          example: '000645'
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned to the CSP during Mastercard onboarding.
-    ErrorWrapper:
-      description: A top level object for errors
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
     MessageRequestBlock:
       type: object
       required:
@@ -197,6 +171,92 @@ components:
           minimum: 1
           maximum: 999
           description: Unique identifier assigned by Mastercard to define the commercial product construct. * Refer to Codes and Formats section for more details.
+    Errors:
+      description: Object that contains the list of errors
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    AgreementForAgmtUpdate:
+      type: object
+      required:
+      - agreementId
+      - agreementStatus
+      properties:
+        agreementId:
+          type: string
+          example: a3e2a749088440eab8b40c926efe2931
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard to the agreement.
+        agreementStatus:
+          type: string
+          example: DELT
+          minLength: 4
+          maxLength: 4
+          description: Status of the Agreement updated by CSP. * Refer to Codes and Formats section for more details.
+    CreditorForSRR:
+      type: object
+      required:
+      - creditorId
+      - creditorServiceProviderId
+      properties:
+        creditorId:
+          type: string
+          example: VerizonoMobile000588
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the Creditor by the CSP.
+        creditorServiceProviderId:
+          type: string
+          example: '000645'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the CSP during Mastercard onboarding.
+    NewAgreementRequestStatusRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - agreementId
+        - creditor
+        properties:
+          agreementId:
+            type: string
+            example: a3e2a749088440eab8b40c926efe2931
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard to the agreement.
+          creditor:
+            $ref: '#/components/schemas/CreditorForSRR'
+    ErrorList:
+      description: The list of errors
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    AgreementRequestStatusRetrievalAck:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock'
+      - type: object
+        required:
+        - agreementRequestStatusRetrievalLifecycleId
+        - retrievalRequestStatus
+        properties:
+          agreementRequestStatusRetrievalLifecycleId:
+            type: string
+            example: '111123123123123111'
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the Agreement Request Status Retrieval request in subsequent transactions or services.
+          retrievalRequestStatus:
+            type: string
+            example: WFAC
+            minLength: 1
+            maxLength: 35
+            description: Informs the status of the Retrieval Request. * Refer to Codes and Formats section for more details.
     NewAgreementUpdate:
       allOf:
       - $ref: '#/components/schemas/MessageRequestBlock'
@@ -233,95 +293,6 @@ components:
           type: string
           example: Invalid structure
           description: Optional details of the error
-    Creditor:
-      type: object
-      required:
-      - creditorId
-      - creditorServiceProviderId
-      properties:
-        creditorId:
-          type: string
-          example: VerizonoMobile000588
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned to the Creditor by the CSP.
-        creditorServiceProviderId:
-          type: string
-          example: '000645'
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned to the CSP during Mastercard onboarding.
-    Errors:
-      description: Object that contains the list of errors
-      type: object
-      required:
-      - Error
-      properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList'
-    AgreementAckUpdate:
-      allOf:
-      - $ref: '#/components/schemas/MessageResponseBlock'
-    ErrorList:
-      description: The list of errors
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
-    AgreementForAgmtUpdate:
-      type: object
-      required:
-      - agreementId
-      - agreementStatus
-      properties:
-        agreementId:
-          type: string
-          example: a3e2a749088440eab8b40c926efe2931
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned by Mastercard to the agreement.
-        agreementStatus:
-          type: string
-          example: DELT
-          minLength: 4
-          maxLength: 4
-          description: Status of the Agreement updated by CSP. * Refer to Codes and Formats section for more details.
-    NewAgreementRequestStatusRetrieval:
-      allOf:
-      - $ref: '#/components/schemas/MessageRequestBlock'
-      - type: object
-        required:
-        - agreementId
-        - creditor
-        properties:
-          agreementId:
-            type: string
-            example: a3e2a749088440eab8b40c926efe2931
-            minLength: 1
-            maxLength: 35
-            description: Unique identifier assigned by Mastercard to the agreement.
-          creditor:
-            $ref: '#/components/schemas/CreditorForSRR'
-    AgreementRequestStatusRetrievalAck:
-      allOf:
-      - $ref: '#/components/schemas/MessageResponseBlock'
-      - type: object
-        required:
-        - agreementRequestStatusRetrievalLifecycleId
-        - retrievalRequestStatus
-        properties:
-          agreementRequestStatusRetrievalLifecycleId:
-            type: string
-            example: '111123123123123111'
-            minLength: 1
-            maxLength: 35
-            description: Unique identifier assigned by Mastercard, to identify the Agreement Request Status Retrieval request in subsequent transactions or services.
-          retrievalRequestStatus:
-            type: string
-            example: WFAC
-            minLength: 1
-            maxLength: 35
-            description: Informs the status of the Retrieval Request. * Refer to Codes and Formats section for more details.
     MessageResponseBlock:
       type: object
       required:
@@ -353,15 +324,108 @@ components:
           minLength: 1
           maxLength: 35
           description: "Original message identifier generated and sent by the initiator of\n the request message."
-    NewAgreementListRetrieval:
+    ErrorWrapper:
+      description: A top level object for errors
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Creditor:
+      type: object
+      required:
+      - creditorId
+      - creditorServiceProviderId
+      properties:
+        creditorId:
+          type: string
+          example: VerizonoMobile000588
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the Creditor by the CSP.
+        creditorServiceProviderId:
+          type: string
+          example: '000645'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the CSP during Mastercard onboarding.
+    AgreementAckUpdate:
       allOf:
-      - $ref: '#/components/schemas/MessageRequestBlock'
-      - type: object
-        required:
-        - debtor
-        properties:
-          debtor:
-            $ref: '#/components/schemas/Debtor'
+      - $ref: '#/components/schemas/MessageResponseBlock'
+    CreditorAcknowledgement:
+      type: object
+      required:
+      - creditorId
+      - creditorTradeName
+      properties:
+        creditorId:
+          type: string
+          example: VerizonoMobile000588
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the Creditor by the CSP.
+        creditorTradeName:
+          type: string
+          example: VerizonoMobileLtd
+          minLength: 1
+          maxLength: 35
+          description: Name used by the Creditor in dealing with customers, which may not be the same as the one it uses for legal purposes.
+        creditorLogoUrl:
+          type: string
+          example: https://www.cdn.com/creditorlogourl
+          minLength: 1
+          maxLength: 512
+          description: Creditor's Logo (in URL encoded format). Can be used by the Debtor to display the Creditor's Logo.
+    AgreementListItems:
+      type: object
+      required:
+      - creditor
+      - agreement
+      properties:
+        creditor:
+          $ref: '#/components/schemas/CreditorAcknowledgement'
+        agreement:
+          type: object
+          required:
+          - agreementId
+          - agreementStatus
+          - agreementType
+          properties:
+            agreementId:
+              type: string
+              example: a3e2a749088440eab8b40c926efe2931
+              minLength: 1
+              maxLength: 35
+              description: Unique identifier assigned by Mastercard to the agreement.
+            agreementStatus:
+              type: string
+              example: APPR
+              minLength: 4
+              maxLength: 4
+              description: Status of the Agreement updated by DSP to Approved. * Refer to Codes and Formats section for more details.
+            agreementType:
+              type: string
+              example: AOF
+              minLength: 1
+              maxLength: 4
+              description: Creditor requesting DSP to display to Debtor to setup Agreement during payment confirmation. * Refer to Codes and Formats section for more details.
+            accountNickname:
+              type: string
+              x-guarded-string: 'true'
+              example: bankname_account
+              minLength: 1
+              maxLength: 35
+              description: Nickname of the account.
+          example: example_value
+    Errors_2:
+      description: Object that contains the list of errors.
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList_2'
     CreditorAckForAgmtRetrieval:
       type: object
       required:
@@ -406,234 +470,6 @@ components:
           minLength: 1
           maxLength: 512
           description: Return string (in URL encoded format) that is passed to the DSP to return the Debtor back to the Creditor's page.
-    ErrorWrapper_2:
-      description: A top level object for errors.
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors_2'
-    AgreementForAgmtRetrieval:
-      type: object
-      properties:
-        agreementId:
-          type: string
-          example: a3e2a749088440eab8b40c926efe2931
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned by Mastercard to the agreement.
-        agreementReferenceNumber:
-          type: string
-          example: '122549'
-          minLength: 6
-          maxLength: 6
-          description: Unique 6 digit reference used by DSP to retrieve the create agreement request.
-    NewAgreementUpdate_2:
-      allOf:
-      - $ref: '#/components/schemas/MessageRequestBlock'
-      - type: object
-        required:
-        - debtor
-        - agreement
-        properties:
-          debtor:
-            $ref: '#/components/schemas/Debtor'
-          agreement:
-            $ref: '#/components/schemas/AgreementForAgmtUpdate_2'
-    AgreementAckForAgmtRetrieval:
-      type: object
-      required:
-      - agreementId
-      - agreementType
-      - agreementStatus
-      properties:
-        agreementId:
-          type: string
-          example: a3e2a749088440eab8b40c926efe2931
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned by Mastercard to the agreement.
-        agreementType:
-          type: string
-          example: AOF
-          minLength: 1
-          maxLength: 4
-          description: Creditor requesting DSP to display to Debtor to setup Agreement during payment confirmation. * Refer to Codes and Formats section for more details.
-        agreementStatus:
-          type: string
-          example: INPR
-          minLength: 4
-          maxLength: 4
-          description: Status of the Agreement. * Refer to Codes and Formats section for more details.
-    Error_2:
-      description: A single error.
-      type: object
-      properties:
-        Source:
-          type: string
-          example: ZAPP
-          description: Source of the error.
-        ReasonCode:
-          type: string
-          example: STVL-9999
-          description: Error Code
-        Description:
-          type: string
-          example: Invalid structure
-          description: Error Description.
-        Recoverable:
-          type: boolean
-          example: false
-          description: Boolean value to specify if error is recoverable or not.
-        Details:
-          type: string
-          example: Invalid structure
-          description: Optional details of the error.
-    AgreementListRetrieval:
-      allOf:
-      - $ref: '#/components/schemas/MessageResponseBlock_2'
-      - type: object
-        properties:
-          agreementList:
-            $ref: '#/components/schemas/AgreementList'
-    AgreementListItems:
-      type: object
-      required:
-      - creditor
-      - agreement
-      properties:
-        creditor:
-          $ref: '#/components/schemas/CreditorAcknowledgement'
-        agreement:
-          type: object
-          required:
-          - agreementId
-          - agreementStatus
-          - agreementType
-          properties:
-            agreementId:
-              type: string
-              example: a3e2a749088440eab8b40c926efe2931
-              minLength: 1
-              maxLength: 35
-              description: Unique identifier assigned by Mastercard to the agreement.
-            agreementStatus:
-              type: string
-              example: APPR
-              minLength: 4
-              maxLength: 4
-              description: Status of the Agreement updated by DSP to Approved. * Refer to Codes and Formats section for more details.
-            agreementType:
-              type: string
-              example: AOF
-              minLength: 1
-              maxLength: 4
-              description: Creditor requesting DSP to display to Debtor to setup Agreement during payment confirmation. * Refer to Codes and Formats section for more details.
-            accountNickname:
-              type: string
-              x-guarded-string: 'true'
-              example: bankname_account
-              minLength: 1
-              maxLength: 35
-              description: Nickname of the account.
-          example: example_value
-    Debtor:
-      type: object
-      required:
-      - debtorId
-      - debtorServiceProviderId
-      properties:
-        debtorId:
-          type: string
-          example: Fxrsi5345
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier of the Debtor provided to Mastercard by the DSP.
-        debtorServiceProviderId:
-          type: string
-          example: 000369
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned to the DSP during Mastercard onboarding.
-    AgreementList:
-      type: array
-      description: An object that has a list of active agreements and details about each agreement that belongs to the Debtor.
-      items:
-        $ref: '#/components/schemas/AgreementListItems'
-    NewAgreementDetailRetrieval:
-      allOf:
-      - $ref: '#/components/schemas/MessageRequestBlock'
-      - type: object
-        required:
-        - debtor
-        - agreement
-        properties:
-          debtor:
-            $ref: '#/components/schemas/Debtor'
-          agreement:
-            $ref: '#/components/schemas/AgreementForAgmtRetrieval'
-    CreditorAcknowledgement:
-      type: object
-      required:
-      - creditorId
-      - creditorTradeName
-      properties:
-        creditorId:
-          type: string
-          example: VerizonoMobile000588
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned to the Creditor by the CSP.
-        creditorTradeName:
-          type: string
-          example: VerizonoMobileLtd
-          minLength: 1
-          maxLength: 35
-          description: Name used by the Creditor in dealing with customers, which may not be the same as the one it uses for legal purposes.
-        creditorLogoUrl:
-          type: string
-          example: https://www.cdn.com/creditorlogourl
-          minLength: 1
-          maxLength: 512
-          description: Creditor's Logo (in URL encoded format). Can be used by the Debtor to display the Creditor's Logo.
-    AgreementDetailRetrieval:
-      allOf:
-      - $ref: '#/components/schemas/MessageResponseBlock_2'
-      - type: object
-        required:
-        - confirmationExpiryTimeInterval
-        - creditor
-        - agreement
-        properties:
-          confirmationExpiryTimeInterval:
-            type: number
-            example: 150
-            description: Time window given in seconds within which the Agreement Confirmation must be received by the Mastercard.
-          categoryPurpose:
-            type: string
-            example: EP2M
-            minLength: 1
-            maxLength: 35
-            description: Set by the Creditor/CSP to offer specific transaction processing. * Refer to Codes and Formats section for more details.
-          creditor:
-            $ref: '#/components/schemas/CreditorAckForAgmtRetrieval'
-          agreement:
-            $ref: '#/components/schemas/AgreementAckForAgmtRetrieval'
-    Errors_2:
-      description: Object that contains the list of errors.
-      type: object
-      required:
-      - Error
-      properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList_2'
-    ErrorList_2:
-      description: The list of errors.
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error_2'
     AgreementForAgmtUpdate_2:
       type: object
       required:
@@ -664,6 +500,147 @@ components:
           minLength: 1
           maxLength: 35
           description: Nickname updated by DSP. Nickname must be supplied when agreement status is Approved.
+    AgreementList:
+      type: array
+      description: An object that has a list of active agreements and details about each agreement that belongs to the Debtor.
+      items:
+        $ref: '#/components/schemas/AgreementListItems'
+    ErrorList_2:
+      description: The list of errors.
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error_2'
+    Debtor:
+      type: object
+      required:
+      - debtorId
+      - debtorServiceProviderId
+      properties:
+        debtorId:
+          type: string
+          example: Fxrsi5345
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the Debtor provided to Mastercard by the DSP.
+        debtorServiceProviderId:
+          type: string
+          example: 000369
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the DSP during Mastercard onboarding.
+    NewAgreementDetailRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - debtor
+        - agreement
+        properties:
+          debtor:
+            $ref: '#/components/schemas/Debtor'
+          agreement:
+            $ref: '#/components/schemas/AgreementForAgmtRetrieval'
+    AgreementDetailRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock_2'
+      - type: object
+        required:
+        - confirmationExpiryTimeInterval
+        - creditor
+        - agreement
+        properties:
+          confirmationExpiryTimeInterval:
+            type: number
+            example: 150
+            description: Time window given in seconds within which the Agreement Confirmation must be received by the Mastercard.
+          categoryPurpose:
+            type: string
+            example: EP2M
+            minLength: 1
+            maxLength: 35
+            description: Set by the Creditor/CSP to offer specific transaction processing. * Refer to Codes and Formats section for more details.
+          creditor:
+            $ref: '#/components/schemas/CreditorAckForAgmtRetrieval'
+          agreement:
+            $ref: '#/components/schemas/AgreementAckForAgmtRetrieval'
+    NewAgreementUpdate_2:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - debtor
+        - agreement
+        properties:
+          debtor:
+            $ref: '#/components/schemas/Debtor'
+          agreement:
+            $ref: '#/components/schemas/AgreementForAgmtUpdate_2'
+    Error_2:
+      description: A single error.
+      type: object
+      properties:
+        Source:
+          type: string
+          example: ZAPP
+          description: Source of the error.
+        ReasonCode:
+          type: string
+          example: STVL-9999
+          description: Error Code
+        Description:
+          type: string
+          example: Invalid structure
+          description: Error Description.
+        Recoverable:
+          type: boolean
+          example: false
+          description: Boolean value to specify if error is recoverable or not.
+        Details:
+          type: string
+          example: Invalid structure
+          description: Optional details of the error.
+    AgreementAckForAgmtRetrieval:
+      type: object
+      required:
+      - agreementId
+      - agreementType
+      - agreementStatus
+      properties:
+        agreementId:
+          type: string
+          example: a3e2a749088440eab8b40c926efe2931
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard to the agreement.
+        agreementType:
+          type: string
+          example: AOF
+          minLength: 1
+          maxLength: 4
+          description: Creditor requesting DSP to display to Debtor to setup Agreement during payment confirmation. * Refer to Codes and Formats section for more details.
+        agreementStatus:
+          type: string
+          example: INPR
+          minLength: 4
+          maxLength: 4
+          description: Status of the Agreement. * Refer to Codes and Formats section for more details.
+    NewAgreementListRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - debtor
+        properties:
+          debtor:
+            $ref: '#/components/schemas/Debtor'
+    AgreementListRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock_2'
+      - type: object
+        properties:
+          agreementList:
+            $ref: '#/components/schemas/AgreementList'
     MessageResponseBlock_2:
       type: object
       required:
@@ -695,108 +672,30 @@ components:
           minLength: 1
           maxLength: 35
           description: Original message identifier generated and sent by the initiator of the request message.
-  parameters:
-    X-Request-ID:
-      name: X-Request-ID
-      in: header
-      required: true
-      schema:
-        type: string
-        example: 7eab4eab35a542e085add0363a49c035
-        minLength: 1
-        maxLength: 50
-      description: Each API request has an associated request identifier. It can be used to match the response to the request and used for tracing, troubleshooting and analysis purposes.
-    Idempotency-Key:
-      name: Idempotency-Key
-      in: header
-      required: true
-      description: Unique identifier generated by the participant. Mastercard uses this identifier to recognize subsequent retries of the same request and ensure idempotent behaviour by sending the same response without repeating the operation again.
-      schema:
-        type: string
-        format: uuid
-        example: 7da7a728-f910-11e6-942a-68f728c1ba70
-        minLength: 1
-        maxLength: 36
-    X-JWS-Signature:
-      name: X-JWS-Signature
-      in: header
-      required: true
-      description: JWS detached signature is applied to ensure data integrity.
-      schema:
-        type: string
-        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
-        minLength: 1
-        maxLength: 512
-    agreement_id:
-      name: agreement_id
-      in: path
-      required: true
-      description: Unique identifier assigned by Mastercard, to the agreement, to be used in Payment Requests for routing them to the destined participant.
-      schema:
-        type: string
-        example: '923123123123123100'
-        minLength: 1
-        maxLength: 35
-    X-Participant-ID:
-      name: X-Participant-ID
-      in: header
-      required: true
-      schema:
-        type: string
-        example: '000545'
-        minLength: 1
-        maxLength: 50
-      description: Unique identifier assigned to the participant by Mastercard during onboarding.
-    X-Product-ID:
-      name: X-Product-ID
-      in: header
-      required: true
-      schema:
-        type: string
-        example: PBARFP
-        minLength: 1
-        maxLength: 50
-      description: Unique identifier assigned to the product construct by Mastercard and given to the participant.
-    X-Product-ID_2:
-      name: X-Product-ID
-      in: header
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: PBARFP
-      description: Unique identifier assigned to the product by Mastercard and given to the participant.
+    AgreementForAgmtRetrieval:
+      type: object
+      properties:
+        agreementId:
+          type: string
+          example: a3e2a749088440eab8b40c926efe2931
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard to the agreement.
+        agreementReferenceNumber:
+          type: string
+          example: '122549'
+          minLength: 6
+          maxLength: 6
+          description: Unique 6 digit reference used by DSP to retrieve the create agreement request.
+    ErrorWrapper_2:
+      description: A top level object for errors.
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors_2'
   responses:
-    AgreementRequestStatusRetrievalResponse:
-      description: Agreement request status retrieval Request was successfully received by Mastercard.
-      headers:
-        X-Request-ID:
-          $ref: '#/components/headers/X-Request-ID'
-        X-Product-ID:
-          $ref: '#/components/headers/X-Product-ID'
-        X-Participant-ID:
-          $ref: '#/components/headers/X-Participant-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AgreementRequestStatusRetrievalAck'
-    UnauthorisedErrorResponse:
-      description: Invalid signature. The service fails signature validation.
-      headers:
-        X-Request-ID:
-          $ref: '#/components/headers/X-Request-ID'
-        X-Product-ID:
-          $ref: '#/components/headers/X-Product-ID'
-        X-Participant-ID:
-          $ref: '#/components/headers/X-Participant-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            BadRequestExample:
-              $ref: '#/components/examples/UnauthorisedExample'
     DebtorAgreementUpdateResponse:
       description: Update agreement request successful.
       headers:
@@ -828,6 +727,50 @@ components:
           examples:
             BadRequestErrorExample:
               $ref: '#/components/examples/BadRequestErrorExample'
+    AgreementRequestStatusRetrievalResponse:
+      description: Agreement request status retrieval Request was successfully received by Mastercard.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AgreementRequestStatusRetrievalAck'
+    UnauthorisedErrorResponse:
+      description: Invalid signature. The service fails signature validation.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/UnauthorisedExample'
+    DebtorAgreementUpdateResponse_2:
+      description: Update Agreement Request Successful.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID_2'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID_2'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+        X-JWS-Signature:
+          $ref: '#/components/headers/X-JWS-Signature'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AgreementAckUpdate'
     RetrieveAgreementListResponse:
       description: Retrieve Agreement List Request Successful.
       headers:
@@ -858,21 +801,163 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AgreementDetailRetrieval'
-    DebtorAgreementUpdateResponse_2:
-      description: Update Agreement Request Successful.
-      headers:
-        X-Request-ID:
-          $ref: '#/components/headers/X-Request-ID_2'
-        X-Product-ID:
-          $ref: '#/components/headers/X-Product-ID_2'
-        X-Participant-ID:
-          $ref: '#/components/headers/X-Participant-ID'
-        X-JWS-Signature:
-          $ref: '#/components/headers/X-JWS-Signature'
+  requestBodies:
+    CreditorAgreementUpdateRequest:
+      required: true
+      description: Update agreement request.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/AgreementAckUpdate'
+            $ref: '#/components/schemas/NewAgreementUpdate'
+    AgreementRequestStatusRetrievalRequest:
+      required: true
+      description: Agreement request status retrieval request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewAgreementRequestStatusRetrieval'
+    RetrieveAgreementRequest:
+      required: true
+      description: Retrieve Agreement Request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewAgreementDetailRetrieval'
+    RetrieveAgreementListRequest:
+      required: true
+      description: Retrieve Agreement List Request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewAgreementListRetrieval'
+    DebtorAgreementUpdateRequest:
+      required: true
+      description: Update Agreement Request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewAgreementUpdate_2'
+  headers:
+    X-Product-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product construct by Mastercard and given to the participant.
+    X-Participant-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: '000545'
+      description: Unique identifier assigned to the participant by Mastercard during onboarding.
+    X-JWS-Signature:
+      required: true
+      description: JWS detached signature is applied to ensure data integrity.
+      schema:
+        type: string
+        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
+        minLength: 1
+        maxLength: 512
+    X-Request-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: 7eab4eab35a542e085add0363a49c035
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and used for tracing, troubleshooting and analysis purposes.
+    X-Product-ID_2:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product by Mastercard and given to the participant.
+    X-Request-ID_2:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: 7eab4eab35a542e085add0363a49c035
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and for tracing, troubleshooting and analysis purposes.
+  parameters:
+    X-Product-ID:
+      name: X-Product-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        example: PBARFP
+        minLength: 1
+        maxLength: 50
+      description: Unique identifier assigned to the product construct by Mastercard and given to the participant.
+    X-JWS-Signature:
+      name: X-JWS-Signature
+      in: header
+      required: true
+      description: JWS detached signature is applied to ensure data integrity.
+      schema:
+        type: string
+        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
+        minLength: 1
+        maxLength: 512
+    agreement_id:
+      name: agreement_id
+      in: path
+      required: true
+      description: Unique identifier assigned by Mastercard, to the agreement, to be used in Payment Requests for routing them to the destined participant.
+      schema:
+        type: string
+        example: '923123123123123100'
+        minLength: 1
+        maxLength: 35
+    X-Request-ID:
+      name: X-Request-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        example: 7eab4eab35a542e085add0363a49c035
+        minLength: 1
+        maxLength: 50
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and used for tracing, troubleshooting and analysis purposes.
+    X-Participant-ID:
+      name: X-Participant-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        example: '000545'
+        minLength: 1
+        maxLength: 50
+      description: Unique identifier assigned to the participant by Mastercard during onboarding.
+    Idempotency-Key:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Unique identifier generated by the participant. Mastercard uses this identifier to recognize subsequent retries of the same request and ensure idempotent behaviour by sending the same response without repeating the operation again.
+      schema:
+        type: string
+        format: uuid
+        example: 7da7a728-f910-11e6-942a-68f728c1ba70
+        minLength: 1
+        maxLength: 36
+    X-Product-ID_2:
+      name: X-Product-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product by Mastercard and given to the participant.
   examples:
     UnauthorisedExample:
       value:
@@ -910,91 +995,6 @@ components:
             Description: Invalid structure.
             Recoverable: false
             Details: Invalid structure
-  headers:
-    X-Request-ID:
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: 7eab4eab35a542e085add0363a49c035
-      description: Each API request has an associated request identifier. It can be used to match the response to the request and used for tracing, troubleshooting and analysis purposes.
-    X-JWS-Signature:
-      required: true
-      description: JWS detached signature is applied to ensure data integrity.
-      schema:
-        type: string
-        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
-        minLength: 1
-        maxLength: 512
-    X-Participant-ID:
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: '000545'
-      description: Unique identifier assigned to the participant by Mastercard during onboarding.
-    X-Product-ID:
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: PBARFP
-      description: Unique identifier assigned to the product construct by Mastercard and given to the participant.
-    X-Request-ID_2:
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: 7eab4eab35a542e085add0363a49c035
-      description: Each API request has an associated request identifier. It can be used to match the response to the request and for tracing, troubleshooting and analysis purposes.
-    X-Product-ID_2:
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: PBARFP
-      description: Unique identifier assigned to the product by Mastercard and given to the participant.
-  requestBodies:
-    CreditorAgreementUpdateRequest:
-      required: true
-      description: Update agreement request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/NewAgreementUpdate'
-    AgreementRequestStatusRetrievalRequest:
-      required: true
-      description: Agreement request status retrieval request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/NewAgreementRequestStatusRetrieval'
-    DebtorAgreementUpdateRequest:
-      required: true
-      description: Update Agreement Request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/NewAgreementUpdate_2'
-    RetrieveAgreementRequest:
-      required: true
-      description: Retrieve Agreement Request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/NewAgreementDetailRetrieval'
-    RetrieveAgreementListRequest:
-      required: true
-      description: Retrieve Agreement List Request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/NewAgreementListRetrieval'
 x-refined-from:
 - mastercard-account-to-account-commerce-for-creditor-service-providers-openapi.yml
 - mastercard-debtor-service-provider-resources-api-openapi.yml

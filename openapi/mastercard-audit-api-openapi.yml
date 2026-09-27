@@ -37,33 +37,11 @@ paths:
         $ref: '#/components/requestBodies/AuditEventsRequest'
 components:
   schemas:
-    AuditEvents:
-      required:
-      - countryCode
-      - userProfileId
-      - sdkAuditEvents
-      properties:
-        sdkAuditEvents:
-          type: array
-          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
-          items:
-            $ref: '#/components/schemas/AuditEventsItem'
-        userProfileId:
-          type: string
-          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
-          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-          example: df52649e-4096-456a-bca0-751ee470009f
-        countryCode:
-          $ref: '#/components/schemas/CountryCode'
-        sdkVersion:
-          $ref: '#/components/schemas/SdkVersion'
-    SdkVersion:
+    CountryCode:
       type: string
-      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
-      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
-      minLength: 5
-      maxLength: 255
-      example: 2.3.0
+      description: The country code of the country where the transaction originates from.
+      pattern: ^[a-zA-Z]{2}$
+      example: US
     AuditEventsItem:
       type: object
       properties:
@@ -196,6 +174,33 @@ components:
               type: object
               description: Response Details.
               example: Response Data
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
+    AuditEvents:
+      required:
+      - countryCode
+      - userProfileId
+      - sdkAuditEvents
+      properties:
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        userProfileId:
+          type: string
+          description: UUID identifying the user, which the TP App generates using the MIDS Core SDK.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          example: df52649e-4096-456a-bca0-751ee470009f
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
     ErrorResponse:
       required:
       - Errors
@@ -240,21 +245,13 @@ components:
                     description: TP will use this URI to redirect to RP.
                     pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
                     example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
-    CountryCode:
-      type: string
-      description: The country code of the country where the transaction originates from.
-      pattern: ^[a-zA-Z]{2}$
-      example: US
-  examples:
-    UserProfileDeletedErrorExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: USER_PROFILE_DELETED
-            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
-            Recoverable: false
-            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+  requestBodies:
+    AuditEventsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuditEvents'
+      required: true
   responses:
     BadRequestError:
       description: Something was wrong with the request.
@@ -272,10 +269,13 @@ components:
           schema:
             type: string
           description: A random 128-bit UUID represents the transaction.
-  requestBodies:
-    AuditEventsRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AuditEvents'
-      required: true
+  examples:
+    UserProfileDeletedErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_DELETED
+            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
+            Recoverable: false
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
