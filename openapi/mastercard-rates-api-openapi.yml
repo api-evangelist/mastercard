@@ -74,7 +74,68 @@ paths:
                 RateIssuedNotFoundResponse:
                   $ref: '#/components/examples/RateIssuedNotFoundResponse'
 components:
+  examples:
+    BadRequestResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: BAD_REQUEST
+            Description: Invalid input
+            Recoverable: false
+            Details: Date format is invalid (Expected date format yyyy-MM-dd)
+    RateIssuedForbiddenResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: FORBIDDEN
+            Description: Data is not accesssible
+            Recoverable: false
+            Details: Rate issuance for requested date not supported - Please use a date within the last 365 days inclusive of current day.
+    UnauthorizedResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: UNAUTHORIZED
+            Description: Invalid Client ID
+            Recoverable: false
+            Details: You do not have access to this service. Please visit the Enhanced Currency Conversion Calculator page for details.
+    RateIssuedNotFoundResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: NOT_FOUND
+            Description: Data not available
+            Recoverable: false
+            Details: Rate issuance for future date not supported.
   schemas:
+    EnhancedSettlementRateIssuedWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the service being requested
+          example: mastercard-and-ecb-rate-status-service
+        description:
+          type: string
+          description: The description of the API being called
+          example: Determine if mastercard and ecb conversion rates are issued for the given date
+        requestDate:
+          type: string
+          description: The date and time the API is being called in GMT
+          example: '2019-11-17T00:00:00.000Z'
+        data:
+          $ref: '#/components/schemas/EnhancedSettlementRateIssued'
+    ErrorResponse:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
     EnhancedSettlementRateIssued:
       type: object
       properties:
@@ -134,64 +195,3 @@ components:
           type: string
           description: The name of the application that generated this error
           example: Gateway
-    ErrorResponse:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    EnhancedSettlementRateIssuedWrapper:
-      type: object
-      properties:
-        name:
-          type: string
-          description: The name of the service being requested
-          example: mastercard-and-ecb-rate-status-service
-        description:
-          type: string
-          description: The description of the API being called
-          example: Determine if mastercard and ecb conversion rates are issued for the given date
-        requestDate:
-          type: string
-          description: The date and time the API is being called in GMT
-          example: '2019-11-17T00:00:00.000Z'
-        data:
-          $ref: '#/components/schemas/EnhancedSettlementRateIssued'
-  examples:
-    RateIssuedForbiddenResponse:
-      value:
-        Errors:
-          Error:
-          - Source: Enhanced Currency Conversion Calculator
-            ReasonCode: FORBIDDEN
-            Description: Data is not accesssible
-            Recoverable: false
-            Details: Rate issuance for requested date not supported - Please use a date within the last 365 days inclusive of current day.
-    UnauthorizedResponse:
-      value:
-        Errors:
-          Error:
-          - Source: Enhanced Currency Conversion Calculator
-            ReasonCode: UNAUTHORIZED
-            Description: Invalid Client ID
-            Recoverable: false
-            Details: You do not have access to this service. Please visit the Enhanced Currency Conversion Calculator page for details.
-    BadRequestResponse:
-      value:
-        Errors:
-          Error:
-          - Source: Enhanced Currency Conversion Calculator
-            ReasonCode: BAD_REQUEST
-            Description: Invalid input
-            Recoverable: false
-            Details: Date format is invalid (Expected date format yyyy-MM-dd)
-    RateIssuedNotFoundResponse:
-      value:
-        Errors:
-          Error:
-          - Source: Enhanced Currency Conversion Calculator
-            ReasonCode: NOT_FOUND
-            Description: Data not available
-            Recoverable: false
-            Details: Rate issuance for future date not supported.

@@ -63,138 +63,48 @@ paths:
         '400':
           $ref: '#/components/responses/ErrorsResponse'
 components:
+  parameters:
+    AccountId:
+      name: id
+      in: path
+      description: The unique identifier for the given account. Account Id is always RANAC.
+      required: true
+      schema:
+        type: string
+      example: '268810378058708149455458707247'
+    UserIdType:
+      name: user_id_type
+      in: query
+      description: Determines the type of user identification. Supported identifier is RANCU.
+      required: false
+      schema:
+        type: string
+      example: RANCU
+    Offset:
+      name: offset
+      in: query
+      description: The number of items you ask the start of the list to be offset from. Zero-based offset index, must NOT be negative, default value is 0.
+      required: false
+      schema:
+        type: integer
+      example: 0
+    Limit:
+      name: limit
+      in: query
+      description: The number of items you ask the list to be limited to. Must be greater than 0 and less than or equal to 25, default value is 25.
+      required: false
+      schema:
+        type: integer
+      example: 2
+    AccountIdType:
+      name: account_id_type
+      in: query
+      description: Determines the type of account identification. Supported identifier is RANAC.
+      required: false
+      schema:
+        type: string
+      example: RANAC
   schemas:
-    Errors:
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          type: array
-          description: Error Details
-          items:
-            $ref: '#/components/schemas/ErrorItem'
-    AccountUpdate:
-      required:
-      - accountId
-      - accountIdType
-      type: object
-      properties:
-        accountId:
-          maxLength: 30
-          minLength: 0
-          type: string
-          description: The unique identifier for the account.
-          example: '103580149704735875487800510667'
-        accountIdType:
-          type: string
-          description: Identifier type for the account. The static value of RANAC should be used for this field.
-          example: RANAC
-        status:
-          type: string
-          description: "Status of the user's account. Valid values are NEW, GOOD_STANDING, REDEEM_ONLY, CANCELLED, ON_HOLD, INACTIVE.\n - NEW  Used for auto and self-enrollment. Can earn, but not redeem.\n - GOOD_STANDING  Can earn and redeem. This is the typical good status for an account.\n - REDEEM_ONLY  Cannot earn but can redeem.\n - CANCELLED  Cannot earn or redeem. This is the typical final state for an account that is no longer active in a program.\n - ON_HOLD  Can earn, but not redeem. This status is for temporarily derogative accounts.\n - INACTIVE"
-          example: CANCELLED
-          enum:
-          - NEW
-          - GOOD_STANDING
-          - REDEEM_ONLY
-          - CANCELLED
-          - ON_HOLD
-          - INACTIVE
-        accruePoints:
-          type: boolean
-          description: "Suggested status and accruePoints settings are as follows:\n - status = NEW, accruePoints = true\n - status = GOOD_STANDING, accruePoints = true\n - status = REDEEM_ONLY, accruePoints = false\n - status = CANCELLED, accruePoints = false\n - status = ON_HOLD, accruePoints = true"
-          example: true
-        primaryAccount:
-          type: boolean
-          description: Identifies if the account is primary for the user. A user may only have one primary account. In situations where householding is used, there may only be one primary account in the household, regardless of how many user accounts make up that household. A value of true indicates that the account is primary for the user or the household.
-          example: false
-        receiveStatements:
-          type: boolean
-          description: Specifies if the account should be included in the outbound statement file that the rewards system can send a customer, for the purpose of producing paper Rewards Statements. A value of true indicates that the user will receive a paper statement.
-          example: true
-        externalAccountId:
-          maxLength: 10
-          minLength: 0
-          type: string
-          description: Used for On-Soil customers when optional fields are turned on in the rewards system.
-          example: '2222332322'
-        cycleId:
-          type: integer
-          description: Bank cycle number that the cardholder/primary cardholder is assigned to. This field is typically not used unless the customer is receiving a Statement batch file from the rewards system.
-          format: int64
-          example: 1
-        cycleRun:
-          type: boolean
-          description: Flag to indicate whether a Rewards account has been cycled for the current period.
-          example: false
-        pcloAccountStatusCode:
-          type: string
-          description: "Status of the user's account. This field is only for PCLO customers. Valid values are NEW, GOOD_STANDING, REDEEM_ONLY, CANCELLED, ON_HOLD.\n - NEW  Used for auto and self-enrollment. Can earn, but not redeem.\n - GOOD_STANDING  Can earn and redeem. This is the typical good status for an account.\n - REDEEM_ONLY  Cannot earn but can redeem.\n - CANCELLED  Cannot earn or redeem. This is the typical final state for an account that is no longer active in a program.\n - ON_HOLD  Can earn, but not redeem. This status is for temporarily derogative accounts."
-          example: NEW
-          enum:
-          - NEW
-          - GOOD_STANDING
-          - REDEEM_ONLY
-          - CANCELLED
-          - ON_HOLD
-        userDefined1:
-          maxLength: 40
-          minLength: 0
-          type: string
-          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
-          example: UDF 1 Example
-        userDefined2:
-          maxLength: 40
-          minLength: 0
-          type: string
-          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
-          example: UDF 2 Example
-        userDefined3:
-          maxLength: 40
-          minLength: 0
-          type: string
-          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
-          example: UDF 3 Example
-        userDefined4:
-          maxLength: 40
-          minLength: 0
-          type: string
-          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
-          example: UDF 4 Example
-        userDefined5:
-          maxLength: 20
-          minLength: 0
-          type: string
-          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
-          example: UDF 5 Example
-        userDefined6:
-          maxLength: 20
-          minLength: 0
-          type: string
-          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
-          example: UDF 6 Example
-        userDefined7:
-          maxLength: 20
-          minLength: 0
-          type: string
-          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
-          example: UDF 7 Example
-        userDefined8:
-          maxLength: 20
-          minLength: 0
-          type: string
-          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
-          example: UDF 8 Example
-        productTransfer:
-          type: boolean
-          description: Determines whether the Bank Product needs to be updated. When productTransfer is true, then only bank product for the given account will be updated ignoring other fields in the request payload.
-          example: true
-        bankProductCode:
-          maxLength: 30
-          type: string
-          description: Bank Product Code associated with the new card.
-          example: VISACD
     AccountEnroll:
       required:
       - accountId
@@ -358,6 +268,206 @@ components:
           type: string
           description: Identifier type of the User. Supported identifiers are BCN or RANCU.
           example: BCN
+    EnrolledAccount:
+      type: object
+      properties:
+        accountIdType:
+          type: string
+          description: Account identifier type such as RANAC.
+          example: RANAC
+        accountId:
+          type: string
+          description: The unique identifier for the given account.
+          example: '136821076497727922312391057516'
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of the error
+          example: user-management
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during API request processing.
+          example: INVALID_FIELD_FORMAT
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Email Address must be in the valid format.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about the data received.
+          example: Invalid Details
+      description: Error Details
+    AccountUpdate:
+      required:
+      - accountId
+      - accountIdType
+      type: object
+      properties:
+        accountId:
+          maxLength: 30
+          minLength: 0
+          type: string
+          description: The unique identifier for the account.
+          example: '103580149704735875487800510667'
+        accountIdType:
+          type: string
+          description: Identifier type for the account. The static value of RANAC should be used for this field.
+          example: RANAC
+        status:
+          type: string
+          description: "Status of the user's account. Valid values are NEW, GOOD_STANDING, REDEEM_ONLY, CANCELLED, ON_HOLD, INACTIVE.\n - NEW  Used for auto and self-enrollment. Can earn, but not redeem.\n - GOOD_STANDING  Can earn and redeem. This is the typical good status for an account.\n - REDEEM_ONLY  Cannot earn but can redeem.\n - CANCELLED  Cannot earn or redeem. This is the typical final state for an account that is no longer active in a program.\n - ON_HOLD  Can earn, but not redeem. This status is for temporarily derogative accounts.\n - INACTIVE"
+          example: CANCELLED
+          enum:
+          - NEW
+          - GOOD_STANDING
+          - REDEEM_ONLY
+          - CANCELLED
+          - ON_HOLD
+          - INACTIVE
+        accruePoints:
+          type: boolean
+          description: "Suggested status and accruePoints settings are as follows:\n - status = NEW, accruePoints = true\n - status = GOOD_STANDING, accruePoints = true\n - status = REDEEM_ONLY, accruePoints = false\n - status = CANCELLED, accruePoints = false\n - status = ON_HOLD, accruePoints = true"
+          example: true
+        primaryAccount:
+          type: boolean
+          description: Identifies if the account is primary for the user. A user may only have one primary account. In situations where householding is used, there may only be one primary account in the household, regardless of how many user accounts make up that household. A value of true indicates that the account is primary for the user or the household.
+          example: false
+        receiveStatements:
+          type: boolean
+          description: Specifies if the account should be included in the outbound statement file that the rewards system can send a customer, for the purpose of producing paper Rewards Statements. A value of true indicates that the user will receive a paper statement.
+          example: true
+        externalAccountId:
+          maxLength: 10
+          minLength: 0
+          type: string
+          description: Used for On-Soil customers when optional fields are turned on in the rewards system.
+          example: '2222332322'
+        cycleId:
+          type: integer
+          description: Bank cycle number that the cardholder/primary cardholder is assigned to. This field is typically not used unless the customer is receiving a Statement batch file from the rewards system.
+          format: int64
+          example: 1
+        cycleRun:
+          type: boolean
+          description: Flag to indicate whether a Rewards account has been cycled for the current period.
+          example: false
+        pcloAccountStatusCode:
+          type: string
+          description: "Status of the user's account. This field is only for PCLO customers. Valid values are NEW, GOOD_STANDING, REDEEM_ONLY, CANCELLED, ON_HOLD.\n - NEW  Used for auto and self-enrollment. Can earn, but not redeem.\n - GOOD_STANDING  Can earn and redeem. This is the typical good status for an account.\n - REDEEM_ONLY  Cannot earn but can redeem.\n - CANCELLED  Cannot earn or redeem. This is the typical final state for an account that is no longer active in a program.\n - ON_HOLD  Can earn, but not redeem. This status is for temporarily derogative accounts."
+          example: NEW
+          enum:
+          - NEW
+          - GOOD_STANDING
+          - REDEEM_ONLY
+          - CANCELLED
+          - ON_HOLD
+        userDefined1:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 1 Example
+        userDefined2:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 2 Example
+        userDefined3:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 3 Example
+        userDefined4:
+          maxLength: 40
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 4 Example
+        userDefined5:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 5 Example
+        userDefined6:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 6 Example
+        userDefined7:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 7 Example
+        userDefined8:
+          maxLength: 20
+          minLength: 0
+          type: string
+          description: User Defined Fields can be used to store partner-specific data that can be used for promotions and other business rules.
+          example: UDF 8 Example
+        productTransfer:
+          type: boolean
+          description: Determines whether the Bank Product needs to be updated. When productTransfer is true, then only bank product for the given account will be updated ignoring other fields in the request payload.
+          example: true
+        bankProductCode:
+          maxLength: 30
+          type: string
+          description: Bank Product Code associated with the new card.
+          example: VISACD
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error Details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    AccountSearchDetails:
+      required:
+      - accounts
+      type: object
+      properties:
+        offset:
+          type: integer
+          description: Indicates the number of items you asked the start of the list to be offset from.
+          example: 1
+        limit:
+          type: integer
+          description: Indicates the number of items you asked the list to be limited to.
+          example: 1
+        total:
+          type: integer
+          format: int64
+          description: Indicates the total number of items in the collection.
+          example: 1
+        count:
+          type: integer
+          description: Indicates the number of items in this batch (the size of the item array).
+          example: 1
+        accounts:
+          type: array
+          description: accounts
+          items:
+            $ref: '#/components/schemas/Account'
     Account:
       required:
       - accountId
@@ -554,147 +664,37 @@ components:
           format: int64
           example: 1234
       description: accounts
-    ErrorItem:
-      type: object
-      properties:
-        Source:
-          type: string
-          description: Source of the error
-          example: user-management
-        ReasonCode:
-          type: string
-          description: A unique constant identifying the error case encountered during API request processing.
-          example: INVALID_FIELD_FORMAT
-        Description:
-          type: string
-          description: Short description of the ReasonCode field.
-          example: Email Address must be in the valid format.
-        Recoverable:
-          type: boolean
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
-          example: false
-        Details:
-          type: string
-          description: Where appropriate, indicates detailed information about the data received.
-          example: Invalid Details
-      description: Error Details
-    AccountSearchDetails:
-      required:
-      - accounts
-      type: object
-      properties:
-        offset:
-          type: integer
-          description: Indicates the number of items you asked the start of the list to be offset from.
-          example: 1
-        limit:
-          type: integer
-          description: Indicates the number of items you asked the list to be limited to.
-          example: 1
-        total:
-          type: integer
-          format: int64
-          description: Indicates the total number of items in the collection.
-          example: 1
-        count:
-          type: integer
-          description: Indicates the number of items in this batch (the size of the item array).
-          example: 1
-        accounts:
-          type: array
-          description: accounts
-          items:
-            $ref: '#/components/schemas/Account'
-    EnrolledAccount:
-      type: object
-      properties:
-        accountIdType:
-          type: string
-          description: Account identifier type such as RANAC.
-          example: RANAC
-        accountId:
-          type: string
-          description: The unique identifier for the given account.
-          example: '136821076497727922312391057516'
-    ErrorsWrapper:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-  parameters:
-    Limit:
-      name: limit
-      in: query
-      description: The number of items you ask the list to be limited to. Must be greater than 0 and less than or equal to 25, default value is 25.
-      required: false
-      schema:
-        type: integer
-      example: 2
-    UserIdType:
-      name: user_id_type
-      in: query
-      description: Determines the type of user identification. Supported identifier is RANCU.
-      required: false
-      schema:
-        type: string
-      example: RANCU
-    Offset:
-      name: offset
-      in: query
-      description: The number of items you ask the start of the list to be offset from. Zero-based offset index, must NOT be negative, default value is 0.
-      required: false
-      schema:
-        type: integer
-      example: 0
-    AccountId:
-      name: id
-      in: path
-      description: The unique identifier for the given account. Account Id is always RANAC.
-      required: true
-      schema:
-        type: string
-      example: '268810378058708149455458707247'
-    AccountIdType:
-      name: account_id_type
-      in: query
-      description: Determines the type of account identification. Supported identifier is RANAC.
-      required: false
-      schema:
-        type: string
-      example: RANAC
   responses:
-    ErrorsResponse:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorsWrapper'
+    AccountUpdateResponse:
+      description: Ok
     AccountEnrollResponse:
       description: Successfully enrolled account.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/EnrolledAccount'
+    ErrorsResponse:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
     AccountSearchDetailsResponse:
       description: Successfully retrieved account.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/AccountSearchDetails'
-    AccountUpdateResponse:
-      description: Ok
   requestBodies:
-    AccountUpdateRequest:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AccountUpdate'
     AccountEnrollRequest:
       required: true
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/AccountEnroll'
+    AccountUpdateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountUpdate'

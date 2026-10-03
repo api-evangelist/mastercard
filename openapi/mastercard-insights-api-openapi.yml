@@ -61,58 +61,135 @@ paths:
           $ref: '#/components/responses/InsightNotFoundError'
 components:
   schemas:
-    Errors:
-      title: Errors
+    Error:
+      title: Error
       type: object
-      description: Error object which returns a list of Error objects.
+      description: Error object which contains details about the error.
       required:
-      - Error
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
       properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList'
-    InsightItem:
-      properties:
-        heading:
-          description: Heading of the item
+        Source:
           type: string
-          example: insight
-        id:
-          description: Id of the item
+          description: The application name that generated this error. Every error message that is generated and returned by the gateway will have this field equal to Gateway. Other possible values are 'Carbon-Calculator' and 'Service-Provider'.
+          minLength: 1
+          maxLength: 100
+          example: Service-Provider-Mgmt
+        ReasonCode:
           type: string
-          example: T1
-        mainCategory:
-          description: Main Category of the item
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: INVALID_REQUEST_PARAMETER
+        Description:
           type: string
-          example: Shopping
-        seen:
-          description: whether or not item has been seen
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with correct request.
+        Recoverable:
           type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
           example: false
-        spendingAreaId:
-          description: Spending Area Id
+        Details:
           type: string
-          example: '678'
-        subCategory:
-          description: Sub Category of the item
-          type: string
-          example: hardware
-        version:
-          description: Version of the item
-          type: string
-          example: '1.1'
-      required:
-      - id
-      - mainCategory
-      - seen
-      - spendingAreaId
-      - subCategory
-      - version
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+    InsightsByIdRequestPayload:
+      title: InsightsByIdRequestPayload
       type: object
+      description: The request object which contains climate Profile
+      properties:
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
+    LanguageCode:
+      description: ISO 639-1 format language code
+      example: es
+      pattern: ^[a-z]{2}$
+      type: string
+    InsightsRequestPayload:
+      title: InsightsRequestPayload
+      type: object
+      description: The request object which contains climate Profile and payload
+      properties:
+        insightsPayload:
+          properties:
+            docc:
+              type: string
+              description: document of insights
+              example: Eat more greens - for the planet
+            main:
+              type: string
+              description: description of main category
+              example: shopping
+            mainCategory:
+              type: string
+              description: details of main category
+              example: shopping
+            spendingAreaId:
+              type: string
+              description: area of category in which expenditure was made
+              example: '30'
+            subCategory:
+              type: string
+              description: details of sub category
+              example: clothes
+          type: object
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
     ErrorList:
       type: array
       minItems: 1
       items:
         $ref: '#/components/schemas/Error'
+    InsightsData:
+      properties:
+        insightPayload:
+          properties:
+            insights:
+              items:
+                $ref: '#/components/schemas/InsightItem'
+              type: array
+              description: details of items
+            language:
+              type: string
+              description: language of insights
+              example: en
+            nextPage:
+              type: string
+              description: next present or not
+              example: 'yes'
+            page:
+              type: number
+              description: number of page
+              example: 1
+            previousPage:
+              type: string
+              description: previous Page present or not
+              example: 'yes'
+            totalItemCount:
+              type: number
+              description: total item count number
+              example: 96
+            totalPageCount:
+              type: number
+              description: total page count
+              example: 20
+          required:
+          - insights
+          - page
+          - totalItemCount
+          - totalPageCount
+          type: object
+        profile:
+          $ref: '#/components/schemas/ClimateProfile'
+      required:
+      - insightPayload
+      type: object
     InsightsResponseById:
       properties:
         insightsByIdPayload:
@@ -179,80 +256,53 @@ components:
       required:
       - insightPayload
       type: object
-    InsightsData:
+    InsightItem:
       properties:
-        insightPayload:
-          properties:
-            insights:
-              items:
-                $ref: '#/components/schemas/InsightItem'
-              type: array
-              description: details of items
-            language:
-              type: string
-              description: language of insights
-              example: en
-            nextPage:
-              type: string
-              description: next present or not
-              example: 'yes'
-            page:
-              type: number
-              description: number of page
-              example: 1
-            previousPage:
-              type: string
-              description: previous Page present or not
-              example: 'yes'
-            totalItemCount:
-              type: number
-              description: total item count number
-              example: 96
-            totalPageCount:
-              type: number
-              description: total page count
-              example: 20
-          required:
-          - insights
-          - page
-          - totalItemCount
-          - totalPageCount
-          type: object
-        profile:
-          $ref: '#/components/schemas/ClimateProfile'
+        heading:
+          description: Heading of the item
+          type: string
+          example: insight
+        id:
+          description: Id of the item
+          type: string
+          example: T1
+        mainCategory:
+          description: Main Category of the item
+          type: string
+          example: Shopping
+        seen:
+          description: whether or not item has been seen
+          type: boolean
+          example: false
+        spendingAreaId:
+          description: Spending Area Id
+          type: string
+          example: '678'
+        subCategory:
+          description: Sub Category of the item
+          type: string
+          example: hardware
+        version:
+          description: Version of the item
+          type: string
+          example: '1.1'
       required:
-      - insightPayload
+      - id
+      - mainCategory
+      - seen
+      - spendingAreaId
+      - subCategory
+      - version
       type: object
-    InsightsRequestPayload:
-      title: InsightsRequestPayload
+    ErrorWrapper:
+      title: ErrorWrapper
       type: object
-      description: The request object which contains climate Profile and payload
+      description: The error response object gets returned in case of any error.
+      required:
+      - Errors
       properties:
-        insightsPayload:
-          properties:
-            docc:
-              type: string
-              description: document of insights
-              example: Eat more greens - for the planet
-            main:
-              type: string
-              description: description of main category
-              example: shopping
-            mainCategory:
-              type: string
-              description: details of main category
-              example: shopping
-            spendingAreaId:
-              type: string
-              description: area of category in which expenditure was made
-              example: '30'
-            subCategory:
-              type: string
-              description: details of sub category
-              example: clothes
-          type: object
-        profile:
-          $ref: '#/components/schemas/ClimateProfile'
+        Errors:
+          $ref: '#/components/schemas/Errors'
     ClimateProfile:
       description: Represents a Climate Profile for a User. Always use updated profile present in the response, which might include benchmarks, comparisons, insights and surveys.
       properties:
@@ -370,99 +420,16 @@ components:
       - traits
       - version
       type: object
-    LanguageCode:
-      description: ISO 639-1 format language code
-      example: es
-      pattern: ^[a-z]{2}$
-      type: string
-    Error:
-      title: Error
+    Errors:
+      title: Errors
       type: object
-      description: Error object which contains details about the error.
+      description: Error object which returns a list of Error objects.
       required:
-      - Source
-      - ReasonCode
-      - Description
-      - Recoverable
+      - Error
       properties:
-        Source:
-          type: string
-          description: The application name that generated this error. Every error message that is generated and returned by the gateway will have this field equal to Gateway. Other possible values are 'Carbon-Calculator' and 'Service-Provider'.
-          minLength: 1
-          maxLength: 100
-          example: Service-Provider-Mgmt
-        ReasonCode:
-          type: string
-          description: A unique constant identifying the error case encountered during request processing.
-          minLength: 1
-          maxLength: 100
-          example: INVALID_REQUEST_PARAMETER
-        Description:
-          type: string
-          description: Short description of the ReasonCode field.
-          minLength: 10
-          maxLength: 1000
-          example: One of the request parameters is invalid, try again with correct request.
-        Recoverable:
-          type: boolean
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
-          example: false
-        Details:
-          type: string
-          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
-          minLength: 0
-          maxLength: 5000
-          example: paymentCardId size must be between 36 and 36
-    InsightsByIdRequestPayload:
-      title: InsightsByIdRequestPayload
-      type: object
-      description: The request object which contains climate Profile
-      properties:
-        profile:
-          $ref: '#/components/schemas/ClimateProfile'
-    ErrorWrapper:
-      title: ErrorWrapper
-      type: object
-      description: The error response object gets returned in case of any error.
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
+        Error:
+          $ref: '#/components/schemas/ErrorList'
   responses:
-    MissingInsightAttributesBadRequestError:
-      description: This response code is returned when one or more request parameters is either missing or is invalid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            BadRequestError:
-              $ref: '#/components/examples/MissingInsightAttributesBadRequestError'
-    InsightsByIdResponse:
-      description: ''
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/InsightsResponseById'
-          examples:
-            InsightsByIdResponse:
-              $ref: '#/components/examples/InsightsByIdResponse'
-    InsightNotFoundError:
-      description: This response code is returned when one or more request parameters is either missing or is invalid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            ServiceProviderNotFoundError:
-              $ref: '#/components/examples/ServiceProviderNotFoundError'
-            InsightItemNotFoundError:
-              $ref: '#/components/examples/InsightItemNotFoundError'
-            InsightItemNotFoundInVersionError:
-              $ref: '#/components/examples/InsightItemNotFoundInVersionError'
-            UnsupportedLanguageError:
-              $ref: '#/components/examples/UnsupportedLanguageError'
     Insights:
       description: ''
       content:
@@ -481,68 +448,150 @@ components:
           examples:
             ServiceProviderNotFoundError:
               $ref: '#/components/examples/ServiceProviderNotFoundError'
-  parameters:
-    Page:
-      name: page
-      in: query
-      description: Page number of the page whose data should be present in response
-      required: false
-      example: 2
-      schema:
-        type: integer
-        minimum: 1
-    Branding:
-      name: branding
-      in: query
-      description: If you have a branded content version, please supply it here
-      required: false
-      example: branding
-      schema:
-        type: string
-    Version:
-      name: version
-      in: query
-      description: version of insights
-      required: false
-      example: 1.1
-      schema:
-        type: string
-        minimum: 1
-    InsightsId:
-      name: id
-      in: path
-      description: for specific insight Id user wants to see insight to their climate profile
+    InsightsByIdResponse:
+      description: ''
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InsightsResponseById'
+          examples:
+            InsightsByIdResponse:
+              $ref: '#/components/examples/InsightsByIdResponse'
+    MissingInsightAttributesBadRequestError:
+      description: This response code is returned when one or more request parameters is either missing or is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestError:
+              $ref: '#/components/examples/MissingInsightAttributesBadRequestError'
+    InsightNotFoundError:
+      description: This response code is returned when one or more request parameters is either missing or is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+            InsightItemNotFoundError:
+              $ref: '#/components/examples/InsightItemNotFoundError'
+            InsightItemNotFoundInVersionError:
+              $ref: '#/components/examples/InsightItemNotFoundInVersionError'
+            UnsupportedLanguageError:
+              $ref: '#/components/examples/UnsupportedLanguageError'
+  requestBodies:
+    InsightsByIdRequest:
+      description: Represents a Climate Profile for a User.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InsightsByIdRequestPayload'
+          examples:
+            InsightsByIdRequest:
+              $ref: '#/components/examples/InsightsByIdRequest'
       required: true
-      example: T101
-      schema:
-        type: string
-    Heading:
-      name: heading
-      in: query
-      description: If you want to display heading of the insights content
-      required: false
-      example: false
-      schema:
-        type: boolean
-    PageSize:
-      name: page_size
-      in: query
-      description: size of page upto which data should be present
-      required: false
-      example: 20
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-    Language:
-      name: language
-      in: query
-      description: language in which user wants to see insights to their climate profile
-      required: false
-      example: en
-      schema:
-        $ref: '#/components/schemas/LanguageCode'
+    InsightsRequest:
+      description: Insights for climate profile.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InsightsRequestPayload'
+          examples:
+            InsightsRequest:
+              $ref: '#/components/examples/InsightsRequest'
+      required: true
   examples:
+    ServiceProviderNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: ACCOUNT_NOT_FOUND
+            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
+            Recoverable: false
+            Details: ''
+    InsightsRequest:
+      value:
+        insightsPayload:
+          mainCategory: shopping
+          main: shopping
+          docc: ''
+          spendingAreaId: '30'
+          subCategory: clothes
+        profile:
+          traits:
+            knowledge: 0.65
+            lifestyle: 0.445
+            motivated: 0.683
+          userAttributes:
+            demo: 66
+            diet: 256
+            lifestyle: 4
+            energy: 12288
+            transport: 36933
+            country: AX
+          created: '2024-01-31T10:57:36.161Z'
+          surveys:
+            key1:
+              key2: 1
+              key3: 2
+          persona: '3'
+          benchmarks:
+            key1:
+              key2: 1
+              key3: 2
+          comparisons:
+            key1:
+              key2: 1
+              key3: 2
+          insights:
+            key1:
+              key2: 1
+              key3: 2
+          version: '1.0'
+    InsightsByIdRequest:
+      value:
+        profile:
+          traits:
+            knowledge: 0.65
+            lifestyle: 0.445
+            motivated: 0.683
+          userAttributes:
+            demo: 66
+            diet: 256
+            lifestyle: 4
+            energy: 12288
+            transport: 36933
+            country: US
+          created: '2024-01-31T10:57:36.161Z'
+          surveys:
+            viewed:
+              onboardingVersion: 1
+          persona: '3'
+          benchmarks:
+            key1:
+              key2: 1
+              key3: 2
+          comparisons:
+            key1:
+              key2: 1
+              key3: 2
+          insights:
+            key1:
+              key2: 1
+              key3: 2
+          version: '1.0'
+    InsightItemNotFoundInVersionError:
+      value:
+        Errors:
+          Error:
+          - Source: Carbon-Calculator
+            ReasonCode: VERSION_NOT_FOUND
+            Description: 'Insight T101 unavailable in 3.1 (use: 1.1)'
+            Recoverable: false
+            Details: ''
     InsightsResponseData:
       value:
         insightPayload:
@@ -672,24 +721,6 @@ components:
               key2: 1
               key3: 2
           version: '1.0'
-    ServiceProviderNotFoundError:
-      value:
-        Errors:
-          Error:
-          - Source: Service-Provider-Mgmt
-            ReasonCode: ACCOUNT_NOT_FOUND
-            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
-            Recoverable: false
-            Details: ''
-    UnsupportedLanguageError:
-      value:
-        Errors:
-          Error:
-          - Source: Carbon-Calculator
-            ReasonCode: LANGUAGE_NOT_FOUND
-            Description: Unsupported language
-            Recoverable: false
-            Details: ''
     InsightsByIdResponse:
       value:
         insightsByIdPayload:
@@ -738,86 +769,6 @@ components:
               key2: 1
               key3: 2
           version: '1.0'
-    InsightsRequest:
-      value:
-        insightsPayload:
-          mainCategory: shopping
-          main: shopping
-          docc: ''
-          spendingAreaId: '30'
-          subCategory: clothes
-        profile:
-          traits:
-            knowledge: 0.65
-            lifestyle: 0.445
-            motivated: 0.683
-          userAttributes:
-            demo: 66
-            diet: 256
-            lifestyle: 4
-            energy: 12288
-            transport: 36933
-            country: AX
-          created: '2024-01-31T10:57:36.161Z'
-          surveys:
-            key1:
-              key2: 1
-              key3: 2
-          persona: '3'
-          benchmarks:
-            key1:
-              key2: 1
-              key3: 2
-          comparisons:
-            key1:
-              key2: 1
-              key3: 2
-          insights:
-            key1:
-              key2: 1
-              key3: 2
-          version: '1.0'
-    InsightsByIdRequest:
-      value:
-        profile:
-          traits:
-            knowledge: 0.65
-            lifestyle: 0.445
-            motivated: 0.683
-          userAttributes:
-            demo: 66
-            diet: 256
-            lifestyle: 4
-            energy: 12288
-            transport: 36933
-            country: US
-          created: '2024-01-31T10:57:36.161Z'
-          surveys:
-            viewed:
-              onboardingVersion: 1
-          persona: '3'
-          benchmarks:
-            key1:
-              key2: 1
-              key3: 2
-          comparisons:
-            key1:
-              key2: 1
-              key3: 2
-          insights:
-            key1:
-              key2: 1
-              key3: 2
-          version: '1.0'
-    InsightItemNotFoundInVersionError:
-      value:
-        Errors:
-          Error:
-          - Source: Carbon-Calculator
-            ReasonCode: VERSION_NOT_FOUND
-            Description: 'Insight T101 unavailable in 3.1 (use: 1.1)'
-            Recoverable: false
-            Details: ''
     InsightItemNotFoundError:
       value:
         Errors:
@@ -825,6 +776,15 @@ components:
           - Source: Carbon-Calculator
             ReasonCode: ITEM_NOT_FOUND
             Description: Insight Item not found for the provided id
+            Recoverable: false
+            Details: ''
+    UnsupportedLanguageError:
+      value:
+        Errors:
+          Error:
+          - Source: Carbon-Calculator
+            ReasonCode: LANGUAGE_NOT_FOUND
+            Description: Unsupported language
             Recoverable: false
             Details: ''
     MissingInsightAttributesBadRequestError:
@@ -841,27 +801,67 @@ components:
             Description: One of the request parameters is invalid, try again with correct request
             Recoverable: false
             Details: profile.traits must not be null
-  requestBodies:
-    InsightsRequest:
-      description: Insights for climate profile.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/InsightsRequestPayload'
-          examples:
-            InsightsRequest:
-              $ref: '#/components/examples/InsightsRequest'
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: Page number of the page whose data should be present in response
+      required: false
+      example: 2
+      schema:
+        type: integer
+        minimum: 1
+    Branding:
+      name: branding
+      in: query
+      description: If you have a branded content version, please supply it here
+      required: false
+      example: branding
+      schema:
+        type: string
+    InsightsId:
+      name: id
+      in: path
+      description: for specific insight Id user wants to see insight to their climate profile
       required: true
-    InsightsByIdRequest:
-      description: Represents a Climate Profile for a User.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/InsightsByIdRequestPayload'
-          examples:
-            InsightsByIdRequest:
-              $ref: '#/components/examples/InsightsByIdRequest'
-      required: true
+      example: T101
+      schema:
+        type: string
+    PageSize:
+      name: page_size
+      in: query
+      description: size of page upto which data should be present
+      required: false
+      example: 20
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+    Version:
+      name: version
+      in: query
+      description: version of insights
+      required: false
+      example: 1.1
+      schema:
+        type: string
+        minimum: 1
+    Heading:
+      name: heading
+      in: query
+      description: If you want to display heading of the insights content
+      required: false
+      example: false
+      schema:
+        type: boolean
+    Language:
+      name: language
+      in: query
+      description: language in which user wants to see insights to their climate profile
+      required: false
+      example: en
+      schema:
+        $ref: '#/components/schemas/LanguageCode'
 externalDocs:
   description: ISO 4217 - Currency Code
   url: https://en.wikipedia.org/wiki/ISO_4217

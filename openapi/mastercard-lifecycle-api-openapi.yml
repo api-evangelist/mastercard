@@ -176,7 +176,252 @@ paths:
     - url: https://services.mastercard.com/zapp/pbarfp/dsp
       description: Production environment.
 components:
+  responses:
+    UnauthorisedErrorResponse:
+      description: Invalid signature. The service fails signature validation.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/UnauthorisedExample'
+    BadRequestErrorResponse:
+      description: 'Invalid structure: The header or payload fails syntax or structural validation.'
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestErrorExample:
+              $ref: '#/components/examples/BadRequestErrorExample'
+    RefundAccountResponse:
+      description: Refund account request creation successful.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+        X-JWS-Signature:
+          $ref: '#/components/headers/X-JWS-Signature'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RefundAccount'
+    PaymentRequestStatusRetrievalResponse:
+      description: Payment request Status Retrieval Request was successfully received by Mastercard.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaymentRequestStatusRetrievalAck'
+    RefundPaymentConfirmationResponse:
+      description: Refund payment confirmation successful.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+        X-JWS-Signature:
+          $ref: '#/components/headers/X-JWS-Signature'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RefundPaymentAdviseConfirmation'
+    StepUpNotificationResponse:
+      description: Step Up Notification Request creation successful.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID_2'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID_2'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+        X-JWS-Signature:
+          $ref: '#/components/headers/X-JWS-Signature'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StepUpNotification'
+    RefundRequestStatusRetrievalResponse:
+      description: Refund Request Status Retrieval Request was successfully received by Mastercard.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/X-Request-ID_2'
+        X-Product-ID:
+          $ref: '#/components/headers/X-Product-ID_2'
+        X-Participant-ID:
+          $ref: '#/components/headers/X-Participant-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RefundRequestStatusRetrievalAck'
   schemas:
+    RefundAcknowledgement:
+      type: object
+      required:
+      - refundRequestLifecycleId
+      - refundRequestStatus
+      properties:
+        refundRequestLifecycleId:
+          type: string
+          example: 0123901239100
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard, to identify the refund request in subsequent transactions or services.
+        refundRequestStatus:
+          type: string
+          example: INPR
+          minLength: 4
+          maxLength: 4
+          description: Refund Status returned to Mastercard. * Refer to Codes and Formats section for more details.
+    Error:
+      description: A single error
+      type: object
+      properties:
+        Source:
+          type: string
+          example: ZAPP
+          description: Source of the error
+        ReasonCode:
+          type: string
+          example: STVL-9999
+          description: Error Code
+        Description:
+          type: string
+          example: Invalid structure
+          description: Error Description
+        Recoverable:
+          type: boolean
+          example: false
+          description: Boolean value to specify if error is recoverable or not
+        Details:
+          type: string
+          example: Invalid structure
+          description: Optional details of the error
+    NewRefundAccount:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - refund
+        - creditor
+        properties:
+          creditor:
+            $ref: '#/components/schemas/CreditorForRefund'
+          refund:
+            $ref: '#/components/schemas/Refund'
+    Refund:
+      type: object
+      required:
+      - paymentRequestLifecycleId
+      - refundAmount
+      - refundReason
+      - refundMethod
+      properties:
+        paymentRequestLifecycleId:
+          type: string
+          example: '923123123123123100'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+        creditorRefundReference:
+          type: string
+          example: '454647894521236'
+          minLength: 1
+          maxLength: 35
+          description: Identifier assigned for the refund transaction by the Creditor or CSP.
+        caseReferenceId:
+          type: string
+          example: '2324252627'
+          minLength: 1
+          maxLength: 35
+          description: CaseReferenceId generated by Dispute Management System to be  Populated when the refund is a result of a dispute. This should be  populated only when the value for refundReason is DISPUTES.
+        refundAmount:
+          $ref: '#/components/schemas/Amount'
+        refundReason:
+          type: string
+          example: DUPLICATEORDER
+          minLength: 1
+          maxLength: 25
+          description: Identifies the reason for the refund, such as whether a refund is the result of a query or a dispute case. * Refer to Codes and Formats section for more details.
+        refundMethod:
+          type: string
+          example: FPS
+          minLength: 1
+          maxLength: 20
+          description: The method of refund that Creditor or CSP will use when they receive account details from DSP. * Refer to Codes and Formats section for more details.
+    RefundAccount:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock'
+      - type: object
+        required:
+        - refund
+        properties:
+          refund:
+            $ref: '#/components/schemas/RefundAcknowledgement'
+    NewPaymentRequestStatusRetrieval:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - paymentRequestLifecycleId
+        - creditor
+        properties:
+          paymentRequestLifecycleId:
+            type: string
+            example: '923123123123123100'
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+          creditor:
+            $ref: '#/components/schemas/CreditorForSRR'
+    Amount:
+      required:
+      - currency
+      - value
+      type: object
+      properties:
+        currency:
+          type: string
+          example: GBP
+          maxLength: 3
+          minLength: 3
+          description: ISO 4217 code for Currency.
+        value:
+          type: number
+          example: 100.25
+          description: Amount value.
+    ErrorList:
+      description: The list of errors
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
     MessageRequestBlock:
       type: object
       required:
@@ -208,37 +453,46 @@ components:
           minimum: 1
           maximum: 999
           description: Unique identifier assigned by Mastercard to define the commercial product construct. * Refer to Codes and Formats section for more details.
-    Amount:
-      required:
-      - currency
-      - value
+    PaymentRequestStatusRetrievalAck:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock'
+      - type: object
+        required:
+        - paymentRequestStatusRetrievalLifecycleId
+        - retrievalRequestStatus
+        properties:
+          paymentRequestStatusRetrievalLifecycleId:
+            type: string
+            example: '111123123123123111'
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the Payment Request Status Retrieval request in subsequent transactions or services.
+          retrievalRequestStatus:
+            type: string
+            example: WFPC
+            minLength: 1
+            maxLength: 35
+            description: Informs the status of the Retrieval Request. * Refer to Codes and Formats section for more details.
+    RefundPaymentAdviseConfirmation:
+      allOf:
+      - $ref: '#/components/schemas/MessageResponseBlock'
+    ErrorWrapper:
+      description: A top level object for errors
       type: object
-      properties:
-        currency:
-          type: string
-          example: GBP
-          maxLength: 3
-          minLength: 3
-          description: ISO 4217 code for Currency.
-        value:
-          type: number
-          example: 100.25
-          description: Amount value.
-    Errors:
-      description: Object that contains the list of errors
-      type: object
       required:
-      - Error
+      - Errors
       properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList'
-    NewPaymentRequestStatusRetrieval:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    NewRefundPaymentConfirmation:
       allOf:
       - $ref: '#/components/schemas/MessageRequestBlock'
       - type: object
         required:
         - paymentRequestLifecycleId
+        - refundRequestLifecycleId
         - creditor
+        - status
         properties:
           paymentRequestLifecycleId:
             type: string
@@ -246,8 +500,24 @@ components:
             minLength: 1
             maxLength: 35
             description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+          refundRequestLifecycleId:
+            type: string
+            example: 0123901239100
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the refund request in subsequent transactions or services.
           creditor:
-            $ref: '#/components/schemas/CreditorForSRR'
+            $ref: '#/components/schemas/CreditorForRefund'
+          status:
+            $ref: '#/components/schemas/status'
+          refundPaymentConfirmation:
+            $ref: '#/components/schemas/refundPayment'
+          refundRequestStatusRetrievalLifecycleId:
+            type: string
+            example: '111123123123123111'
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned by Mastercard, to identify the Refund Request Status Retrieval request in subsequent transactions or services.
     refundPayment:
       type: object
       required:
@@ -289,184 +559,14 @@ components:
           minLength: 1
           maxLength: 35
           description: Unique identifier assigned to the CSP during Mastercard onboarding.
-    Refund:
+    Errors:
+      description: Object that contains the list of errors
       type: object
       required:
-      - paymentRequestLifecycleId
-      - refundAmount
-      - refundReason
-      - refundMethod
+      - Error
       properties:
-        paymentRequestLifecycleId:
-          type: string
-          example: '923123123123123100'
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
-        creditorRefundReference:
-          type: string
-          example: '454647894521236'
-          minLength: 1
-          maxLength: 35
-          description: Identifier assigned for the refund transaction by the Creditor or CSP.
-        caseReferenceId:
-          type: string
-          example: '2324252627'
-          minLength: 1
-          maxLength: 35
-          description: CaseReferenceId generated by Dispute Management System to be  Populated when the refund is a result of a dispute. This should be  populated only when the value for refundReason is DISPUTES.
-        refundAmount:
-          $ref: '#/components/schemas/Amount'
-        refundReason:
-          type: string
-          example: DUPLICATEORDER
-          minLength: 1
-          maxLength: 25
-          description: Identifies the reason for the refund, such as whether a refund is the result of a query or a dispute case. * Refer to Codes and Formats section for more details.
-        refundMethod:
-          type: string
-          example: FPS
-          minLength: 1
-          maxLength: 20
-          description: The method of refund that Creditor or CSP will use when they receive account details from DSP. * Refer to Codes and Formats section for more details.
-    RefundAcknowledgement:
-      type: object
-      required:
-      - refundRequestLifecycleId
-      - refundRequestStatus
-      properties:
-        refundRequestLifecycleId:
-          type: string
-          example: 0123901239100
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned by Mastercard, to identify the refund request in subsequent transactions or services.
-        refundRequestStatus:
-          type: string
-          example: INPR
-          minLength: 4
-          maxLength: 4
-          description: Refund Status returned to Mastercard. * Refer to Codes and Formats section for more details.
-    NewRefundAccount:
-      allOf:
-      - $ref: '#/components/schemas/MessageRequestBlock'
-      - type: object
-        required:
-        - refund
-        - creditor
-        properties:
-          creditor:
-            $ref: '#/components/schemas/CreditorForRefund'
-          refund:
-            $ref: '#/components/schemas/Refund'
-    ErrorList:
-      description: The list of errors
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
-    CreditorForRefund:
-      type: object
-      required:
-      - creditorId
-      - creditorServiceProviderId
-      properties:
-        creditorId:
-          type: string
-          example: VerizonoMobile000588
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned to the Creditor by the CSP.
-        creditorServiceProviderId:
-          type: string
-          example: '000645'
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned to the CSP during Mastercard onboarding.
-    NewRefundPaymentConfirmation:
-      allOf:
-      - $ref: '#/components/schemas/MessageRequestBlock'
-      - type: object
-        required:
-        - paymentRequestLifecycleId
-        - refundRequestLifecycleId
-        - creditor
-        - status
-        properties:
-          paymentRequestLifecycleId:
-            type: string
-            example: '923123123123123100'
-            minLength: 1
-            maxLength: 35
-            description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
-          refundRequestLifecycleId:
-            type: string
-            example: 0123901239100
-            minLength: 1
-            maxLength: 35
-            description: Unique identifier assigned by Mastercard, to identify the refund request in subsequent transactions or services.
-          creditor:
-            $ref: '#/components/schemas/CreditorForRefund'
-          status:
-            $ref: '#/components/schemas/status'
-          refundPaymentConfirmation:
-            $ref: '#/components/schemas/refundPayment'
-          refundRequestStatusRetrievalLifecycleId:
-            type: string
-            example: '111123123123123111'
-            minLength: 1
-            maxLength: 35
-            description: Unique identifier assigned by Mastercard, to identify the Refund Request Status Retrieval request in subsequent transactions or services.
-    status:
-      type: object
-      required:
-      - refundStatus
-      properties:
-        refundStatus:
-          type: string
-          example: APPR
-          maxLength: 4
-          minLength: 4
-          description: Status of the transaction. * Refer to Codes and Formats section for more details.
-        refundStatusReason:
-          type: string
-          example: SYSM
-          maxLength: 4
-          minLength: 4
-          description: Reason for declined transaction. * Refer to Codes and Formats section for more details.
-    Error:
-      description: A single error
-      type: object
-      properties:
-        Source:
-          type: string
-          example: ZAPP
-          description: Source of the error
-        ReasonCode:
-          type: string
-          example: STVL-9999
-          description: Error Code
-        Description:
-          type: string
-          example: Invalid structure
-          description: Error Description
-        Recoverable:
-          type: boolean
-          example: false
-          description: Boolean value to specify if error is recoverable or not
-        Details:
-          type: string
-          example: Invalid structure
-          description: Optional details of the error
-    RefundAccount:
-      allOf:
-      - $ref: '#/components/schemas/MessageResponseBlock'
-      - type: object
-        required:
-        - refund
-        properties:
-          refund:
-            $ref: '#/components/schemas/RefundAcknowledgement'
+        Error:
+          $ref: '#/components/schemas/ErrorList'
     MessageResponseBlock:
       type: object
       required:
@@ -498,72 +598,68 @@ components:
           minLength: 1
           maxLength: 35
           description: "Original message identifier generated and sent by the initiator of\n the request message."
-    PaymentRequestStatusRetrievalAck:
-      allOf:
-      - $ref: '#/components/schemas/MessageResponseBlock'
-      - type: object
-        required:
-        - paymentRequestStatusRetrievalLifecycleId
-        - retrievalRequestStatus
-        properties:
-          paymentRequestStatusRetrievalLifecycleId:
-            type: string
-            example: '111123123123123111'
-            minLength: 1
-            maxLength: 35
-            description: Unique identifier assigned by Mastercard, to identify the Payment Request Status Retrieval request in subsequent transactions or services.
-          retrievalRequestStatus:
-            type: string
-            example: WFPC
-            minLength: 1
-            maxLength: 35
-            description: Informs the status of the Retrieval Request. * Refer to Codes and Formats section for more details.
-    ErrorWrapper:
-      description: A top level object for errors
+    status:
       type: object
       required:
-      - Errors
+      - refundStatus
       properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    RefundPaymentAdviseConfirmation:
-      allOf:
-      - $ref: '#/components/schemas/MessageResponseBlock'
-    Errors_2:
-      description: Object that contains the list of errors.
+        refundStatus:
+          type: string
+          example: APPR
+          maxLength: 4
+          minLength: 4
+          description: Status of the transaction. * Refer to Codes and Formats section for more details.
+        refundStatusReason:
+          type: string
+          example: SYSM
+          maxLength: 4
+          minLength: 4
+          description: Reason for declined transaction. * Refer to Codes and Formats section for more details.
+    CreditorForRefund:
       type: object
       required:
-      - Error
+      - creditorId
+      - creditorServiceProviderId
       properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList_2'
+        creditorId:
+          type: string
+          example: VerizonoMobile000588
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the Creditor by the CSP.
+        creditorServiceProviderId:
+          type: string
+          example: '000645'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the CSP during Mastercard onboarding.
+    Error_2:
+      description: A single error.
+      type: object
+      properties:
+        Source:
+          type: string
+          example: ZAPP
+          description: Source of the error.
+        ReasonCode:
+          type: string
+          example: STVL-9999
+          description: Error Code
+        Description:
+          type: string
+          example: Invalid structure
+          description: Error Description.
+        Recoverable:
+          type: boolean
+          example: false
+          description: Boolean value to specify if error is recoverable or not.
+        Details:
+          type: string
+          example: Invalid structure
+          description: Optional details of the error.
     StepUpNotification:
       allOf:
       - $ref: '#/components/schemas/MessageResponseBlock_2'
-    TransactionForStepUpNotification:
-      type: object
-      required:
-      - paymentRequestLifecycleId
-      - stepUpMessage
-      properties:
-        paymentRequestLifecycleId:
-          type: string
-          example: '923123123123123100'
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
-        stepUpMessage:
-          type: string
-          example: Please go to your Banking App and Authorise the transaction
-          minLength: 1
-          maxLength: 250
-          description: Text message that DSP will be providing to display to the Debtor on Creditor website or application.
-        applicationUrl:
-          type: string
-          example: zapp://812768758639876189746
-          minLength: 1
-          maxLength: 512
-          description: URL that will be used by the Debtor to open the banking app from Creditor's website or application on a single device journey. Creditor should only use this when it's a single device journey.
     ErrorList_2:
       description: The list of errors.
       type: array
@@ -590,30 +686,72 @@ components:
             minLength: 1
             maxLength: 35
             description: Informs the status of the Retrieval Request. * Refer to Codes and Formats section for more details.
-    Error_2:
-      description: A single error.
+    ErrorWrapper_2:
+      description: A top level object for errors.
       type: object
+      required:
+      - Errors
       properties:
-        Source:
+        Errors:
+          $ref: '#/components/schemas/Errors_2'
+    NewStepUpNotification:
+      allOf:
+      - $ref: '#/components/schemas/MessageRequestBlock'
+      - type: object
+        required:
+        - transaction
+        - debtorServiceProviderId
+        properties:
+          debtorServiceProviderId:
+            type: string
+            example: 000369
+            minLength: 1
+            maxLength: 35
+            description: Unique identifier assigned to the DSP during Mastercard onboarding.
+          transaction:
+            $ref: '#/components/schemas/TransactionForStepUpNotification'
+    TransactionForStepUpNotification:
+      type: object
+      required:
+      - paymentRequestLifecycleId
+      - stepUpMessage
+      properties:
+        paymentRequestLifecycleId:
           type: string
-          example: ZAPP
-          description: Source of the error.
-        ReasonCode:
+          example: '923123123123123100'
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+        stepUpMessage:
           type: string
-          example: STVL-9999
-          description: Error Code
-        Description:
+          example: Please go to your Banking App and Authorise the transaction
+          minLength: 1
+          maxLength: 250
+          description: Text message that DSP will be providing to display to the Debtor on Creditor website or application.
+        applicationUrl:
           type: string
-          example: Invalid structure
-          description: Error Description.
-        Recoverable:
-          type: boolean
-          example: false
-          description: Boolean value to specify if error is recoverable or not.
-        Details:
+          example: zapp://812768758639876189746
+          minLength: 1
+          maxLength: 512
+          description: URL that will be used by the Debtor to open the banking app from Creditor's website or application on a single device journey. Creditor should only use this when it's a single device journey.
+    DebtorForSRR:
+      type: object
+      required:
+      - debtorId
+      - debtorServiceProviderId
+      properties:
+        debtorId:
           type: string
-          example: Invalid structure
-          description: Optional details of the error.
+          example: Fxrsi5345
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier of the Debtor provided to Mastercard by the DSP.
+        debtorServiceProviderId:
+          type: string
+          example: 000369
+          minLength: 1
+          maxLength: 35
+          description: Unique identifier assigned to the DSP during Mastercard onboarding.
     NewRefundRequestStatusRetrieval:
       allOf:
       - $ref: '#/components/schemas/MessageRequestBlock'
@@ -637,6 +775,14 @@ components:
             description: Unique identifier assigned by Mastercard, to identify the refund request in subsequent transactions or services.
           debtor:
             $ref: '#/components/schemas/DebtorForSRR'
+    Errors_2:
+      description: Object that contains the list of errors.
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList_2'
     MessageResponseBlock_2:
       type: object
       required:
@@ -668,59 +814,7 @@ components:
           minLength: 1
           maxLength: 35
           description: Original message identifier generated and sent by the initiator of the request message.
-    NewStepUpNotification:
-      allOf:
-      - $ref: '#/components/schemas/MessageRequestBlock'
-      - type: object
-        required:
-        - transaction
-        - debtorServiceProviderId
-        properties:
-          debtorServiceProviderId:
-            type: string
-            example: 000369
-            minLength: 1
-            maxLength: 35
-            description: Unique identifier assigned to the DSP during Mastercard onboarding.
-          transaction:
-            $ref: '#/components/schemas/TransactionForStepUpNotification'
-    DebtorForSRR:
-      type: object
-      required:
-      - debtorId
-      - debtorServiceProviderId
-      properties:
-        debtorId:
-          type: string
-          example: Fxrsi5345
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier of the Debtor provided to Mastercard by the DSP.
-        debtorServiceProviderId:
-          type: string
-          example: 000369
-          minLength: 1
-          maxLength: 35
-          description: Unique identifier assigned to the DSP during Mastercard onboarding.
-    ErrorWrapper_2:
-      description: A top level object for errors.
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors_2'
   parameters:
-    payment_request_lifecycle_id:
-      name: payment_request_lifecycle_id
-      in: path
-      required: true
-      description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
-      schema:
-        type: string
-        example: '128361739311340082'
-        minLength: 1
-        maxLength: 35
     X-Product-ID:
       name: X-Product-ID
       in: header
@@ -731,16 +825,6 @@ components:
         minLength: 1
         maxLength: 50
       description: Unique identifier assigned to the product construct by Mastercard and given to the participant.
-    X-JWS-Signature:
-      name: X-JWS-Signature
-      in: header
-      required: true
-      description: JWS detached signature is applied to ensure data integrity.
-      schema:
-        type: string
-        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
-        minLength: 1
-        maxLength: 512
     refund_request_lifecycle_id:
       name: refund_request_lifecycle_id
       in: path
@@ -751,6 +835,37 @@ components:
         example: '245566173931134008'
         minLength: 1
         maxLength: 35
+    payment_request_lifecycle_id:
+      name: payment_request_lifecycle_id
+      in: path
+      required: true
+      description: Unique identifier assigned by Mastercard, to identify the payment request in subsequent transactions or services.
+      schema:
+        type: string
+        example: '128361739311340082'
+        minLength: 1
+        maxLength: 35
+    Idempotency-Key:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Unique identifier generated by the participant. Mastercard uses this identifier to recognize subsequent retries of the same request and ensure idempotent behaviour by sending the same response without repeating the operation again.
+      schema:
+        type: string
+        format: uuid
+        example: 7da7a728-f910-11e6-942a-68f728c1ba70
+        minLength: 1
+        maxLength: 36
+    X-JWS-Signature:
+      name: X-JWS-Signature
+      in: header
+      required: true
+      description: JWS detached signature is applied to ensure data integrity.
+      schema:
+        type: string
+        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
+        minLength: 1
+        maxLength: 512
     X-Request-ID:
       name: X-Request-ID
       in: header
@@ -771,17 +886,6 @@ components:
         minLength: 1
         maxLength: 50
       description: Unique identifier assigned to the participant by Mastercard during onboarding.
-    Idempotency-Key:
-      name: Idempotency-Key
-      in: header
-      required: true
-      description: Unique identifier generated by the participant. Mastercard uses this identifier to recognize subsequent retries of the same request and ensure idempotent behaviour by sending the same response without repeating the operation again.
-      schema:
-        type: string
-        format: uuid
-        example: 7da7a728-f910-11e6-942a-68f728c1ba70
-        minLength: 1
-        maxLength: 36
     X-Product-ID_2:
       name: X-Product-ID
       in: header
@@ -792,159 +896,6 @@ components:
         maxLength: 50
         example: PBARFP
       description: Unique identifier assigned to the product by Mastercard and given to the participant.
-  headers:
-    X-Product-ID:
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: PBARFP
-      description: Unique identifier assigned to the product construct by Mastercard and given to the participant.
-    X-Participant-ID:
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: '000545'
-      description: Unique identifier assigned to the participant by Mastercard during onboarding.
-    X-JWS-Signature:
-      required: true
-      description: JWS detached signature is applied to ensure data integrity.
-      schema:
-        type: string
-        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
-        minLength: 1
-        maxLength: 512
-    X-Request-ID:
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: 7eab4eab35a542e085add0363a49c035
-      description: Each API request has an associated request identifier. It can be used to match the response to the request and used for tracing, troubleshooting and analysis purposes.
-    X-Product-ID_2:
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: PBARFP
-      description: Unique identifier assigned to the product by Mastercard and given to the participant.
-    X-Request-ID_2:
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 50
-        example: 7eab4eab35a542e085add0363a49c035
-      description: Each API request has an associated request identifier. It can be used to match the response to the request and for tracing, troubleshooting and analysis purposes.
-  responses:
-    RefundAccountResponse:
-      description: Refund account request creation successful.
-      headers:
-        X-Request-ID:
-          $ref: '#/components/headers/X-Request-ID'
-        X-Product-ID:
-          $ref: '#/components/headers/X-Product-ID'
-        X-Participant-ID:
-          $ref: '#/components/headers/X-Participant-ID'
-        X-JWS-Signature:
-          $ref: '#/components/headers/X-JWS-Signature'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/RefundAccount'
-    BadRequestErrorResponse:
-      description: 'Invalid structure: The header or payload fails syntax or structural validation.'
-      headers:
-        X-Request-ID:
-          $ref: '#/components/headers/X-Request-ID'
-        X-Product-ID:
-          $ref: '#/components/headers/X-Product-ID'
-        X-Participant-ID:
-          $ref: '#/components/headers/X-Participant-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            BadRequestErrorExample:
-              $ref: '#/components/examples/BadRequestErrorExample'
-    PaymentRequestStatusRetrievalResponse:
-      description: Payment request Status Retrieval Request was successfully received by Mastercard.
-      headers:
-        X-Request-ID:
-          $ref: '#/components/headers/X-Request-ID'
-        X-Product-ID:
-          $ref: '#/components/headers/X-Product-ID'
-        X-Participant-ID:
-          $ref: '#/components/headers/X-Participant-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PaymentRequestStatusRetrievalAck'
-    UnauthorisedErrorResponse:
-      description: Invalid signature. The service fails signature validation.
-      headers:
-        X-Request-ID:
-          $ref: '#/components/headers/X-Request-ID'
-        X-Product-ID:
-          $ref: '#/components/headers/X-Product-ID'
-        X-Participant-ID:
-          $ref: '#/components/headers/X-Participant-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            BadRequestExample:
-              $ref: '#/components/examples/UnauthorisedExample'
-    RefundPaymentConfirmationResponse:
-      description: Refund payment confirmation successful.
-      headers:
-        X-Request-ID:
-          $ref: '#/components/headers/X-Request-ID'
-        X-Product-ID:
-          $ref: '#/components/headers/X-Product-ID'
-        X-Participant-ID:
-          $ref: '#/components/headers/X-Participant-ID'
-        X-JWS-Signature:
-          $ref: '#/components/headers/X-JWS-Signature'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/RefundPaymentAdviseConfirmation'
-    RefundRequestStatusRetrievalResponse:
-      description: Refund Request Status Retrieval Request was successfully received by Mastercard.
-      headers:
-        X-Request-ID:
-          $ref: '#/components/headers/X-Request-ID_2'
-        X-Product-ID:
-          $ref: '#/components/headers/X-Product-ID_2'
-        X-Participant-ID:
-          $ref: '#/components/headers/X-Participant-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/RefundRequestStatusRetrievalAck'
-    StepUpNotificationResponse:
-      description: Step Up Notification Request creation successful.
-      headers:
-        X-Request-ID:
-          $ref: '#/components/headers/X-Request-ID_2'
-        X-Product-ID:
-          $ref: '#/components/headers/X-Product-ID_2'
-        X-Participant-ID:
-          $ref: '#/components/headers/X-Participant-ID'
-        X-JWS-Signature:
-          $ref: '#/components/headers/X-JWS-Signature'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/StepUpNotification'
   examples:
     UnauthorisedExample:
       value:
@@ -982,6 +933,55 @@ components:
             Description: Invalid structure.
             Recoverable: false
             Details: Invalid structure
+  headers:
+    X-Product-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product construct by Mastercard and given to the participant.
+    X-Participant-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: '000545'
+      description: Unique identifier assigned to the participant by Mastercard during onboarding.
+    X-Request-ID:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: 7eab4eab35a542e085add0363a49c035
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and used for tracing, troubleshooting and analysis purposes.
+    X-JWS-Signature:
+      required: true
+      description: JWS detached signature is applied to ensure data integrity.
+      schema:
+        type: string
+        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1LMGlrb1k3NFpNdUhnbncwSG1MNnpSbi9rRT0iLCJpYXQiOiIxNjc1OTYyMjA3IiwiY3JpdCI6WyJpYXQiXX0..XRHc_Q7mp49sr0CDL6Ps97uz4Lhl3XG_--JfeZrkj-4LK-3gzc7HsN0Jq4UjO_NX5ZlVp_tfL_GE1g9-vUT0NCfXmfbBXYEaC9CgFZIoU9F2PBegdZwHHmkDbu-5-t6kd2xo4UhaQ5VP1quWOD5yAs2a6MlQstT1iT-gPIW1teaiz4lgCmqbcTo6umjLKL-QsYvJ53Ngtb5rrF5WWQ1WKpGeq_PP1hGYbxDzcYBNZqGed-dXuGqpkWJ85JENJyOKDoskWM6cgs6OAjrmjTIFQ0qdfal91SUQtzJ49nbAiqMpROh79uYJ024jgtcQ_StqYJyJWYdLeUv1ge-kDJN0fw
+        minLength: 1
+        maxLength: 512
+    X-Product-ID_2:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: PBARFP
+      description: Unique identifier assigned to the product by Mastercard and given to the participant.
+    X-Request-ID_2:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+        example: 7eab4eab35a542e085add0363a49c035
+      description: Each API request has an associated request identifier. It can be used to match the response to the request and for tracing, troubleshooting and analysis purposes.
   requestBodies:
     RefundPaymentConfirmationRequest:
       required: true

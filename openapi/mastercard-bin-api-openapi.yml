@@ -60,125 +60,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFoundErrorResponse'
 components:
-  requestBodies:
-    BinResourceSearchByAccountRangeRequest:
-      description: BIN Resource Search By account range Request
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/SearchByAccountRange'
-    BinResourceSearchRequest:
-      description: BIN Resource Search Request
-      required: true
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/SearchCriteria'
-  responses:
-    BinResourceResponse:
-      description: BIN Resource response
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/BinResourcePage'
-          examples:
-            FilterBINsExample:
-              $ref: '#/components/examples/SearchBINsExample'
-    BadRequestErrorResponse:
-      description: Invalid or insufficient parameters supplied
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            BINNotFoundExample:
-              $ref: '#/components/examples/BadRequestExample'
-    AccountRangeSearchResponse:
-      description: Account Range Search response
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/BinResourceArray'
-          examples:
-            BINSuccessExample:
-              $ref: '#/components/examples/BINSuccessExample'
-    NotFoundErrorResponse:
-      description: The URI didn't match an existing resource
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            BINNotFoundExample:
-              $ref: '#/components/examples/BINNotFoundExample'
-    ForbiddenErrorResponse:
-      description: Insufficient permissions for interacting with the resource
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            BINNotFoundExample:
-              $ref: '#/components/examples/ForbiddenExample'
-    NotAuthorizedErrorResponse:
-      description: Authentication information was missing or invalid
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            BINNotFoundExample:
-              $ref: '#/components/examples/UnauthorizedExample'
   schemas:
-    SearchCriteria:
-      type: object
-      required:
-      - key
-      - value
-      properties:
-        key:
-          type: string
-          description: The key within the JSON response that you would like to filter the results on. For example, to search by customer name set this as 'customerName'. You can also filter on almost any other keys in the data such as 'ica', 'country.code', 'country.alpha3', 'country.name', 'productCode', and 'productDescription'. The exception to this is the governmentRange key, which you cannot filter on.
-          minLength: 3
-          maxLength: 25
-          example: customerName
-        value:
-          type: string
-          description: The value of the key that you would like to filter the results on. For example, provide the name of a customer to search with here such as 'CITIBANK EUROPE PUBLIC LIMITED COMPANY' when filtering on the 'customerName' key. When filtering on another key provide an appropriate value, for example 'FRA' when filtering the 'country.alpha3' key.
-          minLength: 1
-          maxLength: 200
-          example: CITIBANK EUROPE PUBLIC LIMITED COMPANY
-    Errors:
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
-    ErrorResponse:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          type: object
-          required:
-          - Error
-          properties:
-            Error:
-              $ref: '#/components/schemas/Errors'
-    SearchByAccountRange:
-      type: object
-      required:
-      - accountRange
-      properties:
-        accountRange:
-          type: number
-          description: The first 8 digits of a card number (without spaces), or up to the 11th digit of an account range
-          minimum: 10000000
-          maximum: 99999999999
-          example: 22293261
     Error:
       type: object
       required:
@@ -214,6 +96,56 @@ components:
           example: The provided search value does not exist
           minLength: 0
           maxLength: 500
+    ErrorResponse:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              $ref: '#/components/schemas/Errors'
+    SearchByAccountRange:
+      type: object
+      required:
+      - accountRange
+      properties:
+        accountRange:
+          type: number
+          description: The first 8 digits of a card number (without spaces), or up to the 11th digit of an account range
+          minimum: 10000000
+          maximum: 99999999999
+          example: 22293261
+    BinResourceArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/BinResource'
+    Errors:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    SearchCriteria:
+      type: object
+      required:
+      - key
+      - value
+      properties:
+        key:
+          type: string
+          description: The key within the JSON response that you would like to filter the results on. For example, to search by customer name set this as 'customerName'. You can also filter on almost any other keys in the data such as 'ica', 'country.code', 'country.alpha3', 'country.name', 'productCode', and 'productDescription'. The exception to this is the governmentRange key, which you cannot filter on.
+          minLength: 3
+          maxLength: 25
+          example: customerName
+        value:
+          type: string
+          description: The value of the key that you would like to filter the results on. For example, provide the name of a customer to search with here such as 'CITIBANK EUROPE PUBLIC LIMITED COMPANY' when filtering on the 'customerName' key. When filtering on another key provide an appropriate value, for example 'FRA' when filtering the 'country.alpha3' key.
+          minLength: 1
+          maxLength: 200
+          example: CITIBANK EUROPE PUBLIC LIMITED COMPANY
     BinResourcePage:
       type: object
       properties:
@@ -395,27 +327,79 @@ components:
           minLength: 1
           maxLength: 300
           example: California Community Bank
-    BinResourceArray:
-      type: array
-      items:
-        $ref: '#/components/schemas/BinResource'
+  responses:
+    ForbiddenErrorResponse:
+      description: Insufficient permissions for interacting with the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BINNotFoundExample:
+              $ref: '#/components/examples/ForbiddenExample'
+    BadRequestErrorResponse:
+      description: Invalid or insufficient parameters supplied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BINNotFoundExample:
+              $ref: '#/components/examples/BadRequestExample'
+    BinResourceResponse:
+      description: BIN Resource response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BinResourcePage'
+          examples:
+            FilterBINsExample:
+              $ref: '#/components/examples/SearchBINsExample'
+    AccountRangeSearchResponse:
+      description: Account Range Search response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BinResourceArray'
+          examples:
+            BINSuccessExample:
+              $ref: '#/components/examples/BINSuccessExample'
+    NotFoundErrorResponse:
+      description: The URI didn't match an existing resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BINNotFoundExample:
+              $ref: '#/components/examples/BINNotFoundExample'
+    NotAuthorizedErrorResponse:
+      description: Authentication information was missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            BINNotFoundExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+  requestBodies:
+    BinResourceSearchRequest:
+      description: BIN Resource Search Request
+      required: true
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/SearchCriteria'
+    BinResourceSearchByAccountRangeRequest:
+      description: BIN Resource Search By account range Request
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SearchByAccountRange'
   parameters:
-    Size:
-      name: size
-      in: query
-      schema:
-        type: integer
-      description: The number of items to be displayed per page. The larger the number the slower the API will respond, but the less requests you will need to make for paginating through data. We recommend trying a page size of 1000 and adjusting for your needs.
-      example: 25
-      required: false
-    Sort:
-      name: sort
-      in: query
-      schema:
-        type: string
-      description: Sort by any parameter that the API returns with a direction (- for descending sort, + for ascending sort). For example -lowAccountRange will present the returned data in descending order based on the low account range values. The same is true for any of parameters such as customerName (+customerName) or ica (-ica).
-      example: -lowAccountRange
-      required: false
     Page:
       name: page
       in: query
@@ -425,7 +409,59 @@ components:
       description: The current page based on the number of items per page. Use this value to iterate through all of the paginated data and to know when you are the end of the data.
       example: 1
       required: false
+    Sort:
+      name: sort
+      in: query
+      schema:
+        type: string
+      description: Sort by any parameter that the API returns with a direction (- for descending sort, + for ascending sort). For example -lowAccountRange will present the returned data in descending order based on the low account range values. The same is true for any of parameters such as customerName (+customerName) or ica (-ica).
+      example: -lowAccountRange
+      required: false
+    Size:
+      name: size
+      in: query
+      schema:
+        type: integer
+      description: The number of items to be displayed per page. The larger the number the slower the API will respond, but the less requests you will need to make for paginating through data. We recommend trying a page size of 1000 and adjusting for your needs.
+      example: 25
+      required: false
   examples:
+    BINNotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: BINTABLE_API
+            ReasonCode: NOT_FOUND
+            Description: Invalid BIN format, please ensure there are no spaces used
+            Recoverable: false
+            Details: BIN '131 840' doesn't exist
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: BINTABLE_API
+            ReasonCode: BAD_REQUEST
+            Description: Not all mandatory parameters are supplied or sent incorrectly.
+            Recoverable: false
+            Details: The value of parameter 'sort' is invalid.
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: BINTABLE_API
+            ReasonCode: PERMISSION_DENIED
+            Description: You don't seem authorized to do that
+            Recoverable: false
+            Details: The resource was processed and can't be updated anymore
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: BINTABLE_API
+            ReasonCode: UNAUTHORIZED
+            Description: We couldn't recognize you
+            Recoverable: false
+            Details: 'Full authentication is required to access this resource. See also: https://mstr.cd/31YcrTi'
     BINSuccessExample:
       description: Individual Mastercard BIN data
       value:
@@ -455,15 +491,6 @@ components:
         billingCurrencyDefault: USD
         smartDataEnabled: false
         affiliate: California Community Bank
-    BINNotFoundExample:
-      value:
-        Errors:
-          Error:
-          - Source: BINTABLE_API
-            ReasonCode: NOT_FOUND
-            Description: Invalid BIN format, please ensure there are no spaces used
-            Recoverable: false
-            Details: BIN '131 840' doesn't exist
     SearchBINsExample:
       value:
         currentPageNumber: 1
@@ -523,30 +550,3 @@ components:
           consumerType: CONSUMER
           smartDataEnabled: true
           affiliate: null
-    UnauthorizedExample:
-      value:
-        Errors:
-          Error:
-          - Source: BINTABLE_API
-            ReasonCode: UNAUTHORIZED
-            Description: We couldn't recognize you
-            Recoverable: false
-            Details: 'Full authentication is required to access this resource. See also: https://mstr.cd/31YcrTi'
-    BadRequestExample:
-      value:
-        Errors:
-          Error:
-          - Source: BINTABLE_API
-            ReasonCode: BAD_REQUEST
-            Description: Not all mandatory parameters are supplied or sent incorrectly.
-            Recoverable: false
-            Details: The value of parameter 'sort' is invalid.
-    ForbiddenExample:
-      value:
-        Errors:
-          Error:
-          - Source: BINTABLE_API
-            ReasonCode: PERMISSION_DENIED
-            Description: You don't seem authorized to do that
-            Recoverable: false
-            Details: The resource was processed and can't be updated anymore

@@ -153,12 +153,9 @@ paths:
       description: Production server
 components:
   schemas:
-    CurrencyCode:
+    X-MC-Correlation-ID:
       type: string
-      description: Currency code as per ISO 4217
-      minLength: 3
-      maxLength: 3
-      pattern: ^[A-Za-z]{3}$
+      example: X-MC-Correlation-ID:5e4b7f904d2820f688c67ef9fc0035
     Currency:
       title: Currency
       type: object
@@ -168,9 +165,12 @@ components:
       properties:
         currencyCode:
           $ref: '#/components/schemas/CurrencyCode'
-    X-MC-Correlation-ID:
+    CurrencyCode:
       type: string
-      example: X-MC-Correlation-ID:5e4b7f904d2820f688c67ef9fc0035
+      description: Currency code as per ISO 4217
+      minLength: 3
+      maxLength: 3
+      pattern: ^[A-Za-z]{3}$
     SupportedCurrencies:
       title: SupportedCurrencies
       type: array
@@ -179,6 +179,13 @@ components:
       maxItems: 1000
       items:
         $ref: '#/components/schemas/Currency'
+    ErrorResponse:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
     EnhancedEcbCurrencies:
       type: object
       properties:
@@ -192,16 +199,6 @@ components:
           description: List of ECB Currencies
           items:
             $ref: '#/components/schemas/EnhancedCurrency'
-    Errors:
-      type: object
-      required:
-      - Error
-      properties:
-        Error:
-          type: array
-          description: if an errorhas occurred
-          items:
-            $ref: '#/components/schemas/EcbError'
     EnhancedCurrency:
       type: object
       properties:
@@ -213,6 +210,16 @@ components:
           type: string
           description: The full name of the currency
           example: Euro
+    Errors:
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          type: array
+          description: if an errorhas occurred
+          items:
+            $ref: '#/components/schemas/EcbError'
     EnhancedMastercardCurrencies:
       type: object
       properties:
@@ -226,36 +233,6 @@ components:
           description: List of Mastercard Currencies
           items:
             $ref: '#/components/schemas/EnhancedCurrency'
-    EcbError:
-      type: object
-      properties:
-        Description:
-          type: string
-          description: Short description of the ReasonCode field.
-          example: Not Found
-        Details:
-          type: string
-          description: Where appropriate, indicates detailed information about data received and calculated during request processing, to help the user with diagnosing errors.
-          example: Mastercard and ECB rates are not available for this date. Resubmit for a date within the last 365 days inclusive of current day.
-        ReasonCode:
-          type: string
-          description: A unique constant identifying the error case encountered during transaction processing. For example, INVALID_SIGNATURE is used when the request signature does not match the expected one.
-          example: NOT_FOUND
-        Recoverable:
-          type: boolean
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome. For example, if the request contains an invalid   signature, retrying will never result in a success. However, if the error is related to some unexpected timeout with the service, retrying the call could result in a successful response.
-          example: false
-        Source:
-          type: string
-          description: The name of the application that generated this error
-          example: Gateway
-    ErrorResponse:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
     EnhancedMastercardCurrencyWrapper:
       type: object
       properties:
@@ -290,6 +267,29 @@ components:
           example: '2020-01-21T17:43:37.000Z'
         data:
           $ref: '#/components/schemas/EnhancedEcbCurrencies'
+    EcbError:
+      type: object
+      properties:
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Not Found
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about data received and calculated during request processing, to help the user with diagnosing errors.
+          example: Mastercard and ECB rates are not available for this date. Resubmit for a date within the last 365 days inclusive of current day.
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during transaction processing. For example, INVALID_SIGNATURE is used when the request signature does not match the expected one.
+          example: NOT_FOUND
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome. For example, if the request contains an invalid   signature, retrying will never result in a success. However, if the error is related to some unexpected timeout with the service, retrying the call could result in a successful response.
+          example: false
+        Source:
+          type: string
+          description: The name of the application that generated this error
+          example: Gateway
     SettlementCurrencyWrapper:
       type: object
       properties:
@@ -307,15 +307,6 @@ components:
           description: The date and time the API is being called in GMT.
         data:
           $ref: '#/components/schemas/SettlementCurrency'
-    SettlementCurrency:
-      type: object
-      properties:
-        currencies:
-          type: array
-          description: A list of settlement currencies
-          items:
-            $ref: '#/components/schemas/Currency_2'
-          example: []
     Currency_2:
       type: object
       properties:
@@ -327,19 +318,15 @@ components:
           type: string
           example: ANGOLAN KWANZA
           description: The full name of the currency.
-  responses:
-    SupportedCurrencies:
-      description: This response code is returned when a request is accepted and successfully processed. A corresponding response will be returned for the API caller.
-      headers:
-        X-MC-Correlation-ID:
-          $ref: '#/components/headers/X-MC-Correlation-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/SupportedCurrencies'
-          examples:
-            SupportedCurrencies:
-              $ref: '#/components/examples/SupportedCurrencies'
+    SettlementCurrency:
+      type: object
+      properties:
+        currencies:
+          type: array
+          description: A list of settlement currencies
+          items:
+            $ref: '#/components/schemas/Currency_2'
+          example: []
   headers:
     X-MC-Correlation-ID:
       description: This id is unique per request and is used to co-relate a request to its response. Customers must share this id while raising any incident for this API.
@@ -370,6 +357,19 @@ components:
             Description: Invalid Client ID
             Recoverable: false
             Details: You do not have access to this service. Please visit the Enhanced Currency Conversion Calculator page for details.
+  responses:
+    SupportedCurrencies:
+      description: This response code is returned when a request is accepted and successfully processed. A corresponding response will be returned for the API caller.
+      headers:
+        X-MC-Correlation-ID:
+          $ref: '#/components/headers/X-MC-Correlation-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SupportedCurrencies'
+          examples:
+            SupportedCurrencies:
+              $ref: '#/components/examples/SupportedCurrencies'
 externalDocs:
   description: ISO 4217 - Currency Code
   url: https://en.wikipedia.org/wiki/ISO_4217

@@ -68,175 +68,42 @@ paths:
         delay: 0
         dispatcher: FALLBACK
 components:
-  examples:
-    RateLimitExceededExample:
-      value:
-        Errors:
-          Error:
-          - Source: fld
-            ReasonCode: RATE_LIMIT_EXCEEDED
-            Description: You have exceeded the service rate limit. Maximum allowed 10 TPS.
-            Recoverable: true
-            details: null
-    FraudDataChangedError:
-      value:
-        refId: ecb2d942-eabd-42b6-87fd-69c19692bdc6
-        timestamp: '2021-03-16T20:34:40-06:00'
-        responseCode: '100'
-        responseMessage: Failure
-        errorDetails:
-          Errors:
-            Error:
-            - ReasonCode: '60003'
-              Description: icaNumber incorrect datatype of attribute value.
-    FraudChangeExample:
-      value:
-        refId: ecb2d942-eabd-42b6-87fd-69c19692bdc6
-        timestamp: '2021-03-16T20:34:37-06:00'
-        icaNumber: '1076'
-        providerId: '10'
-        auditControlNumber: '123111111000025'
-        fraudPostedDate: '20210316'
-        fraudTypeCode: '01'
-        fraudSubTypeCode: N
-        accountDeviceType: '1'
-        cardholderReportedDate: '20210314'
-        cardInPossession: Y
-        memo: This is a sample FDC minimal request.
-        issuerSCAExemption: 09
-    BadRequestRefIdMissing:
-      value:
-        Errors:
-          Error:
-          - Source: fld
-            ReasonCode: VALIDATION_ERROR
-            Description: Reference Id is not provided
-            Recoverable: false
-    FraudIssuerChangeExample:
-      value:
-        refId: ecb2d942-eabd-42b6-87fd-69c19692bdc6
-        timestamp: '2021-03-16T20:34:37-06:00'
-        icaNumber: '1076'
-        auditControlNumber: '123111111000025'
-        acquirerId: '2742'
-        cardNumber: '5587450000000008074'
-        fraudTypeCode: '01'
-        fraudSubTypeCode: U
-        cardProductCode: CIR
-        transactionDate: '20200215'
-        settlementDate: '20200216'
-        fraudPostedDate: '20210316'
-        cardholderReportedDate: '20210314'
-        transactionAmount: '56823'
-        transactionCurrencyCode: '840'
-        billingAmount: '56823'
-        billingCurrencyCode: '840'
-        merchantId: '6698696'
-        merchantName: BANKNEWPORT
-        merchantCity: Phoenix
-        merchantStateProvinceCode: AZ
-        merchantCountryCode: USA
-        merchantPostalCode: '85001'
-        merchantCategoryCode: '6011'
-        terminalAttendanceIndicator: '0'
-        terminalId: 5055D305
-        terminalOperatingEnvironment: '1'
-        cardholderPresenceIndicator: '0'
-        cardPresenceIndicator: '1'
-        cardInPossession: Y
-        catLevelIndicator: '2'
-        terminalCapabilityIndicator: '0'
-        posEntryMode: '00'
-        cvcInvalidIndicator: M
-        avsResponseCode: U
-        authResponseCode: '00'
-        secureCode: '9'
-        accountDeviceType: A
-        transactionIndicator: M205
-        memo: This is a sample FDC complete request.
-        issuerSCAExemption: 09
-    FraudIssuerDataChanged:
-      value:
-        refId: ecb2d942-eabd-42b6-87fd-69c19692bdc6
-        timestamp: '2021-03-16T20:34:40-06:00'
-        responseCode: '000'
-        responseMessage: Success
-        icaNumber: '1076'
-        auditControlNumber: '123111111000025'
-        previousStatus: CONFIRMED-REJECTED
-        currentStatus: CONFIRMED-SUCCESS
-        matchLevelIndicator: I
-        financialTransactionIndicator: APPROVED
-    FraudDataChanged:
-      value:
-        refId: ecb2d942-eabd-42b6-87fd-69c19692bdc6
-        timestamp: '2021-03-16T20:34:40-06:00'
-        responseCode: '000'
-        responseMessage: Success
-        icaNumber: '1076'
-        auditControlNumber: '123111111000025'
-        previousStatus: CONFIRMED-REJECTED
-        currentStatus: CONFIRMED-SUCCESS
-        matchLevelIndicator: M
-        financialTransactionIndicator: DECLINED
-        authorizationResponse: 05 - Do not honor
-    UnauthorizedExample:
-      value:
-        Errors:
-          Error:
-          - Source: fld
-            ReasonCode: UNAUTHORIZED_REQUEST
-            Description: Unauthorized request
-            Recoverable: false
-    ForbiddenExample:
-      value:
-        Errors:
-          Error:
-          - Source: fld
-            ReasonCode: CONSENT_NOT_GIVEN
-            Description: User Consent Not Given
-            Recoverable: false
   schemas:
-    Errors:
-      title: Errors
+    Error:
+      title: ErrorMessage
       required:
-      - Error
+      - Description
+      - ReasonCode
       type: object
       properties:
-        Error:
-          type: array
-          description: Errors array wrapped in an error object
-          items:
-            $ref: '#/components/schemas/Error'
-          example: []
-    SafeFraudProvider:
-      description: Indicates the originator of the request. Value 10 is for Issuer and 20 for Acquirer.
-      type: string
-      example: '10'
-      pattern: ^(10|20)
-      minLength: 2
-      maxLength: 2
-    FraudBase:
-      type: object
-      properties:
-        refId:
-          description: Unique identification generated by the transaction originator using UUID logic to unambiguously link a request and response message.
-          example: ecb2d942-eabd-42b6-87fd-69c19692bdc6
-          maxLength: 36
-          minLength: 36
+        Source:
           type: string
-        timestamp:
-          description: Timestamp of the request initiation by the originator in the format 'YYYY-MM-DDThh:mm:ss:mmm+hh:mm'. The value of '+hh:mm' portion should always be '-05:00' or '-06:00' reflecting CST time.
-          example: '2022-05-24T20:34:37+6:00'
-          maxLength: 25
-          minLength: 25
-          type: string
-        icaNumber:
-          description: ICA number of the Issuer or Acquirer or Provider initiating the fraud submission request.
-          example: '1076'
-          maxLength: 7
+          description: The application or component that generated this error.
           minLength: 3
+          maxLength: 50
+          example: FLD
+        ReasonCode:
           type: string
+          description: Reason code is a unique constant identifying the error case encountered during request processing.
+          minLength: 5
+          maxLength: 100
+          example: VALIDATION_ERROR
+        Description:
+          type: string
+          description: Human-readable short description of the reasonCode
+          minLength: 10
+          maxLength: 250
+          example: Reference Id is not provided
+        Details:
+          type: string
+          description: Optional detailed description provides information about data received and calculated during request processing.  This helps the user to diagnose errors.
+          minLength: 0
+          maxLength: 1000
+          example: This is mandatory field while requesting for fraud submission.
+        Recoverable:
+          type: boolean
+          description: Recoverable flag indicates whether this error is always returned for this request, or retrying could change the outcome.  For example, 'true' or 'false'.
+          example: false
     Fraud:
       allOf:
       - $ref: '#/components/schemas/FraudBase'
@@ -315,72 +182,75 @@ components:
             example: Online
           errorDetails:
             $ref: '#/components/schemas/ErrorWrapper'
-    Error:
-      title: ErrorMessage
+    UpdatedMastercardFraud:
+      allOf:
+      - $ref: '#/components/schemas/APIDataElement'
+      - type: object
+        required:
+        - providerId
+        - auditControlNumber
+        properties:
+          providerId:
+            $ref: '#/components/schemas/SafeFraudProvider'
+          auditControlNumber:
+            description: Unique number generated by FLD application and provided in the response message for a successful fraud record submission (FDA event). This is used as a reference to subsequently modify, delete or convert a suspended to a confirmed fraud record.
+            type: string
+            minLength: 15
+            maxLength: 15
+            example: '418142102142002'
+          fraudPostedDate:
+            description: Date on which the fraud is posted in FLD by the originator. Format is 'YYYYMMDD'.
+            type: string
+            minLength: 8
+            maxLength: 8
+            pattern: ^\d{4}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$
+            example: '20210120'
+          fraudTypeCode:
+            description: Code identifying the reason the originator submitted the transaction as fraud in FLD. Please refer to [Table 1](https://developer.mastercard.com/fld-fraud-submission/documentation/parameters/annexure-1/#table-1-fraud-type-codes) for possible values.
+            type: string
+            minLength: 2
+            maxLength: 2
+            example: '04'
+          fraudSubTypeCode:
+            description: Code to further identify the reason why the originator submitted the transaction as fraud in FLD. This attribute is mandatory for Issuer but optional for Acquirer. Please refer to [Table 2](https://developer.mastercard.com/fld-fraud-submission/documentation/parameters/annexure-1/#table-2-fraud-sub-type-codes) for possible values.
+            type: string
+            minLength: 1
+            maxLength: 1
+            example: U
+          accountDeviceType:
+            description: Indicates if the account uses a magnetic stripe, chip, pin, contactless or any combination thereof. Please refer to [Table 3](https://developer.mastercard.com/fld-fraud-submission/documentation/parameters/annexure-1/#table-3-account-device-type-codes) for possible values.
+            type: string
+            minLength: 1
+            maxLength: 1
+            example: '1'
+          cardholderReportedDate:
+            description: Date on which the cardholder had reported the fraud. Format is 'YYYYMMDD'.
+            type: string
+            minLength: 8
+            maxLength: 8
+            pattern: ^\d{4}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$
+            example: '20210118'
+          cardInPossession:
+            description: Flag to indicate if the card holder was in possession of the card at the time the fraud occurred. Possible values are 'Y', 'N' and 'U' (for Unknown).
+            type: string
+            minLength: 1
+            maxLength: 1
+            example: N
+          memo:
+            description: Brief description by the originator providing some comment supporting the action.
+            type: string
+            minLength: 1
+            maxLength: 1000
+            example: This is a sample FDC minimal request.
+    ErrorWrapper:
+      description: Object containing the list of combination of error reason codes and their corresponding description (can provide up to 5 errors for a record). It will be absent if the request is processed by FLD application successfully.
+      title: Error Response
       required:
-      - Description
-      - ReasonCode
+      - Errors
       type: object
       properties:
-        Source:
-          type: string
-          description: The application or component that generated this error.
-          minLength: 3
-          maxLength: 50
-          example: FLD
-        ReasonCode:
-          type: string
-          description: Reason code is a unique constant identifying the error case encountered during request processing.
-          minLength: 5
-          maxLength: 100
-          example: VALIDATION_ERROR
-        Description:
-          type: string
-          description: Human-readable short description of the reasonCode
-          minLength: 10
-          maxLength: 250
-          example: Reference Id is not provided
-        Details:
-          type: string
-          description: Optional detailed description provides information about data received and calculated during request processing.  This helps the user to diagnose errors.
-          minLength: 0
-          maxLength: 1000
-          example: This is mandatory field while requesting for fraud submission.
-        Recoverable:
-          type: boolean
-          description: Recoverable flag indicates whether this error is always returned for this request, or retrying could change the outcome.  For example, 'true' or 'false'.
-          example: false
-    APIDataElement:
-      required:
-      - refId
-      - timestamp
-      - icaNumber
-      type: object
-      properties:
-        refId:
-          description: Unique identification generated by the transaction originator using UUID logic to unambiguously link a request and response message.
-          type: string
-          minLength: 36
-          maxLength: 36
-          example: ecb2d942-eabd-42b6-87fd-69c19692bdc6
-        timestamp:
-          type: string
-          description: Timestamp of the request initiation by the originator in the format 'YYYY-MM-DDThh:mm:ss:mmm+hh:mm'. The value of '+hh:mm' portion should always be '-05:00' or '-06:00' reflecting CST time.
-          minLength: 25
-          maxLength: 25
-          example: '2021-02-02T02:34:37-06:00'
-        icaNumber:
-          description: ICA number of the Issuer or Acquirer initiating the fraud submission request.
-          type: string
-          minLength: 3
-          maxLength: 7
-          example: '1076'
-        issuerSCAExemption:
-          description: Issuer SCA (Strong Customer Authentication) Exemption value. Please refer to [Table 16](https://developer.mastercard.com/fld-fraud-submission/documentation/parameters/annexure-1/#table-16-issuer-sca-strong-customer-authentication-exemption) for possible values.
-          type: string
-          minLength: 1
-          maxLength: 2
-          example: 09
+        Errors:
+          $ref: '#/components/schemas/Errors'
     UpdatedIssuerFraud:
       allOf:
       - $ref: '#/components/schemas/APIDataElement'
@@ -620,134 +490,205 @@ components:
             minLength: 1
             maxLength: 1000
             example: This is a sample FDC complete request.
-    UpdatedMastercardFraud:
-      allOf:
-      - $ref: '#/components/schemas/APIDataElement'
-      - type: object
-        required:
-        - providerId
-        - auditControlNumber
-        properties:
-          providerId:
-            $ref: '#/components/schemas/SafeFraudProvider'
-          auditControlNumber:
-            description: Unique number generated by FLD application and provided in the response message for a successful fraud record submission (FDA event). This is used as a reference to subsequently modify, delete or convert a suspended to a confirmed fraud record.
-            type: string
-            minLength: 15
-            maxLength: 15
-            example: '418142102142002'
-          fraudPostedDate:
-            description: Date on which the fraud is posted in FLD by the originator. Format is 'YYYYMMDD'.
-            type: string
-            minLength: 8
-            maxLength: 8
-            pattern: ^\d{4}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$
-            example: '20210120'
-          fraudTypeCode:
-            description: Code identifying the reason the originator submitted the transaction as fraud in FLD. Please refer to [Table 1](https://developer.mastercard.com/fld-fraud-submission/documentation/parameters/annexure-1/#table-1-fraud-type-codes) for possible values.
-            type: string
-            minLength: 2
-            maxLength: 2
-            example: '04'
-          fraudSubTypeCode:
-            description: Code to further identify the reason why the originator submitted the transaction as fraud in FLD. This attribute is mandatory for Issuer but optional for Acquirer. Please refer to [Table 2](https://developer.mastercard.com/fld-fraud-submission/documentation/parameters/annexure-1/#table-2-fraud-sub-type-codes) for possible values.
-            type: string
-            minLength: 1
-            maxLength: 1
-            example: U
-          accountDeviceType:
-            description: Indicates if the account uses a magnetic stripe, chip, pin, contactless or any combination thereof. Please refer to [Table 3](https://developer.mastercard.com/fld-fraud-submission/documentation/parameters/annexure-1/#table-3-account-device-type-codes) for possible values.
-            type: string
-            minLength: 1
-            maxLength: 1
-            example: '1'
-          cardholderReportedDate:
-            description: Date on which the cardholder had reported the fraud. Format is 'YYYYMMDD'.
-            type: string
-            minLength: 8
-            maxLength: 8
-            pattern: ^\d{4}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$
-            example: '20210118'
-          cardInPossession:
-            description: Flag to indicate if the card holder was in possession of the card at the time the fraud occurred. Possible values are 'Y', 'N' and 'U' (for Unknown).
-            type: string
-            minLength: 1
-            maxLength: 1
-            example: N
-          memo:
-            description: Brief description by the originator providing some comment supporting the action.
-            type: string
-            minLength: 1
-            maxLength: 1000
-            example: This is a sample FDC minimal request.
-    ErrorWrapper:
-      description: Object containing the list of combination of error reason codes and their corresponding description (can provide up to 5 errors for a record). It will be absent if the request is processed by FLD application successfully.
-      title: Error Response
-      required:
-      - Errors
+    FraudBase:
       type: object
       properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-  responses:
-    BadRequestError:
-      description: Something was wrong with the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            BadRequestRefIdMissing:
-              $ref: '#/components/examples/BadRequestRefIdMissing'
-    UnauthorizedError:
-      description: Unauthorized request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedExample'
+        refId:
+          description: Unique identification generated by the transaction originator using UUID logic to unambiguously link a request and response message.
+          example: ecb2d942-eabd-42b6-87fd-69c19692bdc6
+          maxLength: 36
+          minLength: 36
+          type: string
+        timestamp:
+          description: Timestamp of the request initiation by the originator in the format 'YYYY-MM-DDThh:mm:ss:mmm+hh:mm'. The value of '+hh:mm' portion should always be '-05:00' or '-06:00' reflecting CST time.
+          example: '2022-05-24T20:34:37+6:00'
+          maxLength: 25
+          minLength: 25
+          type: string
+        icaNumber:
+          description: ICA number of the Issuer or Acquirer or Provider initiating the fraud submission request.
+          example: '1076'
+          maxLength: 7
+          minLength: 3
+          type: string
+    APIDataElement:
+      required:
+      - refId
+      - timestamp
+      - icaNumber
+      type: object
+      properties:
+        refId:
+          description: Unique identification generated by the transaction originator using UUID logic to unambiguously link a request and response message.
+          type: string
+          minLength: 36
+          maxLength: 36
+          example: ecb2d942-eabd-42b6-87fd-69c19692bdc6
+        timestamp:
+          type: string
+          description: Timestamp of the request initiation by the originator in the format 'YYYY-MM-DDThh:mm:ss:mmm+hh:mm'. The value of '+hh:mm' portion should always be '-05:00' or '-06:00' reflecting CST time.
+          minLength: 25
+          maxLength: 25
+          example: '2021-02-02T02:34:37-06:00'
+        icaNumber:
+          description: ICA number of the Issuer or Acquirer initiating the fraud submission request.
+          type: string
+          minLength: 3
+          maxLength: 7
+          example: '1076'
+        issuerSCAExemption:
+          description: Issuer SCA (Strong Customer Authentication) Exemption value. Please refer to [Table 16](https://developer.mastercard.com/fld-fraud-submission/documentation/parameters/annexure-1/#table-16-issuer-sca-strong-customer-authentication-exemption) for possible values.
+          type: string
+          minLength: 1
+          maxLength: 2
+          example: 09
+    SafeFraudProvider:
+      description: Indicates the originator of the request. Value 10 is for Issuer and 20 for Acquirer.
+      type: string
+      example: '10'
+      pattern: ^(10|20)
+      minLength: 2
+      maxLength: 2
+    Errors:
+      title: Errors
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Errors array wrapped in an error object
+          items:
+            $ref: '#/components/schemas/Error'
+          example: []
+  examples:
+    FraudIssuerChangeExample:
+      value:
+        refId: ecb2d942-eabd-42b6-87fd-69c19692bdc6
+        timestamp: '2021-03-16T20:34:37-06:00'
+        icaNumber: '1076'
+        auditControlNumber: '123111111000025'
+        acquirerId: '2742'
+        cardNumber: '5587450000000008074'
+        fraudTypeCode: '01'
+        fraudSubTypeCode: U
+        cardProductCode: CIR
+        transactionDate: '20200215'
+        settlementDate: '20200216'
+        fraudPostedDate: '20210316'
+        cardholderReportedDate: '20210314'
+        transactionAmount: '56823'
+        transactionCurrencyCode: '840'
+        billingAmount: '56823'
+        billingCurrencyCode: '840'
+        merchantId: '6698696'
+        merchantName: BANKNEWPORT
+        merchantCity: Phoenix
+        merchantStateProvinceCode: AZ
+        merchantCountryCode: USA
+        merchantPostalCode: '85001'
+        merchantCategoryCode: '6011'
+        terminalAttendanceIndicator: '0'
+        terminalId: 5055D305
+        terminalOperatingEnvironment: '1'
+        cardholderPresenceIndicator: '0'
+        cardPresenceIndicator: '1'
+        cardInPossession: Y
+        catLevelIndicator: '2'
+        terminalCapabilityIndicator: '0'
+        posEntryMode: '00'
+        cvcInvalidIndicator: M
+        avsResponseCode: U
+        authResponseCode: '00'
+        secureCode: '9'
+        accountDeviceType: A
+        transactionIndicator: M205
+        memo: This is a sample FDC complete request.
+        issuerSCAExemption: 09
+    FraudDataChangedError:
+      value:
+        refId: ecb2d942-eabd-42b6-87fd-69c19692bdc6
+        timestamp: '2021-03-16T20:34:40-06:00'
+        responseCode: '100'
+        responseMessage: Failure
+        errorDetails:
+          Errors:
+            Error:
+            - ReasonCode: '60003'
+              Description: icaNumber incorrect datatype of attribute value.
     FraudIssuerDataChanged:
-      description: Fraud data changed successfully.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Fraud'
-          examples:
-            FraudDataChanged:
-              $ref: '#/components/examples/FraudIssuerDataChanged'
-            FraudDataChangedError:
-              $ref: '#/components/examples/FraudDataChangedError'
-    ForbiddenError:
-      description: Consent not given.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            ForbiddenExample:
-              $ref: '#/components/examples/ForbiddenExample'
-    RateLimitExceededError:
-      description: Too Many Requests.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            RateLimitExceededExample:
-              $ref: '#/components/examples/RateLimitExceededExample'
+      value:
+        refId: ecb2d942-eabd-42b6-87fd-69c19692bdc6
+        timestamp: '2021-03-16T20:34:40-06:00'
+        responseCode: '000'
+        responseMessage: Success
+        icaNumber: '1076'
+        auditControlNumber: '123111111000025'
+        previousStatus: CONFIRMED-REJECTED
+        currentStatus: CONFIRMED-SUCCESS
+        matchLevelIndicator: I
+        financialTransactionIndicator: APPROVED
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: fld
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given
+            Recoverable: false
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: fld
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request
+            Recoverable: false
     FraudDataChanged:
-      description: Fraud data changed successfully.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Fraud'
-          examples:
-            FraudDataChanged:
-              $ref: '#/components/examples/FraudDataChanged'
-            FraudDataChangedError:
-              $ref: '#/components/examples/FraudDataChangedError'
+      value:
+        refId: ecb2d942-eabd-42b6-87fd-69c19692bdc6
+        timestamp: '2021-03-16T20:34:40-06:00'
+        responseCode: '000'
+        responseMessage: Success
+        icaNumber: '1076'
+        auditControlNumber: '123111111000025'
+        previousStatus: CONFIRMED-REJECTED
+        currentStatus: CONFIRMED-SUCCESS
+        matchLevelIndicator: M
+        financialTransactionIndicator: DECLINED
+        authorizationResponse: 05 - Do not honor
+    RateLimitExceededExample:
+      value:
+        Errors:
+          Error:
+          - Source: fld
+            ReasonCode: RATE_LIMIT_EXCEEDED
+            Description: You have exceeded the service rate limit. Maximum allowed 10 TPS.
+            Recoverable: true
+            details: null
+    BadRequestRefIdMissing:
+      value:
+        Errors:
+          Error:
+          - Source: fld
+            ReasonCode: VALIDATION_ERROR
+            Description: Reference Id is not provided
+            Recoverable: false
+    FraudChangeExample:
+      value:
+        refId: ecb2d942-eabd-42b6-87fd-69c19692bdc6
+        timestamp: '2021-03-16T20:34:37-06:00'
+        icaNumber: '1076'
+        providerId: '10'
+        auditControlNumber: '123111111000025'
+        fraudPostedDate: '20210316'
+        fraudTypeCode: '01'
+        fraudSubTypeCode: N
+        accountDeviceType: '1'
+        cardholderReportedDate: '20210314'
+        cardInPossession: Y
+        memo: This is a sample FDC minimal request.
+        issuerSCAExemption: 09
   requestBodies:
     FraudIssuerRequestChange:
       description: Change an existing fraud record using complete input parameters for both Mastercard and Issuer built transactions. [Mastercard payload encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/). Please refer to the [reference application](https://developer.mastercard.com/fld-fraud-submission/documentation/api-reference/) page for implementation details.
@@ -769,3 +710,62 @@ components:
           examples:
             FraudChangeExample:
               $ref: '#/components/examples/FraudChangeExample'
+  responses:
+    RateLimitExceededError:
+      description: Too Many Requests.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            RateLimitExceededExample:
+              $ref: '#/components/examples/RateLimitExceededExample'
+    UnauthorizedError:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+    FraudIssuerDataChanged:
+      description: Fraud data changed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Fraud'
+          examples:
+            FraudDataChanged:
+              $ref: '#/components/examples/FraudIssuerDataChanged'
+            FraudDataChangedError:
+              $ref: '#/components/examples/FraudDataChangedError'
+    FraudDataChanged:
+      description: Fraud data changed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Fraud'
+          examples:
+            FraudDataChanged:
+              $ref: '#/components/examples/FraudDataChanged'
+            FraudDataChangedError:
+              $ref: '#/components/examples/FraudDataChangedError'
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestRefIdMissing:
+              $ref: '#/components/examples/BadRequestRefIdMissing'

@@ -46,32 +46,100 @@ paths:
         $ref: '#/components/requestBodies/AuthenticationDecisionRequest'
 components:
   schemas:
-    DeviceInfo:
-      description: Object containing the details of the device from which the enrollment is being conducted.
+    AuthenticationDecisions:
       required:
-      - deviceAppId
-      - make
-      - model
+      - transactionId
+      - status
+      - attributes
+      - rotatedPds
       type: object
       properties:
-        deviceAppId:
+        transactionId:
           type: string
-          description: The device application ID is retrieved from the mobile SDK.
-          minLength: 1
-          maxLength: 255
-          example: 599F9C00-92DC-4B5C-9464-7971F01F8370
-        make:
+          description: A random 128-bit UUID represents the MIDS transaction.
+          minLength: 36
+          maxLength: 36
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+        status:
           type: string
-          description: The make of the mobile device.
+          description: Status of the authentication.
+          pattern: ^(SUCCESS|FAILURE)$
           minLength: 1
-          maxLength: 255
-          example: Samsung
-        model:
+          maxLength: 50
+          example: SUCCESS
+        attributes:
+          type: object
+          description: Keys will be in RetrieveIdentities.scopedFields and data structure will be the data object named after the key.
+          example:
+            legalName:
+              aa6dee5a-6e4d-4932-8189-2ecb7ad6f676:
+                value: SMITH, JOHN
+                lastVerifiedDate: '2022-04-04T02:49:27.915Z'
+          additionalProperties: {}
+          minLength: 1
+        rotatedPds:
           type: string
-          description: The model of the mobile device.
+          description: A rotated PDS is created and returned when the encryption key expires and a new key is generated.
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
           minLength: 1
-          maxLength: 255
-          example: S8
+          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    ARID:
+      type: string
+      description: A unique identifier for any activity being executed arising out of a Claim Share request. This value is passed as a parameter in the URL redirecting a User to the TP Flow during a Claim Share.
+      format: uuid
+      pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+      minLength: 36
+      maxLength: 36
+      example: a15fa6de-b199-11eb-8529-0242ac130003
+    CountryCode:
+      type: string
+      description: The country code of the country where the transaction originates from.
+      pattern: ^[a-zA-Z]{2}$
+      example: US
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      description: The error response model used by all the API endpoints.
+      properties:
+        Errors:
+          required:
+          - Error
+          type: object
+          description: The error response model used by all the API endpoints.
+          properties:
+            Error:
+              type: array
+              description: A list of Error objects.
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The source of the problem. That is where the error occurred.
+                    example: mids
+                  ReasonCode:
+                    type: string
+                    description: A code defining the error, as defined in documentation.
+                    example: USER_PROFILE_ID_NOT_FOUND
+                  Description:
+                    type: string
+                    description: A description of this specific occurrence of the Reason code.
+                    example: The provided user profile ID does not exist.
+                  Recoverable:
+                    type: boolean
+                    description: Whether or not retrying this request could result in a successful response.
+                    example: false
+                  Details:
+                    type: string
+                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+                    example: User X was not found
+                  redirectUri:
+                    type: string
+                    description: TP will use this URI to redirect to RP.
+                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
     VerifyAuthenticationDecisions:
       required:
       - countryCode
@@ -124,6 +192,12 @@ components:
           $ref: '#/components/schemas/FraudDetection'
         arid:
           $ref: '#/components/schemas/ARID'
+    PDS:
+      type: string
+      description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
+      pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+      minLength: 1
+      example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
     UserConsent:
       enum:
       - ACCEPT
@@ -136,113 +210,6 @@ components:
       minLength: 6
       maxLength: 7
       example: ACCEPT
-    ErrorResponse:
-      required:
-      - Errors
-      type: object
-      description: The error response model used by all the API endpoints.
-      properties:
-        Errors:
-          required:
-          - Error
-          type: object
-          description: The error response model used by all the API endpoints.
-          properties:
-            Error:
-              type: array
-              description: A list of Error objects.
-              minItems: 1
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    description: The source of the problem. That is where the error occurred.
-                    example: mids
-                  ReasonCode:
-                    type: string
-                    description: A code defining the error, as defined in documentation.
-                    example: USER_PROFILE_ID_NOT_FOUND
-                  Description:
-                    type: string
-                    description: A description of this specific occurrence of the Reason code.
-                    example: The provided user profile ID does not exist.
-                  Recoverable:
-                    type: boolean
-                    description: Whether or not retrying this request could result in a successful response.
-                    example: false
-                  Details:
-                    type: string
-                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
-                    example: User X was not found
-                  redirectUri:
-                    type: string
-                    description: TP will use this URI to redirect to RP.
-                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
-                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
-    ARID:
-      type: string
-      description: A unique identifier for any activity being executed arising out of a Claim Share request. This value is passed as a parameter in the URL redirecting a User to the TP Flow during a Claim Share.
-      format: uuid
-      pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-      minLength: 36
-      maxLength: 36
-      example: a15fa6de-b199-11eb-8529-0242ac130003
-    SdkVersion:
-      type: string
-      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
-      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
-      minLength: 5
-      maxLength: 255
-      example: 2.3.0
-    CountryCode:
-      type: string
-      description: The country code of the country where the transaction originates from.
-      pattern: ^[a-zA-Z]{2}$
-      example: US
-    AuthenticationDecisions:
-      required:
-      - transactionId
-      - status
-      - attributes
-      - rotatedPds
-      type: object
-      properties:
-        transactionId:
-          type: string
-          description: A random 128-bit UUID represents the MIDS transaction.
-          minLength: 36
-          maxLength: 36
-          example: 1ec14310-e85c-11ea-adc1-0242ac120002
-        status:
-          type: string
-          description: Status of the authentication.
-          pattern: ^(SUCCESS|FAILURE)$
-          minLength: 1
-          maxLength: 50
-          example: SUCCESS
-        attributes:
-          type: object
-          description: Keys will be in RetrieveIdentities.scopedFields and data structure will be the data object named after the key.
-          example:
-            legalName:
-              aa6dee5a-6e4d-4932-8189-2ecb7ad6f676:
-                value: SMITH, JOHN
-                lastVerifiedDate: '2022-04-04T02:49:27.915Z'
-          additionalProperties: {}
-          minLength: 1
-        rotatedPds:
-          type: string
-          description: A rotated PDS is created and returned when the encryption key expires and a new key is generated.
-          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
-          minLength: 1
-          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-    PDS:
-      type: string
-      description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
-      pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
-      minLength: 1
-      example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
     FraudDetection:
       type: object
       description: Object containing the signals from the device to be used for fraud detection.
@@ -292,7 +259,98 @@ components:
               description: The requested URL is hit by the app to the TP backend.
               pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
               example: http://tp-backend.com/api/path
+    DeviceInfo:
+      description: Object containing the details of the device from which the enrollment is being conducted.
+      required:
+      - deviceAppId
+      - make
+      - model
+      type: object
+      properties:
+        deviceAppId:
+          type: string
+          description: The device application ID is retrieved from the mobile SDK.
+          minLength: 1
+          maxLength: 255
+          example: 599F9C00-92DC-4B5C-9464-7971F01F8370
+        make:
+          type: string
+          description: The make of the mobile device.
+          minLength: 1
+          maxLength: 255
+          example: Samsung
+        model:
+          type: string
+          description: The model of the mobile device.
+          minLength: 1
+          maxLength: 255
+          example: S8
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
+  requestBodies:
+    AuthenticationDecisionRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VerifyAuthenticationDecisions'
+      required: true
+  parameters:
+    XEncryptedPayload:
+      in: header
+      name: X-Encrypted-Payload
+      type: boolean
+      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
+
+        '
+      example: true
+      schema: null
+    ScanIdPathParameter:
+      name: scan_id
+      in: path
+      description: Scan ID.
+      example: 1234
+      required: true
+      schema:
+        type: string
+        pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
   examples:
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided user profile ID does not exist.
+            Recoverable: false
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
+            Recoverable: false
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
     AuthenticationDecisionsExample:
       value:
         transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
@@ -303,14 +361,6 @@ components:
               value: SMITH, JOHN
               lastVerifiedDate: '2022-04-04T02:49:27.915Z'
         rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-    ForbiddenExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: CONSENT_NOT_GIVEN
-            Description: User Consent Not Given.
-            Recoverable: false
     UserProfileDeletedErrorExample:
       value:
         Errors:
@@ -320,44 +370,11 @@ components:
             Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
             Recoverable: false
             redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
-    NotFoundExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: USER_PROFILE_ID_NOT_FOUND
-            Description: The provided user profile ID does not exist.
-            Recoverable: false
-    ForbiddenExampleUnauthorizedScopedFields:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
-            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
-            Recoverable: false
-    UnauthorizedExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: UNAUTHORIZED_REQUEST
-            Description: Unauthorized request.
-            Recoverable: false
     EncryptedPayloadWithRotatedPDSExample:
       value:
         encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IoxNTE2MjM5MDIyf
         rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
   responses:
-    BadRequestError:
-      description: Something was wrong with the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            UserProfileDeletedErrorExample:
-              $ref: '#/components/examples/UserProfileDeletedErrorExample'
     UnauthorizedError:
       description: Unauthorized request.
       content:
@@ -398,6 +415,15 @@ components:
               $ref: '#/components/examples/AuthenticationDecisionsExample'
             AuthenticationDecisionsEncryptedResponse:
               $ref: '#/components/examples/EncryptedPayloadWithRotatedPDSExample'
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
     NotFoundError:
       description: The request didn't match an existing resource.
       content:
@@ -407,29 +433,3 @@ components:
           examples:
             NotFoundExample:
               $ref: '#/components/examples/NotFoundExample'
-  parameters:
-    ScanIdPathParameter:
-      name: scan_id
-      in: path
-      description: Scan ID.
-      example: 1234
-      required: true
-      schema:
-        type: string
-        pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-    XEncryptedPayload:
-      in: header
-      name: X-Encrypted-Payload
-      type: boolean
-      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
-
-        '
-      example: true
-      schema: null
-  requestBodies:
-    AuthenticationDecisionRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/VerifyAuthenticationDecisions'
-      required: true

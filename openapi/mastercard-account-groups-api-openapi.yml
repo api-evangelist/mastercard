@@ -31,7 +31,33 @@ paths:
         '400':
           $ref: '#/components/responses/ErrorsResponse'
 components:
+  responses:
+    AccountGroupUpdateResponse:
+      description: Ok
+    ErrorsResponse:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
   schemas:
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error Details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
     ErrorItem:
       type: object
       properties:
@@ -56,23 +82,6 @@ components:
           description: Where appropriate, indicates detailed information about the data received.
           example: Invalid Details
       description: Error Details
-    ErrorsWrapper:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    Errors:
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          type: array
-          description: Error Details
-          items:
-            $ref: '#/components/schemas/ErrorItem'
     AccountGroupDetails:
       required:
       - actionCode
@@ -102,15 +111,6 @@ components:
           type: string
           description: Identifier type that will be used to identify the reference to the target household. When using actionCode MH or MA, this field is should contain the static value of HHID. When using actionCode DH or DA, in a Program with a token-based householding scheme, this field is should contain the static value of HHT if the target household created by the operation needs to assign a household token to the new household.
           example: HHID
-  responses:
-    ErrorsResponse:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorsWrapper'
-    AccountGroupUpdateResponse:
-      description: Ok
   requestBodies:
     AccountGroupUpdateRequest:
       required: true

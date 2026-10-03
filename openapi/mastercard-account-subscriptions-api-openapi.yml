@@ -36,59 +36,6 @@ paths:
         dispatcher: FALLBACK
 components:
   schemas:
-    AccountNumber:
-      type: string
-      maxLength: 19
-      minLength: 13
-      example: '5573491171027315'
-      description: The account number being inquired upon.
-    BaseAccount:
-      description: Properties common to all accounts
-      type: object
-      required:
-      - accountNumber
-      - expiryDate
-      properties:
-        accountNumber:
-          $ref: '#/components/schemas/AccountNumber'
-        expiryDate:
-          $ref: '#/components/schemas/Expiry'
-    Errors:
-      type: object
-      required:
-      - Error
-      properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList'
-    ErrorList:
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
-    Account:
-      description: Representation of an account
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseAccount'
-      - type: object
-    Ica:
-      type: string
-      minLength: 4
-      maxLength: 15
-      example: '1111'
-      description: A number assigned by Mastercard to a licensed customer to identify the member in transactions. This is used as an identifier for data submitted to ABU.
-    SubMerchantId:
-      type: string
-      maxLength: 15
-      minLength: 15
-      example: '000000000000001'
-      description: An optional identifier for a sub-merchant of a payment facilitators under a registered merchant ID.
-    Expiry:
-      type: string
-      maxLength: 4
-      minLength: 4
-      example: '1228'
-      description: The expiration date associated to the account number being inquired upon. Must be in MMYY format.
     Error:
       type: object
       properties:
@@ -120,6 +67,49 @@ components:
           example: ICA is Mandatory
           maxLength: 5000
           minLength: 0
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    Ica:
+      type: string
+      minLength: 4
+      maxLength: 15
+      example: '1111'
+      description: A number assigned by Mastercard to a licensed customer to identify the member in transactions. This is used as an identifier for data submitted to ABU.
+    MerchantId:
+      type: string
+      maxLength: 15
+      minLength: 15
+      example: '000000000002535'
+      description: A merchant ID or payment facilitator ID, previously registered with Mastercard.
+    ErrorWrapper:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Customer:
+      description: Representation of a customer
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseCustomer'
+      - type: object
+        properties:
+          subMerchantId:
+            $ref: '#/components/schemas/SubMerchantId'
+    SubscriptionDeletion:
+      allOf:
+      - $ref: '#/components/schemas/CustomerAccount'
+      - type: object
+    SubMerchantId:
+      type: string
+      maxLength: 15
+      minLength: 15
+      example: '000000000000001'
+      description: An optional identifier for a sub-merchant of a payment facilitators under a registered merchant ID.
     CustomerAccount:
       type: object
       required:
@@ -137,10 +127,12 @@ components:
           $ref: '#/components/schemas/Customer'
         account:
           $ref: '#/components/schemas/Account'
-    SubscriptionDeletion:
-      allOf:
-      - $ref: '#/components/schemas/CustomerAccount'
-      - type: object
+    Expiry:
+      type: string
+      maxLength: 4
+      minLength: 4
+      example: '1228'
+      description: The expiration date associated to the account number being inquired upon. Must be in MMYY format.
     BaseCustomer:
       description: Properties common to all customer
       type: object
@@ -152,29 +144,46 @@ components:
           $ref: '#/components/schemas/Ica'
         merchantId:
           $ref: '#/components/schemas/MerchantId'
-    MerchantId:
-      type: string
-      maxLength: 15
-      minLength: 15
-      example: '000000000002535'
-      description: A merchant ID or payment facilitator ID, previously registered with Mastercard.
-    Customer:
-      description: Representation of a customer
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseCustomer'
-      - type: object
-        properties:
-          subMerchantId:
-            $ref: '#/components/schemas/SubMerchantId'
-    ErrorWrapper:
+    BaseAccount:
+      description: Properties common to all accounts
       type: object
       required:
-      - Errors
+      - accountNumber
+      - expiryDate
       properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
+        accountNumber:
+          $ref: '#/components/schemas/AccountNumber'
+        expiryDate:
+          $ref: '#/components/schemas/Expiry'
+    Errors:
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    AccountNumber:
+      type: string
+      maxLength: 19
+      minLength: 13
+      example: '5573491171027315'
+      description: The account number being inquired upon.
+    Account:
+      description: Representation of an account
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseAccount'
+      - type: object
   responses:
+    BadRequestErrorResponse:
+      description: Something was wrong with the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
     UnauthorizedErrorResponse:
       description: Authentication information was missing or invalid
       content:
@@ -186,25 +195,7 @@ components:
               $ref: '#/components/examples/UnauthorizedExample'
     SubscriptionDeletionResponse:
       description: Successfully unsubscribed customer from account number for a given merchant.
-    BadRequestErrorResponse:
-      description: Something was wrong with the request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            BadRequestExample:
-              $ref: '#/components/examples/BadRequestExample'
   examples:
-    UnauthorizedExample:
-      value:
-        Errors:
-          Error:
-          - Source: Security.Credential
-            ReasonCode: AUTHENTICATION_FAILED
-            Description: Unauthorized Access to Web Service.
-            Recoverable: false
-            Details: No ICA configured for clientID
     BadRequestExample:
       value:
         Errors:
@@ -214,6 +205,15 @@ components:
             Description: ICA required for ABU client eligibility validation.
             Recoverable: false
             Details: ICA is mandatory.
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: Security.Credential
+            ReasonCode: AUTHENTICATION_FAILED
+            Description: Unauthorized Access to Web Service.
+            Recoverable: false
+            Details: No ICA configured for clientID
   requestBodies:
     SubscriptionDeletionRequest:
       description: ABU Integrator sends subscriptionDeletion request to unsubscribe from an account.

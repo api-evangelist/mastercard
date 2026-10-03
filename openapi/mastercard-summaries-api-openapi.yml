@@ -109,7 +109,101 @@ paths:
                 NotFoundResponse:
                   $ref: '#/components/examples/NotFoundResponse'
 components:
+  examples:
+    BadRequestResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: BAD_REQUEST
+            Description: Invalid input
+            Recoverable: false
+            Details: Date format is invalid (Expected date format yyyy-MM-dd)
+    ForbiddenResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: FORBIDDEN
+            Description: Data is not accesssible
+            Recoverable: false
+            Details: Rate is not accessible for this date - Please use a date within the last 365 days inclusive of current day.
+    NotFoundResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: NOT_FOUND
+            Description: Data not available
+            Recoverable: false
+            Details: Mastercard and ECB rates are not available for this date. Resubmit for a date within the last 365 days inclusive of current day.
+    UnauthorizedResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: UNAUTHORIZED
+            Description: Invalid Client ID
+            Recoverable: false
+            Details: You do not have access to this service. Please visit the Enhanced Currency Conversion Calculator page for details.
   schemas:
+    MastercardConversionObject:
+      type: object
+      properties:
+        mastercardFxRateDate:
+          type: string
+          description: Date of Mastercard issued conversion rates. The date can differ to the requested rate date if no new rates are published for the requested date or if the user requests for a historical date
+          example: '2021-02-16T00:00:00.000Z'
+        mastercardConvRateInclPctFee:
+          type: number
+          description: Mastercard exchange rate for the requested currency pair including issuer-to-cardholder percentage rate fee as provided by the issuer in the API call
+          example: 1.2250048
+        mastercardConvRateExclAllFees:
+          type: number
+          description: Mastercard exchange rate for the requested currency pair excluding any issuer-to-cardholder fees
+          example: 1.2048193
+        crdhldBillAmtInclAllFees:
+          type: number
+          description: Cardholder Billing Amount as calculated by applying the Mastercard Conversion Rate, including any applicable issuer-to-cardholder fees (percentage and fixed)
+          example: 123.00048
+        crdhldBillAmtExclAllFees:
+          type: number
+          description: Cardholder billing amount calculated by using the Mastercard conversion rate, excluding any applicable issuer-to-cardholder fees
+          example: 120.48193
+        message:
+          type: string
+          description: User friendly message (if applicable)
+          example: Conversion rate is not available for this currency pair, Please refer to the Support section for a complete list of MCI reference rates available via the Enhanced Currency Conversion Calculator - https://developer.mastercard.com/documentation/enhanced-currency-conversion-calculator
+        reasonCode:
+          type: string
+          description: User friendly reason code (if applicable)
+          example: NOT_APPLICABLE
+    ErrorResponse:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    ECBConversionObject:
+      type: object
+      properties:
+        ecbReferenceRateDate:
+          type: string
+          description: Date of reference rates issued by the European Central Bank (ECB).
+          example: '2021-02-16T00:00:00.000Z'
+        ecbReferenceRate:
+          type: number
+          description: Euro foreign exchange reference rates issued by the European Central Bank (ECB). When neither the transaction currency nor the cardholder billing currency is equal to Euro, a calculated reference rate is derived from the two ECB rates
+          example: 1.2018075
+        message:
+          type: string
+          description: User friendly message (if applicable)
+          example: Rate issuance for requested date not supported.  Resubmit for a non-weekend or non-holiday date.
+        reasonCode:
+          type: string
+          description: User friendly reason code (if applicable)
+          example: NOT_AVAILABLE
     EnhancedCurrencyConversionData:
       type: object
       properties:
@@ -163,25 +257,6 @@ components:
           description: if an errorhas occurred
           items:
             $ref: '#/components/schemas/EcbError'
-    ECBConversionObject:
-      type: object
-      properties:
-        ecbReferenceRateDate:
-          type: string
-          description: Date of reference rates issued by the European Central Bank (ECB).
-          example: '2021-02-16T00:00:00.000Z'
-        ecbReferenceRate:
-          type: number
-          description: Euro foreign exchange reference rates issued by the European Central Bank (ECB). When neither the transaction currency nor the cardholder billing currency is equal to Euro, a calculated reference rate is derived from the two ECB rates
-          example: 1.2018075
-        message:
-          type: string
-          description: User friendly message (if applicable)
-          example: Rate issuance for requested date not supported.  Resubmit for a non-weekend or non-holiday date.
-        reasonCode:
-          type: string
-          description: User friendly reason code (if applicable)
-          example: NOT_AVAILABLE
     EcbError:
       type: object
       properties:
@@ -205,44 +280,6 @@ components:
           type: string
           description: The name of the application that generated this error
           example: Gateway
-    ErrorResponse:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    MastercardConversionObject:
-      type: object
-      properties:
-        mastercardFxRateDate:
-          type: string
-          description: Date of Mastercard issued conversion rates. The date can differ to the requested rate date if no new rates are published for the requested date or if the user requests for a historical date
-          example: '2021-02-16T00:00:00.000Z'
-        mastercardConvRateInclPctFee:
-          type: number
-          description: Mastercard exchange rate for the requested currency pair including issuer-to-cardholder percentage rate fee as provided by the issuer in the API call
-          example: 1.2250048
-        mastercardConvRateExclAllFees:
-          type: number
-          description: Mastercard exchange rate for the requested currency pair excluding any issuer-to-cardholder fees
-          example: 1.2048193
-        crdhldBillAmtInclAllFees:
-          type: number
-          description: Cardholder Billing Amount as calculated by applying the Mastercard Conversion Rate, including any applicable issuer-to-cardholder fees (percentage and fixed)
-          example: 123.00048
-        crdhldBillAmtExclAllFees:
-          type: number
-          description: Cardholder billing amount calculated by using the Mastercard conversion rate, excluding any applicable issuer-to-cardholder fees
-          example: 120.48193
-        message:
-          type: string
-          description: User friendly message (if applicable)
-          example: Conversion rate is not available for this currency pair, Please refer to the Support section for a complete list of MCI reference rates available via the Enhanced Currency Conversion Calculator - https://developer.mastercard.com/documentation/enhanced-currency-conversion-calculator
-        reasonCode:
-          type: string
-          description: User friendly reason code (if applicable)
-          example: NOT_APPLICABLE
     EnhancedCurrencyConversionWrapper:
       type: object
       properties:
@@ -260,40 +297,3 @@ components:
           example: '2020-01-17T18:04:18.000Z'
         data:
           $ref: '#/components/schemas/EnhancedCurrencyConversionData'
-  examples:
-    UnauthorizedResponse:
-      value:
-        Errors:
-          Error:
-          - Source: Enhanced Currency Conversion Calculator
-            ReasonCode: UNAUTHORIZED
-            Description: Invalid Client ID
-            Recoverable: false
-            Details: You do not have access to this service. Please visit the Enhanced Currency Conversion Calculator page for details.
-    ForbiddenResponse:
-      value:
-        Errors:
-          Error:
-          - Source: Enhanced Currency Conversion Calculator
-            ReasonCode: FORBIDDEN
-            Description: Data is not accesssible
-            Recoverable: false
-            Details: Rate is not accessible for this date - Please use a date within the last 365 days inclusive of current day.
-    BadRequestResponse:
-      value:
-        Errors:
-          Error:
-          - Source: Enhanced Currency Conversion Calculator
-            ReasonCode: BAD_REQUEST
-            Description: Invalid input
-            Recoverable: false
-            Details: Date format is invalid (Expected date format yyyy-MM-dd)
-    NotFoundResponse:
-      value:
-        Errors:
-          Error:
-          - Source: Enhanced Currency Conversion Calculator
-            ReasonCode: NOT_FOUND
-            Description: Data not available
-            Recoverable: false
-            Details: Mastercard and ECB rates are not available for this date. Resubmit for a date within the last 365 days inclusive of current day.

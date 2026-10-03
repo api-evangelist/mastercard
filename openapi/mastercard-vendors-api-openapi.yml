@@ -35,81 +35,6 @@ paths:
           $ref: '#/components/responses/UnauthorizedOrderErrorResponse'
 components:
   schemas:
-    OrderItemError:
-      type: object
-      properties:
-        fieldName:
-          type: string
-          description: field name
-          example: address1
-        code:
-          type: string
-          description: errorcode
-          example: GRS_1001
-        message:
-          type: string
-          description: error message
-          example: address1 is required
-    ErrorItem:
-      type: object
-      properties:
-        Source:
-          type: string
-          description: Source of the error
-          example: mrs-catalog-api
-        ReasonCode:
-          type: string
-          description: A unique constant identifying the error case encountered during API request processing.
-          example: INVALID_INPUT
-        Description:
-          type: string
-          description: Short description of the ReasonCode field.
-          example: Invalid Reward Catalog HierarchyId.
-        Recoverable:
-          type: boolean
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
-          example: false
-        Details:
-          type: string
-          description: Where appropriate, indicates detailed information about the data received.
-          example: Invalid Details
-      description: Error Details
-    ErrorsWrapper:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    Errors:
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          type: array
-          description: Error details
-          items:
-            $ref: '#/components/schemas/ErrorItem'
-    History:
-      type: object
-      properties:
-        orderItemNumber:
-          type: string
-          description: order_item_number
-          example: order-item-1
-        eventType:
-          type: string
-          description: event_type
-          example: note
-        eventDate:
-          type: string
-          description: event_date
-          example: '2023-10-03T21:05:10Z'
-        note:
-          type: string
-          description: note
-          example: 'GRS order item created for partner system order number: SL_OCT-03-2023-16-431 Status is pending.'
     OrderItemStatus:
       type: object
       properties:
@@ -143,11 +68,6 @@ components:
           description: history detail of order item
           items:
             $ref: '#/components/schemas/History'
-    OrderStatusArray:
-      type: array
-      description: order status array list
-      items:
-        $ref: '#/components/schemas/OrderStatus'
     OrderStatus:
       type: object
       properties:
@@ -168,49 +88,87 @@ components:
           type: string
           description: Order Status
           example: Pending
-  examples:
-    OrderStatusExample:
-      value:
-      - orderId: 656afd7-2396-54345-34545
-        mcOrderId: afd72396-b9c0-11ed-afa1-0242ac120002
-        status: FAILED
-        errorCode: 1001
-        description: '[Combination of ExternalOrderId: (656afd7-2396-54345-34545) and OrderId: (afd72396-b9c0-11ed-afa1-0242ac120002) invalid.]'
-    UnauthorizedOrderExample:
-      value:
+    OrderItemError:
+      type: object
+      properties:
+        fieldName:
+          type: string
+          description: field name
+          example: address1
+        code:
+          type: string
+          description: errorcode
+          example: GRS_1001
+        message:
+          type: string
+          description: error message
+          example: address1 is required
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
         Errors:
-          Error:
-          - Source: rewards-order-management
-            ReasonCode: INVALID_CLIENT_ID
-            Description: ClientId doesn't have access to the requested service.
-            Recoverable: false
-    BadOrderRequestExample:
-      value:
-        Errors:
-          Error:
-          - Source: rewards-order-management
-            ReasonCode: MISSING_REQUIRED_FIELD_VENDORS_UPDATE_ORDER_REQUEST_LIST[0].MC_ORDER_ID
-            Description: McOrderId is blank or null.
-            Recoverable: false
+          $ref: '#/components/schemas/Errors'
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of the error
+          example: mrs-catalog-api
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during API request processing.
+          example: INVALID_INPUT
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Invalid Reward Catalog HierarchyId.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about the data received.
+          example: Invalid Details
+      description: Error Details
+    History:
+      type: object
+      properties:
+        orderItemNumber:
+          type: string
+          description: order_item_number
+          example: order-item-1
+        eventType:
+          type: string
+          description: event_type
+          example: note
+        eventDate:
+          type: string
+          description: event_date
+          example: '2023-10-03T21:05:10Z'
+        note:
+          type: string
+          description: note
+          example: 'GRS order item created for partner system order number: SL_OCT-03-2023-16-431 Status is pending.'
+    OrderStatusArray:
+      type: array
+      description: order status array list
+      items:
+        $ref: '#/components/schemas/OrderStatus'
   responses:
-    UnauthorizedOrderErrorResponse:
-      description: User does not have access to the resource
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorsWrapper'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedOrderExample'
-    SuccessResponse:
-      description: Status updated successfully
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/OrderStatusArray'
-          examples:
-            SuccessRequestExample:
-              $ref: '#/components/examples/OrderStatusExample'
     BadRequestOrderErrorResponse:
       description: Something was wrong with the request.
       content:
@@ -220,6 +178,55 @@ components:
           examples:
             BadRequestExample:
               $ref: '#/components/examples/BadOrderRequestExample'
+    SuccessResponse:
+      description: Status updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrderStatusArray'
+          examples:
+            SuccessRequestExample:
+              $ref: '#/components/examples/OrderStatusExample'
+    UnauthorizedOrderErrorResponse:
+      description: User does not have access to the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedOrderExample'
+  requestBodies:
+    OrderStatusRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrderStatusArray'
+  examples:
+    BadOrderRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: rewards-order-management
+            ReasonCode: MISSING_REQUIRED_FIELD_VENDORS_UPDATE_ORDER_REQUEST_LIST[0].MC_ORDER_ID
+            Description: McOrderId is blank or null.
+            Recoverable: false
+    UnauthorizedOrderExample:
+      value:
+        Errors:
+          Error:
+          - Source: rewards-order-management
+            ReasonCode: INVALID_CLIENT_ID
+            Description: ClientId doesn't have access to the requested service.
+            Recoverable: false
+    OrderStatusExample:
+      value:
+      - orderId: 656afd7-2396-54345-34545
+        mcOrderId: afd72396-b9c0-11ed-afa1-0242ac120002
+        status: FAILED
+        errorCode: 1001
+        description: '[Combination of ExternalOrderId: (656afd7-2396-54345-34545) and OrderId: (afd72396-b9c0-11ed-afa1-0242ac120002) invalid.]'
   parameters:
     VendorId:
       name: vendor_id
@@ -229,10 +236,3 @@ components:
       schema:
         type: string
       example: carltonone
-  requestBodies:
-    OrderStatusRequest:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/OrderStatusArray'

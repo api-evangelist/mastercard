@@ -28,6 +28,214 @@ paths:
         '404':
           $ref: '#/components/responses/ServiceProviderNotFoundError'
 components:
+  schemas:
+    Option:
+      properties:
+        text:
+          type: string
+          example: What kind of car is it?
+          description: The survey question
+        value:
+          type: string
+          example: Diesel
+          description: The survey answer
+      required:
+      - text
+      - value
+      type: object
+    Error:
+      title: Error
+      type: object
+      description: Error object which contains details about the error.
+      required:
+      - Source
+      - ReasonCode
+      - Description
+      - Recoverable
+      properties:
+        Source:
+          type: string
+          description: The application name that generated this error. Every error message that is generated and returned by the gateway will have this field equal to Gateway. Other possible values are 'Carbon-Calculator' and 'Service-Provider'.
+          minLength: 1
+          maxLength: 100
+          example: Service-Provider-Mgmt
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during request processing.
+          minLength: 1
+          maxLength: 100
+          example: INVALID_REQUEST_PARAMETER
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          minLength: 10
+          maxLength: 1000
+          example: One of the request parameters is invalid, try again with correct request.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
+          minLength: 0
+          maxLength: 5000
+          example: paymentCardId size must be between 36 and 36
+    Page:
+      properties:
+        questions:
+          description: Array containing the questions for this page
+          items:
+            $ref: '#/components/schemas/Question'
+          type: array
+        name:
+          description: 'Name of this page default: `pageNN` ex `page3`'
+          type: string
+          example: page1
+          minLength: 5
+          maxLength: 20
+        visibleIf:
+          description: to denote if the page will be visible or not. This will only be displayed in the response if a particular page is to be displayed based on a certain condition.
+          type: boolean
+          example: '{haveCar} = ''transport.hasCar'''
+      required:
+      - questions
+      - name
+      type: object
+    Surveys:
+      type: object
+      properties:
+        surveysPayload:
+          $ref: '#/components/schemas/SurveyData'
+    Question:
+      properties:
+        choices:
+          description: dropdown or choice
+          items:
+            $ref: '#/components/schemas/Option'
+          type: array
+        description:
+          description: Question asked as a part of survey
+          type: string
+          example: I am curious about my own carbon footprint and how I personally contribute to climate change
+        name:
+          type: string
+          example: interest
+          description: name given to the question
+        title:
+          description: title for survey question
+          type: string
+          example: I am curious about my own carbon footprint and how I personally contribute to climate change
+        type:
+          description: denotes input type of the choices
+          type: string
+          example: radiogroup
+      required:
+      - description
+      - name
+      - title
+      - type
+      type: object
+    SurveyData:
+      title: surveys
+      type: object
+      description: List of survey questions.
+      properties:
+        id:
+          description: Id of survey
+          type: string
+          example: onboarding
+          minLength: 10
+          maxLength: 15
+        language:
+          description: language of user
+          type: string
+          example: en
+          minLength: 2
+          maxLength: 10
+        type:
+          description: The type of survey
+          type: string
+          example: survey
+          minLength: 6
+          maxLength: 20
+        survey:
+          $ref: '#/components/schemas/SurveyJs'
+        version:
+          description: Survey version number
+          type: string
+          example: '1.0'
+          minLength: 2
+          maxLength: 10
+      required:
+      - id
+      - survey
+      - version
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns a list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    SurveyJs:
+      description: SurveyJS compatible survey. See https://surveyjs.io/
+      properties:
+        pages:
+          description: Pages containing questions
+          items:
+            $ref: '#/components/schemas/Page'
+          type: array
+        showQuestionNumbers:
+          description: string to denote whether or not question number is diplayed
+          type: string
+          example: 'off'
+          minLength: 3
+          maxLength: 10
+        showProgressBar:
+          description: denotes position of progress bar
+          type: string
+          example: top
+          minLength: 3
+          maxLength: 20
+      required:
+      - pages
+      type: object
+  responses:
+    ServiceProviderNotFoundError:
+      description: This response code is returned when the server cannot find the account which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
+    Survey:
+      description: Returns a survey compatible with the format supported by SurveyJS.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Surveys'
+          examples:
+            SurveyResponse:
+              $ref: '#/components/examples/SurveyResponseData'
   examples:
     ServiceProviderNotFoundError:
       value:
@@ -172,214 +380,6 @@ components:
                 choices:
                 - value: transport.twice
                   text: A couple of times a year
-  schemas:
-    Surveys:
-      type: object
-      properties:
-        surveysPayload:
-          $ref: '#/components/schemas/SurveyData'
-    SurveyJs:
-      description: SurveyJS compatible survey. See https://surveyjs.io/
-      properties:
-        pages:
-          description: Pages containing questions
-          items:
-            $ref: '#/components/schemas/Page'
-          type: array
-        showQuestionNumbers:
-          description: string to denote whether or not question number is diplayed
-          type: string
-          example: 'off'
-          minLength: 3
-          maxLength: 10
-        showProgressBar:
-          description: denotes position of progress bar
-          type: string
-          example: top
-          minLength: 3
-          maxLength: 20
-      required:
-      - pages
-      type: object
-    Errors:
-      title: Errors
-      type: object
-      description: Error object which returns a list of Error objects.
-      required:
-      - Error
-      properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList'
-    ErrorList:
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
-    Option:
-      properties:
-        text:
-          type: string
-          example: What kind of car is it?
-          description: The survey question
-        value:
-          type: string
-          example: Diesel
-          description: The survey answer
-      required:
-      - text
-      - value
-      type: object
-    Page:
-      properties:
-        questions:
-          description: Array containing the questions for this page
-          items:
-            $ref: '#/components/schemas/Question'
-          type: array
-        name:
-          description: 'Name of this page default: `pageNN` ex `page3`'
-          type: string
-          example: page1
-          minLength: 5
-          maxLength: 20
-        visibleIf:
-          description: to denote if the page will be visible or not. This will only be displayed in the response if a particular page is to be displayed based on a certain condition.
-          type: boolean
-          example: '{haveCar} = ''transport.hasCar'''
-      required:
-      - questions
-      - name
-      type: object
-    SurveyData:
-      title: surveys
-      type: object
-      description: List of survey questions.
-      properties:
-        id:
-          description: Id of survey
-          type: string
-          example: onboarding
-          minLength: 10
-          maxLength: 15
-        language:
-          description: language of user
-          type: string
-          example: en
-          minLength: 2
-          maxLength: 10
-        type:
-          description: The type of survey
-          type: string
-          example: survey
-          minLength: 6
-          maxLength: 20
-        survey:
-          $ref: '#/components/schemas/SurveyJs'
-        version:
-          description: Survey version number
-          type: string
-          example: '1.0'
-          minLength: 2
-          maxLength: 10
-      required:
-      - id
-      - survey
-      - version
-    ErrorWrapper:
-      title: ErrorWrapper
-      type: object
-      description: The error response object gets returned in case of any error.
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    Error:
-      title: Error
-      type: object
-      description: Error object which contains details about the error.
-      required:
-      - Source
-      - ReasonCode
-      - Description
-      - Recoverable
-      properties:
-        Source:
-          type: string
-          description: The application name that generated this error. Every error message that is generated and returned by the gateway will have this field equal to Gateway. Other possible values are 'Carbon-Calculator' and 'Service-Provider'.
-          minLength: 1
-          maxLength: 100
-          example: Service-Provider-Mgmt
-        ReasonCode:
-          type: string
-          description: A unique constant identifying the error case encountered during request processing.
-          minLength: 1
-          maxLength: 100
-          example: INVALID_REQUEST_PARAMETER
-        Description:
-          type: string
-          description: Short description of the ReasonCode field.
-          minLength: 10
-          maxLength: 1000
-          example: One of the request parameters is invalid, try again with correct request.
-        Recoverable:
-          type: boolean
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
-          example: false
-        Details:
-          type: string
-          description: (Optional) Where appropriate, indicates detailed information about data received and calculated during the request processing, to help the user with diagnosing errors.
-          minLength: 0
-          maxLength: 5000
-          example: paymentCardId size must be between 36 and 36
-    Question:
-      properties:
-        choices:
-          description: dropdown or choice
-          items:
-            $ref: '#/components/schemas/Option'
-          type: array
-        description:
-          description: Question asked as a part of survey
-          type: string
-          example: I am curious about my own carbon footprint and how I personally contribute to climate change
-        name:
-          type: string
-          example: interest
-          description: name given to the question
-        title:
-          description: title for survey question
-          type: string
-          example: I am curious about my own carbon footprint and how I personally contribute to climate change
-        type:
-          description: denotes input type of the choices
-          type: string
-          example: radiogroup
-      required:
-      - description
-      - name
-      - title
-      - type
-      type: object
-  responses:
-    Survey:
-      description: Returns a survey compatible with the format supported by SurveyJS.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Surveys'
-          examples:
-            SurveyResponse:
-              $ref: '#/components/examples/SurveyResponseData'
-    ServiceProviderNotFoundError:
-      description: This response code is returned when the server cannot find the account which has been used to call this API.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            ServiceProviderNotFoundError:
-              $ref: '#/components/examples/ServiceProviderNotFoundError'
 externalDocs:
   description: ISO 4217 - Currency Code
   url: https://en.wikipedia.org/wiki/ISO_4217

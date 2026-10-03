@@ -33,6 +33,30 @@ paths:
           $ref: '#/components/responses/ErrorsResponse'
 components:
   schemas:
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error Details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    LostStolen:
+      type: object
+      properties:
+        message:
+          type: string
+          description: result
+          example: Successfully processed Lost Stolen request
     ErrorItem:
       type: object
       properties:
@@ -57,30 +81,6 @@ components:
           description: Where appropriate, indicates detailed information about the data received.
           example: Invalid Details
       description: Error Details
-    LostStolen:
-      type: object
-      properties:
-        message:
-          type: string
-          description: result
-          example: Successfully processed Lost Stolen request
-    ErrorsWrapper:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    Errors:
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          type: array
-          description: Error Details
-          items:
-            $ref: '#/components/schemas/ErrorItem'
     LostStolenCard:
       required:
       - oldAccountId
@@ -121,6 +121,13 @@ components:
           - C
           - S
           example: A
+  requestBodies:
+    LostStolenCardRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LostStolenCard'
   responses:
     ErrorsResponse:
       description: Bad Request
@@ -134,10 +141,3 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/LostStolen'
-  requestBodies:
-    LostStolenCardRequest:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/LostStolenCard'

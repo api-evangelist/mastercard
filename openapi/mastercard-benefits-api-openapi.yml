@@ -34,6 +34,88 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
 components:
   schemas:
+    Error:
+      description: A single error
+      type: object
+      properties:
+        Source:
+          type: string
+          minLength: 0
+          maxLength: 200
+          description: Information about where the error happened
+          example: ELIGIBILITY_BENEFITS_API
+        ReasonCode:
+          type: string
+          minLength: 0
+          maxLength: 200
+          description: An error code
+          example: BAD_REQUEST
+        Description:
+          type: string
+          minLength: 0
+          maxLength: 10000
+          description: A description of the error
+          example: We couldn't handle your request
+        Recoverable:
+          type: boolean
+          description: Indicates if the request can be presented again for processing
+          example: false
+        Details:
+          type: string
+          minLength: 0
+          maxLength: 10000
+          description: More details about the error
+          example: Invalid JSON payload
+    Benefits:
+      type: object
+      properties:
+        cardNumber:
+          description: Full card number or BIN number
+          type: string
+          example: '5308780000000000'
+          minLength: 6
+          maxLength: 19
+        effectiveDate:
+          description: Date for which products are to be determined. Defaults to the current date if not provided. Date is in YYYY-MM-DD format.
+          type: string
+          example: '2022-12-15'
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        serviceProviderCode:
+          description: Number that represents the Service Provider of a Benefit
+          type: string
+          example: '01'
+          minLength: 1
+          maxLength: 6
+        productCode:
+          description: The product identifier for a benefit, it is mandatory if a BIN is used
+          type: string
+          example: MCC
+          minLength: 3
+          maxLength: 3
+        benefitCode:
+          type: string
+          maxLength: 3
+          minLength: 3
+          example: WTY
+          description: The unique alpha code assigned for the benefit
+      required:
+      - cardNumber
+    SearchBenefits:
+      type: object
+      properties:
+        data:
+          description: Array of Products
+          type: array
+          items:
+            $ref: '#/components/schemas/Benefit'
+    Errors:
+      description: Object that contains the list of errors
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
     Benefit:
       type: object
       description: "The representation of a benefit provided by Mastercard to the cardholders.  \nThe details of the benefit are represented by means of various properties defined by this object.  \nDepending on the type of benefit, only a subset of these properties will have the values.  \nPlease refer to the examples to know more about the details of the attributes that are available for different benefit types.\n"
@@ -309,28 +391,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomAttribute'
-    Errors:
-      description: Object that contains the list of errors
-      type: object
-      required:
-      - Error
-      properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList'
-    ErrorList:
-      description: The list of errors
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
-    SearchBenefits:
-      type: object
-      properties:
-        data:
-          description: Array of Products
-          type: array
-          items:
-            $ref: '#/components/schemas/Benefit'
     ErrorWrapper:
       description: A top level object for errors
       type: object
@@ -339,72 +399,12 @@ components:
       properties:
         Errors:
           $ref: '#/components/schemas/Errors'
-    Error:
-      description: A single error
-      type: object
-      properties:
-        Source:
-          type: string
-          minLength: 0
-          maxLength: 200
-          description: Information about where the error happened
-          example: ELIGIBILITY_BENEFITS_API
-        ReasonCode:
-          type: string
-          minLength: 0
-          maxLength: 200
-          description: An error code
-          example: BAD_REQUEST
-        Description:
-          type: string
-          minLength: 0
-          maxLength: 10000
-          description: A description of the error
-          example: We couldn't handle your request
-        Recoverable:
-          type: boolean
-          description: Indicates if the request can be presented again for processing
-          example: false
-        Details:
-          type: string
-          minLength: 0
-          maxLength: 10000
-          description: More details about the error
-          example: Invalid JSON payload
-    Benefits:
-      type: object
-      properties:
-        cardNumber:
-          description: Full card number or BIN number
-          type: string
-          example: '5308780000000000'
-          minLength: 6
-          maxLength: 19
-        effectiveDate:
-          description: Date for which products are to be determined. Defaults to the current date if not provided. Date is in YYYY-MM-DD format.
-          type: string
-          example: '2022-12-15'
-          pattern: ^\d{4}-\d{2}-\d{2}$
-        serviceProviderCode:
-          description: Number that represents the Service Provider of a Benefit
-          type: string
-          example: '01'
-          minLength: 1
-          maxLength: 6
-        productCode:
-          description: The product identifier for a benefit, it is mandatory if a BIN is used
-          type: string
-          example: MCC
-          minLength: 3
-          maxLength: 3
-        benefitCode:
-          type: string
-          maxLength: 3
-          minLength: 3
-          example: WTY
-          description: The unique alpha code assigned for the benefit
-      required:
-      - cardNumber
+    ErrorList:
+      description: The list of errors
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
     CustomAttribute:
       type: object
       properties:
@@ -416,52 +416,7 @@ components:
           type: string
           description: value of the custom attribute.
           example: 10%
-  responses:
-    BadRequestError:
-      description: Something was wrong with the request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            BadRequestExample:
-              $ref: '#/components/examples/BadRequestExample'
-    UnauthorizedError:
-      description: Unauthorized - Access Not Granted
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedExample'
-    SearchBenefits:
-      description: Returns Benefits that match the requested details
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/SearchBenefits'
-          examples:
-            listOfMultipleBenefitTypes:
-              $ref: '#/components/examples/MultipleBenefitTypes'
   examples:
-    BadRequestExample:
-      value:
-        Errors:
-          Error:
-          - Source: Benefits Eligibility Service
-            ReasonCode: BENEFITINFO_VAL_001
-            Description: Validation Error  BIN Number should be numeric.
-            Recoverable: false
-    UnauthorizedExample:
-      value:
-        Errors:
-          Error:
-          - Source: Gateway
-            ReasonCode: DECLINED
-            Description: Unauthorized - Access Not Granted
-            Recoverable: false
-            Details: null
     MultipleBenefitTypes:
       summary: Multiple types of Benefits
       value:
@@ -560,6 +515,51 @@ components:
           duration: '20'
           durationTimeIncrement: Hour
           vendorReference: DP
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: Benefits Eligibility Service
+            ReasonCode: BENEFITINFO_VAL_001
+            Description: Validation Error  BIN Number should be numeric.
+            Recoverable: false
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: Gateway
+            ReasonCode: DECLINED
+            Description: Unauthorized - Access Not Granted
+            Recoverable: false
+            Details: null
+  responses:
+    BadRequestError:
+      description: Something was wrong with the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    UnauthorizedError:
+      description: Unauthorized - Access Not Granted
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    SearchBenefits:
+      description: Returns Benefits that match the requested details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SearchBenefits'
+          examples:
+            listOfMultipleBenefitTypes:
+              $ref: '#/components/examples/MultipleBenefitTypes'
   requestBodies:
     BenefitsSearch:
       required: true
