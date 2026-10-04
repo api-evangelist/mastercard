@@ -28,7 +28,64 @@ paths:
         '404':
           $ref: '#/components/responses/ServiceProviderNotFoundError'
 components:
+  responses:
+    Survey:
+      description: Returns a survey compatible with the format supported by SurveyJS.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Surveys'
+          examples:
+            SurveyResponse:
+              $ref: '#/components/examples/SurveyResponseData'
+    ServiceProviderNotFoundError:
+      description: This response code is returned when the server cannot find the account which has been used to call this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ServiceProviderNotFoundError:
+              $ref: '#/components/examples/ServiceProviderNotFoundError'
   schemas:
+    Question:
+      properties:
+        choices:
+          description: dropdown or choice
+          items:
+            $ref: '#/components/schemas/Option'
+          type: array
+        description:
+          description: Question asked as a part of survey
+          type: string
+          example: I am curious about my own carbon footprint and how I personally contribute to climate change
+        name:
+          type: string
+          example: interest
+          description: name given to the question
+        title:
+          description: title for survey question
+          type: string
+          example: I am curious about my own carbon footprint and how I personally contribute to climate change
+        type:
+          description: denotes input type of the choices
+          type: string
+          example: radiogroup
+      required:
+      - description
+      - name
+      - title
+      - type
+      type: object
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of any error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
     Option:
       properties:
         text:
@@ -81,6 +138,25 @@ components:
           minLength: 0
           maxLength: 5000
           example: paymentCardId size must be between 36 and 36
+    ErrorList:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    Surveys:
+      type: object
+      properties:
+        surveysPayload:
+          $ref: '#/components/schemas/SurveyData'
+    Errors:
+      title: Errors
+      type: object
+      description: Error object which returns a list of Error objects.
+      required:
+      - Error
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
     Page:
       properties:
         questions:
@@ -102,39 +178,28 @@ components:
       - questions
       - name
       type: object
-    Surveys:
-      type: object
+    SurveyJs:
+      description: SurveyJS compatible survey. See https://surveyjs.io/
       properties:
-        surveysPayload:
-          $ref: '#/components/schemas/SurveyData'
-    Question:
-      properties:
-        choices:
-          description: dropdown or choice
+        pages:
+          description: Pages containing questions
           items:
-            $ref: '#/components/schemas/Option'
+            $ref: '#/components/schemas/Page'
           type: array
-        description:
-          description: Question asked as a part of survey
+        showQuestionNumbers:
+          description: string to denote whether or not question number is diplayed
           type: string
-          example: I am curious about my own carbon footprint and how I personally contribute to climate change
-        name:
+          example: 'off'
+          minLength: 3
+          maxLength: 10
+        showProgressBar:
+          description: denotes position of progress bar
           type: string
-          example: interest
-          description: name given to the question
-        title:
-          description: title for survey question
-          type: string
-          example: I am curious about my own carbon footprint and how I personally contribute to climate change
-        type:
-          description: denotes input type of the choices
-          type: string
-          example: radiogroup
+          example: top
+          minLength: 3
+          maxLength: 20
       required:
-      - description
-      - name
-      - title
-      - type
+      - pages
       type: object
     SurveyData:
       title: surveys
@@ -171,81 +236,7 @@ components:
       - id
       - survey
       - version
-    Errors:
-      title: Errors
-      type: object
-      description: Error object which returns a list of Error objects.
-      required:
-      - Error
-      properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList'
-    ErrorWrapper:
-      title: ErrorWrapper
-      type: object
-      description: The error response object gets returned in case of any error.
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    ErrorList:
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
-    SurveyJs:
-      description: SurveyJS compatible survey. See https://surveyjs.io/
-      properties:
-        pages:
-          description: Pages containing questions
-          items:
-            $ref: '#/components/schemas/Page'
-          type: array
-        showQuestionNumbers:
-          description: string to denote whether or not question number is diplayed
-          type: string
-          example: 'off'
-          minLength: 3
-          maxLength: 10
-        showProgressBar:
-          description: denotes position of progress bar
-          type: string
-          example: top
-          minLength: 3
-          maxLength: 20
-      required:
-      - pages
-      type: object
-  responses:
-    ServiceProviderNotFoundError:
-      description: This response code is returned when the server cannot find the account which has been used to call this API.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            ServiceProviderNotFoundError:
-              $ref: '#/components/examples/ServiceProviderNotFoundError'
-    Survey:
-      description: Returns a survey compatible with the format supported by SurveyJS.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Surveys'
-          examples:
-            SurveyResponse:
-              $ref: '#/components/examples/SurveyResponseData'
   examples:
-    ServiceProviderNotFoundError:
-      value:
-        Errors:
-          Error:
-          - Source: Service-Provider-Mgmt
-            ReasonCode: ACCOUNT_NOT_FOUND
-            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
-            Recoverable: false
-            Details: ''
     SurveyResponseData:
       value:
       - surveysPayload:
@@ -380,6 +371,15 @@ components:
                 choices:
                 - value: transport.twice
                   text: A couple of times a year
+    ServiceProviderNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: Service-Provider-Mgmt
+            ReasonCode: ACCOUNT_NOT_FOUND
+            Description: We cannot find the account which you are using to access this service. Kindly register your account or contact your Mastercard associate if you have already registered with us earlier.
+            Recoverable: false
+            Details: ''
 externalDocs:
   description: ISO 4217 - Currency Code
   url: https://en.wikipedia.org/wiki/ISO_4217

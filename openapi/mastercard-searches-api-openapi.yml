@@ -42,7 +42,120 @@ paths:
         delay: 0
         dispatcher: FALLBACK
 components:
+  parameters:
+    DistanceUnitParam:
+      name: distance_unit
+      in: query
+      description: Unit of measurement for calculating the radius search. Optional. Measurement of distance unit in miles or kilometers. Value string (MILE or KM)
+      required: false
+      schema:
+        type: string
+        enum:
+        - MILE
+        - KM
+      example: MILE
+    OffsetParam:
+      name: offset
+      in: query
+      description: The page offset used for the query
+      required: false
+      schema:
+        type: integer
+      example: 1
+    LimitParam:
+      name: limit
+      in: query
+      description: The number of items to be retrieved
+      required: false
+      schema:
+        type: integer
+      example: 25
+    DistanceParam:
+      name: distance
+      in: query
+      description: Distance measurement for calculating the radius search. Optional The length of distance from the centroid point. Value string(<25). The default will be 5 units
+      required: false
+      schema:
+        type: integer
+      example: 5
   schemas:
+    Merchants:
+      title: Merchants
+      type: object
+      properties:
+        count:
+          type: integer
+          format: int32
+          description: The number of items in the retrieved data set
+          example: 10
+        limit:
+          type: integer
+          format: int32
+          description: The number of items requested to be retrieved
+          example: 10
+        offset:
+          type: integer
+          format: int32
+          description: The page offset used for the query
+          example: 1
+        total:
+          type: integer
+          format: int32
+          description: The total number of merchants available to be retrieved
+          example: 210
+        merchants:
+          type: array
+          description: The list of merchants retrieved
+          items:
+            $ref: '#/components/schemas/Merchant'
+          example: []
+    ErrorResponse:
+      description: Only returned in the event of an error condition
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Error:
+      description: Details of the error condition such as the source of the error, reason code for the error, if the error is recoverable, and details about the error
+      required:
+      - Description
+      - ReasonCode
+      - Recoverable
+      - Source
+      type: object
+      properties:
+        Source:
+          description: The application that generated this error
+          type: string
+          minLength: 0
+          maxLength: 150
+          example: latitude
+        ReasonCode:
+          description: A unique constant identifying the error case encountered during transaction processing
+          type: string
+          minLength: 0
+          maxLength: 150
+          example: INVALID_INPUT_VALUE
+        Description:
+          description: Short description of the ReasonCode field
+          type: string
+          minLength: 0
+          maxLength: 150
+          example: Latitude is missing, invalid, or could not be determined from address fields.
+        Recoverable:
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
+          type: boolean
+          example: 'false'
+        Details:
+          description: Description of the issue
+          example: Latitude is missing, invalid, or could not be determined from address fields.
+          type:
+          - string
+          - 'null'
+          minLength: 0
+          maxLength: 150
     Merchant:
       title: Merchant
       description: Merchant detail information
@@ -170,53 +283,6 @@ components:
           type: string
           description: Merchant's website URL address
           example: www.mcdondalds.com
-    Error:
-      description: Details of the error condition such as the source of the error, reason code for the error, if the error is recoverable, and details about the error
-      required:
-      - Description
-      - ReasonCode
-      - Recoverable
-      - Source
-      type: object
-      properties:
-        Source:
-          description: The application that generated this error
-          type: string
-          minLength: 0
-          maxLength: 150
-          example: latitude
-        ReasonCode:
-          description: A unique constant identifying the error case encountered during transaction processing
-          type: string
-          minLength: 0
-          maxLength: 150
-          example: INVALID_INPUT_VALUE
-        Description:
-          description: Short description of the ReasonCode field
-          type: string
-          minLength: 0
-          maxLength: 150
-          example: Latitude is missing, invalid, or could not be determined from address fields.
-        Recoverable:
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome
-          type: boolean
-          example: 'false'
-        Details:
-          description: Description of the issue
-          example: Latitude is missing, invalid, or could not be determined from address fields.
-          type:
-          - string
-          - 'null'
-          minLength: 0
-          maxLength: 150
-    ErrorResponse:
-      description: Only returned in the event of an error condition
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
     Errors:
       description: Only returned in the event of an error condition
       required:
@@ -292,72 +358,6 @@ components:
           type: string
           description: The zip code or postal code for a Merchant location. This parameter is ignored if latitude and longitude are provided. If you provide this parameter you must also provide the Country parameter.
           example: '63376'
-    Merchants:
-      title: Merchants
-      type: object
-      properties:
-        count:
-          type: integer
-          format: int32
-          description: The number of items in the retrieved data set
-          example: 10
-        limit:
-          type: integer
-          format: int32
-          description: The number of items requested to be retrieved
-          example: 10
-        offset:
-          type: integer
-          format: int32
-          description: The page offset used for the query
-          example: 1
-        total:
-          type: integer
-          format: int32
-          description: The total number of merchants available to be retrieved
-          example: 210
-        merchants:
-          type: array
-          description: The list of merchants retrieved
-          items:
-            $ref: '#/components/schemas/Merchant'
-          example: []
-  parameters:
-    LimitParam:
-      name: limit
-      in: query
-      description: The number of items to be retrieved
-      required: false
-      schema:
-        type: integer
-      example: 25
-    DistanceUnitParam:
-      name: distance_unit
-      in: query
-      description: Unit of measurement for calculating the radius search. Optional. Measurement of distance unit in miles or kilometers. Value string (MILE or KM)
-      required: false
-      schema:
-        type: string
-        enum:
-        - MILE
-        - KM
-      example: MILE
-    OffsetParam:
-      name: offset
-      in: query
-      description: The page offset used for the query
-      required: false
-      schema:
-        type: integer
-      example: 1
-    DistanceParam:
-      name: distance
-      in: query
-      description: Distance measurement for calculating the radius search. Optional The length of distance from the centroid point. Value string(<25). The default will be 5 units
-      required: false
-      schema:
-        type: integer
-      example: 5
   responses:
     BadRequestError:
       description: Something was wrong with the request.
@@ -373,6 +373,12 @@ components:
                 Description: Latitude is missing, invalid, or could not be determined from address fields.
                 Recoverable: false
                 Details: null
+    Merchants:
+      description: List of Merchant details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Merchants'
     UnauthorizedError:
       description: Authentication information was missing or invalid.
       content:
@@ -401,12 +407,6 @@ components:
                 Description: You don't seem authorized to do that
                 Recoverable: false
                 Details: Reading merchant information requires read-only permissions
-    Merchants:
-      description: List of Merchant details
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Merchants'
   requestBodies:
     MerchantSearch:
       description: A JSON object containing item data

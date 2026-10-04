@@ -99,6 +99,23 @@ paths:
         dispatcher: FALLBACK
 components:
   schemas:
+    Segment:
+      required:
+      - code
+      - effectiveDate
+      type: object
+      properties:
+        code:
+          maxLength: 250
+          minLength: 0
+          type: string
+          description: Unique identifier representing a group of benefit bundles to be assigned.
+          example: DART
+        effectiveDate:
+          type: string
+          description: Date at which the benefit bundles associated to the segment code will be active and available for use. Date should be in YYYY-MM-DD format.
+          format: date
+          example: '2023-08-08'
     Error:
       type: object
       properties:
@@ -130,32 +147,6 @@ components:
           maxLength: 100000
           description: More details about the error
           example: Invalid JSON payload
-    ErrorWrapper:
-      description: A top level object for errors
-      type: object
-      required:
-      - errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/errors'
-    AssignBenefitAllocation:
-      required:
-      - cardNumber
-      - segments
-      type: object
-      properties:
-        cardNumber:
-          type: integer
-          format: int64
-          description: 16 or 19 digit PAN number that will have a segment assigned to it.
-          example: 5291070000000000
-          pattern: ^(\d{16}|\d{19})$
-        segments:
-          type: array
-          description: List of segments that will be assigned to the pan number. Only accepts arrays containing one segment.
-          items:
-            $ref: '#/components/schemas/Segment'
-          example: []
     ReplaceBenefitAllocation:
       required:
       - cardNumber
@@ -187,6 +178,76 @@ components:
           description: Date at which the new segment will go in effect. Date should be in YYYY-MM-DD format.
           format: date
           example: '2023-08-08'
+    CancelBenefitAllocation:
+      required:
+      - cardNumber
+      - segments
+      type: object
+      properties:
+        cardNumber:
+          type: integer
+          format: int64
+          description: 16 or 19 digit PAN number that will have it's segment expired/cancelled.
+          example: 5291070000000000
+          pattern: ^(\d{16}|\d{19})$
+        segments:
+          type: array
+          description: List of segments assigned to the card number that will be cancelled. Only accepts arrays containing one segment.
+          items:
+            $ref: '#/components/schemas/SegmentToCancel'
+          example: []
+    Bundles:
+      type: object
+      properties:
+        bundles:
+          type: array
+          description: List of eligible benefit bundles after a segment has been assigned to a card number.
+          items:
+            $ref: '#/components/schemas/BundleDetails'
+          example: []
+    AssignBenefitAllocation:
+      required:
+      - cardNumber
+      - segments
+      type: object
+      properties:
+        cardNumber:
+          type: integer
+          format: int64
+          description: 16 or 19 digit PAN number that will have a segment assigned to it.
+          example: 5291070000000000
+          pattern: ^(\d{16}|\d{19})$
+        segments:
+          type: array
+          description: List of segments that will be assigned to the pan number. Only accepts arrays containing one segment.
+          items:
+            $ref: '#/components/schemas/Segment'
+          example: []
+    ErrorWrapper:
+      description: A top level object for errors
+      type: object
+      required:
+      - errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/errors'
+    SegmentToCancel:
+      required:
+      - code
+      - expiryDate
+      type: object
+      properties:
+        code:
+          maxLength: 250
+          minLength: 0
+          type: string
+          description: Identifier that represents a group of benefit bundles to be cancelled.
+          example: DART
+        expiryDate:
+          type: string
+          description: Date at which the benefit bundles associated to the segment code will be cancelled. Date should be in YYYY-MM-DD format.
+          format: date
+          example: '2024-07-24'
     errors:
       required:
       - Error
@@ -217,93 +278,7 @@ components:
           description: Expiry date associated to the benefits in the benefit bundle. Date will be in YYYY-MM-DD format.
           format: date
           example: '2024-07-18'
-    Segment:
-      required:
-      - code
-      - effectiveDate
-      type: object
-      properties:
-        code:
-          maxLength: 250
-          minLength: 0
-          type: string
-          description: Unique identifier representing a group of benefit bundles to be assigned.
-          example: DART
-        effectiveDate:
-          type: string
-          description: Date at which the benefit bundles associated to the segment code will be active and available for use. Date should be in YYYY-MM-DD format.
-          format: date
-          example: '2023-08-08'
-    SegmentToCancel:
-      required:
-      - code
-      - expiryDate
-      type: object
-      properties:
-        code:
-          maxLength: 250
-          minLength: 0
-          type: string
-          description: Identifier that represents a group of benefit bundles to be cancelled.
-          example: DART
-        expiryDate:
-          type: string
-          description: Date at which the benefit bundles associated to the segment code will be cancelled. Date should be in YYYY-MM-DD format.
-          format: date
-          example: '2024-07-24'
-    Bundles:
-      type: object
-      properties:
-        bundles:
-          type: array
-          description: List of eligible benefit bundles after a segment has been assigned to a card number.
-          items:
-            $ref: '#/components/schemas/BundleDetails'
-          example: []
-    CancelBenefitAllocation:
-      required:
-      - cardNumber
-      - segments
-      type: object
-      properties:
-        cardNumber:
-          type: integer
-          format: int64
-          description: 16 or 19 digit PAN number that will have it's segment expired/cancelled.
-          example: 5291070000000000
-          pattern: ^(\d{16}|\d{19})$
-        segments:
-          type: array
-          description: List of segments assigned to the card number that will be cancelled. Only accepts arrays containing one segment.
-          items:
-            $ref: '#/components/schemas/SegmentToCancel'
-          example: []
-  responses:
-    ForbiddenErrorResponse:
-      description: Insufficient permissions for interacting with the resource
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            ForbiddenExample:
-              $ref: '#/components/examples/ForbiddenExample'
-    BadRequestErrorResponse:
-      description: Something was wrong with the request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            BadRequestExample:
-              $ref: '#/components/examples/BadRequestExample'
   requestBodies:
-    ReplaceBenefitAllocationsRequest:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ReplaceBenefitAllocation'
     AssignBenefitAllocationsRequest:
       required: true
       content:
@@ -316,16 +291,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CancelBenefitAllocation'
+    ReplaceBenefitAllocationsRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ReplaceBenefitAllocation'
   examples:
-    BadRequestExample:
-      value:
-        Errors:
-          Error:
-          - Source: Benefit Allocation Service
-            ReasonCode: 50
-            Description: invalid card number, segment code, date
-            Recoverable: false
-            Details: invalid card number format
     ForbiddenExample:
       value:
         Errors:
@@ -353,3 +325,31 @@ components:
         - code: PC6323
           effectiveDate: '2023-08-08'
           expiryDate: '2024-07-18'
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: Benefit Allocation Service
+            ReasonCode: 50
+            Description: invalid card number, segment code, date
+            Recoverable: false
+            Details: invalid card number format
+  responses:
+    BadRequestErrorResponse:
+      description: Something was wrong with the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    ForbiddenErrorResponse:
+      description: Insufficient permissions for interacting with the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'

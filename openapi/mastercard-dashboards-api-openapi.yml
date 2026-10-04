@@ -38,7 +38,91 @@ paths:
         delay: 0
         dispatcher: FALLBACK
 components:
+  examples:
+    UserInactiveError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: USER_INACTIVE
+            Description: The user is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: The user is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+    InvalidUserIdError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: false
+            Details: UserId should be of size 36
+    UserNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: USER_NOT_FOUND
+            Description: We cannot find user details for provided userId. Kindly register the user through the enrollment process.
+            Recoverable: false
+            Details: Make sure the user is enrolled through /issuers/users API endpoint.
+    IssuerTerminatedError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_TERMINATED
+            Description: Your account has been terminated, you won't be able to access any service. Kindly register yourself again.
+            Recoverable: false
+            Details: Your account has been terminated, you won't be able to access any service. Kindly register yourself again.
+    IssuerSuspendedError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_SUSPENDED
+            Description: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
+    IssuerNotFoundError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: SERVICE_PROVIDER_NOT_FOUND
+            Description: Service provider clientId is not Identified
+            Recoverable: false
+            Details: Client not found.
+    IssuerInactiveError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_INACTIVE
+            Description: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+    UserTerminatedError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: USER_TERMINATE_IN_PROGRESS
+            Description: User termination is in progress, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: 'User termination is in progress, kindly contact your Mastercard associate to activate it again. Until then you won''t be able to access any service. '
   schemas:
+    Lang:
+      type: string
+      description: Language for the issuer.
+      example: en-US
+    UserID:
+      type: string
+      minLength: 36
+      maxLength: 36
+      pattern: ^[0-9A-Fa-f-]{36}
+      description: Unique identifier for a user enrolled in the Carbon Calculator Experience platform.
+      example: f5d88571-ac15-465a-a0d8-1ad1327b9a06
     Error:
       title: Error
       type: object
@@ -77,19 +161,18 @@ components:
           minLength: 0
           maxLength: 5000
           example: email must not be null.
-    Lang:
-      type: string
-      description: Language for the issuer.
-      example: en-US
-    ErrorWrapper:
-      title: ErrorWrapper
+    Errors:
+      title: Errors
       type: object
-      description: The error response object gets returned in case of error.
+      description: Error object which contains a list of error objects.
       required:
-      - Errors
+      - Error
       properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
+        Error:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+          example: []
     Dashboard:
       type: object
       required:
@@ -108,114 +191,16 @@ components:
           minLength: 1
           maxLength: 10
           example: '300000'
-    UserID:
-      type: string
-      minLength: 36
-      maxLength: 36
-      pattern: ^[0-9A-Fa-f-]{36}
-      description: Unique identifier for a user enrolled in the Carbon Calculator Experience platform.
-      example: f5d88571-ac15-465a-a0d8-1ad1327b9a06
-    Errors:
-      title: Errors
+    ErrorWrapper:
+      title: ErrorWrapper
       type: object
-      description: Error object which contains a list of error objects.
+      description: The error response object gets returned in case of error.
       required:
-      - Error
+      - Errors
       properties:
-        Error:
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-          example: []
-  examples:
-    IssuerNotFoundError:
-      value:
         Errors:
-          Error:
-          - Source: CARBON CALCULATOR EXPERIENCE
-            ReasonCode: SERVICE_PROVIDER_NOT_FOUND
-            Description: Service provider clientId is not Identified
-            Recoverable: false
-            Details: Client not found.
-    IssuerSuspendedError:
-      value:
-        Errors:
-          Error:
-          - Source: CARBON CALCULATOR EXPERIENCE
-            ReasonCode: ACCOUNT_SUSPENDED
-            Description: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
-            Recoverable: false
-            Details: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
-    IssuerInactiveError:
-      value:
-        Errors:
-          Error:
-          - Source: CARBON CALCULATOR EXPERIENCE
-            ReasonCode: ACCOUNT_INACTIVE
-            Description: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
-            Recoverable: false
-            Details: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
-    IssuerTerminatedError:
-      value:
-        Errors:
-          Error:
-          - Source: CARBON CALCULATOR EXPERIENCE
-            ReasonCode: ACCOUNT_TERMINATED
-            Description: Your account has been terminated, you won't be able to access any service. Kindly register yourself again.
-            Recoverable: false
-            Details: Your account has been terminated, you won't be able to access any service. Kindly register yourself again.
-    UserNotFoundError:
-      value:
-        Errors:
-          Error:
-          - Source: CARBON CALCULATOR EXPERIENCE
-            ReasonCode: USER_NOT_FOUND
-            Description: We cannot find user details for provided userId. Kindly register the user through the enrollment process.
-            Recoverable: false
-            Details: Make sure the user is enrolled through /issuers/users API endpoint.
-    UserInactiveError:
-      value:
-        Errors:
-          Error:
-          - Source: CARBON CALCULATOR EXPERIENCE
-            ReasonCode: USER_INACTIVE
-            Description: The user is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
-            Recoverable: false
-            Details: The user is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
-    InvalidUserIdError:
-      value:
-        Errors:
-          Error:
-          - Source: CARBON CALCULATOR EXPERIENCE
-            ReasonCode: INVALID_REQUEST_PARAMETER
-            Description: One of the request parameters is invalid, try again with correct request.
-            Recoverable: false
-            Details: UserId should be of size 36
-    UserTerminatedError:
-      value:
-        Errors:
-          Error:
-          - Source: CARBON CALCULATOR EXPERIENCE
-            ReasonCode: USER_TERMINATE_IN_PROGRESS
-            Description: User termination is in progress, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
-            Recoverable: false
-            Details: 'User termination is in progress, kindly contact your Mastercard associate to activate it again. Until then you won''t be able to access any service. '
+          $ref: '#/components/schemas/Errors'
   responses:
-    DashboardBadRequestError:
-      description: This response code is returned when a request is invalid or data in the request is not valid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            InvalidUserIdError:
-              $ref: '#/components/examples/InvalidUserIdError'
-    Dashboard:
-      description: The response object after decryption contains a short-lived URL along with an authentication token and its expiry time.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Dashboard'
     DashboardNotFoundError:
       description: This response code is returned when a user or Issuer is not present.
       content:
@@ -227,6 +212,12 @@ components:
               $ref: '#/components/examples/UserNotFoundError'
             IssuerNotFoundError:
               $ref: '#/components/examples/IssuerNotFoundError'
+    Dashboard:
+      description: The response object after decryption contains a short-lived URL along with an authentication token and its expiry time.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Dashboard'
     DashboardsUnauthorisedError:
       description: This response code is returned when a user and the Issuer are unauthorized.
       content:
@@ -244,6 +235,15 @@ components:
               $ref: '#/components/examples/UserTerminatedError'
             IssuerTerminatedError:
               $ref: '#/components/examples/IssuerTerminatedError'
+    DashboardBadRequestError:
+      description: This response code is returned when a request is invalid or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidUserIdError:
+              $ref: '#/components/examples/InvalidUserIdError'
   parameters:
     UserID:
       in: path

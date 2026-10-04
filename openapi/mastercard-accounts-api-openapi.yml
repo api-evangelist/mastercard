@@ -64,6 +64,14 @@ paths:
           $ref: '#/components/responses/ErrorsResponse'
 components:
   parameters:
+    AccountIdType:
+      name: account_id_type
+      in: query
+      description: Determines the type of account identification. Supported identifier is RANAC.
+      required: false
+      schema:
+        type: string
+      example: RANAC
     AccountId:
       name: id
       in: path
@@ -80,14 +88,6 @@ components:
       schema:
         type: string
       example: RANCU
-    Offset:
-      name: offset
-      in: query
-      description: The number of items you ask the start of the list to be offset from. Zero-based offset index, must NOT be negative, default value is 0.
-      required: false
-      schema:
-        type: integer
-      example: 0
     Limit:
       name: limit
       in: query
@@ -96,15 +96,22 @@ components:
       schema:
         type: integer
       example: 2
-    AccountIdType:
-      name: account_id_type
+    Offset:
+      name: offset
       in: query
-      description: Determines the type of account identification. Supported identifier is RANAC.
+      description: The number of items you ask the start of the list to be offset from. Zero-based offset index, must NOT be negative, default value is 0.
       required: false
       schema:
-        type: string
-      example: RANAC
+        type: integer
+      example: 0
   schemas:
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
     AccountEnroll:
       required:
       - accountId
@@ -268,17 +275,6 @@ components:
           type: string
           description: Identifier type of the User. Supported identifiers are BCN or RANCU.
           example: BCN
-    EnrolledAccount:
-      type: object
-      properties:
-        accountIdType:
-          type: string
-          description: Account identifier type such as RANAC.
-          example: RANAC
-        accountId:
-          type: string
-          description: The unique identifier for the given account.
-          example: '136821076497727922312391057516'
     ErrorItem:
       type: object
       properties:
@@ -424,23 +420,6 @@ components:
           type: string
           description: Bank Product Code associated with the new card.
           example: VISACD
-    ErrorsWrapper:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    Errors:
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          type: array
-          description: Error Details
-          items:
-            $ref: '#/components/schemas/ErrorItem'
     AccountSearchDetails:
       required:
       - accounts
@@ -468,6 +447,16 @@ components:
           description: accounts
           items:
             $ref: '#/components/schemas/Account'
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error Details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
     Account:
       required:
       - accountId
@@ -664,27 +653,38 @@ components:
           format: int64
           example: 1234
       description: accounts
+    EnrolledAccount:
+      type: object
+      properties:
+        accountIdType:
+          type: string
+          description: Account identifier type such as RANAC.
+          example: RANAC
+        accountId:
+          type: string
+          description: The unique identifier for the given account.
+          example: '136821076497727922312391057516'
   responses:
     AccountUpdateResponse:
       description: Ok
-    AccountEnrollResponse:
-      description: Successfully enrolled account.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/EnrolledAccount'
-    ErrorsResponse:
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorsWrapper'
     AccountSearchDetailsResponse:
       description: Successfully retrieved account.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/AccountSearchDetails'
+    ErrorsResponse:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+    AccountEnrollResponse:
+      description: Successfully enrolled account.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EnrolledAccount'
   requestBodies:
     AccountEnrollRequest:
       required: true

@@ -33,7 +33,40 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 components:
+  responses:
+    UnauthorizedError:
+      description: Unauthorized - Access Not Granted
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    BadRequestError:
+      description: Something was wrong with the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    SearchProducts:
+      description: Returns Products that match the search criteria
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SearchProducts'
   schemas:
+    ErrorWrapper:
+      description: A top level object for errors
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
     Error:
       description: A single error
       type: object
@@ -66,6 +99,28 @@ components:
           maxLength: 10000
           description: More details about the error
           example: Invalid JSON payload
+    ErrorList:
+      description: The list of errors
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
+    Products:
+      type: object
+      properties:
+        effectiveDate:
+          description: Date for which benefits are to be determined. Defaults to the current date if not provided. Date is in YYYY-MM-DD format
+          type: string
+          example: '2022-12-15'
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        cardNumber:
+          description: Full card number or BIN number
+          type: string
+          example: '5308780000000000'
+          minLength: 6
+          maxLength: 19
+      required:
+      - cardNumber
     Errors:
       description: Object that contains the list of errors
       type: object
@@ -90,36 +145,6 @@ components:
           example: Mixed Product
           minLength: 1
           maxLength: 100
-    ErrorWrapper:
-      description: A top level object for errors
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    ErrorList:
-      description: The list of errors
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
-    Products:
-      type: object
-      properties:
-        effectiveDate:
-          description: Date for which benefits are to be determined. Defaults to the current date if not provided. Date is in YYYY-MM-DD format
-          type: string
-          example: '2022-12-15'
-          pattern: ^\d{4}-\d{2}-\d{2}$
-        cardNumber:
-          description: Full card number or BIN number
-          type: string
-          example: '5308780000000000'
-          minLength: 6
-          maxLength: 19
-      required:
-      - cardNumber
     SearchProducts:
       type: object
       properties:
@@ -170,38 +195,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Product'
-  responses:
-    SearchProducts:
-      description: Returns Products that match the search criteria
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/SearchProducts'
-    BadRequestError:
-      description: Something was wrong with the request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            BadRequestExample:
-              $ref: '#/components/examples/BadRequestExample'
-    UnauthorizedError:
-      description: Unauthorized - Access Not Granted
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedExample'
-  requestBodies:
-    ProductSearch:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Products'
   examples:
     BadRequestExample:
       value:
@@ -220,3 +213,10 @@ components:
             Description: Unauthorized - Access Not Granted
             Recoverable: false
             Details: null
+  requestBodies:
+    ProductSearch:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Products'

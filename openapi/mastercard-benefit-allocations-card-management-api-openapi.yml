@@ -63,7 +63,57 @@ paths:
         delay: 0
         dispatcher: FALLBACK
 components:
+  responses:
+    ForbiddenErrorResponse:
+      description: Insufficient permissions for interacting with the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+    BenefitAllocationEmptyResponse:
+      description: No content.
+    BadRequestErrorResponse:
+      description: Something was wrong with the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
   schemas:
+    ErrorWrapper:
+      description: A top level object for errors
+      type: object
+      required:
+      - errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/errors'
+    FrozenCard:
+      required:
+      - cardNumber
+      - date
+      - isFrozen
+      type: object
+      properties:
+        cardNumber:
+          type: integer
+          format: int64
+          description: 16 or 19 digit PAN number that will be frozen/unfrozen.
+          example: 5291070000000000
+        date:
+          type: string
+          description: Date at which the freeze will be effective. Date should be in YYYY-MM-DD format.
+          format: date
+          example: '2023-08-08'
+        isFrozen:
+          type: boolean
+          description: Variable to change whether or not the card number is frozen. True for freeze and false for unfreeze.
+          example: true
     Error:
       type: object
       properties:
@@ -95,27 +145,6 @@ components:
           maxLength: 100000
           description: More details about the error
           example: Invalid JSON payload
-    FrozenCard:
-      required:
-      - cardNumber
-      - date
-      - isFrozen
-      type: object
-      properties:
-        cardNumber:
-          type: integer
-          format: int64
-          description: 16 or 19 digit PAN number that will be frozen/unfrozen.
-          example: 5291070000000000
-        date:
-          type: string
-          description: Date at which the freeze will be effective. Date should be in YYYY-MM-DD format.
-          format: date
-          example: '2023-08-08'
-        isFrozen:
-          type: boolean
-          description: Variable to change whether or not the card number is frozen. True for freeze and false for unfreeze.
-          example: true
     errors:
       required:
       - Error
@@ -126,15 +155,6 @@ components:
           description: Object that contains the list of errors
           items:
             $ref: '#/components/schemas/Error'
-          example: []
-    Bundles:
-      type: object
-      properties:
-        bundles:
-          type: array
-          description: List of eligible benefit bundles after a segment has been assigned to a card number.
-          items:
-            $ref: '#/components/schemas/BundleDetails'
           example: []
     BundleDetails:
       type: object
@@ -155,14 +175,6 @@ components:
           description: Expiry date associated to the benefits in the benefit bundle. Date will be in YYYY-MM-DD format.
           format: date
           example: '2024-07-18'
-    ErrorWrapper:
-      description: A top level object for errors
-      type: object
-      required:
-      - errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/errors'
     CardReplacement:
       required:
       - oldCardNumber
@@ -185,27 +197,15 @@ components:
           description: Date at which the replace will be effective. Date should be in YYYY-MM-DD format.
           format: date
           example: '2023-08-08'
-  responses:
-    BenefitAllocationEmptyResponse:
-      description: No content.
-    ForbiddenErrorResponse:
-      description: Insufficient permissions for interacting with the resource
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            ForbiddenExample:
-              $ref: '#/components/examples/ForbiddenExample'
-    BadRequestErrorResponse:
-      description: Something was wrong with the request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            BadRequestExample:
-              $ref: '#/components/examples/BadRequestExample'
+    Bundles:
+      type: object
+      properties:
+        bundles:
+          type: array
+          description: List of eligible benefit bundles after a segment has been assigned to a card number.
+          items:
+            $ref: '#/components/schemas/BundleDetails'
+          example: []
   requestBodies:
     FrozenCardRequest:
       required: true
@@ -220,15 +220,6 @@ components:
           schema:
             $ref: '#/components/schemas/CardReplacement'
   examples:
-    BadRequestExample:
-      value:
-        Errors:
-          Error:
-          - Source: Benefit Allocation Service
-            ReasonCode: 50
-            Description: invalid card number, segment code, date
-            Recoverable: false
-            Details: invalid card number format
     ReplaceCardExample:
       value:
         bundles:
@@ -238,6 +229,15 @@ components:
         - code: PC6323
           effectiveDate: '2022-01-18'
           expiryDate: '2024-07-18'
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: Benefit Allocation Service
+            ReasonCode: 50
+            Description: invalid card number, segment code, date
+            Recoverable: false
+            Details: invalid card number format
     ForbiddenExample:
       value:
         Errors:

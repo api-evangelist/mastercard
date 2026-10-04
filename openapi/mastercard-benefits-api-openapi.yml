@@ -34,38 +34,14 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
 components:
   schemas:
-    Error:
-      description: A single error
+    ErrorWrapper:
+      description: A top level object for errors
       type: object
+      required:
+      - Errors
       properties:
-        Source:
-          type: string
-          minLength: 0
-          maxLength: 200
-          description: Information about where the error happened
-          example: ELIGIBILITY_BENEFITS_API
-        ReasonCode:
-          type: string
-          minLength: 0
-          maxLength: 200
-          description: An error code
-          example: BAD_REQUEST
-        Description:
-          type: string
-          minLength: 0
-          maxLength: 10000
-          description: A description of the error
-          example: We couldn't handle your request
-        Recoverable:
-          type: boolean
-          description: Indicates if the request can be presented again for processing
-          example: false
-        Details:
-          type: string
-          minLength: 0
-          maxLength: 10000
-          description: More details about the error
-          example: Invalid JSON payload
+        Errors:
+          $ref: '#/components/schemas/Errors'
     Benefits:
       type: object
       properties:
@@ -100,6 +76,44 @@ components:
           description: The unique alpha code assigned for the benefit
       required:
       - cardNumber
+    Error:
+      description: A single error
+      type: object
+      properties:
+        Source:
+          type: string
+          minLength: 0
+          maxLength: 200
+          description: Information about where the error happened
+          example: ELIGIBILITY_BENEFITS_API
+        ReasonCode:
+          type: string
+          minLength: 0
+          maxLength: 200
+          description: An error code
+          example: BAD_REQUEST
+        Description:
+          type: string
+          minLength: 0
+          maxLength: 10000
+          description: A description of the error
+          example: We couldn't handle your request
+        Recoverable:
+          type: boolean
+          description: Indicates if the request can be presented again for processing
+          example: false
+        Details:
+          type: string
+          minLength: 0
+          maxLength: 10000
+          description: More details about the error
+          example: Invalid JSON payload
+    ErrorList:
+      description: The list of errors
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
     SearchBenefits:
       type: object
       properties:
@@ -391,20 +405,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomAttribute'
-    ErrorWrapper:
-      description: A top level object for errors
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    ErrorList:
-      description: The list of errors
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
     CustomAttribute:
       type: object
       properties:
@@ -416,7 +416,50 @@ components:
           type: string
           description: value of the custom attribute.
           example: 10%
+  responses:
+    BadRequestError:
+      description: Something was wrong with the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    SearchBenefits:
+      description: Returns Benefits that match the requested details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SearchBenefits'
+          examples:
+            listOfMultipleBenefitTypes:
+              $ref: '#/components/examples/MultipleBenefitTypes'
+    UnauthorizedError:
+      description: Unauthorized - Access Not Granted
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+  requestBodies:
+    BenefitsSearch:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Benefits'
   examples:
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: Benefits Eligibility Service
+            ReasonCode: BENEFITINFO_VAL_001
+            Description: Validation Error  BIN Number should be numeric.
+            Recoverable: false
     MultipleBenefitTypes:
       summary: Multiple types of Benefits
       value:
@@ -515,14 +558,6 @@ components:
           duration: '20'
           durationTimeIncrement: Hour
           vendorReference: DP
-    BadRequestExample:
-      value:
-        Errors:
-          Error:
-          - Source: Benefits Eligibility Service
-            ReasonCode: BENEFITINFO_VAL_001
-            Description: Validation Error  BIN Number should be numeric.
-            Recoverable: false
     UnauthorizedExample:
       value:
         Errors:
@@ -532,38 +567,3 @@ components:
             Description: Unauthorized - Access Not Granted
             Recoverable: false
             Details: null
-  responses:
-    BadRequestError:
-      description: Something was wrong with the request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            BadRequestExample:
-              $ref: '#/components/examples/BadRequestExample'
-    UnauthorizedError:
-      description: Unauthorized - Access Not Granted
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedExample'
-    SearchBenefits:
-      description: Returns Benefits that match the requested details
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/SearchBenefits'
-          examples:
-            listOfMultipleBenefitTypes:
-              $ref: '#/components/examples/MultipleBenefitTypes'
-  requestBodies:
-    BenefitsSearch:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Benefits'

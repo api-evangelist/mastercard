@@ -40,83 +40,83 @@ paths:
         delay: 0
         dispatcher: FALLBACK
 components:
-  examples:
-    InvalidAuthHeaderExample:
-      value:
-        Errors:
-          Error:
-          - Source: PAYMENT_SERVICE
-            ReasonCode: INVALID_AUTH_HEADER
-            Description: Bad Request - No Authorization header set
-            Recoverable: false
-            Details: check if key is passed to call the API
-    InvalidKeyExample:
-      value:
-        Errors:
-          Error:
-          - Source: PAYMENT_SERVIC
-            ReasonCode: INVALID_KEY
-            Description: Signing certificate must be valid
-            Recoverable: false
-            Details: 'null'
-    BadRequestExample:
-      value:
-        Errors:
-          Error:
-          - Source: PAYMENT_SERVICE
-            ReasonCode: BAD_REQUEST
-            Description: We couldn't handle your request
-            Recoverable: false
-            Details: appId should be either MFN or Kupaa
-    NotFoundExample:
-      value:
-        Errors:
-          Error:
-          - Source: PAYMENT_SERVICE
-            ReasonCode: NOT_FOUND
-            Description: You requested something we don't have
-            Recoverable: false
-            Details: Requested resource doesn't exist
-  responses:
-    InvalidKeyError:
-      description: Forbidden-You do not have necessary permission to access this resource on this server.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            InvalidKeyExample:
-              $ref: '#/components/examples/InvalidKeyExample'
-    CallbackSuccess:
-      description: Payment callback request executed successfully.
-    InvalidAuthHeaderError:
-      description: Bad Request - No Authorization header set
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            InvalidAuthHeaderExample:
-              $ref: '#/components/examples/InvalidAuthHeaderExample'
-    BadRequestError:
-      description: Bad Request-The server cannot not process the request due to invalid request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            BadRequestExample:
-              $ref: '#/components/examples/BadRequestExample'
-    NotFoundError:
-      description: Not Found-The requested resource was not found on this server.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            NotFoundExample:
-              $ref: '#/components/examples/NotFoundExample'
   schemas:
+    ErrorWrapper:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          type: object
+          required:
+          - Error
+          properties:
+            Error:
+              $ref: '#/components/schemas/Errors'
+          description: Error object
+          example:
+            $ref: '#/components/examples/BadRequestExample'
+    Recipient:
+      type: object
+      properties:
+        clientId:
+          type: string
+          description: Client id generated for each beneficiary transaction by client application.
+          enum:
+          - MFN
+          - KUPAA
+          example: '8387484747'
+          minLength: 5
+          maxLength: 30
+        transactionId:
+          type: string
+          description: Transcation id generated for each beneficiary transaction by payment provider.
+          example: '7253653653'
+          minLength: 5
+          maxLength: 50
+        accountName:
+          type: string
+          minLength: 1
+          maxLength: 60
+          example: Test User
+          description: Account Name
+        accountNumber:
+          type: string
+          minLength: 1
+          maxLength: 30
+          example: '1234567890'
+          description: Account Number
+        transactionAmount:
+          type: number
+          format: double
+          example: 1500
+          description: Transaction Amount
+        currency:
+          type: string
+          example: USD
+          minLength: 3
+          maxLength: 3
+          description: Alphabetic code of currency as per ISO4217 standard.
+        countryCode:
+          type: string
+          minLength: 3
+          maxLength: 3
+          example: USA
+          description: ISO 3-alpha country code format.
+        responseCode:
+          type: string
+          minLength: 3
+          maxLength: 3
+          example: '200'
+          description: Reason code
+        responseMessage:
+          type: string
+          minLength: 3
+          maxLength: 3
+          example: XYZ
+          description: Response Message
+      title: Recipient
+      description: Recipient Request
     Error:
       type: object
       properties:
@@ -252,82 +252,82 @@ components:
             responseMessage: Successful
       title: Callback
       description: Callback Request
-    ErrorWrapper:
-      type: object
-      required:
-      - Errors
-      properties:
+  examples:
+    InvalidAuthHeaderExample:
+      value:
         Errors:
-          type: object
-          required:
-          - Error
-          properties:
-            Error:
-              $ref: '#/components/schemas/Errors'
-          description: Error object
-          example:
-            $ref: '#/components/examples/BadRequestExample'
-    Recipient:
-      type: object
-      properties:
-        clientId:
-          type: string
-          description: Client id generated for each beneficiary transaction by client application.
-          enum:
-          - MFN
-          - KUPAA
-          example: '8387484747'
-          minLength: 5
-          maxLength: 30
-        transactionId:
-          type: string
-          description: Transcation id generated for each beneficiary transaction by payment provider.
-          example: '7253653653'
-          minLength: 5
-          maxLength: 50
-        accountName:
-          type: string
-          minLength: 1
-          maxLength: 60
-          example: Test User
-          description: Account Name
-        accountNumber:
-          type: string
-          minLength: 1
-          maxLength: 30
-          example: '1234567890'
-          description: Account Number
-        transactionAmount:
-          type: number
-          format: double
-          example: 1500
-          description: Transaction Amount
-        currency:
-          type: string
-          example: USD
-          minLength: 3
-          maxLength: 3
-          description: Alphabetic code of currency as per ISO4217 standard.
-        countryCode:
-          type: string
-          minLength: 3
-          maxLength: 3
-          example: USA
-          description: ISO 3-alpha country code format.
-        responseCode:
-          type: string
-          minLength: 3
-          maxLength: 3
-          example: '200'
-          description: Reason code
-        responseMessage:
-          type: string
-          minLength: 3
-          maxLength: 3
-          example: XYZ
-          description: Response Message
-      title: Recipient
-      description: Recipient Request
+          Error:
+          - Source: PAYMENT_SERVICE
+            ReasonCode: INVALID_AUTH_HEADER
+            Description: Bad Request - No Authorization header set
+            Recoverable: false
+            Details: check if key is passed to call the API
+    BadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: PAYMENT_SERVICE
+            ReasonCode: BAD_REQUEST
+            Description: We couldn't handle your request
+            Recoverable: false
+            Details: appId should be either MFN or Kupaa
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: PAYMENT_SERVICE
+            ReasonCode: NOT_FOUND
+            Description: You requested something we don't have
+            Recoverable: false
+            Details: Requested resource doesn't exist
+    InvalidKeyExample:
+      value:
+        Errors:
+          Error:
+          - Source: PAYMENT_SERVIC
+            ReasonCode: INVALID_KEY
+            Description: Signing certificate must be valid
+            Recoverable: false
+            Details: 'null'
+  responses:
+    BadRequestError:
+      description: Bad Request-The server cannot not process the request due to invalid request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    InvalidKeyError:
+      description: Forbidden-You do not have necessary permission to access this resource on this server.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidKeyExample:
+              $ref: '#/components/examples/InvalidKeyExample'
+    NotFoundError:
+      description: Not Found-The requested resource was not found on this server.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
+    CallbackSuccess:
+      description: Payment callback request executed successfully.
+    InvalidAuthHeaderError:
+      description: Bad Request - No Authorization header set
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            InvalidAuthHeaderExample:
+              $ref: '#/components/examples/InvalidAuthHeaderExample'
   requestBodies:
     CallbackRequest:
       description: Callback Request

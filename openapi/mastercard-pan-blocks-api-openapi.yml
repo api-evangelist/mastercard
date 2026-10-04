@@ -32,31 +32,7 @@ paths:
         '400':
           $ref: '#/components/responses/ErrorsResponse'
 components:
-  requestBodies:
-    PanBlockRequest:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PanBlock'
   schemas:
-    ErrorsWrapper:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    Errors:
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          type: array
-          description: Error Details
-          items:
-            $ref: '#/components/schemas/ErrorItem'
     PanBlock:
       required:
       - accountId
@@ -95,6 +71,30 @@ components:
           description: Program identifier for the program in which the cardholder is enrolled. Note the program identifier is filler name and not a sequential ID.
           example:
           - PGM41632
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error Details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    PanBlockAutoEnrollment:
+      type: object
+      properties:
+        message:
+          type: string
+          description: result
+          example: Successfully blocked PAN auto enrollment
     ErrorItem:
       type: object
       properties:
@@ -119,23 +119,23 @@ components:
           description: Where appropriate, indicates detailed information about the data received.
           example: Invalid Details
       description: Error Details
-    PanBlockAutoEnrollment:
-      type: object
-      properties:
-        message:
-          type: string
-          description: result
-          example: Successfully blocked PAN auto enrollment
   responses:
-    PanBlockResponse:
-      description: Successfully blocked PAN auto enrollment.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PanBlockAutoEnrollment'
     ErrorsResponse:
       description: Bad Request
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorsWrapper'
+    PanBlockResponse:
+      description: Successfully blocked PAN auto enrollment.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PanBlockAutoEnrollment'
+  requestBodies:
+    PanBlockRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PanBlock'

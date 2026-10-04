@@ -110,24 +110,6 @@ paths:
                   $ref: '#/components/examples/NotFoundResponse'
 components:
   examples:
-    BadRequestResponse:
-      value:
-        Errors:
-          Error:
-          - Source: Enhanced Currency Conversion Calculator
-            ReasonCode: BAD_REQUEST
-            Description: Invalid input
-            Recoverable: false
-            Details: Date format is invalid (Expected date format yyyy-MM-dd)
-    ForbiddenResponse:
-      value:
-        Errors:
-          Error:
-          - Source: Enhanced Currency Conversion Calculator
-            ReasonCode: FORBIDDEN
-            Description: Data is not accesssible
-            Recoverable: false
-            Details: Rate is not accessible for this date - Please use a date within the last 365 days inclusive of current day.
     NotFoundResponse:
       value:
         Errors:
@@ -137,6 +119,15 @@ components:
             Description: Data not available
             Recoverable: false
             Details: Mastercard and ECB rates are not available for this date. Resubmit for a date within the last 365 days inclusive of current day.
+    BadRequestResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: BAD_REQUEST
+            Description: Invalid input
+            Recoverable: false
+            Details: Date format is invalid (Expected date format yyyy-MM-dd)
     UnauthorizedResponse:
       value:
         Errors:
@@ -146,7 +137,92 @@ components:
             Description: Invalid Client ID
             Recoverable: false
             Details: You do not have access to this service. Please visit the Enhanced Currency Conversion Calculator page for details.
+    ForbiddenResponse:
+      value:
+        Errors:
+          Error:
+          - Source: Enhanced Currency Conversion Calculator
+            ReasonCode: FORBIDDEN
+            Description: Data is not accesssible
+            Recoverable: false
+            Details: Rate is not accessible for this date - Please use a date within the last 365 days inclusive of current day.
   schemas:
+    EnhancedCurrencyConversionWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the service being requested
+          example: mastercard-and-ecb-currency-conversion-rates
+        description:
+          type: string
+          description: The description of the API being called
+          example: Provides Mastercard currency conversion rate, calculated cardholder billing amount, the ECB reference rates and the calculated percentage difference between Mastercard and ECB rates for a provided currency pair
+        requestDate:
+          type: string
+          description: The date and time the API is being called in GMT
+          example: '2020-01-17T18:04:18.000Z'
+        data:
+          $ref: '#/components/schemas/EnhancedCurrencyConversionData'
+    ECBConversionObject:
+      type: object
+      properties:
+        ecbReferenceRateDate:
+          type: string
+          description: Date of reference rates issued by the European Central Bank (ECB).
+          example: '2021-02-16T00:00:00.000Z'
+        ecbReferenceRate:
+          type: number
+          description: Euro foreign exchange reference rates issued by the European Central Bank (ECB). When neither the transaction currency nor the cardholder billing currency is equal to Euro, a calculated reference rate is derived from the two ECB rates
+          example: 1.2018075
+        message:
+          type: string
+          description: User friendly message (if applicable)
+          example: Rate issuance for requested date not supported.  Resubmit for a non-weekend or non-holiday date.
+        reasonCode:
+          type: string
+          description: User friendly reason code (if applicable)
+          example: NOT_AVAILABLE
+    EcbError:
+      type: object
+      properties:
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Not Found
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about data received and calculated during request processing, to help the user with diagnosing errors.
+          example: Mastercard and ECB rates are not available for this date. Resubmit for a date within the last 365 days inclusive of current day.
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during transaction processing. For example, INVALID_SIGNATURE is used when the request signature does not match the expected one.
+          example: NOT_FOUND
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome. For example, if the request contains an invalid   signature, retrying will never result in a success. However, if the error is related to some unexpected timeout with the service, retrying the call could result in a successful response.
+          example: false
+        Source:
+          type: string
+          description: The name of the application that generated this error
+          example: Gateway
+    ErrorResponse:
+      type: object
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    Errors:
+      type: object
+      required:
+      - Error
+      properties:
+        Error:
+          type: array
+          description: if an errorhas occurred
+          items:
+            $ref: '#/components/schemas/EcbError'
     MastercardConversionObject:
       type: object
       properties:
@@ -178,32 +254,6 @@ components:
           type: string
           description: User friendly reason code (if applicable)
           example: NOT_APPLICABLE
-    ErrorResponse:
-      type: object
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    ECBConversionObject:
-      type: object
-      properties:
-        ecbReferenceRateDate:
-          type: string
-          description: Date of reference rates issued by the European Central Bank (ECB).
-          example: '2021-02-16T00:00:00.000Z'
-        ecbReferenceRate:
-          type: number
-          description: Euro foreign exchange reference rates issued by the European Central Bank (ECB). When neither the transaction currency nor the cardholder billing currency is equal to Euro, a calculated reference rate is derived from the two ECB rates
-          example: 1.2018075
-        message:
-          type: string
-          description: User friendly message (if applicable)
-          example: Rate issuance for requested date not supported.  Resubmit for a non-weekend or non-holiday date.
-        reasonCode:
-          type: string
-          description: User friendly reason code (if applicable)
-          example: NOT_AVAILABLE
     EnhancedCurrencyConversionData:
       type: object
       properties:
@@ -247,53 +297,3 @@ components:
           type: number
           description: Calculated percentage difference between Mastercard Conversion Rate Including all issuer-to-cardholder fees (fixed and percentage) for the selected currency pair and the ECB Reference Rate ([effectiveConversionRate/ecbReferenceRateDate]-1*100)
           example: 2.3462409
-    Errors:
-      type: object
-      required:
-      - Error
-      properties:
-        Error:
-          type: array
-          description: if an errorhas occurred
-          items:
-            $ref: '#/components/schemas/EcbError'
-    EcbError:
-      type: object
-      properties:
-        Description:
-          type: string
-          description: Short description of the ReasonCode field.
-          example: Not Found
-        Details:
-          type: string
-          description: Where appropriate, indicates detailed information about data received and calculated during request processing, to help the user with diagnosing errors.
-          example: Mastercard and ECB rates are not available for this date. Resubmit for a date within the last 365 days inclusive of current day.
-        ReasonCode:
-          type: string
-          description: A unique constant identifying the error case encountered during transaction processing. For example, INVALID_SIGNATURE is used when the request signature does not match the expected one.
-          example: NOT_FOUND
-        Recoverable:
-          type: boolean
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome. For example, if the request contains an invalid   signature, retrying will never result in a success. However, if the error is related to some unexpected timeout with the service, retrying the call could result in a successful response.
-          example: false
-        Source:
-          type: string
-          description: The name of the application that generated this error
-          example: Gateway
-    EnhancedCurrencyConversionWrapper:
-      type: object
-      properties:
-        name:
-          type: string
-          description: The name of the service being requested
-          example: mastercard-and-ecb-currency-conversion-rates
-        description:
-          type: string
-          description: The description of the API being called
-          example: Provides Mastercard currency conversion rate, calculated cardholder billing amount, the ECB reference rates and the calculated percentage difference between Mastercard and ECB rates for a provided currency pair
-        requestDate:
-          type: string
-          description: The date and time the API is being called in GMT
-          example: '2020-01-17T18:04:18.000Z'
-        data:
-          $ref: '#/components/schemas/EnhancedCurrencyConversionData'

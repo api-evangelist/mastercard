@@ -45,20 +45,61 @@ paths:
         delay: 0
         dispatcher: FALLBACK
 components:
-  examples:
+  responses:
     UserIDs:
-      value:
-      - 4ba581a55-bcea-4c3e-8e0f-9b4726e5e6d3
-      - c5d88571-ac15-465a-a0d8-1ad1327b9a06
-    IssuerInactiveError:
-      value:
-        Errors:
-          Error:
-          - Source: CARBON CALCULATOR EXPERIENCE
-            ReasonCode: ACCOUNT_INACTIVE
-            Description: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
-            Recoverable: false
-            Details: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+      description: The response object contains a list of deleted user IDs
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/UserID'
+          examples:
+            DeletedUserIds:
+              $ref: '#/components/examples/UserIDs'
+    DeleteUserNotFoundError:
+      description: This response code is returned when a user or Issuer is not present.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            IssuerNotFoundError:
+              $ref: '#/components/examples/IssuerNotFoundError'
+    DeleteUserUnauthorisedError:
+      description: This response code is returned when a user is terminated or inactive.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            IssuerInactiveError:
+              $ref: '#/components/examples/IssuerInactiveError'
+            IssuerSuspendedError:
+              $ref: '#/components/examples/IssuerSuspendedError'
+            IssuerTerminatedError:
+              $ref: '#/components/examples/IssuerTerminatedError'
+    UnsupportedMediaTypeError:
+      description: This response code is returned when the MediaType in the request is other than application/json format.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            UnsupportedMediaTypeError:
+              $ref: '#/components/examples/UnsupportedMediaTypeError'
+    DeleteUserBadRequestError:
+      description: This response code is returned when a request is invalid or data in the request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorWrapper'
+          examples:
+            UserCountError:
+              $ref: '#/components/examples/UserCountError'
+            InvalidUserIdLengthError:
+              $ref: '#/components/examples/InvalidUserIdLengthError'
+  examples:
     InvalidUserIdLengthError:
       value:
         Errors:
@@ -68,33 +109,6 @@ components:
             Description: One of the request parameters is invalid, try again with correct request.
             Recoverable: false
             Details: userId must match "^[0-9A-Fa-f\-]{36}"
-    IssuerTerminatedError:
-      value:
-        Errors:
-          Error:
-          - Source: CARBON CALCULATOR EXPERIENCE
-            ReasonCode: ACCOUNT_TERMINATED
-            Description: Your account has been terminated, you won't be able to access any service. Kindly register yourself again.
-            Recoverable: false
-            Details: Your account has been terminated, you won't be able to access any service. Kindly register yourself again.
-    UserCountError:
-      value:
-        Errors:
-          Error:
-          - Source: CARBON CALCULATOR EXPERIENCE
-            ReasonCode: INVALID_REQUEST_PARAMETER
-            Description: One of the request parameters is invalid, try again with correct request.
-            Recoverable: true
-            Details: Request body should have at least 1 or not more than 500 userIds
-    IssuerSuspendedError:
-      value:
-        Errors:
-          Error:
-          - Source: CARBON CALCULATOR EXPERIENCE
-            ReasonCode: ACCOUNT_SUSPENDED
-            Description: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
-            Recoverable: false
-            Details: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
     UnsupportedMediaTypeError:
       value:
         Errors:
@@ -113,7 +127,56 @@ components:
             Description: Service provider clientId is not Identified
             Recoverable: false
             Details: Client not found.
+    UserIDs:
+      value:
+      - 4ba581a55-bcea-4c3e-8e0f-9b4726e5e6d3
+      - c5d88571-ac15-465a-a0d8-1ad1327b9a06
+    UserCountError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: INVALID_REQUEST_PARAMETER
+            Description: One of the request parameters is invalid, try again with correct request.
+            Recoverable: true
+            Details: Request body should have at least 1 or not more than 500 userIds
+    IssuerInactiveError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_INACTIVE
+            Description: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: Your account is inactive, kindly contact your Mastercard associate to activate it. Until then you won't be able to access any service.
+    IssuerTerminatedError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_TERMINATED
+            Description: Your account has been terminated, you won't be able to access any service. Kindly register yourself again.
+            Recoverable: false
+            Details: Your account has been terminated, you won't be able to access any service. Kindly register yourself again.
+    IssuerSuspendedError:
+      value:
+        Errors:
+          Error:
+          - Source: CARBON CALCULATOR EXPERIENCE
+            ReasonCode: ACCOUNT_SUSPENDED
+            Description: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
+            Recoverable: false
+            Details: Your account has been suspended temporarily, kindly contact your Mastercard associate to activate it again. Until then you won't be able to access any service.
   schemas:
+    ErrorWrapper:
+      title: ErrorWrapper
+      type: object
+      description: The error response object gets returned in case of error.
+      required:
+      - Errors
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
     Error:
       title: Error
       type: object
@@ -171,15 +234,6 @@ components:
       pattern: ^[0-9A-Fa-f-]{36}
       description: Unique identifier for a user enrolled in the Carbon Calculator Experience platform.
       example: f5d88571-ac15-465a-a0d8-1ad1327b9a06
-    ErrorWrapper:
-      title: ErrorWrapper
-      type: object
-      description: The error response object gets returned in case of error.
-      required:
-      - Errors
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
   requestBodies:
     UserIDs:
       description: List of user ids
@@ -194,58 +248,4 @@ components:
             maxItems: 500
           examples:
             UserIDs:
-              $ref: '#/components/examples/UserIDs'
-  responses:
-    DeleteUserBadRequestError:
-      description: This response code is returned when a request is invalid or data in the request is not valid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            UserCountError:
-              $ref: '#/components/examples/UserCountError'
-            InvalidUserIdLengthError:
-              $ref: '#/components/examples/InvalidUserIdLengthError'
-    DeleteUserUnauthorisedError:
-      description: This response code is returned when a user is terminated or inactive.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            IssuerInactiveError:
-              $ref: '#/components/examples/IssuerInactiveError'
-            IssuerSuspendedError:
-              $ref: '#/components/examples/IssuerSuspendedError'
-            IssuerTerminatedError:
-              $ref: '#/components/examples/IssuerTerminatedError'
-    DeleteUserNotFoundError:
-      description: This response code is returned when a user or Issuer is not present.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            IssuerNotFoundError:
-              $ref: '#/components/examples/IssuerNotFoundError'
-    UnsupportedMediaTypeError:
-      description: This response code is returned when the MediaType in the request is other than application/json format.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorWrapper'
-          examples:
-            UnsupportedMediaTypeError:
-              $ref: '#/components/examples/UnsupportedMediaTypeError'
-    UserIDs:
-      description: The response object contains a list of deleted user IDs
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/UserID'
-          examples:
-            DeletedUserIds:
               $ref: '#/components/examples/UserIDs'

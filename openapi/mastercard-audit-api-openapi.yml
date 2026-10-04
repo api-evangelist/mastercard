@@ -37,6 +37,11 @@ paths:
         $ref: '#/components/requestBodies/AuditEventsRequest'
 components:
   schemas:
+    CountryCode:
+      type: string
+      description: The country code of the country where the transaction originates from.
+      pattern: ^[a-zA-Z]{2}$
+      example: US
     ErrorResponse:
       required:
       - Errors
@@ -81,6 +86,13 @@ components:
                     description: TP will use this URI to redirect to RP.
                     pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
                     example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
     AuditEventsItem:
       type: object
       properties:
@@ -233,18 +245,13 @@ components:
           $ref: '#/components/schemas/CountryCode'
         sdkVersion:
           $ref: '#/components/schemas/SdkVersion'
-    SdkVersion:
-      type: string
-      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
-      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
-      minLength: 5
-      maxLength: 255
-      example: 2.3.0
-    CountryCode:
-      type: string
-      description: The country code of the country where the transaction originates from.
-      pattern: ^[a-zA-Z]{2}$
-      example: US
+  requestBodies:
+    AuditEventsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuditEvents'
+      required: true
   responses:
     AuditEventsResponse:
       description: Success.
@@ -272,10 +279,3 @@ components:
             Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
             Recoverable: false
             redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
-  requestBodies:
-    AuditEventsRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AuditEvents'
-      required: true

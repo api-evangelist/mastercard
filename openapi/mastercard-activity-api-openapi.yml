@@ -48,15 +48,15 @@ paths:
         $ref: '#/components/requestBodies/RPActivitySearchRequest'
 components:
   responses:
-    NotFoundError:
-      description: The request didn't match an existing resource.
+    BadRequestError:
+      description: Something was wrong with the request.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
           examples:
-            NotFoundExample:
-              $ref: '#/components/examples/NotFoundExample'
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
     RPActivitySearchResponse:
       description: Success.
       headers:
@@ -77,15 +77,6 @@ components:
               $ref: '#/components/examples/RPActivitiesResponseExample'
             EncryptedResponseExample:
               $ref: '#/components/examples/EncryptedPayloadNoPDSExample'
-    UnauthorizedError:
-      description: Unauthorized request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedExample'
     ForbiddenError:
       description: Consent not given.
       content:
@@ -97,66 +88,25 @@ components:
               $ref: '#/components/examples/ForbiddenExample'
             ForbiddenExampleUnauthorizedScopedFields:
               $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
-    BadRequestError:
-      description: Something was wrong with the request.
+    UnauthorizedError:
+      description: Unauthorized request.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
           examples:
-            UserProfileDeletedErrorExample:
-              $ref: '#/components/examples/UserProfileDeletedErrorExample'
-  requestBodies:
-    RPActivitySearchRequest:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    NotFoundError:
+      description: The request didn't match an existing resource.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/RPActivitySearch'
-      required: true
-  parameters:
-    XEncryptedPayload:
-      in: header
-      name: X-Encrypted-Payload
-      type: boolean
-      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
-
-        '
-      example: true
-      schema: null
-    XUserIdentityParameter:
-      in: header
-      name: X-User-Identity
-      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-      description: 'JWT token for session validation. Returned as response header in previous API calls with key X-User-Identity.
-
-        '
-      schema:
-        type: string
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
   examples:
-    NotFoundExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: USER_PROFILE_ID_NOT_FOUND
-            Description: The provided user profile ID does not exist.
-            Recoverable: false
-    ForbiddenExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: CONSENT_NOT_GIVEN
-            Description: User Consent Not Given.
-            Recoverable: false
-    UnauthorizedExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: UNAUTHORIZED_REQUEST
-            Description: Unauthorized request.
-            Recoverable: false
     ForbiddenExampleUnauthorizedScopedFields:
       value:
         Errors:
@@ -165,9 +115,6 @@ components:
             ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
             Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
             Recoverable: false
-    EncryptedPayloadNoPDSExample:
-      value:
-        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyf
     UserProfileDeletedErrorExample:
       value:
         Errors:
@@ -187,7 +134,56 @@ components:
             passport.firstName: John
             passport.lastName: Doe
         rotatedPds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
+            Recoverable: false
+    EncryptedPayloadNoPDSExample:
+      value:
+        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyf
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided user profile ID does not exist.
+            Recoverable: false
   schemas:
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
+    RPActivities:
+      required:
+      - rpActivities
+      properties:
+        rpActivities:
+          type: array
+          description: Relying Party activity items.
+          items:
+            $ref: '#/components/schemas/RPActivityItems'
+        rotatedPds:
+          type: string
+          description: A rotated PDS is created and returned when the encryption key expires and a new key is generated.
+          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
+          minLength: 1
+          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
     ErrorResponse:
       required:
       - Errors
@@ -232,55 +228,12 @@ components:
                     description: TP will use this URI to redirect to RP.
                     pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
                     example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
-    RPActivitySearch:
-      required:
-      - pds
-      - startIndex
-      - endIndex
-      - userConsent
-      type: object
-      properties:
-        pds:
-          $ref: '#/components/schemas/PDS'
-        startIndex:
-          type: integer
-          description: Start index of the RP activity.
-          format: int32
-          minimum: 1
-          maximum: 999
-          example: 3
-        endIndex:
-          type: integer
-          description: End index of the RP activity.
-          format: int32
-          minimum: 1
-          maximum: 999
-          example: 10
-        userConsent:
-          $ref: '#/components/schemas/UserConsent'
-        sdkVersion:
-          $ref: '#/components/schemas/SdkVersion'
     PDS:
       type: string
       description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
       pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
       minLength: 1
       example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-    RPActivities:
-      required:
-      - rpActivities
-      properties:
-        rpActivities:
-          type: array
-          description: Relying Party activity items.
-          items:
-            $ref: '#/components/schemas/RPActivityItems'
-        rotatedPds:
-          type: string
-          description: A rotated PDS is created and returned when the encryption key expires and a new key is generated.
-          pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
-          minLength: 1
-          example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
     UserConsent:
       enum:
       - ACCEPT
@@ -293,13 +246,6 @@ components:
       minLength: 6
       maxLength: 7
       example: ACCEPT
-    SdkVersion:
-      type: string
-      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
-      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
-      minLength: 5
-      maxLength: 255
-      example: 2.3.0
     RPActivityItems:
       required:
       - rpName
@@ -333,3 +279,57 @@ components:
           example:
             passport.firstName: John
             passport.lastName: Doe
+    RPActivitySearch:
+      required:
+      - pds
+      - startIndex
+      - endIndex
+      - userConsent
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        startIndex:
+          type: integer
+          description: Start index of the RP activity.
+          format: int32
+          minimum: 1
+          maximum: 999
+          example: 3
+        endIndex:
+          type: integer
+          description: End index of the RP activity.
+          format: int32
+          minimum: 1
+          maximum: 999
+          example: 10
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
+  parameters:
+    XUserIdentityParameter:
+      in: header
+      name: X-User-Identity
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      description: 'JWT token for session validation. Returned as response header in previous API calls with key X-User-Identity.
+
+        '
+      schema:
+        type: string
+    XEncryptedPayload:
+      in: header
+      name: X-Encrypted-Payload
+      type: boolean
+      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
+
+        '
+      example: true
+      schema: null
+  requestBodies:
+    RPActivitySearchRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RPActivitySearch'
+      required: true

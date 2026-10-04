@@ -163,412 +163,63 @@ paths:
     - url: https://sandbox.api.mastercard.com/loyalty/insurance
       description: Sandbox server
 components:
-  parameters:
-    XEncryptedPayload:
-      in: header
-      name: X-Encrypted-Payload
-      type: boolean
-      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
-
-        '
-      example: true
-      schema: null
-    XUserIdentityParameter:
-      in: header
-      name: X-User-Identity
-      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-      description: 'JWT token for session validation. Returned as response header in previous API calls with key X-User-Identity.
-
-        '
-      schema:
-        type: string
-    DocumentTypeParameter:
-      name: document_type
-      in: query
-      description: The type of document scanned (DRIVING_LICENSE, PASSPORT, ID_CARD).
-      example: DRIVING_LICENSE
-      schema:
-        type: string
-        pattern: ^(DRIVING_LICENSE|PASSPORT|ID_CARD)$
-    CountryParameter:
-      name: user_selected_country
-      in: query
-      description: The ISO 3166-1 alpha3 code which corresponds to the country from where the request to ID is originating from.
-      example: USA
-      schema:
-        type: string
-        pattern: ^[A-Z]{3}
-    UserConsentParameter:
-      name: user_consent
-      in: query
-      description: The value which best reflects the input of the User with regard to Consent to use their data (ACCEPT, DECLINE, REVOKE, EXPIRE).
-      example: ACCEPT
-      required: true
-      schema:
-        type: string
-        pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
-    ScanIdParameter:
-      name: scan_id
-      in: path
-      description: UUID returned to the application/webpage on completion of the users interactions with the ID-V SDK.
-      example: 5226539e-78e7-45ac-a924-072d1301c24c
-      required: true
-      schema:
-        maxLength: 36
-        minLength: 36
-        type: string
-        pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-    RetrieveDocumentImagesParameter:
-      name: retrieve_document_images
-      in: query
-      description: Flag indicating if the document images needs to be retrieved.
-      example: 'true'
-      required: true
-      schema:
-        type: string
-        pattern: ^(true|false)$
-    RetrieveFacemapParameter:
-      name: retrieve_facemap
-      in: query
-      description: Flag indicating if the facemap needs to be retrieved.
-      example: 'true'
-      required: true
-      schema:
-        type: string
-        pattern: ^(true|false)$
-    EncryptedPayloadParameter:
-      name: X-Encrypted-Payload
-      in: header
-      description: Whether the request payload is encrypted with the Encyption Key generated from the Developer Zone Portal.
-      example: true
-      required: false
-      schema:
-        type: boolean
-    RetrieveSelfieParameter:
-      name: retrieve_selfie
-      in: query
-      description: Flag indicating if the selfie needs to be retrieved.
-      example: 'true'
-      required: true
-      schema:
-        type: string
-        pattern: ^(true|false)$
-  examples:
-    NotFoundExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: USER_PROFILE_ID_NOT_FOUND
-            Description: The provided user profile ID does not exist.
-            Recoverable: false
-    TPDataShareRequestExample:
-      value:
-        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-        userConsent: ACCEPT
-        userProfileId: df52649e-4096-456a-bca0-751ee470009f
-        address:
-          addressLine1: 36271 GrandRiver Ave
-          addressLine2: Building no 2
-          addressZipCode: '48335'
-          addressCity: Farmington
-          addressSubdivision: MO
-          addressCountry: USA
-          value: 36271 GrandRiver Ave Building no 2 48335 Farmington MI USA
-          lastVerifiedDate: '2021-02-19T10:55:58.165Z'
-        email:
-          value: person@mastercard.com
-          lastVerifiedDate: '2021-02-19T10:55:58.165Z'
-        phone:
-          value: '11234567890'
-          lastVerifiedDate: '2021-02-19T10:55:58.165Z'
-    EncryptedPayloadWithPDSExample:
-      value:
-        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyf
-        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-    ForbiddenExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: CONSENT_NOT_GIVEN
-            Description: User Consent Not Given.
-            Recoverable: false
-    ForbiddenExampleUnauthorizedScopedFields:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
-            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
-            Recoverable: false
-    UnauthorizedExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: UNAUTHORIZED_REQUEST
-            Description: Unauthorized request.
-            Recoverable: false
-    UserProfileDeletedErrorExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: USER_PROFILE_DELETED
-            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
-            Recoverable: false
-            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
-    EncryptedPayloadExample:
-      value:
-        encryptedData: eyJraWQiOiIwMTQyNmRhY2JlMmRjYzA3NmQ1OWU1NDQ5N2NiNjBiMjdjZmQwMDE0ZjZmMGQyYTJiN2FmNjExNDg2NjYyMj...
-    BadRequestExampleMedicareName:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value for 'nameLine' field OR value exceeds allowed max characters.
-            Recoverable: false
-            Details: null
-    NotFoundExample_2:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: USER_PROFILE_ID_NOT_FOUND
-            Description: The provided userProfileId does not exist.
-            Recoverable: false
-    BadRequestExampleDocumentMismatch:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: BAD_REQUEST
-            Description: The document uploaded by the User does not comply to the document type/country specified by the client in the originating access-token request.
-            Recoverable: false
-            Details: null
-    BadRequestExampleIVPSystemError:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: IVP_SYSTEM_ERROR
-            Description: Received system error from the Identity Verification Provider. Please look at 'details' for additional information.
-            Recoverable: false
-            Details: System Error Received
-    ForbiddenExampleUnauthorizedScopedFields_2:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
-            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
-            Recoverable: false
-            Details: null
-    AccessTokensResponsePayload:
-      value:
-        transactionId: f64d44f8-3b0c-449c-8b79-9e2bbe0b2f3b
-        sdkToken: eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAJXNQWsCMRAF4P-Scwcym0km8eahVKGwthRtT5JkZlFBLKKuWPrf3fUfeH18770_o9fpyUwMBscWPZOLMZkXk2udy5AXSkoePWCoCKTeQkIXgS1JQ2IpqIz8gVNmYVECT64AZRcgDrPQZBz3Uy4BB9x3-gyvn9oNelFu6_d9uz0f3w69NnPys1nbL1_bjy9cXX7P37tNt1vVH8oq0Wocm4-b3ChJSAyWWIFcEEgqBYpnRsZcXULzfwdxCwYuCgEAAA.KaJPW0KH5yL5xFBcyxGIQnUsW895RPc1ohRXyx_JaIMrAlpIRga7WH6SyIylCBKHxSYd4gW9f-O5qabYPzQE7g
-        accountId: 14c01794-926a-426f-ad72-c45f8fbf78a4
-        workflowId: 5226539e-78e7-45ac-a924-072d1301c24c
-        apiDataCenter: US
-        documentVerificationUrl: https://mastercard.web.apac-1.jumio.link/web/v4/app?authorizationToken=eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAJXOQQ5CIQxF0b0wtkmBFqgzh07_Dkp_iWM10cS4d0FX4PTm5OW9gj9P93AMsaRaS845CVM4BDU776sLi5JGiM06UGGDLiUCRaLa0rDR6uJf7FH6mBwYtUyCBcSywBznbmMfGdPEj-H_cNt8TL35zfVql1V-12o0SZ3AGysQ1wKNFCGbsjlyUsTw_gANOZ5b4gAAAA.2bo6KfOvGIswNRNTXv6QtoGvHyNYp_j3LwHia9DtuWna3y_LLI1VgPZle46Q5cFHuuMJB7g7y4wHbtogBX2HfQ&locale=en-US
-    BadRequestExampleMedicareMedicareNumber:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value for 'Medicare card number'.
-            Recoverable: false
-            Details: null
-    BadRequestExampleMedicareUserConsent:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: User consent not given.
-            Recoverable: false
-            Details: null
-    DocumentDataExampleIDCard:
-      value:
-        status: SUCCESS
-        transactionId: 5f4b0b79-8f7a-4731-b828-5e9db6e39e5a
-        documentData:
-          lastName: SMITH
-          gender: M
-          fathersName: WILLIAM SMITH
-          documentType: ID_CARD
-          issuingDate: '2010-01-01'
-          documentNumber: C204050123
-          expiryDate: '2030-12-31T00:00:00.000Z'
-          issuingPlace: null
-          formattedAddress: null
-          cpf: 000.000.000-00
-          addressLine1: null
-          documentStatus: SUCCESS
-          addressLine2: null
-          addressCity: null
-          addressZipCode: null
-          addressCountry: null
-          placeOfBirth: null
-          dateOfBirth: '1980-01-01'
-          issuingState: null
-          firstName: JOHN
-          issuingAuthority: null
-          issuingCountry: BRA
-          mothersName: JANE SMITH
-          addressSubdivision: null
-          rgNumber: F204050123
-          selfie: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
-          documentImageFront: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
-          documentImageBack: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
-          facemap: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
-    BadRequestExampleUserConsent:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Unexpected value 'Invalid' for enumerate field.
-            Recoverable: false
-            Details: null
-    DocumentDataExampleDriverLicense:
-      value:
-        status: SUCCESS
-        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
-        documentData:
-          documentNumber: AB001234567
-          documentStatus: SUCCESS
-          documentType: DRIVER_LICENSE
-          dateOfBirth: '2020-09-09'
-          firstName: MIRIAM
-          lastName: Smith
-          expiryDate: '2020-10-10'
-          gender: F
-          cardNumber: '1234567890'
-          issuingCountry: AUS
-          issuingDate: '2020-09-09'
-          issuingPlace: Sydney
-          issuingAuthority: Australia
-          placeOfBirth: Sydney
-          addressLine1: 10 Boronia Street
-          addressLine2: 09 Boronia Street
-          addressZipCode: '10021'
-          addressCity: SYDNEY
-          addressCountry: Users Country
-          addressSubdivision: NSW
-          issuingState: NSW
-          formattedAddress: 22 Melville Street, Hobart 7000
-          selfie: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
-          documentImageFront: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
-          documentImageBack: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
-          facemap: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
-    BadRequestExampleIVPConnectionTimeout:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: IVP_CONNECTION_TIMEOUT
-            Description: Connection timeout when trying to connect with the Identity Verification Provider. Please look at 'details' for additional information.
-            Recoverable: false
-            Details: Received Connection TimeOut Exception
-    BadRequestExampleCountryCode:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value US4 for 'countryCode'.
-            Recoverable: false
-            Details: null
-    BadRequestExamplePhoneNumber:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value ASD for 'phoneNumber'.
-            Recoverable: false
-            Details: null
-    BadRequestExampleMedicareIndividualReferenceNo:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value for 'INDIVIDUAL_REFERENCE_NO'.
-            Recoverable: false
-            Details: null
-    BadRequestExampleMedicareExpireDate:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value for 'expiry date'.
-            Recoverable: false
-            Details: null
-    DocumentDataExamplePassport:
-      value:
-        status: PENDING
-        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
-        documentData:
-          documentNumber: N1234567
-          documentStatus: PENDING
-          documentType: PASSPORT
-          dateOfBirth: '2020-09-09'
-          firstName: John
-          lastName: Smith
-          expiryDate: '2020-10-10'
-          gender: F
-          issuingCountry: USA
-          issuingDate: '2020-09-09'
-          issuingPlace: New York
-          issuingAuthority: United States
-          placeOfBirth: Boston
-          addressLine1: 123 Main St.
-          addressLine2: New York
-          addressZipCode: '10021'
-          addressCity: New York
-          addressCountry: Users Country
-          addressSubdivision: MO
-          issuingState: MO
-          formattedAddress: 220 BLVD O FALLON
-          selfie: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
-          documentImageFront: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
-          documentImageBack: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
-          facemap: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
-    BadRequestExampleMedicareCountryCode:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value for 'Country code'.
-            Recoverable: false
-            Details: null
-    UserBadRequestExample:
-      value:
-        Errors:
-          Error:
-          - Source: Loyalty Service - Insurance
-            ReasonCode: INVALID_FIELD
-            Description: Invalid Field(s).
-            Recoverable: false
-            Details: Invalid field - 'pan' is not a string.
-    UnauthorizedExample_2:
-      value:
-        Errors:
-          Error:
-          - Source: Gateway
-            ReasonCode: DECLINED
-            Description: Unauthorized - Access Not Granted.
-            Recoverable: false
-            Details: null
   schemas:
+    AddressData:
+      type: object
+      properties:
+        addressLine1:
+          type: string
+          description: Address line 1.
+          minLength: 1
+          maxLength: 255
+          example: 36271 GrandRiver Ave
+        addressLine2:
+          type: string
+          description: Address line 2.
+          minLength: 1
+          maxLength: 255
+          example: Building no 2
+        addressZipCode:
+          type: string
+          description: Zip code.
+          minLength: 1
+          maxLength: 255
+          example: 48335
+        addressCity:
+          type: string
+          description: City.
+          minLength: 1
+          maxLength: 255
+          example: Farmington
+        addressSubdivision:
+          type: string
+          description: Subdivision of the user address, possible values include county, state, province, and municipality.
+          minLength: 2
+          maxLength: 2
+          example: MO
+        addressCountry:
+          type: string
+          description: Country provided in the address from the scanned document.
+          minLength: 1
+          maxLength: 255
+          example: USA
+    Email:
+      required:
+      - lastVerifiedDate
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          description: Value.
+          minLength: 1
+          maxLength: 255
+          example: person@mastercard.com
+        lastVerifiedDate:
+          type: string
+          description: Last verified date and time.
+          format: date-time
+          example: '2021-02-19T10:55:58.165Z'
     TpDataShare:
       required:
       - pds
@@ -637,23 +288,6 @@ components:
                     description: TP will use this URI to redirect to RP.
                     pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
                     example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
-    Phone:
-      required:
-      - lastVerifiedDate
-      - value
-      type: object
-      properties:
-        value:
-          type: string
-          description: Value.
-          minLength: 1
-          maxLength: 255
-          example: 11234567890
-        lastVerifiedDate:
-          type: string
-          description: Last verified date and time.
-          format: date-time
-          example: '2021-02-19T10:55:58.165Z'
     Address:
       required:
       - lastVerifiedDate
@@ -672,7 +306,7 @@ components:
             description: Last verified date and time.
             format: date-time
             example: '2021-02-19T10:55:58.165Z'
-    Email:
+    Phone:
       required:
       - lastVerifiedDate
       - value
@@ -683,51 +317,17 @@ components:
           description: Value.
           minLength: 1
           maxLength: 255
-          example: person@mastercard.com
+          example: 11234567890
         lastVerifiedDate:
           type: string
           description: Last verified date and time.
           format: date-time
           example: '2021-02-19T10:55:58.165Z'
-    AddressData:
+    TPDataShareSuccessData:
       type: object
       properties:
-        addressLine1:
-          type: string
-          description: Address line 1.
-          minLength: 1
-          maxLength: 255
-          example: 36271 GrandRiver Ave
-        addressLine2:
-          type: string
-          description: Address line 2.
-          minLength: 1
-          maxLength: 255
-          example: Building no 2
-        addressZipCode:
-          type: string
-          description: Zip code.
-          minLength: 1
-          maxLength: 255
-          example: 48335
-        addressCity:
-          type: string
-          description: City.
-          minLength: 1
-          maxLength: 255
-          example: Farmington
-        addressSubdivision:
-          type: string
-          description: Subdivision of the user address, possible values include county, state, province, and municipality.
-          minLength: 2
-          maxLength: 2
-          example: MO
-        addressCountry:
-          type: string
-          description: Country provided in the address from the scanned document.
-          minLength: 1
-          maxLength: 255
-          example: USA
+        pds:
+          $ref: '#/components/schemas/PDS'
     PDS:
       type: string
       description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
@@ -746,154 +346,12 @@ components:
       minLength: 6
       maxLength: 7
       example: ACCEPT
-    TPDataShareSuccessData:
-      type: object
-      properties:
-        pds:
-          $ref: '#/components/schemas/PDS'
-    Error:
-      type: object
-      properties:
-        Source:
-          type: string
-          description: Source of where the error occured.
-          example: mids
-        ReasonCode:
-          type: string
-          description: Code of the error.
-          example: USER_PROFILE_ID_NOT_FOUND
-        Description:
-          type: string
-          description: The cause of the error
-          example: The provided userProfileId does not exist
-        Recoverable:
-          type: boolean
-          description: Indiciates if the error can be recovered from.
-          example: false
-        Details:
-          type: string
-          description: Contains information about the error.
-          example: IOException Occured
     ErrorList:
       description: Error Details.
       type: array
       minItems: 1
       items:
         $ref: '#/components/schemas/Error'
-    AccessToken:
-      required:
-      - apiDataCenter
-      - sdkToken
-      - transactionId
-      type: object
-      properties:
-        transactionId:
-          description: The transaction ID provided in the API response must be logged by the Relying Party. The Relying Party is required to provide the transaction ID when contacting the Mastercard customer support team.
-          type: string
-          example: 1ec14310-e85c-11ea-adc1-0242ac120002
-          minLength: 36
-          maxLength: 36
-        accountId:
-          description: The accountId is an identifier for the client's account on the identity verification provider used by ID Verification.
-          type: string
-          example: 14c01794-926a-426f-ad72-c45f8fbf78a4
-          minLength: 36
-          maxLength: 36
-        workflowId:
-          description: The workflowId is the identifier for the scan on the identity verification provider used by ID Verification.
-          type: string
-          example: 5226539e-78e7-45ac-a924-072d1301c24c
-          minLength: 36
-          maxLength: 36
-        sdkToken:
-          description: Token to initialize the SDK.
-          type: string
-          example: eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAB3NQQpCMQwE0Lt0baBJ0yZ159KtN0jTBgTBjYgg3t3__3KGN8w3rc_llc4JG6KUhrmoYjolc7_OvWfPKJ2hUzNgagE2hcC5hsYIUeOdH7gStVr6AtElwNUcrBNDFppYMjqxb9hvKzb9fNzfa4_HVkORomdoggsYp8HgPqAWF43VtsOcfn_stx4UsAAAAA.tDRVowYYcpQ03Vlt7D3MiovleiyRFQMv4qzXb7Lf_6CarphRrlWXan8-jE-YesNiAiT8tk0b-i8TKHGrcgT1VQ
-          minLength: 1
-          maxLength: 328
-        apiDataCenter:
-          description: API Data Center. The accepted values are US, EU or SG.
-          type: string
-          example: US
-          minLength: 1
-          maxLength: 2
-        documentVerificationUrl:
-          description: Web url to display in iframe.
-          type: string
-          example: https://mastercard.web.apac-1.jumio.link/web/v4/app?authorizationToken=eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAJXOQQ5CIQxF0b0wtkmBFqgzh07_Dkp_iWM10cS4d0FX4PTm5OW9gj9P93AMsaRaS845CVM4BDU776sLi5JGiM06UGGDLiUCRaLa0rDR6uJf7FH6mBwYtUyCBcSywBznbmMfGdPEj-H_cNt8TL35zfVql1V-12o0SZ3AGysQ1wKNFCGbsjlyUsTw_gANOZ5b4gAAAA.2bo6KfOvGIswNRNTXv6QtoGvHyNYp_j3LwHia9DtuWna3y_LLI1VgPZle46Q5cFHuuMJB7g7y4wHbtogBX2HfQ&locale=en-US
-    FacematchSourceVerificationResult:
-      required:
-      - verificationResult
-      - accountId
-      - workflowId
-      type: object
-      properties:
-        verificationResult:
-          type: string
-          example: DOCUMENT_VERIFIED
-          description: 'Verification Results, following: DOCUMENT_VERIFIED - Document matches with the IVP registered document, DOCUMENT_NOT_VERIFIED - Document does not match with any of the IVP registered document, DOCUMENT_INVALID - Document is invalid or not electronically captured'
-        workflowId:
-          description: The workflowId is the identifier for the scan on the identity verification provider used by ID Verification.
-          type: string
-          example: 5226539e-78e7-45ac-a924-072d1301c24c
-          minLength: 36
-          maxLength: 36
-        accountId:
-          description: The accountId is an identifier for the client's account on the identity verification provider used by ID Verification.
-          type: string
-          example: 14c01794-926a-426f-ad72-c45f8fbf78a4
-          minLength: 36
-          maxLength: 36
-    SelfieVerificationRequest:
-      required:
-      - accountId
-      - selfie
-      - channelType
-      - livenessType
-      type: object
-      properties:
-        accountId:
-          description: User account ID
-          example: 14c01794-926a-426f-ad72-c45f8fbf78a4
-          type: string
-        selfie:
-          description: Base 64 selfie
-          example: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
-          type: string
-        livenessType:
-          type: string
-          example: GPA
-          description: liveness type, GPA takes longer and provides more accuracy, LA is faster
-          enum:
-          - GPA
-          - LA
-        channelType:
-          type: string
-          example: WEB
-          description: the platform of enrollment process
-          enum:
-          - WEB
-          - SDK
-    DocumentVerificationExtractedData:
-      required:
-      - status
-      - transactionId
-      type: object
-      properties:
-        documentData:
-          $ref: '#/components/schemas/DocumentVerificationExtractedDataDocumentData'
-        status:
-          description: The status of the Status API, possible values are SUCCESS / PENDING.
-          example: SUCCESS
-          type: string
-          minLength: 1
-          maxLength: 7
-        transactionId:
-          description: The transaction ID provided in the API response must be logged by the Relying Party. The Relying Party is required to provide the transaction ID when contacting the Mastercard customer support team.
-          example: 1ec14310-e85c-11ea-adc1-0242ac120002
-          type: string
-          minLength: 36
-          maxLength: 36
     DocumentVerificationExtractedDataDocumentData:
       description: Document Data.
       required:
@@ -1082,6 +540,29 @@ components:
           maxLength: 255
           description: Mother's Name.
           example: Paula Smith
+    Error:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of where the error occured.
+          example: mids
+        ReasonCode:
+          type: string
+          description: Code of the error.
+          example: USER_PROFILE_ID_NOT_FOUND
+        Description:
+          type: string
+          description: The cause of the error
+          example: The provided userProfileId does not exist
+        Recoverable:
+          type: boolean
+          description: Indiciates if the error can be recovered from.
+          example: false
+        Details:
+          type: string
+          description: Contains information about the error.
+          example: IOException Occured
     RetrieveAccessToken:
       required:
       - countryCode
@@ -1167,13 +648,6 @@ components:
           example: 5226539e-78e7-45ac-a924-072d1301c24c
           pattern: ^[a-zA-Z][0-9][-]{*}$
           description: Required only when the FACEMATCH enum is specified in the workflowDefinition field.<br/> The workflowId value returned to the client in a previous access token call for the document which is to form the basis for the face-match.
-    ApiError:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
     Errors:
       description: List of Errors.
       example:
@@ -1184,45 +658,127 @@ components:
       properties:
         Error:
           $ref: '#/components/schemas/ErrorList'
-    ErrorItems:
+    SelfieVerificationRequest:
+      required:
+      - accountId
+      - selfie
+      - channelType
+      - livenessType
+      type: object
+      properties:
+        accountId:
+          description: User account ID
+          example: 14c01794-926a-426f-ad72-c45f8fbf78a4
+          type: string
+        selfie:
+          description: Base 64 selfie
+          example: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          type: string
+        livenessType:
+          type: string
+          example: GPA
+          description: liveness type, GPA takes longer and provides more accuracy, LA is faster
+          enum:
+          - GPA
+          - LA
+        channelType:
+          type: string
+          example: WEB
+          description: the platform of enrollment process
+          enum:
+          - WEB
+          - SDK
+    ApiError:
       required:
       - Errors
       type: object
       properties:
         Errors:
-          required:
-          - Error
-          type: object
-          properties:
-            Error:
-              type: array
-              description: Error Details
-              items:
-                $ref: '#/components/schemas/ErrorItem'
-          example: example_value
-    ErrorItem:
+          $ref: '#/components/schemas/Errors'
+    AccessToken:
+      required:
+      - apiDataCenter
+      - sdkToken
+      - transactionId
       type: object
       properties:
-        Source:
+        transactionId:
+          description: The transaction ID provided in the API response must be logged by the Relying Party. The Relying Party is required to provide the transaction ID when contacting the Mastercard customer support team.
           type: string
-          example: Error source
-          description: Source of the error.
-        Description:
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+          minLength: 36
+          maxLength: 36
+        accountId:
+          description: The accountId is an identifier for the client's account on the identity verification provider used by ID Verification.
           type: string
-          example: Generic error description
-          description: Short description of the ReasonCode field.
-        ReasonCode:
+          example: 14c01794-926a-426f-ad72-c45f8fbf78a4
+          minLength: 36
+          maxLength: 36
+        workflowId:
+          description: The workflowId is the identifier for the scan on the identity verification provider used by ID Verification.
           type: string
-          example: REASON_CODE
-          description: A unique constant identifying the error case encountered during API request processing.
-        Recoverable:
-          type: boolean
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
-          example: false
-        Details:
+          example: 5226539e-78e7-45ac-a924-072d1301c24c
+          minLength: 36
+          maxLength: 36
+        sdkToken:
+          description: Token to initialize the SDK.
           type: string
-          example: Detailed error description
-          description: Where appropriate, indicates detailed information about data received.
+          example: eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAB3NQQpCMQwE0Lt0baBJ0yZ159KtN0jTBgTBjYgg3t3__3KGN8w3rc_llc4JG6KUhrmoYjolc7_OvWfPKJ2hUzNgagE2hcC5hsYIUeOdH7gStVr6AtElwNUcrBNDFppYMjqxb9hvKzb9fNzfa4_HVkORomdoggsYp8HgPqAWF43VtsOcfn_stx4UsAAAAA.tDRVowYYcpQ03Vlt7D3MiovleiyRFQMv4qzXb7Lf_6CarphRrlWXan8-jE-YesNiAiT8tk0b-i8TKHGrcgT1VQ
+          minLength: 1
+          maxLength: 328
+        apiDataCenter:
+          description: API Data Center. The accepted values are US, EU or SG.
+          type: string
+          example: US
+          minLength: 1
+          maxLength: 2
+        documentVerificationUrl:
+          description: Web url to display in iframe.
+          type: string
+          example: https://mastercard.web.apac-1.jumio.link/web/v4/app?authorizationToken=eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAJXOQQ5CIQxF0b0wtkmBFqgzh07_Dkp_iWM10cS4d0FX4PTm5OW9gj9P93AMsaRaS845CVM4BDU776sLi5JGiM06UGGDLiUCRaLa0rDR6uJf7FH6mBwYtUyCBcSywBznbmMfGdPEj-H_cNt8TL35zfVql1V-12o0SZ3AGysQ1wKNFCGbsjlyUsTw_gANOZ5b4gAAAA.2bo6KfOvGIswNRNTXv6QtoGvHyNYp_j3LwHia9DtuWna3y_LLI1VgPZle46Q5cFHuuMJB7g7y4wHbtogBX2HfQ&locale=en-US
+    FacematchSourceVerificationResult:
+      required:
+      - verificationResult
+      - accountId
+      - workflowId
+      type: object
+      properties:
+        verificationResult:
+          type: string
+          example: DOCUMENT_VERIFIED
+          description: 'Verification Results, following: DOCUMENT_VERIFIED - Document matches with the IVP registered document, DOCUMENT_NOT_VERIFIED - Document does not match with any of the IVP registered document, DOCUMENT_INVALID - Document is invalid or not electronically captured'
+        workflowId:
+          description: The workflowId is the identifier for the scan on the identity verification provider used by ID Verification.
+          type: string
+          example: 5226539e-78e7-45ac-a924-072d1301c24c
+          minLength: 36
+          maxLength: 36
+        accountId:
+          description: The accountId is an identifier for the client's account on the identity verification provider used by ID Verification.
+          type: string
+          example: 14c01794-926a-426f-ad72-c45f8fbf78a4
+          minLength: 36
+          maxLength: 36
+    DocumentVerificationExtractedData:
+      required:
+      - status
+      - transactionId
+      type: object
+      properties:
+        documentData:
+          $ref: '#/components/schemas/DocumentVerificationExtractedDataDocumentData'
+        status:
+          description: The status of the Status API, possible values are SUCCESS / PENDING.
+          example: SUCCESS
+          type: string
+          minLength: 1
+          maxLength: 7
+        transactionId:
+          description: The transaction ID provided in the API response must be logged by the Relying Party. The Relying Party is required to provide the transaction ID when contacting the Mastercard customer support team.
+          example: 1ec14310-e85c-11ea-adc1-0242ac120002
+          type: string
+          minLength: 36
+          maxLength: 36
     SubmitClaimUserToken:
       type: object
       properties:
@@ -1287,57 +843,55 @@ components:
           type: string
           description: Payment card number
           example: '5534782345678238'
-  requestBodies:
-    TpDataShareRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/TpDataShare'
-          examples:
-            TPDataShareRequestExampleUnencrypted:
-              $ref: '#/components/examples/TPDataShareRequestExample'
-            TPDataShareRequestExampleEncrypted:
-              $ref: '#/components/examples/EncryptedPayloadWithPDSExample'
-      required: true
-    SelfieVerificationRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/SelfieVerificationRequest'
-    AccessTokenRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/RetrieveAccessToken'
-      required: true
-    UserDataClaim:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/SubmitClaimUserData'
-      description: User data for the submitted claim.
-      required: true
+    ErrorItems:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          required:
+          - Error
+          type: object
+          properties:
+            Error:
+              type: array
+              description: Error Details
+              items:
+                $ref: '#/components/schemas/ErrorItem'
+          example: example_value
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          example: Error source
+          description: Source of the error.
+        Description:
+          type: string
+          example: Generic error description
+          description: Short description of the ReasonCode field.
+        ReasonCode:
+          type: string
+          example: REASON_CODE
+          description: A unique constant identifying the error case encountered during API request processing.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          example: Detailed error description
+          description: Where appropriate, indicates detailed information about data received.
   responses:
-    UnauthorizedError:
-      description: Unauthorized request.
+    BadRequestError:
+      description: Something was wrong with the request.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
           examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedExample'
-    ForbiddenError:
-      description: Consent not given.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            ForbiddenExample:
-              $ref: '#/components/examples/ForbiddenExample'
-            ForbiddenExampleUnauthorizedScopedFields:
-              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
     TPDataShareSuccessResponse:
       description: Success.
       headers:
@@ -1349,15 +903,26 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/TPDataShareSuccessData'
-    BadRequestError:
-      description: Something was wrong with the request.
+    ForbiddenError:
+      description: Consent not given.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
           examples:
-            UserProfileDeletedErrorExample:
-              $ref: '#/components/examples/UserProfileDeletedErrorExample'
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    UnauthorizedError:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
     NotFoundError:
       description: The request didn't match an existing resource.
       content:
@@ -1367,56 +932,6 @@ components:
           examples:
             NotFoundExample:
               $ref: '#/components/examples/NotFoundExample'
-    AccessTokenSuccessResponse:
-      description: Success.
-      headers:
-        X-Transaction-ID:
-          $ref: '#/components/headers/X-Transaction-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AccessToken'
-          examples:
-            AccessTokensResponsePayload:
-              $ref: '#/components/examples/AccessTokensResponsePayload'
-            EncryptedPayloadExample:
-              $ref: '#/components/examples/EncryptedPayloadExample'
-    DataExtractionSuccessResponse:
-      description: Success.
-      headers:
-        X-Transaction-ID:
-          $ref: '#/components/headers/X-Transaction-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DocumentVerificationExtractedData'
-          examples:
-            DocumentDataDriverLicense:
-              $ref: '#/components/examples/DocumentDataExampleDriverLicense'
-            DocumentDataPassaport:
-              $ref: '#/components/examples/DocumentDataExamplePassport'
-            DocumentDataExampleIDCard:
-              $ref: '#/components/examples/DocumentDataExampleIDCard'
-    ForbiddenError_2:
-      description: Consent not given.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiError'
-          examples:
-            ForbiddenExample:
-              $ref: '#/components/examples/ForbiddenExample'
-            ForbiddenExampleUnauthorizedScopedFields:
-              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields_2'
-    FacematchResult:
-      description: Success
-      headers:
-        X-Transaction-ID:
-          $ref: '#/components/headers/X-Transaction-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/FacematchSourceVerificationResult'
     BadRequestError_2:
       description: Something was wrong with the request.
       content:
@@ -1448,6 +963,40 @@ components:
               $ref: '#/components/examples/BadRequestExampleMedicareUserConsent'
             BadRequestExampleDocumentMismatch:
               $ref: '#/components/examples/BadRequestExampleDocumentMismatch'
+    AccessTokenSuccessResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          $ref: '#/components/headers/X-Transaction-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccessToken'
+          examples:
+            AccessTokensResponsePayload:
+              $ref: '#/components/examples/AccessTokensResponsePayload'
+            EncryptedPayloadExample:
+              $ref: '#/components/examples/EncryptedPayloadExample'
+    FacematchResult:
+      description: Success
+      headers:
+        X-Transaction-ID:
+          $ref: '#/components/headers/X-Transaction-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FacematchSourceVerificationResult'
+    ForbiddenError_2:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields_2'
     NotFoundError_2:
       description: Request didn't match an existing resource.
       content:
@@ -1457,6 +1006,22 @@ components:
           examples:
             NotFoundExample:
               $ref: '#/components/examples/NotFoundExample_2'
+    DataExtractionSuccessResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          $ref: '#/components/headers/X-Transaction-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DocumentVerificationExtractedData'
+          examples:
+            DocumentDataDriverLicense:
+              $ref: '#/components/examples/DocumentDataExampleDriverLicense'
+            DocumentDataPassaport:
+              $ref: '#/components/examples/DocumentDataExamplePassport'
+            DocumentDataExampleIDCard:
+              $ref: '#/components/examples/DocumentDataExampleIDCard'
     UserDataToken:
       description: The user data token generated from the request.
       content:
@@ -1489,6 +1054,441 @@ components:
           examples:
             UnauthorizedExample:
               $ref: '#/components/examples/UnauthorizedExample_2'
+  examples:
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+    UserProfileDeletedErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_DELETED
+            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
+            Recoverable: false
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
+            Recoverable: false
+    EncryptedPayloadWithPDSExample:
+      value:
+        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyf
+        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    TPDataShareRequestExample:
+      value:
+        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        userConsent: ACCEPT
+        userProfileId: df52649e-4096-456a-bca0-751ee470009f
+        address:
+          addressLine1: 36271 GrandRiver Ave
+          addressLine2: Building no 2
+          addressZipCode: '48335'
+          addressCity: Farmington
+          addressSubdivision: MO
+          addressCountry: USA
+          value: 36271 GrandRiver Ave Building no 2 48335 Farmington MI USA
+          lastVerifiedDate: '2021-02-19T10:55:58.165Z'
+        email:
+          value: person@mastercard.com
+          lastVerifiedDate: '2021-02-19T10:55:58.165Z'
+        phone:
+          value: '11234567890'
+          lastVerifiedDate: '2021-02-19T10:55:58.165Z'
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided user profile ID does not exist.
+            Recoverable: false
+    ForbiddenExampleUnauthorizedScopedFields_2:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareIndividualReferenceNo:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'INDIVIDUAL_REFERENCE_NO'.
+            Recoverable: false
+            Details: null
+    BadRequestExampleDocumentMismatch:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: BAD_REQUEST
+            Description: The document uploaded by the User does not comply to the document type/country specified by the client in the originating access-token request.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareUserConsent:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: User consent not given.
+            Recoverable: false
+            Details: null
+    BadRequestExampleCountryCode:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value US4 for 'countryCode'.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareMedicareNumber:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'Medicare card number'.
+            Recoverable: false
+            Details: null
+    EncryptedPayloadExample:
+      value:
+        encryptedData: eyJraWQiOiIwMTQyNmRhY2JlMmRjYzA3NmQ1OWU1NDQ5N2NiNjBiMjdjZmQwMDE0ZjZmMGQyYTJiN2FmNjExNDg2NjYyMj...
+    DocumentDataExampleIDCard:
+      value:
+        status: SUCCESS
+        transactionId: 5f4b0b79-8f7a-4731-b828-5e9db6e39e5a
+        documentData:
+          lastName: SMITH
+          gender: M
+          fathersName: WILLIAM SMITH
+          documentType: ID_CARD
+          issuingDate: '2010-01-01'
+          documentNumber: C204050123
+          expiryDate: '2030-12-31T00:00:00.000Z'
+          issuingPlace: null
+          formattedAddress: null
+          cpf: 000.000.000-00
+          addressLine1: null
+          documentStatus: SUCCESS
+          addressLine2: null
+          addressCity: null
+          addressZipCode: null
+          addressCountry: null
+          placeOfBirth: null
+          dateOfBirth: '1980-01-01'
+          issuingState: null
+          firstName: JOHN
+          issuingAuthority: null
+          issuingCountry: BRA
+          mothersName: JANE SMITH
+          addressSubdivision: null
+          rgNumber: F204050123
+          selfie: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          documentImageFront: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          documentImageBack: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          facemap: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+    BadRequestExamplePhoneNumber:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value ASD for 'phoneNumber'.
+            Recoverable: false
+            Details: null
+    DocumentDataExamplePassport:
+      value:
+        status: PENDING
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+        documentData:
+          documentNumber: N1234567
+          documentStatus: PENDING
+          documentType: PASSPORT
+          dateOfBirth: '2020-09-09'
+          firstName: John
+          lastName: Smith
+          expiryDate: '2020-10-10'
+          gender: F
+          issuingCountry: USA
+          issuingDate: '2020-09-09'
+          issuingPlace: New York
+          issuingAuthority: United States
+          placeOfBirth: Boston
+          addressLine1: 123 Main St.
+          addressLine2: New York
+          addressZipCode: '10021'
+          addressCity: New York
+          addressCountry: Users Country
+          addressSubdivision: MO
+          issuingState: MO
+          formattedAddress: 220 BLVD O FALLON
+          selfie: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          documentImageFront: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          documentImageBack: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          facemap: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+    BadRequestExampleMedicareCountryCode:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'Country code'.
+            Recoverable: false
+            Details: null
+    BadRequestExampleIVPConnectionTimeout:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: IVP_CONNECTION_TIMEOUT
+            Description: Connection timeout when trying to connect with the Identity Verification Provider. Please look at 'details' for additional information.
+            Recoverable: false
+            Details: Received Connection TimeOut Exception
+    BadRequestExampleIVPSystemError:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: IVP_SYSTEM_ERROR
+            Description: Received system error from the Identity Verification Provider. Please look at 'details' for additional information.
+            Recoverable: false
+            Details: System Error Received
+    DocumentDataExampleDriverLicense:
+      value:
+        status: SUCCESS
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+        documentData:
+          documentNumber: AB001234567
+          documentStatus: SUCCESS
+          documentType: DRIVER_LICENSE
+          dateOfBirth: '2020-09-09'
+          firstName: MIRIAM
+          lastName: Smith
+          expiryDate: '2020-10-10'
+          gender: F
+          cardNumber: '1234567890'
+          issuingCountry: AUS
+          issuingDate: '2020-09-09'
+          issuingPlace: Sydney
+          issuingAuthority: Australia
+          placeOfBirth: Sydney
+          addressLine1: 10 Boronia Street
+          addressLine2: 09 Boronia Street
+          addressZipCode: '10021'
+          addressCity: SYDNEY
+          addressCountry: Users Country
+          addressSubdivision: NSW
+          issuingState: NSW
+          formattedAddress: 22 Melville Street, Hobart 7000
+          selfie: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          documentImageFront: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          documentImageBack: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+          facemap: /mJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanq.........................
+    BadRequestExampleMedicareName:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'nameLine' field OR value exceeds allowed max characters.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareExpireDate:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'expiry date'.
+            Recoverable: false
+            Details: null
+    AccessTokensResponsePayload:
+      value:
+        transactionId: f64d44f8-3b0c-449c-8b79-9e2bbe0b2f3b
+        sdkToken: eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAJXNQWsCMRAF4P-Scwcym0km8eahVKGwthRtT5JkZlFBLKKuWPrf3fUfeH18770_o9fpyUwMBscWPZOLMZkXk2udy5AXSkoePWCoCKTeQkIXgS1JQ2IpqIz8gVNmYVECT64AZRcgDrPQZBz3Uy4BB9x3-gyvn9oNelFu6_d9uz0f3w69NnPys1nbL1_bjy9cXX7P37tNt1vVH8oq0Wocm4-b3ChJSAyWWIFcEEgqBYpnRsZcXULzfwdxCwYuCgEAAA.KaJPW0KH5yL5xFBcyxGIQnUsW895RPc1ohRXyx_JaIMrAlpIRga7WH6SyIylCBKHxSYd4gW9f-O5qabYPzQE7g
+        accountId: 14c01794-926a-426f-ad72-c45f8fbf78a4
+        workflowId: 5226539e-78e7-45ac-a924-072d1301c24c
+        apiDataCenter: US
+        documentVerificationUrl: https://mastercard.web.apac-1.jumio.link/web/v4/app?authorizationToken=eyJhbGciOiJIUzUxMiIsInppcCI6IkdaSVAifQ.H4sIAAAAAAAAAJXOQQ5CIQxF0b0wtkmBFqgzh07_Dkp_iWM10cS4d0FX4PTm5OW9gj9P93AMsaRaS845CVM4BDU776sLi5JGiM06UGGDLiUCRaLa0rDR6uJf7FH6mBwYtUyCBcSywBznbmMfGdPEj-H_cNt8TL35zfVql1V-12o0SZ3AGysQ1wKNFCGbsjlyUsTw_gANOZ5b4gAAAA.2bo6KfOvGIswNRNTXv6QtoGvHyNYp_j3LwHia9DtuWna3y_LLI1VgPZle46Q5cFHuuMJB7g7y4wHbtogBX2HfQ&locale=en-US
+    NotFoundExample_2:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided userProfileId does not exist.
+            Recoverable: false
+    BadRequestExampleUserConsent:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Unexpected value 'Invalid' for enumerate field.
+            Recoverable: false
+            Details: null
+    UserBadRequestExample:
+      value:
+        Errors:
+          Error:
+          - Source: Loyalty Service - Insurance
+            ReasonCode: INVALID_FIELD
+            Description: Invalid Field(s).
+            Recoverable: false
+            Details: Invalid field - 'pan' is not a string.
+    UnauthorizedExample_2:
+      value:
+        Errors:
+          Error:
+          - Source: Gateway
+            ReasonCode: DECLINED
+            Description: Unauthorized - Access Not Granted.
+            Recoverable: false
+            Details: null
+  parameters:
+    XUserIdentityParameter:
+      in: header
+      name: X-User-Identity
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      description: 'JWT token for session validation. Returned as response header in previous API calls with key X-User-Identity.
+
+        '
+      schema:
+        type: string
+    XEncryptedPayload:
+      in: header
+      name: X-Encrypted-Payload
+      type: boolean
+      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
+
+        '
+      example: true
+      schema: null
+    CountryParameter:
+      name: user_selected_country
+      in: query
+      description: The ISO 3166-1 alpha3 code which corresponds to the country from where the request to ID is originating from.
+      example: USA
+      schema:
+        type: string
+        pattern: ^[A-Z]{3}
+    ScanIdParameter:
+      name: scan_id
+      in: path
+      description: UUID returned to the application/webpage on completion of the users interactions with the ID-V SDK.
+      example: 5226539e-78e7-45ac-a924-072d1301c24c
+      required: true
+      schema:
+        maxLength: 36
+        minLength: 36
+        type: string
+        pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+    RetrieveFacemapParameter:
+      name: retrieve_facemap
+      in: query
+      description: Flag indicating if the facemap needs to be retrieved.
+      example: 'true'
+      required: true
+      schema:
+        type: string
+        pattern: ^(true|false)$
+    RetrieveDocumentImagesParameter:
+      name: retrieve_document_images
+      in: query
+      description: Flag indicating if the document images needs to be retrieved.
+      example: 'true'
+      required: true
+      schema:
+        type: string
+        pattern: ^(true|false)$
+    DocumentTypeParameter:
+      name: document_type
+      in: query
+      description: The type of document scanned (DRIVING_LICENSE, PASSPORT, ID_CARD).
+      example: DRIVING_LICENSE
+      schema:
+        type: string
+        pattern: ^(DRIVING_LICENSE|PASSPORT|ID_CARD)$
+    EncryptedPayloadParameter:
+      name: X-Encrypted-Payload
+      in: header
+      description: Whether the request payload is encrypted with the Encyption Key generated from the Developer Zone Portal.
+      example: true
+      required: false
+      schema:
+        type: boolean
+    RetrieveSelfieParameter:
+      name: retrieve_selfie
+      in: query
+      description: Flag indicating if the selfie needs to be retrieved.
+      example: 'true'
+      required: true
+      schema:
+        type: string
+        pattern: ^(true|false)$
+    UserConsentParameter:
+      name: user_consent
+      in: query
+      description: The value which best reflects the input of the User with regard to Consent to use their data (ACCEPT, DECLINE, REVOKE, EXPIRE).
+      example: ACCEPT
+      required: true
+      schema:
+        type: string
+        pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+  requestBodies:
+    TpDataShareRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TpDataShare'
+          examples:
+            TPDataShareRequestExampleUnencrypted:
+              $ref: '#/components/examples/TPDataShareRequestExample'
+            TPDataShareRequestExampleEncrypted:
+              $ref: '#/components/examples/EncryptedPayloadWithPDSExample'
+      required: true
+    AccessTokenRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RetrieveAccessToken'
+      required: true
+    SelfieVerificationRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SelfieVerificationRequest'
+    UserDataClaim:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubmitClaimUserData'
+      description: User data for the submitted claim.
+      required: true
   headers:
     X-Transaction-ID:
       schema:

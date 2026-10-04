@@ -68,6 +68,47 @@ components:
           description: history detail of order item
           items:
             $ref: '#/components/schemas/History'
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    OrderStatusArray:
+      type: array
+      description: order status array list
+      items:
+        $ref: '#/components/schemas/OrderStatus'
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    History:
+      type: object
+      properties:
+        orderItemNumber:
+          type: string
+          description: order_item_number
+          example: order-item-1
+        eventType:
+          type: string
+          description: event_type
+          example: note
+        eventDate:
+          type: string
+          description: event_date
+          example: '2023-10-03T21:05:10Z'
+        note:
+          type: string
+          description: note
+          example: 'GRS order item created for partner system order number: SL_OCT-03-2023-16-431 Status is pending.'
     OrderStatus:
       type: object
       properties:
@@ -103,23 +144,6 @@ components:
           type: string
           description: error message
           example: address1 is required
-    ErrorsWrapper:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    Errors:
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          type: array
-          description: Error details
-          items:
-            $ref: '#/components/schemas/ErrorItem'
     ErrorItem:
       type: object
       properties:
@@ -144,58 +168,6 @@ components:
           description: Where appropriate, indicates detailed information about the data received.
           example: Invalid Details
       description: Error Details
-    History:
-      type: object
-      properties:
-        orderItemNumber:
-          type: string
-          description: order_item_number
-          example: order-item-1
-        eventType:
-          type: string
-          description: event_type
-          example: note
-        eventDate:
-          type: string
-          description: event_date
-          example: '2023-10-03T21:05:10Z'
-        note:
-          type: string
-          description: note
-          example: 'GRS order item created for partner system order number: SL_OCT-03-2023-16-431 Status is pending.'
-    OrderStatusArray:
-      type: array
-      description: order status array list
-      items:
-        $ref: '#/components/schemas/OrderStatus'
-  responses:
-    BadRequestOrderErrorResponse:
-      description: Something was wrong with the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorsWrapper'
-          examples:
-            BadRequestExample:
-              $ref: '#/components/examples/BadOrderRequestExample'
-    SuccessResponse:
-      description: Status updated successfully
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/OrderStatusArray'
-          examples:
-            SuccessRequestExample:
-              $ref: '#/components/examples/OrderStatusExample'
-    UnauthorizedOrderErrorResponse:
-      description: User does not have access to the resource
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorsWrapper'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedOrderExample'
   requestBodies:
     OrderStatusRequest:
       required: true
@@ -227,6 +199,34 @@ components:
         status: FAILED
         errorCode: 1001
         description: '[Combination of ExternalOrderId: (656afd7-2396-54345-34545) and OrderId: (afd72396-b9c0-11ed-afa1-0242ac120002) invalid.]'
+  responses:
+    BadRequestOrderErrorResponse:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadOrderRequestExample'
+    SuccessResponse:
+      description: Status updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrderStatusArray'
+          examples:
+            SuccessRequestExample:
+              $ref: '#/components/examples/OrderStatusExample'
+    UnauthorizedOrderErrorResponse:
+      description: User does not have access to the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorsWrapper'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedOrderExample'
   parameters:
     VendorId:
       name: vendor_id

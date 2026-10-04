@@ -60,7 +60,395 @@ paths:
     - url: https://sandbox.api.mastercard.com.au/idservice
       description: Sandbox server (testing AUS environment).
 components:
+  responses:
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    UnauthorizedError:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    OtpVerificationsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
+            type: string
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OtpVerificationResult'
+          examples:
+            OtpVerificationSuccessfulExample:
+              $ref: '#/components/examples/OtpVerificationSuccessfulExample'
+            IncorrectOtpCodeProvidedExample:
+              $ref: '#/components/examples/IncorrectOtpCodeProvidedExample'
+            OtpDoesNotExistExample:
+              $ref: '#/components/examples/OtpDoesNotExistExample'
+    SmsOtpVerificationSuccessResponses:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          $ref: '#/components/headers/X-Transaction-ID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OtpVerificationResult_2'
+          examples:
+            OtpVerificationSuccessfulExample:
+              $ref: '#/components/examples/OtpVerificationSuccessfulExample_2'
+            IncorrectOtpCodeProvidedExample:
+              $ref: '#/components/examples/IncorrectOtpCodeProvidedExample_2'
+            OtpDoesNotExistExample:
+              $ref: '#/components/examples/OtpDoesNotExistExample_2'
+            EncryptedPayloadExample:
+              $ref: '#/components/examples/EncryptedPayloadExample'
+    BadRequestError_2:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            BadRequestExampleUserConsent:
+              $ref: '#/components/examples/BadRequestExampleUserConsent'
+            BadRequestExampleCountryCode:
+              $ref: '#/components/examples/BadRequestExampleCountryCode'
+            BadRequestExamplePhoneNumber:
+              $ref: '#/components/examples/BadRequestExamplePhoneNumber'
+            BadRequestExampleIVPConnectionTimeout:
+              $ref: '#/components/examples/BadRequestExampleIVPConnectionTimeout'
+            BadRequestExampleIVPSystemError:
+              $ref: '#/components/examples/BadRequestExampleIVPSystemError'
+            BadRequestExampleMedicareExpireDate:
+              $ref: '#/components/examples/BadRequestExampleMedicareExpireDate'
+            BadRequestExampleMedicareName:
+              $ref: '#/components/examples/BadRequestExampleMedicareName'
+            BadRequestExampleMedicareIndividualReferenceNo:
+              $ref: '#/components/examples/BadRequestExampleMedicareIndividualReferenceNo'
+            BadRequestExampleMedicareMedicareNumber:
+              $ref: '#/components/examples/BadRequestExampleMedicareMedicareNumber'
+            BadRequestExampleMedicareCountryCode:
+              $ref: '#/components/examples/BadRequestExampleMedicareCountryCode'
+            BadRequestExampleMedicareUserConsent:
+              $ref: '#/components/examples/BadRequestExampleMedicareUserConsent'
+            BadRequestExampleDocumentMismatch:
+              $ref: '#/components/examples/BadRequestExampleDocumentMismatch'
+    ForbiddenError_2:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields_2'
+    UnauthorizedError_2:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+  examples:
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+    UserProfileDeletedErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_DELETED
+            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
+            Recoverable: false
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    IncorrectOtpCodeProvidedExample:
+      value:
+        responseCode: FAILURE
+        responseMessage: Incorrect code provided.
+        attemptsRemaining: '2'
+        transactionId: 9060c8ca-c5ec-11ea-87d0-0242ac130003
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
+            Recoverable: false
+    EncryptedPayloadWithPDSExample:
+      value:
+        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyf
+        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    OtpDoesNotExistExample:
+      value:
+        responseCode: FAILURE
+        responseMessage: The OTP request does not exist or has timed out.
+        transactionId: 9060c8ca-c5ec-11ea-87d0-0242ac130003
+    OtpVerificationSuccessfulExample:
+      value:
+        responseCode: SUCCESS
+        responseMessage: Verification Successful.
+        transactionId: 9060c8ca-c5ec-11ea-87d0-0242ac130003
+        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    OtpVerificationsRequestExample:
+      value:
+        code: '123456'
+        otpId: 63d04933-02b6-4ea4-adf9-68696e675a01
+        countryCode: US
+        userConsent: ACCEPT
+        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        sdkAuditEvents:
+        - dateTime: '2020-01-28T13:16:01.714-05:00'
+          softwareVersion: 1.0.0
+          userProfileId: df52649e-4096-456a-bca0-751ee470009f
+          sessionId: 123ae1aa-6744-433e-879d-7da48d631234
+          transactionGroupId: 28eae1aa-6744-433e-879d-7da48d63e89a
+          logRequestFlow: CoreSDK-TP
+          logEvent: ID Enrollment
+          logEventType: User Profile Creation
+          osVersion: Android 5.0
+          deviceMake: Samsung S10
+          type: audit
+          audit:
+            privacyPolicy: 1.0.0
+            userBiometricConsent: 'TRUE'
+            event: Document Scan
+            eventType: Enrollment
+            result: 'TRUE'
+            eventGeneratedSource: CoreSDK
+            owner: TP
+        tpAuditMetadata:
+          sessionId: be3ad617-04ad-43e1-a438-79425b6511b6
+          transactionGroupId: be3ad617-04ad-43e1-a438-79425b6511b6
+        arid: a15fa6de-b199-11eb-8529-0242ac130003
+        sdkVersion: 2.3.0
+    ForbiddenExampleUnauthorizedScopedFields_2:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareIndividualReferenceNo:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'INDIVIDUAL_REFERENCE_NO'.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareUserConsent:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: User consent not given.
+            Recoverable: false
+            Details: null
+    BadRequestExampleDocumentMismatch:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: BAD_REQUEST
+            Description: The document uploaded by the User does not comply to the document type/country specified by the client in the originating access-token request.
+            Recoverable: false
+            Details: null
+    BadRequestExampleCountryCode:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value US4 for 'countryCode'.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareMedicareNumber:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'Medicare card number'.
+            Recoverable: false
+            Details: null
+    IncorrectOtpCodeProvidedExample_2:
+      value:
+        responseCode: FAILURE
+        responseMessage: Incorrect code provided
+        attemptsRemaining: 2
+        transactionId: 9060c8ca-c5ec-11ea-87d0-0242ac130003
+    EncryptedPayloadExample:
+      value:
+        encryptedData: eyJraWQiOiIwMTQyNmRhY2JlMmRjYzA3NmQ1OWU1NDQ5N2NiNjBiMjdjZmQwMDE0ZjZmMGQyYTJiN2FmNjExNDg2NjYyMj...
+    BadRequestExamplePhoneNumber:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value ASD for 'phoneNumber'.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareCountryCode:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'Country code'.
+            Recoverable: false
+            Details: null
+    BadRequestExampleIVPConnectionTimeout:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: IVP_CONNECTION_TIMEOUT
+            Description: Connection timeout when trying to connect with the Identity Verification Provider. Please look at 'details' for additional information.
+            Recoverable: false
+            Details: Received Connection TimeOut Exception
+    OtpDoesNotExistExample_2:
+      value:
+        responseCode: FAILURE
+        responseMessage: The otp request does not exist or has timed out
+        transactionId: 9060c8ca-c5ec-11ea-87d0-0242ac130003
+    BadRequestExampleIVPSystemError:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: IVP_SYSTEM_ERROR
+            Description: Received system error from the Identity Verification Provider. Please look at 'details' for additional information.
+            Recoverable: false
+            Details: System Error Received
+    BadRequestExampleMedicareName:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'nameLine' field OR value exceeds allowed max characters.
+            Recoverable: false
+            Details: null
+    BadRequestExampleMedicareExpireDate:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Invalid value for 'expiry date'.
+            Recoverable: false
+            Details: null
+    OtpVerificationSuccessfulExample_2:
+      value:
+        responseCode: SUCCESS
+        responseMessage: Verification Successful
+        transactionId: 9060c8ca-c5ec-11ea-87d0-0242ac130003
+    OtpVerificationExample:
+      value:
+        code: '123456'
+        otpId: 63d04933-02b6-4ea4-adf9-68696e675a01
+        countryCode: BR
+        userConsent: ACCEPT
+    NotFoundExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_ID_NOT_FOUND
+            Description: The provided userProfileId does not exist.
+            Recoverable: false
+    BadRequestExampleUserConsent:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: VALIDATION_ERROR
+            Description: Unexpected value 'Invalid' for enumerate field.
+            Recoverable: false
+            Details: null
+  requestBodies:
+    SmsOtpVerificationsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OtpVerification'
+          examples:
+            SmsOtpVerificationsRequestUnencrypted:
+              $ref: '#/components/examples/OtpVerificationsRequestExample'
+            SmsOtpVerificationsRequestEncrypted:
+              $ref: '#/components/examples/EncryptedPayloadWithPDSExample'
+      required: true
+    SmsOtpVerificationRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OtpVerification_2'
+          examples:
+            OtpVerificationExample:
+              $ref: '#/components/examples/OtpVerificationExample'
+            EncryptedPayloadExample:
+              $ref: '#/components/examples/EncryptedPayloadExample'
+      required: true
   schemas:
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
     ARID:
       type: string
       description: A unique identifier for any activity being executed arising out of a Claim Share request. This value is passed as a parameter in the URL redirecting a User to the TP Flow during a Claim Share.
@@ -74,6 +462,27 @@ components:
       description: The country code of the country where the transaction originates from.
       pattern: ^[a-zA-Z]{2}$
       example: US
+    TpAuditMetadata:
+      required:
+      - sessionId
+      - transactionGroupId
+      type: object
+      description: Object containing metadata related to the request.
+      properties:
+        sessionId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
+        transactionGroupId:
+          type: string
+          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: be3ad617-04ad-43e1-a438-79425b6511b6
     OtpVerificationResult:
       required:
       - pds
@@ -109,6 +518,46 @@ components:
           example: 28eae1aa-6744-433e-879d-7da48d63e89a
         pds:
           $ref: '#/components/schemas/PDS'
+    OtpVerification:
+      required:
+      - code
+      - countryCode
+      - userConsent
+      - otpId
+      - pds
+      type: object
+      properties:
+        code:
+          type: string
+          description: The 6-digit code sent to the user.
+          pattern: ^[0-9]{6}$
+          minLength: 6
+          maxLength: 6
+          example: '123456'
+        otpId:
+          type: string
+          description: The Otp ID in the response body to create an OTP request.
+          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
+          minLength: 36
+          maxLength: 36
+          example: 63d04933-02b6-4ea4-adf9-68696e675a01
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        pds:
+          $ref: '#/components/schemas/PDS'
+        sdkAuditEvents:
+          type: array
+          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
+          items:
+            $ref: '#/components/schemas/AuditEventsItem'
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        arid:
+          $ref: '#/components/schemas/ARID'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
     ErrorResponse:
       required:
       - Errors
@@ -153,33 +602,24 @@ components:
                     description: TP will use this URI to redirect to RP.
                     pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
                     example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
-    TpAuditMetadata:
-      required:
-      - sessionId
-      - transactionGroupId
-      type: object
-      description: Object containing metadata related to the request.
-      properties:
-        sessionId:
-          type: string
-          description: UUID which uniquely identifies a set of transactions being executed within the same authentication session.
-          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-          minLength: 36
-          maxLength: 36
-          example: be3ad617-04ad-43e1-a438-79425b6511b6
-        transactionGroupId:
-          type: string
-          description: UUID which uniquely identifies a set of transactions being executed within a single use-case.
-          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-          minLength: 36
-          maxLength: 36
-          example: be3ad617-04ad-43e1-a438-79425b6511b6
     PDS:
       type: string
       description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
       pattern: ^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$
       minLength: 1
       example: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+    UserConsent:
+      enum:
+      - ACCEPT
+      - DECLINE
+      - REVOKE
+      - EXPIRE
+      type: string
+      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
+      pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
+      minLength: 6
+      maxLength: 7
+      example: ACCEPT
     AuditEventsItem:
       type: object
       properties:
@@ -312,65 +752,12 @@ components:
               type: object
               description: Response Details.
               example: Response Data
-    OtpVerification:
-      required:
-      - code
-      - countryCode
-      - userConsent
-      - otpId
-      - pds
-      type: object
-      properties:
-        code:
-          type: string
-          description: The 6-digit code sent to the user.
-          pattern: ^[0-9]{6}$
-          minLength: 6
-          maxLength: 6
-          example: '123456'
-        otpId:
-          type: string
-          description: The Otp ID in the response body to create an OTP request.
-          pattern: ^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$
-          minLength: 36
-          maxLength: 36
-          example: 63d04933-02b6-4ea4-adf9-68696e675a01
-        countryCode:
-          $ref: '#/components/schemas/CountryCode'
-        userConsent:
-          $ref: '#/components/schemas/UserConsent'
-        pds:
-          $ref: '#/components/schemas/PDS'
-        sdkAuditEvents:
-          type: array
-          description: Array of objects containing a record of any auditable steps occurring between the App and the SDK. A call must be made by the TP App from the MIDS Audit SDK prior to all API calls, with any audit events included in the subsequent call.
-          items:
-            $ref: '#/components/schemas/AuditEventsItem'
-        tpAuditMetadata:
-          $ref: '#/components/schemas/TpAuditMetadata'
-        arid:
-          $ref: '#/components/schemas/ARID'
-        sdkVersion:
-          $ref: '#/components/schemas/SdkVersion'
-    UserConsent:
-      enum:
-      - ACCEPT
-      - DECLINE
-      - REVOKE
-      - EXPIRE
-      type: string
-      description: Confirmation provided by the TP that the user has consented that the ID-Network can have access to their identity for the purposes of the API call. Should be ACCEPT, a forbidden exception will be thrown if it is any other value.
-      pattern: ^(ACCEPT|DECLINE|REVOKE|EXPIRE)$
-      minLength: 6
-      maxLength: 7
-      example: ACCEPT
-    SdkVersion:
-      type: string
-      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
-      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
-      minLength: 5
-      maxLength: 255
-      example: 2.3.0
+    ErrorList:
+      description: Error Details.
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/Error'
     Error:
       type: object
       properties:
@@ -394,12 +781,6 @@ components:
           type: string
           description: Contains information about the error.
           example: IOException Occured
-    ErrorList:
-      description: Error Details.
-      type: array
-      minItems: 1
-      items:
-        $ref: '#/components/schemas/Error'
     OtpVerificationResult_2:
       required:
       - responseCode
@@ -430,6 +811,23 @@ components:
           type: integer
           format: int32
           example: 2
+    Errors:
+      description: List of Errors.
+      example:
+        $ref: '#/components/examples/NotFoundExample'
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          $ref: '#/components/schemas/ErrorList'
+    ApiError:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
     OtpVerification_2:
       required:
       - code
@@ -467,154 +865,7 @@ components:
           - EXPIRE
           type: string
           example: ACCEPT
-    ApiError:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    Errors:
-      description: List of Errors.
-      example:
-        $ref: '#/components/examples/NotFoundExample'
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          $ref: '#/components/schemas/ErrorList'
-  responses:
-    OtpVerificationsResponse:
-      description: Success.
-      headers:
-        X-Transaction-ID:
-          schema:
-            type: string
-          description: A random 128-bit UUID represents the transaction.
-        X-User-Identity:
-          schema:
-            type: string
-          description: JWT token for session validation in subsequent API calls.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/OtpVerificationResult'
-          examples:
-            OtpVerificationSuccessfulExample:
-              $ref: '#/components/examples/OtpVerificationSuccessfulExample'
-            IncorrectOtpCodeProvidedExample:
-              $ref: '#/components/examples/IncorrectOtpCodeProvidedExample'
-            OtpDoesNotExistExample:
-              $ref: '#/components/examples/OtpDoesNotExistExample'
-    UnauthorizedError:
-      description: Unauthorized request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedExample'
-    ForbiddenError:
-      description: Consent not given.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            ForbiddenExample:
-              $ref: '#/components/examples/ForbiddenExample'
-            ForbiddenExampleUnauthorizedScopedFields:
-              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
-    BadRequestError:
-      description: Something was wrong with the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            UserProfileDeletedErrorExample:
-              $ref: '#/components/examples/UserProfileDeletedErrorExample'
-    UnauthorizedError_2:
-      description: Unauthorized request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiError'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedExample'
-    ForbiddenError_2:
-      description: Consent not given.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiError'
-          examples:
-            ForbiddenExample:
-              $ref: '#/components/examples/ForbiddenExample'
-            ForbiddenExampleUnauthorizedScopedFields:
-              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields_2'
-    SmsOtpVerificationSuccessResponses:
-      description: Success.
-      headers:
-        X-Transaction-ID:
-          $ref: '#/components/headers/X-Transaction-ID'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/OtpVerificationResult_2'
-          examples:
-            OtpVerificationSuccessfulExample:
-              $ref: '#/components/examples/OtpVerificationSuccessfulExample_2'
-            IncorrectOtpCodeProvidedExample:
-              $ref: '#/components/examples/IncorrectOtpCodeProvidedExample_2'
-            OtpDoesNotExistExample:
-              $ref: '#/components/examples/OtpDoesNotExistExample_2'
-            EncryptedPayloadExample:
-              $ref: '#/components/examples/EncryptedPayloadExample'
-    BadRequestError_2:
-      description: Something was wrong with the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiError'
-          examples:
-            BadRequestExampleUserConsent:
-              $ref: '#/components/examples/BadRequestExampleUserConsent'
-            BadRequestExampleCountryCode:
-              $ref: '#/components/examples/BadRequestExampleCountryCode'
-            BadRequestExamplePhoneNumber:
-              $ref: '#/components/examples/BadRequestExamplePhoneNumber'
-            BadRequestExampleIVPConnectionTimeout:
-              $ref: '#/components/examples/BadRequestExampleIVPConnectionTimeout'
-            BadRequestExampleIVPSystemError:
-              $ref: '#/components/examples/BadRequestExampleIVPSystemError'
-            BadRequestExampleMedicareExpireDate:
-              $ref: '#/components/examples/BadRequestExampleMedicareExpireDate'
-            BadRequestExampleMedicareName:
-              $ref: '#/components/examples/BadRequestExampleMedicareName'
-            BadRequestExampleMedicareIndividualReferenceNo:
-              $ref: '#/components/examples/BadRequestExampleMedicareIndividualReferenceNo'
-            BadRequestExampleMedicareMedicareNumber:
-              $ref: '#/components/examples/BadRequestExampleMedicareMedicareNumber'
-            BadRequestExampleMedicareCountryCode:
-              $ref: '#/components/examples/BadRequestExampleMedicareCountryCode'
-            BadRequestExampleMedicareUserConsent:
-              $ref: '#/components/examples/BadRequestExampleMedicareUserConsent'
-            BadRequestExampleDocumentMismatch:
-              $ref: '#/components/examples/BadRequestExampleDocumentMismatch'
   parameters:
-    XEncryptedPayload:
-      in: header
-      name: X-Encrypted-Payload
-      type: boolean
-      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
-
-        '
-      example: true
-      schema: null
     XUserIdentityParameter:
       in: header
       name: X-User-Identity
@@ -624,6 +875,15 @@ components:
         '
       schema:
         type: string
+    XEncryptedPayload:
+      in: header
+      name: X-Encrypted-Payload
+      type: boolean
+      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
+
+        '
+      example: true
+      schema: null
     EncryptedPayloadParameter:
       name: X-Encrypted-Payload
       in: header
@@ -632,266 +892,6 @@ components:
       required: false
       schema:
         type: boolean
-  examples:
-    EncryptedPayloadWithPDSExample:
-      value:
-        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyf
-        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-    OtpVerificationsRequestExample:
-      value:
-        code: '123456'
-        otpId: 63d04933-02b6-4ea4-adf9-68696e675a01
-        countryCode: US
-        userConsent: ACCEPT
-        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-        sdkAuditEvents:
-        - dateTime: '2020-01-28T13:16:01.714-05:00'
-          softwareVersion: 1.0.0
-          userProfileId: df52649e-4096-456a-bca0-751ee470009f
-          sessionId: 123ae1aa-6744-433e-879d-7da48d631234
-          transactionGroupId: 28eae1aa-6744-433e-879d-7da48d63e89a
-          logRequestFlow: CoreSDK-TP
-          logEvent: ID Enrollment
-          logEventType: User Profile Creation
-          osVersion: Android 5.0
-          deviceMake: Samsung S10
-          type: audit
-          audit:
-            privacyPolicy: 1.0.0
-            userBiometricConsent: 'TRUE'
-            event: Document Scan
-            eventType: Enrollment
-            result: 'TRUE'
-            eventGeneratedSource: CoreSDK
-            owner: TP
-        tpAuditMetadata:
-          sessionId: be3ad617-04ad-43e1-a438-79425b6511b6
-          transactionGroupId: be3ad617-04ad-43e1-a438-79425b6511b6
-        arid: a15fa6de-b199-11eb-8529-0242ac130003
-        sdkVersion: 2.3.0
-    ForbiddenExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: CONSENT_NOT_GIVEN
-            Description: User Consent Not Given.
-            Recoverable: false
-    OtpDoesNotExistExample:
-      value:
-        responseCode: FAILURE
-        responseMessage: The OTP request does not exist or has timed out.
-        transactionId: 9060c8ca-c5ec-11ea-87d0-0242ac130003
-    UnauthorizedExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: UNAUTHORIZED_REQUEST
-            Description: Unauthorized request.
-            Recoverable: false
-    ForbiddenExampleUnauthorizedScopedFields:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
-            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
-            Recoverable: false
-    IncorrectOtpCodeProvidedExample:
-      value:
-        responseCode: FAILURE
-        responseMessage: Incorrect code provided.
-        attemptsRemaining: '2'
-        transactionId: 9060c8ca-c5ec-11ea-87d0-0242ac130003
-    OtpVerificationSuccessfulExample:
-      value:
-        responseCode: SUCCESS
-        responseMessage: Verification Successful.
-        transactionId: 9060c8ca-c5ec-11ea-87d0-0242ac130003
-        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-    UserProfileDeletedErrorExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: USER_PROFILE_DELETED
-            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
-            Recoverable: false
-            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
-    EncryptedPayloadExample:
-      value:
-        encryptedData: eyJraWQiOiIwMTQyNmRhY2JlMmRjYzA3NmQ1OWU1NDQ5N2NiNjBiMjdjZmQwMDE0ZjZmMGQyYTJiN2FmNjExNDg2NjYyMj...
-    BadRequestExampleMedicareName:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value for 'nameLine' field OR value exceeds allowed max characters.
-            Recoverable: false
-            Details: null
-    NotFoundExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: USER_PROFILE_ID_NOT_FOUND
-            Description: The provided userProfileId does not exist.
-            Recoverable: false
-    BadRequestExampleDocumentMismatch:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: BAD_REQUEST
-            Description: The document uploaded by the User does not comply to the document type/country specified by the client in the originating access-token request.
-            Recoverable: false
-            Details: null
-    BadRequestExampleIVPSystemError:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: IVP_SYSTEM_ERROR
-            Description: Received system error from the Identity Verification Provider. Please look at 'details' for additional information.
-            Recoverable: false
-            Details: System Error Received
-    ForbiddenExampleUnauthorizedScopedFields_2:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
-            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
-            Recoverable: false
-            Details: null
-    OtpDoesNotExistExample_2:
-      value:
-        responseCode: FAILURE
-        responseMessage: The otp request does not exist or has timed out
-        transactionId: 9060c8ca-c5ec-11ea-87d0-0242ac130003
-    BadRequestExampleMedicareMedicareNumber:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value for 'Medicare card number'.
-            Recoverable: false
-            Details: null
-    BadRequestExampleMedicareUserConsent:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: User consent not given.
-            Recoverable: false
-            Details: null
-    BadRequestExampleUserConsent:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Unexpected value 'Invalid' for enumerate field.
-            Recoverable: false
-            Details: null
-    IncorrectOtpCodeProvidedExample_2:
-      value:
-        responseCode: FAILURE
-        responseMessage: Incorrect code provided
-        attemptsRemaining: 2
-        transactionId: 9060c8ca-c5ec-11ea-87d0-0242ac130003
-    BadRequestExampleIVPConnectionTimeout:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: IVP_CONNECTION_TIMEOUT
-            Description: Connection timeout when trying to connect with the Identity Verification Provider. Please look at 'details' for additional information.
-            Recoverable: false
-            Details: Received Connection TimeOut Exception
-    BadRequestExampleCountryCode:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value US4 for 'countryCode'.
-            Recoverable: false
-            Details: null
-    OtpVerificationSuccessfulExample_2:
-      value:
-        responseCode: SUCCESS
-        responseMessage: Verification Successful
-        transactionId: 9060c8ca-c5ec-11ea-87d0-0242ac130003
-    OtpVerificationExample:
-      value:
-        code: '123456'
-        otpId: 63d04933-02b6-4ea4-adf9-68696e675a01
-        countryCode: BR
-        userConsent: ACCEPT
-    BadRequestExamplePhoneNumber:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value ASD for 'phoneNumber'.
-            Recoverable: false
-            Details: null
-    BadRequestExampleMedicareIndividualReferenceNo:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value for 'INDIVIDUAL_REFERENCE_NO'.
-            Recoverable: false
-            Details: null
-    BadRequestExampleMedicareExpireDate:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value for 'expiry date'.
-            Recoverable: false
-            Details: null
-    BadRequestExampleMedicareCountryCode:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: VALIDATION_ERROR
-            Description: Invalid value for 'Country code'.
-            Recoverable: false
-            Details: null
-  requestBodies:
-    SmsOtpVerificationsRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/OtpVerification'
-          examples:
-            SmsOtpVerificationsRequestUnencrypted:
-              $ref: '#/components/examples/OtpVerificationsRequestExample'
-            SmsOtpVerificationsRequestEncrypted:
-              $ref: '#/components/examples/EncryptedPayloadWithPDSExample'
-      required: true
-    SmsOtpVerificationRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/OtpVerification_2'
-          examples:
-            OtpVerificationExample:
-              $ref: '#/components/examples/OtpVerificationExample'
-            EncryptedPayloadExample:
-              $ref: '#/components/examples/EncryptedPayloadExample'
-      required: true
   headers:
     X-Transaction-ID:
       schema:

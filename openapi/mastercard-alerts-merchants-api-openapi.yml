@@ -139,7 +139,281 @@ paths:
         delay: 0
         dispatcher: FALLBACK
 components:
+  examples:
+    InvalidData:
+      summary: Invalid Data Error Response For Consumer Clarity
+      description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: merchantType'
+            Description: must not be blank
+            Recoverable: false
+            Details: ''
+    AlertsMerchantIdentifierConfigIdOnly:
+      summary: Alerts Merchant Identifier Configuration ID
+      value:
+        merchantIdentifierConfigId: 88ca4b15-72a6-41dd-8127-573d4b07875c
+    FormatInvalid:
+      summary: Format Invalid Error Response For Consumer Clarity
+      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: format.invalid
+            Description: orderHistoryMonths
+            Recoverable: false
+            Details: ''
+    PermissionDenied:
+      summary: Permission Denied Error Response
+      description: If the client id in the request doesn't correspond to any member in the system, then PermissionDenied error response is returned to the caller with HTTP Status code 401.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: permission.denied
+            Description: Member does not have permission to perform any operation
+            Recoverable: false
+            Details: ''
+    InvalidParameterSet:
+      summary: Invalid Parameter Set Error Response
+      description: If request body is malformed or missing, then InvalidParameterSet error response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: invalid.parameter.set
+            Description: request body is malformed
+            Recoverable: false
+            Details: ''
+    AlertsAcquirerReferenceIdConfigUpdate:
+      summary: Alerts Acquirer Reference Id Configuration for Update
+      value:
+        binOnlyMatch: true
+    ResourceNotFound:
+      summary: Resource Not Found Error Response
+      description: If request URI doesn't match with any available endpoints, then ResourceNotFound error response is returned the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: resource.not.found
+            Description: Not Found
+            Recoverable: false
+            Details: /merchant-self-services/sub-merchantTs/
+    MissingRequiredHeader:
+      summary: Missing Required Header Error Response
+      description: If a required request header is missing or null, then MissingRequiredHeader error response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: missing required header
+            Description: Submitter-First-Name
+            Recoverable: false
+            Details: ''
+    AlertsInvalidData:
+      summary: Invalid Data Field Error Response For Alerts
+      description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: name'
+            Description: size must be between 3 and 200
+            Recoverable: false
+            Details: ''
+    EntityNotFound:
+      summary: Entity Not Found Error Response For Consumer Clarity
+      description: If a requested entity(e.g. Merchant or Logo) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: GUID'
+            Description: Merchant 1E37M8VSX1D28QYX not found
+            Recoverable: false
+            Details: ''
+    AlertsEntityNotFound:
+      summary: Entity Not Found Error Response For Alerts
+      description: If a requested entity(e.g. Sub-Merchant or Card Acceptor ID or Card Acceptor Name) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: subMerchantId'
+            Description: Sub-Merchant 99ca4b15-72a6-41dd-8127-573d4b07669c not found
+            Recoverable: false
+            Details: ''
+    ServerError:
+      summary: Server Error Response
+      description: If an unexpected internal server error occurs, then ServerError response is returned to the caller with HTTP Status code 500.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: server.error
+            Description: Internal Server Error
+            Recoverable: false
+            Details: ''
+    AlertsFormatInvalid:
+      summary: Format Invalid Error Response For Alerts
+      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: 'invalid data: merchantCategoryCode'
+            Description: must match \"^[0-9]*$\"
+            Recoverable: false
+            Details: ''
+    ForbiddenOperation:
+      summary: Member does not have permission to add/update/delete a resource
+      description: If the merchant tries operate on a resource that is not related to them or if they are not allowed perform a specific operation on their resource, then ForbiddenOperation error response is returned to the caller with HTTP Status code 403.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: operation.not.allowed
+            Description: Member is not allowed to perform a specific operation on a particular resource
+            Recoverable: false
+            Details: ''
+    ValidationFailed:
+      summary: Validation of the request failed
+      description: If the fields in the request did not pass the validation, a ValidationFailed error response is returned to the caller with HTTP Status code 422.
+      value:
+        Errors:
+          Error:
+          - Source: service
+            ReasonCode: validation.failed
+            Description: Validation of the request fields failed
+            Recoverable: false
+            Details: ''
+    AlertsAcquirerReferenceIdConfig:
+      summary: Alerts Acquirer Reference Id Configuration
+      value:
+        cardScheme: MASTERCARD
+        acquirerReferenceId: '123456'
+        binOnlyMatch: true
+  parameters:
+    PageNumberParam:
+      name: page_number
+      in: query
+      required: false
+      description: Current page number
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+      example: 1
+    OffsetParam:
+      name: offset
+      in: query
+      required: false
+      description: Number of items per page
+      schema:
+        type: integer
+        default: 25
+        maximum: 25
+      example: 25
+    MerchantIdentifierConfigIdParam:
+      name: merchant_identifier_config_id
+      in: query
+      required: true
+      description: The Configuration ID for acquirer reference ID or card acceptor ID or card acceptor name configurations.
+      schema:
+        $ref: '#/components/schemas/AlertsMerchantConfigId'
+      example: 88ca4b15-72a6-41dd-8127-573d4b07875c
+    SubmitterLastNameParam:
+      name: Submitter-Last-Name
+      in: header
+      required: true
+      example: Princess
+      description: The last name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/LastName'
+    CardSchemeParam:
+      name: card_scheme
+      description: Name of card scheme may be one of - MASTERCARD, VISA or any other supported schemes
+      in: query
+      schema:
+        $ref: '#/components/schemas/CardScheme'
+      example: MASTERCARD
+    MemberIdParam:
+      name: member_id
+      in: path
+      required: true
+      description: Merchant member ID (parent of the sub-merchant)
+      example: 99ca4b15-72a6-41dd-8127-573d4b07669c
+      schema:
+        $ref: '#/components/schemas/AlertsMerchantMemberId'
+    UserIdParam:
+      name: User-Id
+      in: header
+      required: true
+      example: princess.diana
+      description: The user id of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/UserId'
+    SubmitterFirstNameParam:
+      name: Submitter-First-Name
+      in: header
+      required: true
+      example: Diana
+      description: The first name of the submitter/technical contact.
+      schema:
+        $ref: '#/components/schemas/FirstName'
+    AcquirerReferenceIdParam:
+      name: acquirer_reference_id
+      in: query
+      required: false
+      description: BIN that a partner currently services under their portfolio.
+      schema:
+        $ref: '#/components/schemas/AcquirerReferenceId'
+      example: '123456'
   schemas:
+    AlertsMerchantConfigId:
+      title: Unique identifier for merchants identifier (such as acquirer reference id, card acceptor id or name) configuration
+      description: Internal Universally Unique Identifier (UUID) which uniquely identifies the merchants configuration
+      type: string
+      format: uuid
+      example: 88ca4b15-72a6-41dd-8127-573d4b07558c
+    AlertsMerchantIdentifierConfigIdOnly:
+      description: Merchant identifier configuration Id (referring to card acceptor id or name configuration)
+      type: object
+      properties:
+        merchantIdentifierConfigId:
+          $ref: '#/components/schemas/AlertsMerchantConfigId'
+    AlertsAcquirerReferenceIdConfig:
+      description: Acquirer reference id configuration
+      type: object
+      properties:
+        merchantIdentifierConfigId:
+          $ref: '#/components/schemas/AlertsMerchantConfigId'
+        acquirerReferenceId:
+          $ref: '#/components/schemas/AcquirerReferenceId'
+        cardScheme:
+          $ref: '#/components/schemas/CardScheme'
+        binOnlyMatch:
+          $ref: '#/components/schemas/BinOnlyMatch'
+      required:
+      - acquirerReferenceId
+      - cardScheme
+    AlertsAcquirerReferenceIdConfigs:
+      description: Acquirer reference id configurations
+      type: array
+      items:
+        $ref: '#/components/schemas/AlertsAcquirerReferenceIdConfig'
+    AcquirerReferenceId:
+      title: Acquirer Reference ID (ARID)
+      description: The acquirer BINs that a partner currently services under their portfolio. This is represented by Mastercard DE 31 - Subfield 2 (Clearing), DE 32 (Authorization), or Visa Field 32.
+      type: string
+      minLength: 6
+      maxLength: 6
+      pattern: ^[\d]+$
+      example: '123456'
     Error:
       type: object
       properties:
@@ -183,11 +457,37 @@ components:
           description: Optional detailed description of the issue
           example: Detailed description of the error
       description: Error object
-    BinOnlyMatch:
-      description: Indicates whether to use only acquirer reference ID (Acquirer BIN) for merchant matching
-      type: boolean
-      default: false
-      example: true
+    ResponseTime:
+      type: string
+      description: Total response time in ms
+      minLength: 0
+      maxLength: 10
+      example: 300 ms
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: List of error objects
+          items:
+            $ref: '#/components/schemas/Error'
+          example: []
+      description: Errors object
+    UserId:
+      title: User Id
+      maxLength: 300
+      minLength: 1
+      type: string
+      description: The user id of the submitter/technical contact.
+      example: princess.diana
+    CardScheme:
+      description: Name of card scheme may be one of - MASTERCARD, VISA or any other supported schemes
+      type: string
+      minLength: 1
+      maxLength: 20
+      example: MASTERCARD
     ErrorResponse:
       required:
       - Errors
@@ -196,12 +496,34 @@ components:
         Errors:
           $ref: '#/components/schemas/Errors'
       description: Error Response object
-    AlertsMerchantConfigId:
-      title: Unique identifier for merchants identifier (such as acquirer reference id, card acceptor id or name) configuration
-      description: Internal Universally Unique Identifier (UUID) which uniquely identifies the merchants configuration
+    FirstName:
+      title: First Name
+      maxLength: 30
+      minLength: 1
+      type:
+      - string
+      - 'null'
+      description: The individual's first name
+      example: Michael
+    AlertsAcquirerReferenceIdConfigUpdate:
+      description: Acquirer reference id configuration for update
+      type: object
+      properties:
+        binOnlyMatch:
+          $ref: '#/components/schemas/BinOnlyMatch'
+      required:
+      - binOnlyMatch
+    BinOnlyMatch:
+      description: Indicates whether to use only acquirer reference ID (Acquirer BIN) for merchant matching
+      type: boolean
+      default: false
+      example: true
+    AlertsMerchantMemberId:
+      title: Unique identifier for merchants
+      description: Internal Universally Unique Identifier (UUID) which uniquely identifies the merchants
       type: string
       format: uuid
-      example: 88ca4b15-72a6-41dd-8127-573d4b07558c
+      example: 99ca4b15-72a6-41dd-8127-573d4b07669c
     LastName:
       title: Last Name
       maxLength: 30
@@ -211,35 +533,6 @@ components:
       - 'null'
       description: The individual's last name
       example: Fox
-    CardScheme:
-      description: Name of card scheme may be one of - MASTERCARD, VISA or any other supported schemes
-      type: string
-      minLength: 1
-      maxLength: 20
-      example: MASTERCARD
-    AcquirerReferenceId:
-      title: Acquirer Reference ID (ARID)
-      description: The acquirer BINs that a partner currently services under their portfolio. This is represented by Mastercard DE 31 - Subfield 2 (Clearing), DE 32 (Authorization), or Visa Field 32.
-      type: string
-      minLength: 6
-      maxLength: 6
-      pattern: ^[\d]+$
-      example: '123456'
-    AlertsPageableAcquirerReferenceIdConfigs:
-      description: Pageable response containing acquirer reference id configurations
-      type: object
-      properties:
-        responseHeader:
-          $ref: '#/components/schemas/ResponseHeader'
-        configs:
-          $ref: '#/components/schemas/AlertsAcquirerReferenceIdConfigs'
-    UserId:
-      title: User Id
-      maxLength: 300
-      minLength: 1
-      type: string
-      description: The user id of the submitter/technical contact.
-      example: princess.diana
     ResponseHeader:
       type: object
       properties:
@@ -264,325 +557,15 @@ components:
           example: 2
         responseTime:
           $ref: '#/components/schemas/ResponseTime'
-    AlertsMerchantMemberId:
-      title: Unique identifier for merchants
-      description: Internal Universally Unique Identifier (UUID) which uniquely identifies the merchants
-      type: string
-      format: uuid
-      example: 99ca4b15-72a6-41dd-8127-573d4b07669c
-    AlertsMerchantIdentifierConfigIdOnly:
-      description: Merchant identifier configuration Id (referring to card acceptor id or name configuration)
-      type: object
-      properties:
-        merchantIdentifierConfigId:
-          $ref: '#/components/schemas/AlertsMerchantConfigId'
-    AlertsAcquirerReferenceIdConfigUpdate:
-      description: Acquirer reference id configuration for update
-      type: object
-      properties:
-        binOnlyMatch:
-          $ref: '#/components/schemas/BinOnlyMatch'
-      required:
-      - binOnlyMatch
-    ResponseTime:
-      type: string
-      description: Total response time in ms
-      minLength: 0
-      maxLength: 10
-      example: 300 ms
-    AlertsAcquirerReferenceIdConfig:
-      description: Acquirer reference id configuration
-      type: object
-      properties:
-        merchantIdentifierConfigId:
-          $ref: '#/components/schemas/AlertsMerchantConfigId'
-        acquirerReferenceId:
-          $ref: '#/components/schemas/AcquirerReferenceId'
-        cardScheme:
-          $ref: '#/components/schemas/CardScheme'
-        binOnlyMatch:
-          $ref: '#/components/schemas/BinOnlyMatch'
-      required:
-      - acquirerReferenceId
-      - cardScheme
-    FirstName:
-      title: First Name
-      maxLength: 30
-      minLength: 1
-      type:
-      - string
-      - 'null'
-      description: The individual's first name
-      example: Michael
-    Errors:
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          type: array
-          description: List of error objects
-          items:
-            $ref: '#/components/schemas/Error'
-          example: []
-      description: Errors object
-    AlertsAcquirerReferenceIdConfigs:
-      description: Acquirer reference id configurations
-      type: array
-      items:
-        $ref: '#/components/schemas/AlertsAcquirerReferenceIdConfig'
-  examples:
-    AlertsAcquirerReferenceIdConfigUpdate:
-      summary: Alerts Acquirer Reference Id Configuration for Update
-      value:
-        binOnlyMatch: true
-    PermissionDenied:
-      summary: Permission Denied Error Response
-      description: If the client id in the request doesn't correspond to any member in the system, then PermissionDenied error response is returned to the caller with HTTP Status code 401.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: permission.denied
-            Description: Member does not have permission to perform any operation
-            Recoverable: false
-            Details: ''
-    ForbiddenOperation:
-      summary: Member does not have permission to add/update/delete a resource
-      description: If the merchant tries operate on a resource that is not related to them or if they are not allowed perform a specific operation on their resource, then ForbiddenOperation error response is returned to the caller with HTTP Status code 403.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: operation.not.allowed
-            Description: Member is not allowed to perform a specific operation on a particular resource
-            Recoverable: false
-            Details: ''
-    ServerError:
-      summary: Server Error Response
-      description: If an unexpected internal server error occurs, then ServerError response is returned to the caller with HTTP Status code 500.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: server.error
-            Description: Internal Server Error
-            Recoverable: false
-            Details: ''
-    AlertsEntityNotFound:
-      summary: Entity Not Found Error Response For Alerts
-      description: If a requested entity(e.g. Sub-Merchant or Card Acceptor ID or Card Acceptor Name) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: 'invalid data: subMerchantId'
-            Description: Sub-Merchant 99ca4b15-72a6-41dd-8127-573d4b07669c not found
-            Recoverable: false
-            Details: ''
-    ResourceNotFound:
-      summary: Resource Not Found Error Response
-      description: If request URI doesn't match with any available endpoints, then ResourceNotFound error response is returned the caller with HTTP Status code 404.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: resource.not.found
-            Description: Not Found
-            Recoverable: false
-            Details: /merchant-self-services/sub-merchantTs/
-    MissingRequiredHeader:
-      summary: Missing Required Header Error Response
-      description: If a required request header is missing or null, then MissingRequiredHeader error response is returned to the caller with HTTP Status code 400.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: missing required header
-            Description: Submitter-First-Name
-            Recoverable: false
-            Details: ''
-    AlertsFormatInvalid:
-      summary: Format Invalid Error Response For Alerts
-      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: 'invalid data: merchantCategoryCode'
-            Description: must match \"^[0-9]*$\"
-            Recoverable: false
-            Details: ''
-    EntityNotFound:
-      summary: Entity Not Found Error Response For Consumer Clarity
-      description: If a requested entity(e.g. Merchant or Logo) doesn't exist in the system, then EntityNotFound error response is returned to the caller with HTTP Status code 404.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: 'invalid data: GUID'
-            Description: Merchant 1E37M8VSX1D28QYX not found
-            Recoverable: false
-            Details: ''
-    FormatInvalid:
-      summary: Format Invalid Error Response For Consumer Clarity
-      description: If a field is not correctly formatted (e.g. a String value is sent in an Integer type field), then FormatInvalid response is returned to the caller with HTTP Status code 400.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: format.invalid
-            Description: orderHistoryMonths
-            Recoverable: false
-            Details: ''
-    ValidationFailed:
-      summary: Validation of the request failed
-      description: If the fields in the request did not pass the validation, a ValidationFailed error response is returned to the caller with HTTP Status code 422.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: validation.failed
-            Description: Validation of the request fields failed
-            Recoverable: false
-            Details: ''
-    AlertsMerchantIdentifierConfigIdOnly:
-      summary: Alerts Merchant Identifier Configuration ID
-      value:
-        merchantIdentifierConfigId: 88ca4b15-72a6-41dd-8127-573d4b07875c
-    InvalidData:
-      summary: Invalid Data Error Response For Consumer Clarity
-      description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: 'invalid data: merchantType'
-            Description: must not be blank
-            Recoverable: false
-            Details: ''
-    AlertsAcquirerReferenceIdConfig:
-      summary: Alerts Acquirer Reference Id Configuration
-      value:
-        cardScheme: MASTERCARD
-        acquirerReferenceId: '123456'
-        binOnlyMatch: true
-    InvalidParameterSet:
-      summary: Invalid Parameter Set Error Response
-      description: If request body is malformed or missing, then InvalidParameterSet error response is returned to the caller with HTTP Status code 400.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: invalid.parameter.set
-            Description: request body is malformed
-            Recoverable: false
-            Details: ''
-    AlertsInvalidData:
-      summary: Invalid Data Field Error Response For Alerts
-      description: If a field or set of fields fails a validation (eg. NotNull, Length, Pattern etc.), then InvalidData response will be returned to the caller for each invalid field with HTTP Status code 400.
-      value:
-        Errors:
-          Error:
-          - Source: service
-            ReasonCode: 'invalid data: name'
-            Description: size must be between 3 and 200
-            Recoverable: false
-            Details: ''
-  parameters:
-    MemberIdParam:
-      name: member_id
-      in: path
-      required: true
-      description: Merchant member ID (parent of the sub-merchant)
-      example: 99ca4b15-72a6-41dd-8127-573d4b07669c
-      schema:
-        $ref: '#/components/schemas/AlertsMerchantMemberId'
-    CardSchemeParam:
-      name: card_scheme
-      description: Name of card scheme may be one of - MASTERCARD, VISA or any other supported schemes
-      in: query
-      schema:
-        $ref: '#/components/schemas/CardScheme'
-      example: MASTERCARD
-    OffsetParam:
-      name: offset
-      in: query
-      required: false
-      description: Number of items per page
-      schema:
-        type: integer
-        default: 25
-        maximum: 25
-      example: 25
-    UserIdParam:
-      name: User-Id
-      in: header
-      required: true
-      example: princess.diana
-      description: The user id of the submitter/technical contact.
-      schema:
-        $ref: '#/components/schemas/UserId'
-    PageNumberParam:
-      name: page_number
-      in: query
-      required: false
-      description: Current page number
-      schema:
-        type: integer
-        default: 1
-        minimum: 1
-      example: 1
-    MerchantIdentifierConfigIdParam:
-      name: merchant_identifier_config_id
-      in: query
-      required: true
-      description: The Configuration ID for acquirer reference ID or card acceptor ID or card acceptor name configurations.
-      schema:
-        $ref: '#/components/schemas/AlertsMerchantConfigId'
-      example: 88ca4b15-72a6-41dd-8127-573d4b07875c
-    SubmitterLastNameParam:
-      name: Submitter-Last-Name
-      in: header
-      required: true
-      example: Princess
-      description: The last name of the submitter/technical contact.
-      schema:
-        $ref: '#/components/schemas/LastName'
-    SubmitterFirstNameParam:
-      name: Submitter-First-Name
-      in: header
-      required: true
-      example: Diana
-      description: The first name of the submitter/technical contact.
-      schema:
-        $ref: '#/components/schemas/FirstName'
-    AcquirerReferenceIdParam:
-      name: acquirer_reference_id
-      in: query
-      required: false
-      description: BIN that a partner currently services under their portfolio.
-      schema:
-        $ref: '#/components/schemas/AcquirerReferenceId'
-      example: '123456'
-  responses:
-    SuccessWithoutBody:
-      description: Successful Operation
     AlertsPageableAcquirerReferenceIdConfigs:
-      description: Pageable list of acquirer reference id configurations
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AlertsPageableAcquirerReferenceIdConfigs'
-    ForbiddenOperation:
-      description: Forbidden Operation
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            ForbiddenOperation:
-              $ref: '#/components/examples/ForbiddenOperation'
+      description: Pageable response containing acquirer reference id configurations
+      type: object
+      properties:
+        responseHeader:
+          $ref: '#/components/schemas/ResponseHeader'
+        configs:
+          $ref: '#/components/schemas/AlertsAcquirerReferenceIdConfigs'
+  responses:
     ValidationFailed:
       description: Validation Failed
       content:
@@ -601,6 +584,27 @@ components:
           examples:
             ServerError:
               $ref: '#/components/examples/ServerError'
+    AlertsPageableAcquirerReferenceIdConfigs:
+      description: Pageable list of acquirer reference id configurations
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsPageableAcquirerReferenceIdConfigs'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ResourceNotFound:
+              $ref: '#/components/examples/ResourceNotFound'
+            EntityNotFound:
+              $ref: '#/components/examples/EntityNotFound'
+            AlertsEntityNotFound:
+              $ref: '#/components/examples/AlertsEntityNotFound'
+    SuccessWithoutBody:
+      description: Successful Operation
     PermissionDenied:
       description: Permission Denied
       content:
@@ -610,6 +614,24 @@ components:
           examples:
             PermissionDenied:
               $ref: '#/components/examples/PermissionDenied'
+    AlertsMerchantIdentifierSuccess:
+      description: Sub-merchant identifiers for either card acceptor id or card acceptor name configuration
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AlertsMerchantIdentifierConfigIdOnly'
+          examples:
+            AlertsMerchantIdentifierConfigIdOnly:
+              $ref: '#/components/examples/AlertsMerchantIdentifierConfigIdOnly'
+    ForbiddenOperation:
+      description: Forbidden Operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ForbiddenOperation:
+              $ref: '#/components/examples/ForbiddenOperation'
     BadRequest:
       description: Bad Request
       content:
@@ -629,28 +651,6 @@ components:
               $ref: '#/components/examples/AlertsFormatInvalid'
             MissingRequiredHeader:
               $ref: '#/components/examples/MissingRequiredHeader'
-    NotFound:
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            ResourceNotFound:
-              $ref: '#/components/examples/ResourceNotFound'
-            EntityNotFound:
-              $ref: '#/components/examples/EntityNotFound'
-            AlertsEntityNotFound:
-              $ref: '#/components/examples/AlertsEntityNotFound'
-    AlertsMerchantIdentifierSuccess:
-      description: Sub-merchant identifiers for either card acceptor id or card acceptor name configuration
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AlertsMerchantIdentifierConfigIdOnly'
-          examples:
-            AlertsMerchantIdentifierConfigIdOnly:
-              $ref: '#/components/examples/AlertsMerchantIdentifierConfigIdOnly'
   requestBodies:
     AlertsAcquirerReferenceIdConfigUpdateRequestBody:
       required: true

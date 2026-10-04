@@ -31,15 +31,13 @@ paths:
         '400':
           $ref: '#/components/responses/ErrorsResponse'
 components:
-  responses:
-    AccountGroupUpdateResponse:
-      description: Ok
-    ErrorsResponse:
-      description: Bad Request
+  requestBodies:
+    AccountGroupUpdateRequest:
+      required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorsWrapper'
+            $ref: '#/components/schemas/AccountGroupDetails'
   schemas:
     ErrorsWrapper:
       required:
@@ -58,30 +56,6 @@ components:
           description: Error Details
           items:
             $ref: '#/components/schemas/ErrorItem'
-    ErrorItem:
-      type: object
-      properties:
-        Source:
-          type: string
-          description: Source of the error
-          example: user-management
-        ReasonCode:
-          type: string
-          description: A unique constant identifying the error case encountered during API request processing.
-          example: INVALID_FIELD_FORMAT
-        Description:
-          type: string
-          description: Short description of the ReasonCode field.
-          example: Email Address must be in the valid format.
-        Recoverable:
-          type: boolean
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
-          example: false
-        Details:
-          type: string
-          description: Where appropriate, indicates detailed information about the data received.
-          example: Invalid Details
-      description: Error Details
     AccountGroupDetails:
       required:
       - actionCode
@@ -111,10 +85,36 @@ components:
           type: string
           description: Identifier type that will be used to identify the reference to the target household. When using actionCode MH or MA, this field is should contain the static value of HHID. When using actionCode DH or DA, in a Program with a token-based householding scheme, this field is should contain the static value of HHT if the target household created by the operation needs to assign a household token to the new household.
           example: HHID
-  requestBodies:
-    AccountGroupUpdateRequest:
-      required: true
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of the error
+          example: user-management
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during API request processing.
+          example: INVALID_FIELD_FORMAT
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Email Address must be in the valid format.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about the data received.
+          example: Invalid Details
+      description: Error Details
+  responses:
+    ErrorsResponse:
+      description: Bad Request
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/AccountGroupDetails'
+            $ref: '#/components/schemas/ErrorsWrapper'
+    AccountGroupUpdateResponse:
+      description: Ok

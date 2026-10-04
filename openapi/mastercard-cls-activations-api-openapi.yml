@@ -110,6 +110,19 @@ components:
           type: string
           description: Used by the Partner to include custom data.
           example: 'null'
+    ErrorsWrapper:
+      required:
+      - Errors
+      type: object
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Errors'
+    AccountActivationDetails:
+      properties:
+        activationId:
+          type: string
+          description: Unique Id for the activation, this will be optional and will be generated if not populated by the user.
+          example: '695026705601132106860975039544'
     ClsAccountActivationUpdate:
       required:
       - activationStatus
@@ -156,63 +169,6 @@ components:
           type: string
           description: Used by the partner to include custom data that does not go anywhere except for the activation.
           example: UDF 5 Example
-    ErrorsWrapper:
-      required:
-      - Errors
-      type: object
-      properties:
-        Errors:
-          $ref: '#/components/schemas/Errors'
-    Errors:
-      required:
-      - Error
-      type: object
-      properties:
-        Error:
-          type: array
-          description: Error Details
-          items:
-            $ref: '#/components/schemas/ErrorItem'
-    ErrorItem:
-      type: object
-      properties:
-        Source:
-          type: string
-          description: Source of the error
-          example: user-management
-        ReasonCode:
-          type: string
-          description: A unique constant identifying the error case encountered during API request processing.
-          example: INVALID_FIELD_FORMAT
-        Description:
-          type: string
-          description: Short description of the ReasonCode field.
-          example: Email Address must be in the valid format.
-        Recoverable:
-          type: boolean
-          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
-          example: false
-        Details:
-          type: string
-          description: Where appropriate, indicates detailed information about the data received.
-          example: Invalid Details
-      description: Error Details
-    AccountActivationDetails:
-      properties:
-        activationId:
-          type: string
-          description: Unique Id for the activation, this will be optional and will be generated if not populated by the user.
-          example: '695026705601132106860975039544'
-    AccountSearchActivationDetails:
-      required:
-      - accountActivations
-      type: object
-      properties:
-        accountActivations:
-          type: array
-          description: accountActivations
-          items:
-            $ref: '#/components/schemas/AccountSearchActivations'
     AccountActivation:
       required:
       - userId
@@ -273,7 +229,80 @@ components:
           type: string
           description: Used by the Partner to include custom data.
           example: UDF 5 Example
+    AccountSearchActivationDetails:
+      required:
+      - accountActivations
+      type: object
+      properties:
+        accountActivations:
+          type: array
+          description: accountActivations
+          items:
+            $ref: '#/components/schemas/AccountSearchActivations'
+    Errors:
+      required:
+      - Error
+      type: object
+      properties:
+        Error:
+          type: array
+          description: Error Details
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    ErrorItem:
+      type: object
+      properties:
+        Source:
+          type: string
+          description: Source of the error
+          example: user-management
+        ReasonCode:
+          type: string
+          description: A unique constant identifying the error case encountered during API request processing.
+          example: INVALID_FIELD_FORMAT
+        Description:
+          type: string
+          description: Short description of the ReasonCode field.
+          example: Email Address must be in the valid format.
+        Recoverable:
+          type: boolean
+          description: Indicates whether this error will always be returned for this request, or retrying could change the outcome.
+          example: false
+        Details:
+          type: string
+          description: Where appropriate, indicates detailed information about the data received.
+          example: Invalid Details
+      description: Error Details
+  requestBodies:
+    UpdateActivationRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClsAccountActivationUpdate'
+    AccountActivationRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountActivation'
   parameters:
+    ActivationAccountId:
+      name: account_id
+      in: path
+      description: The unique identifier for the given account.
+      required: true
+      schema:
+        type: string
+      example: '5330333671236516'
+    ActivationId:
+      name: activation_id
+      in: query
+      description: Unique id for the activation.
+      required: false
+      schema:
+        type: string
+      example: 9cc35fae-f3cd-11ec-b939-0242ac120002
     ActivationStatus:
       name: activation_status
       in: query
@@ -285,22 +314,6 @@ components:
         - ACTIVE
         - INACTIVE
       example: ACTIVE
-    ActivationId:
-      name: activation_id
-      in: query
-      description: Unique id for the activation.
-      required: false
-      schema:
-        type: string
-      example: 9cc35fae-f3cd-11ec-b939-0242ac120002
-    ActivationAccountId:
-      name: account_id
-      in: path
-      description: The unique identifier for the given account.
-      required: true
-      schema:
-        type: string
-      example: '5330333671236516'
     AccountActivationId:
       name: activation_id
       in: path
@@ -316,8 +329,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AccountSearchActivationDetails'
-    UpdateActivationResponse:
-      description: Ok
     ErrorsResponse:
       description: Bad Request
       content:
@@ -330,16 +341,5 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AccountActivationDetails'
-  requestBodies:
-    UpdateActivationRequest:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ClsAccountActivationUpdate'
-    AccountActivationRequest:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AccountActivation'
+    UpdateActivationResponse:
+      description: Ok

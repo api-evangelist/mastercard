@@ -45,85 +45,109 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/TPRPClaimsRequest'
 components:
-  schemas:
-    ClaimScopes:
-      required:
-      - pds
-      - scopedFields
-      - userConsent
-      type: object
-      properties:
-        pds:
-          $ref: '#/components/schemas/PDS'
-        userConsent:
-          $ref: '#/components/schemas/UserConsent'
-        scopedFields:
-          type: array
-          description: 'Array of enums representing the identity attributes which the TP is requesting access to.
-
-            The acceptable values are any/all of: ''all'', ''legalName'', ''email'', ''phone'', ''dateOfBirth'', ''driverLicense'', ''passport'', ''address''
-
-            '
-          minItems: 1
-          items:
-            enum:
-            - all - legalName - email - phone - dateOfBirth - selfie - address - ageOver - ageUnder - city - postalCode - subDivision - govtId - govtIdDetails - govtIdImage - passportIdentity - passportDetails - passportImage - driverLicenseIdentity - driverLicenseCardNumber - driverLicenseDetails - driverLicenseImage - driverLicenseIssuingState - visaMatched - cpf - rgNumber - cnh - mothersName - fathersName
+  responses:
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UserProfileDeletedErrorExample:
+              $ref: '#/components/examples/UserProfileDeletedErrorExample'
+    ForbiddenError:
+      description: Consent not given.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+            ForbiddenExampleUnauthorizedScopedFields:
+              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
+    UnauthorizedError:
+      description: Unauthorized request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    TPRPClaimsResponse:
+      description: Success.
+      headers:
+        X-Transaction-ID:
+          schema:
             type: string
-            example: all
-        tpAuditMetadata:
-          $ref: '#/components/schemas/TpAuditMetadata'
-        sdkVersion:
-          $ref: '#/components/schemas/SdkVersion'
-    FraudDetectionResponseMeta:
-      type: object
-      description: An object that represents the result of the fraud risk assessment.
-      properties:
-        score:
-          $ref: '#/components/schemas/FraudDetectionScore'
-    ErrorResponse:
-      required:
-      - Errors
-      type: object
-      description: The error response model used by all the API endpoints.
-      properties:
+          description: A random 128-bit UUID represents the transaction.
+        X-User-Identity:
+          schema:
+            type: string
+          description: JWT token for session validation in subsequent API calls.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClaimIdentities'
+          examples:
+            TPRPClaimsUnencryptedResponse:
+              $ref: '#/components/examples/ClaimIdentitiesExample'
+            TPRPClaimsEncryptedResponse:
+              $ref: '#/components/examples/EncryptedPayloadWithPDSExample'
+  examples:
+    ForbiddenExampleUnauthorizedScopedFields:
+      value:
         Errors:
-          required:
-          - Error
-          type: object
-          description: The error response model used by all the API endpoints.
-          properties:
-            Error:
-              type: array
-              description: A list of Error objects.
-              minItems: 1
-              items:
-                type: object
-                properties:
-                  Source:
-                    type: string
-                    description: The source of the problem. That is where the error occurred.
-                    example: mids
-                  ReasonCode:
-                    type: string
-                    description: A code defining the error, as defined in documentation.
-                    example: USER_PROFILE_ID_NOT_FOUND
-                  Description:
-                    type: string
-                    description: A description of this specific occurrence of the Reason code.
-                    example: The provided user profile ID does not exist.
-                  Recoverable:
-                    type: boolean
-                    description: Whether or not retrying this request could result in a successful response.
-                    example: false
-                  Details:
-                    type: string
-                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
-                    example: User X was not found
-                  redirectUri:
-                    type: string
-                    description: TP will use this URI to redirect to RP.
-                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
-                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
+            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
+            Recoverable: false
+    UserProfileDeletedErrorExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: USER_PROFILE_DELETED
+            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
+            Recoverable: false
+            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    ForbiddenExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: CONSENT_NOT_GIVEN
+            Description: User Consent Not Given.
+            Recoverable: false
+    UnauthorizedExample:
+      value:
+        Errors:
+          Error:
+          - Source: mids
+            ReasonCode: UNAUTHORIZED_REQUEST
+            Description: Unauthorized request.
+            Recoverable: false
+    ClaimIdentitiesExample:
+      value:
+        claims:
+          driverLicense.firstName: John
+          driverLicense.lastName: Doe
+        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
+        rpSpecificIdentifier: 46eb72430ffeca3daf31360264fa0424ba4facfdcb69c6f43e73063f290a75a8
+        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+        fraudDetectionMeta:
+          score:
+            value: 0
+            band: GREEN
+            signals:
+            - anonymous_ip
+    EncryptedPayloadWithPDSExample:
+      value:
+        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyf
+        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
+  schemas:
     FraudDetectionScore:
       type: object
       description: An object represents the result of the fraud risk assessment.
@@ -145,6 +169,13 @@ components:
             type: string
             description: The specific signals which caused the above score band.
             example: anonymous_ip
+    SdkVersion:
+      type: string
+      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
+      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
+      minLength: 5
+      maxLength: 255
+      example: 2.3.0
     TpAuditMetadata:
       required:
       - sessionId
@@ -198,6 +229,78 @@ components:
           $ref: '#/components/schemas/PDS'
         fraudDetectionMeta:
           $ref: '#/components/schemas/FraudDetectionResponseMeta'
+    ErrorResponse:
+      required:
+      - Errors
+      type: object
+      description: The error response model used by all the API endpoints.
+      properties:
+        Errors:
+          required:
+          - Error
+          type: object
+          description: The error response model used by all the API endpoints.
+          properties:
+            Error:
+              type: array
+              description: A list of Error objects.
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: The source of the problem. That is where the error occurred.
+                    example: mids
+                  ReasonCode:
+                    type: string
+                    description: A code defining the error, as defined in documentation.
+                    example: USER_PROFILE_ID_NOT_FOUND
+                  Description:
+                    type: string
+                    description: A description of this specific occurrence of the Reason code.
+                    example: The provided user profile ID does not exist.
+                  Recoverable:
+                    type: boolean
+                    description: Whether or not retrying this request could result in a successful response.
+                    example: false
+                  Details:
+                    type: string
+                    description: More details of this specific error. This is an optional field and is sometimes used to give a more comprehensive description of the error that has occurred, when required.
+                    example: User X was not found
+                  redirectUri:
+                    type: string
+                    description: TP will use this URI to redirect to RP.
+                    pattern: ^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$
+                    example: https://sample-rp-redirect-uri.com/?error=invalid_scope&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w&ARID=1234&error_description=claim_not_satisfied
+    ClaimScopes:
+      required:
+      - pds
+      - scopedFields
+      - userConsent
+      type: object
+      properties:
+        pds:
+          $ref: '#/components/schemas/PDS'
+        userConsent:
+          $ref: '#/components/schemas/UserConsent'
+        scopedFields:
+          type: array
+          description: 'Array of enums representing the identity attributes which the TP is requesting access to.
+
+            The acceptable values are any/all of: ''all'', ''legalName'', ''email'', ''phone'', ''dateOfBirth'', ''driverLicense'', ''passport'', ''address''
+
+            '
+          minItems: 1
+          items:
+            enum:
+            - all - legalName - email - phone - dateOfBirth - selfie - address - ageOver - ageUnder - city - postalCode - subDivision - govtId - govtIdDetails - govtIdImage - passportIdentity - passportDetails - passportImage - driverLicenseIdentity - driverLicenseCardNumber - driverLicenseDetails - driverLicenseImage - driverLicenseIssuingState - visaMatched - cpf - rgNumber - cnh - mothersName - fathersName
+            type: string
+            example: all
+        tpAuditMetadata:
+          $ref: '#/components/schemas/TpAuditMetadata'
+        sdkVersion:
+          $ref: '#/components/schemas/SdkVersion'
     PDS:
       type: string
       description: Encrypted Personal Device Storage (PDS) which hosts the users identity attributes. The PDS can be retrieved from the MIDS Core SDK, please refer to the SDK guide for details on how to retrieve this.
@@ -216,23 +319,13 @@ components:
       minLength: 6
       maxLength: 7
       example: ACCEPT
-    SdkVersion:
-      type: string
-      description: Mastercard SDK version integrated with TP App, it is a constant extracted from MIDS SDK Configurations (generated while bundling SDK artifacts). If the TP app supports split PDS, this attribute MUST be specified.
-      pattern: ^[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}$
-      minLength: 5
-      maxLength: 255
-      example: 2.3.0
+    FraudDetectionResponseMeta:
+      type: object
+      description: An object that represents the result of the fraud risk assessment.
+      properties:
+        score:
+          $ref: '#/components/schemas/FraudDetectionScore'
   parameters:
-    XEncryptedPayload:
-      in: header
-      name: X-Encrypted-Payload
-      type: boolean
-      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
-
-        '
-      example: true
-      schema: null
     XUserIdentityParameter:
       in: header
       name: X-User-Identity
@@ -242,108 +335,15 @@ components:
         '
       schema:
         type: string
-  responses:
-    TPRPClaimsResponse:
-      description: Success.
-      headers:
-        X-Transaction-ID:
-          schema:
-            type: string
-          description: A random 128-bit UUID represents the transaction.
-        X-User-Identity:
-          schema:
-            type: string
-          description: JWT token for session validation in subsequent API calls.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ClaimIdentities'
-          examples:
-            TPRPClaimsUnencryptedResponse:
-              $ref: '#/components/examples/ClaimIdentitiesExample'
-            TPRPClaimsEncryptedResponse:
-              $ref: '#/components/examples/EncryptedPayloadWithPDSExample'
-    UnauthorizedError:
-      description: Unauthorized request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            UnauthorizedExample:
-              $ref: '#/components/examples/UnauthorizedExample'
-    ForbiddenError:
-      description: Consent not given.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            ForbiddenExample:
-              $ref: '#/components/examples/ForbiddenExample'
-            ForbiddenExampleUnauthorizedScopedFields:
-              $ref: '#/components/examples/ForbiddenExampleUnauthorizedScopedFields'
-    BadRequestError:
-      description: Something was wrong with the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            UserProfileDeletedErrorExample:
-              $ref: '#/components/examples/UserProfileDeletedErrorExample'
-  examples:
-    EncryptedPayloadWithPDSExample:
-      value:
-        encryptedData: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyf
-        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-    ForbiddenExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: CONSENT_NOT_GIVEN
-            Description: User Consent Not Given.
-            Recoverable: false
-    ForbiddenExampleUnauthorizedScopedFields:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: UNAUTHORIZED_SCOPED_FIELDS
-            Description: 'UNAUTHORIZED_SCOPED_FIELDS: Requested scoped fields are not part of whitelisted fields.'
-            Recoverable: false
-    UnauthorizedExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: UNAUTHORIZED_REQUEST
-            Description: Unauthorized request.
-            Recoverable: false
-    ClaimIdentitiesExample:
-      value:
-        claims:
-          driverLicense.firstName: John
-          driverLicense.lastName: Doe
-        transactionId: 1ec14310-e85c-11ea-adc1-0242ac120002
-        rpSpecificIdentifier: 46eb72430ffeca3daf31360264fa0424ba4facfdcb69c6f43e73063f290a75a8
-        pds: ZGZnZGVmZ2RnZGVnZXJnZXJncmRnZXJ5aGdld3J0eWJld3J5dHdleXd5d3l3cmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh
-        fraudDetectionMeta:
-          score:
-            value: 0
-            band: GREEN
-            signals:
-            - anonymous_ip
-    UserProfileDeletedErrorExample:
-      value:
-        Errors:
-          Error:
-          - Source: mids
-            ReasonCode: USER_PROFILE_DELETED
-            Description: 'USER_PROFILE_DELETED: ID of the deleted profile.'
-            Recoverable: false
-            redirectUri: https://sample-rp-redirect-uri.com?error=server_error&state=AJahbadinvjbdvdnvljkdnvdfhsrbghrtiu4w
+    XEncryptedPayload:
+      in: header
+      name: X-Encrypted-Payload
+      type: boolean
+      description: 'An indicator that the request is encrypted or indicates that the client is able to receive an encrypted response. If not set, the payload will be treated as plaintext.
+
+        '
+      example: true
+      schema: null
   requestBodies:
     TPRPClaimsRequest:
       content:
