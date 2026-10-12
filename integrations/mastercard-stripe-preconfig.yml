@@ -1,44 +1,42 @@
 arazzo: 1.0.1
 info:
-  title: 'mastercard through stripe: PostCustomersCustomerSubscriptions preconfigured with mastercard'
-  summary: Calls stripe's PostCustomersCustomerSubscriptions with `mastercard` preset, the way mastercard is used
-    inside stripe.
+  title: 'mastercard through stripe: PostSetupIntents preconfigured with mastercard'
+  summary: Calls stripe's PostSetupIntents with `mastercard` preset, the way mastercard is used inside stripe.
   description: 'A PRECONFIGURATION, not an orchestration: mastercard is a network inside stripe, so the integration
-    is stripe''s own operation with mastercard''s enum value set. Derived from stripe''s contract (stripe-customers-api-openapi.yml);
+    is stripe''s own operation with mastercard''s enum value set. Derived from stripe''s contract (stripe-setup-intents-api-openapi.yml);
     required properties are inputs.'
   version: 1.0.0
 x-integration:
   partner: stripe
   relationship: network
   preconfig: true
-  edge_evidence: https://github.com/api-evangelist/stripe/blob/main/openapi/stripe-customers-api-openapi.yml
+  edge_evidence: https://github.com/api-evangelist/stripe/blob/main/openapi/stripe-setup-intents-api-openapi.yml
   edge_type: contract
   preset:
-    payment_settings.payment_method_options.card.network: mastercard
+    payment_method_options.card.network: mastercard
   method: derived
   generated: '2026-10-12'
   generator: build-integration-preconfigs.py
 sourceDescriptions:
-- name: stripeCustomersApiOpenapi
-  url: https://raw.githubusercontent.com/api-evangelist/stripe/refs/heads/main/openapi/stripe-customers-api-openapi.yml
+- name: stripeSetupIntentsApiOpenapi
+  url: https://raw.githubusercontent.com/api-evangelist/stripe/refs/heads/main/openapi/stripe-setup-intents-api-openapi.yml
   type: openapi
 workflows:
-- workflowId: mastercard-via-stripe-postcustomerscustomersubscriptions
-  summary: PostCustomersCustomerSubscriptions with mastercard preset
+- workflowId: mastercard-via-stripe-postsetupintents
+  summary: PostSetupIntents with mastercard preset
   inputs:
     type: object
     required: []
     properties: {}
   steps:
   - stepId: call-with-preset
-    operationId: $sourceDescriptions.stripeCustomersApiOpenapi.PostCustomersCustomerSubscriptions
+    operationId: $sourceDescriptions.stripeSetupIntentsApiOpenapi.PostSetupIntents
     requestBody:
       contentType: application/x-www-form-urlencoded
       payload:
-        payment_settings:
-          payment_method_options:
-            card:
-              network: mastercard
+        payment_method_options:
+          card:
+            network: mastercard
     successCriteria:
     - condition: $statusCode == 200
     outputs:
