@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/mastercard/main/json-schema/mastercard-dpa-response-schema.json",
+  "title": "DpaResponse",
+  "description": "Container object for DpaResults",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/mastercard-batch-api-openapi.yml#/components/schemas/DpaResponse",
+  "type": "object",
+  "properties": {
+    "dpaResults": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/DpaResults_2"
+      }
+    }
+  },
+  "$defs": {
+    "DpaResults_2": {
+      "type": "object",
+      "description": "Status of uploaded dpas",
+      "properties": {
+        "srciDpaId": {
+          "type": "string",
+          "description": "generated id for srci dpa"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the individual Digital Payment Application (DPA) item. Potential statuses include:\n\n* `SUCCESSFUL` - The DPA is eligible to process transactions.\n* `FAILED` - The DPA is NOT eligible to process transactions. Please see the error object for more details.\n",
+          "enum": [
+            "SUCCESSFUL",
+            "FAILED"
+          ]
+        },
+        "dpaName": {
+          "type": "string",
+          "description": "Registered Legal Name of the Merchant"
+        },
+        "error": {
+          "$ref": "#/$defs/Error_2"
+        }
+      }
+    },
+    "ErrorDetail_2": {
+      "type": "object",
+      "description": "Error associated with a failed Digital Payment Application (DPA) item action.",
+      "required": [
+        "reason"
+      ],
+      "properties": {
+        "reason": {
+          "type": "string",
+          "description": "Reason for receiving an error for the Digital Payment Application (DPA) item."
+        },
+        "sourceType": {
+          "type": "string",
+          "description": "Indicates the source type of the Digital Payment Application (DPA) item error."
+        },
+        "message": {
+          "type": "string",
+          "description": "Additional details on the Digital Payment Application (DPA) item error."
+        },
+        "source": {
+          "type": "string",
+          "description": "Indicates the field name for the cause of the Digital Payment Application (DPA) item error."
+        }
+      }
+    },
+    "Error_2": {
+      "type": "object",
+      "description": "An error object is associated with individual DPA failures in a given batch.\nPlease note: In the event of a SUCCESSFUL response, this error object may be sent as NULL.\n",
+      "required": [
+        "status",
+        "reason",
+        "message"
+      ],
+      "properties": {
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "description": "HTTP status code associated with the Digital Payment Application (DPA) item error"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Reason for receiving an error for the Digital Payment Application (DPA) item."
+        },
+        "message": {
+          "type": "string",
+          "description": "Additional details on the Digital Payment Application (DPA) item error."
+        },
+        "errordetail": {
+          "type": "array",
+          "description": "List of errors associated with a failed Digital Payment Application (DPA) item action.",
+          "items": {
+            "$ref": "#/$defs/ErrorDetail_2"
+          }
+        }
+      }
+    }
+  }
+}

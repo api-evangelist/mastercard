@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/mastercard/main/json-schema/mastercard-enhanced-currency-conversion-wrapper-schema.json",
+  "title": "EnhancedCurrencyConversionWrapper",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/mastercard-summaries-api-openapi.yml#/components/schemas/EnhancedCurrencyConversionWrapper",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the service being requested"
+    },
+    "description": {
+      "type": "string",
+      "description": "The description of the API being called"
+    },
+    "requestDate": {
+      "type": "string",
+      "description": "The date and time the API is being called in GMT"
+    },
+    "data": {
+      "$ref": "#/$defs/EnhancedCurrencyConversionData"
+    }
+  },
+  "$defs": {
+    "ECBConversionObject": {
+      "type": "object",
+      "properties": {
+        "ecbReferenceRateDate": {
+          "type": "string",
+          "description": "Date of reference rates issued by the European Central Bank (ECB)."
+        },
+        "ecbReferenceRate": {
+          "type": "number",
+          "description": "Euro foreign exchange reference rates issued by the European Central Bank (ECB). When neither the transaction currency nor the cardholder billing currency is equal to Euro, a calculated reference rate is derived from the two ECB rates"
+        },
+        "message": {
+          "type": "string",
+          "description": "User friendly message (if applicable)"
+        },
+        "reasonCode": {
+          "type": "string",
+          "description": "User friendly reason code (if applicable)"
+        }
+      }
+    },
+    "EnhancedCurrencyConversionData": {
+      "type": "object",
+      "properties": {
+        "transCurr": {
+          "type": "string",
+          "description": "Currency of the transaction as provided in the API request"
+        },
+        "crdhldBillCurr": {
+          "type": "string",
+          "description": "Cardholder billing currency as provided in the API request"
+        },
+        "rateDate": {
+          "type": "string",
+          "description": "The date of the requested rates"
+        },
+        "transAmt": {
+          "type": "number",
+          "description": "Amount in transaction currency as provided in the API request"
+        },
+        "bankFeePct": {
+          "type": "number",
+          "description": "Percentage bank fee as provided in the API request"
+        },
+        "bankFeeFixed": {
+          "type": "number",
+          "description": "Fixed bank fee as provided in the API request"
+        },
+        "mastercard": {
+          "$ref": "#/$defs/MastercardConversionObject"
+        },
+        "ecb": {
+          "$ref": "#/$defs/ECBConversionObject"
+        },
+        "effectiveConversionRate": {
+          "type": "number",
+          "description": "Calculated effective exchange rate for the requested currency pair including all issuer-to-cardholder fees. This is calculated by dividing cardholder billing amount including all fees divided by the transaction amount (crdhldBillAmtInclAllFees / transAmount)"
+        },
+        "pctDifferenceMastercardExclAllFeesAndEcb": {
+          "type": "number",
+          "description": "Calculated percentage difference between Mastercard Conversion Rate excluding all issuer-to-cardholder fees for the selected currency pair and the ECB Reference Rate"
+        },
+        "pctDifferenceMastercardInclAllFeesAndEcb": {
+          "type": "number",
+          "description": "Calculated percentage difference between Mastercard Conversion Rate Including all issuer-to-cardholder fees (fixed and percentage) for the selected currency pair and the ECB Reference Rate ([effectiveConversionRate/ecbReferenceRateDate]-1*100)"
+        }
+      }
+    },
+    "MastercardConversionObject": {
+      "type": "object",
+      "properties": {
+        "mastercardFxRateDate": {
+          "type": "string",
+          "description": "Date of Mastercard issued conversion rates. The date can differ to the requested rate date if no new rates are published for the requested date or if the user requests for a historical date"
+        },
+        "mastercardConvRateInclPctFee": {
+          "type": "number",
+          "description": "Mastercard exchange rate for the requested currency pair including issuer-to-cardholder percentage rate fee as provided by the issuer in the API call"
+        },
+        "mastercardConvRateExclAllFees": {
+          "type": "number",
+          "description": "Mastercard exchange rate for the requested currency pair excluding any issuer-to-cardholder fees"
+        },
+        "crdhldBillAmtInclAllFees": {
+          "type": "number",
+          "description": "Cardholder Billing Amount as calculated by applying the Mastercard Conversion Rate, including any applicable issuer-to-cardholder fees (percentage and fixed)"
+        },
+        "crdhldBillAmtExclAllFees": {
+          "type": "number",
+          "description": "Cardholder billing amount calculated by using the Mastercard conversion rate, excluding any applicable issuer-to-cardholder fees"
+        },
+        "message": {
+          "type": "string",
+          "description": "User friendly message (if applicable)"
+        },
+        "reasonCode": {
+          "type": "string",
+          "description": "User friendly reason code (if applicable)"
+        }
+      }
+    }
+  }
+}

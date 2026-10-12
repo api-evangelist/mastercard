@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/mastercard/main/json-schema/mastercard-update-dpa-request-schema.json",
+  "title": "UpdateDpaRequest",
+  "description": "A limited number of DPA fields can be changed using the __UPDATE__ action. These are `supportedCardBrands`, `supportedCheckoutTypes`, `dpaPresentationName`, `originDomains`,  `debitTokenRequested`, `merchantCategoryCodes`, `defaultAcquirerBin`, `defaultAcquirerMerchantId`, `defaultMerchantCategoryCode`, `acquirerIca`, `acquirerBin` and `acquirerMerchantId`.\n\n__Note__: All DPA data from the original request (including non-updatable fields, such as `dpaUri` and `dpaAddress` if previously passed) will also need to be provided unchanged in the __PUT__ request for the update operation to process successfully. Any alterations contained in the request made outside of these updatable fields will cause the request to fail.\n",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/mastercard-merchant-registration-api-openapi.yml#/components/schemas/UpdateDpaRequest",
+  "type": "object",
+  "required": [
+    "dpa"
+  ],
+  "properties": {
+    "dpa": {
+      "$ref": "#/$defs/Dpa"
+    }
+  },
+  "$defs": {
+    "AcquirerData": {
+      "type": "object",
+      "description": "AcquirerData\n\nObject for details about the acquiring institution (for example, merchant bank) or its agent. This includes acquirerIca, acquirerMerchantId and acquirerBin. This object may be used to improve transaction acceptance rates.\n",
+      "required": [
+        "acquirerIca",
+        "acquirerMerchantId"
+      ],
+      "properties": {
+        "acquirerIca": {
+          "type": "string",
+          "description": "An Acquirer Interbank Card Association (ICA) value is an identifier assigned to the Acquirer by Mastercard."
+        },
+        "acquirerBin": {
+          "type": "string",
+          "description": "Each Acquirer Interbank Card Association (ICA) identifier may be assigned one or more BINs by Mastercard.\n\nNote: It is important to use the correct Acquirer ICA associated with the Acquirer BIN.\n"
+        },
+        "acquirerMerchantId": {
+          "type": "string",
+          "description": "A Merchant Identifier (MID) is a unique code assigned to the Merchant by the Acquirer once the Merchant has successfully opened an account. A MID identifies the Merchant to the Acquirer."
+        }
+      }
+    },
+    "Dpa": {
+      "type": "object",
+      "description": "An array of objects to contain DPA registration details.",
+      "required": [
+        "supportedCardBrands",
+        "dpaData",
+        "merchantCountryCode"
+      ],
+      "properties": {
+        "supportedCardBrands": {
+          "type": "array",
+          "description": "Card networks that are supported for DPA registration. The following networks are supported: MASTERCARD, VISA, DISCOVER, AMEX.\n",
+          "maxItems": 4,
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "maxLength": 20
+          }
+        },
+        "dpaData": {
+          "$ref": "#/$defs/DpaData"
+        },
+        "debitTokenRequested": {
+          "type": "boolean",
+          "description": "A flag for the Integrator to indicate that they would not like to have their Cardholder's debit cards tokenized.\n\nConditional: Must be set to true when the Digital Payment Application (DPA) processes in the United States (US)\"'\n"
+        },
+        "merchantCountryCode": {
+          "$ref": "#/$defs/merchantCountryCode"
+        },
+        "merchantCategoryCodes": {
+          "$ref": "#/$defs/merchantCategoryCodes"
+        },
+        "supportedCheckoutTypes": {
+          "type": "array",
+          "description": "List of checkout types to be supported by the DPA. These include CLICK_TO_PAY, GUEST_CHECKOUT_TOKENIZATION and CARD_ON_FILE_TOKENIZATION.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "threeDSDefaultdata": {
+          "$ref": "#/$defs/ThreeDSDefaultData"
+        },
+        "acquirerData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AcquirerData"
+          }
+        }
+      }
+    },
+    "DpaAddress": {
+      "type": "object",
+      "description": "The Digital Payment Application (DPA) business address.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 75,
+          "description": "Name of the address"
+        },
+        "line1": {
+          "type": "string",
+          "maxLength": 75,
+          "description": "First line of the address."
+        },
+        "line2": {
+          "type": "string",
+          "maxLength": 75,
+          "description": "Second line of the address."
+        },
+        "line3": {
+          "type": "string",
+          "maxLength": 75,
+          "description": "Third line of the address."
+        },
+        "city": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "The city/town of the address."
+        },
+        "state": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "The state of the address. Use 2-character state designation for USA and Canada addresses."
+        },
+        "countryCode": {
+          "type": "string",
+          "maxLength": 2,
+          "description": "ISO 3166 alpha 2 country code. Note that for the UK the correct ISO code is \"GB\"."
+        },
+        "zip": {
+          "type": "string",
+          "maxLength": 8,
+          "description": "Zipcode for the region."
+        }
+      }
+    },
+    "DpaData": {
+      "type": "object",
+      "required": [
+        "dpaName",
+        "dpaUri"
+      ],
+      "properties": {
+        "dpaName": {
+          "type": "string",
+          "maxLength": 60,
+          "minLength": 0,
+          "description": "Legal name of Merchant (which may differ from dpaPresentationName)."
+        },
+        "dpaPresentationName": {
+          "type": "string",
+          "maxLength": 60,
+          "minLength": 1,
+          "description": "The name of the Merchant that the Cardholder will see when checking out with the Digital Payment Application (DPA)."
+        },
+        "dpaUri": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1,
+          "description": "Digital Payment Application (DPA) identifier. This field may contain the DPA website URI, a mobile application identifier, or another unique identifier (UUID, URL, APK package name, etc.)."
+        },
+        "originDomains": {
+          "type": "array",
+          "description": "Website or URL where the payment experience is placed on the checkout page.",
+          "items": {
+            "type": "string",
+            "maxLength": 1024
+          },
+          "minItems": 0,
+          "maxItems": 10,
+          "uniqueItems": true
+        },
+        "dpaAddress": {
+          "$ref": "#/$defs/DpaAddress"
+        }
+      }
+    },
+    "ThreeDSDefaultData": {
+      "type": "object",
+      "description": "Enables a Merchant to supply their existing 3-D Secure (3DS) integration details at the time of Digital Payment Application (DPA) registration.",
+      "properties": {
+        "defaultAcquirerBin": {
+          "type": "string",
+          "description": "Allows a Merchant to set a default Acquirer. An Acquirer BIN is an identifier assigned by Mastercard to an Acquirer.\n\nIf this field is not defined and acquirerData has only one entry, this field will be populated with the value from acquirerBin.\n"
+        },
+        "defaultAcquirerMerchantId": {
+          "type": "string",
+          "description": "An identifier assigned to the Merchant by their Acquirer. If this field is not populated and acquirerData has only one entry, this field will be populated with the value from acquirerMerchantId."
+        },
+        "defaultMerchantCountryCode": {
+          "type": "string",
+          "description": "Allows a Merchant to set a default Merchant Country Code (CC).\n\nA Merchant CC is a two-character code indicating the country the Merchant is doing business in.\n"
+        },
+        "defaultMerchantCategoryCode": {
+          "type": "string",
+          "description": "Allows a Merchant to set a default Merchant Category Code (MCC).\n\nAn MCC is a four-character code assigned by Mastercard to the Merchant that indicates the type of business, service, or product provided by the Merchant.\n\nNote: MCC's may be assigned differently across payment networks. To avoid errors, be sure to use your assigned Mastercard MCC. This code is required for 3-D Secure (3DS) and risk profiling. If the Merchant has more than one MCC, the code most relevant to their business should be used.\n"
+        }
+      }
+    },
+    "merchantCategoryCodes": {
+      "type": "array",
+      "description": "Object for the array of Merchant Category Codes (MCC) that the Merchant processes transactions under, and is used for risk-scoring transactions by the issuer. All MCC codes that will be processed by a DPA should be provided here (typically, this will be a single item).\n\nAn MCC is a four-character code assigned by Mastercard to the Merchant that indicates the type of business, service, or product provided by the Merchant.\n\nNote: MCC's may be assigned differently across payment networks. To avoid errors, be sure to use your assigned Mastercard MCC. This code is required for 3-D Secure (3DS) and risk profiling. If the Merchant has more than one MCC, the code most relevant to their business should be used.\n",
+      "maxItems": 200,
+      "items": {
+        "type": "string",
+        "maxLength": 4
+      }
+    },
+    "merchantCountryCode": {
+      "type": "string",
+      "description": "Country code for the registering merchant in ISO 3166 format. It is also required for the phone number field.",
+      "maxLength": 2
+    }
+  }
+}

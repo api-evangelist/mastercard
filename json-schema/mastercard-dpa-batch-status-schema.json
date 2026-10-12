@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/mastercard/main/json-schema/mastercard-dpa-batch-status-schema.json",
+  "title": "DpaBatchStatus",
+  "description": "The DpaBatchStatus response contains information related to the status of a submitted Digital Payment Application (DPA) batch.",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/mastercard-batch-api-openapi.yml#/components/schemas/DpaBatchStatus",
+  "type": "object",
+  "properties": {
+    "requestId": {
+      "type": "string",
+      "description": "This field allows the Integrator to assign an internal reference to a batch request so that it can be used for internal tracking purposes."
+    },
+    "batchId": {
+      "type": "string",
+      "description": "A unique identifier associated with the submitted Digital Payment Application (DPA) batch. The Batch ID can be used to retrieve the status of the batch by calling GET DPA status endpoint."
+    },
+    "batchStatus": {
+      "description": "Describes the outcome of the submitted Digital Payment Application (DPA) batch. Possible outcomes include:\n\n* COMPLETED_SUCCESSFULLY - Batch was completed successfully and all DPAs included in the batch are ready to transact.\n\n* COMPLETED_WITH_ERRORS - Batch was completed successfully, but some DPAs included in the batch aren't ready to transact.\n\n* FAILED -  Batch failed to load.\n\n* IN_PROGRESS - Batch processing in progress.\n\nFor a full breakdown of all DPA outcomes in a batch, refer to the items.\n",
+      "enum": [
+        "COMPLETED_SUCCESSFULLY",
+        "COMPLETED_WITH_ERRORS",
+        "FAILED",
+        "IN_PROGRESS"
+      ],
+      "type": "string"
+    },
+    "batchStartTime": {
+      "type": "string",
+      "description": "Start time of batch request"
+    },
+    "batchEndTime": {
+      "type": "string",
+      "description": "End time of batch request"
+    },
+    "errorMessage": {
+      "type": "string",
+      "description": "Provides additional information when batchStatus yields a FAILED status."
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/BatchStatusItems"
+      },
+      "type": "array",
+      "description": "An array of status objects that describes the outcome of each Digital Payment Application (DPA) item in a batch request.\n\nNote: DPA item order may differ from original submission.\"\n"
+    }
+  },
+  "$defs": {
+    "BatchStatusItems": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "description": "The action to be performed on the Digital Payment Application (DPA). The selected action will be applied to all DPAs provided in the items list.\n\n__ADD__ - Add DPA\n\n__UPDATE__ - Update DPA\n\n__DELETE__ - Delete DPA\n\nNote: A limited number of DPA fields can be changed using the 'UPDATE' action. These are dpaPresentationName, dpaLogoUri, debitTokenRequested,  merchantCategoryCode, and threeDSDefaultData. Please refer to the example for a minimal use case.\n",
+          "enum": [
+            "ADD",
+            "UPDATE",
+            "DELETE"
+          ],
+          "type": "string"
+        },
+        "serviceId": {
+          "type": "string",
+          "description": "A unique identifier assigned by Mastercard for which tokens are created uniquely for the entity onboarded."
+        },
+        "trid": {
+          "description": "Token Requestors receive a unique identifier, TRID, which represents the consumer-facing entity name to the Issuer\nduring the tokenization process. This identifier has a one-to-one relationship with the serviceId.\n<br>\n<br> Note: Reach out to your Mastercard representative to begin receiving trid in API responses.\n",
+          "type": "string",
+          "minLength": 11,
+          "maxLength": 11
+        },
+        "programName": {
+          "type": "string",
+          "description": "The Cardholder facing name of the Merchant.\n\nConditional: Must be supplied when adding Merchants to a Payment Facilitator (PF) program.\"\n"
+        },
+        "status": {
+          "type": "string",
+          "description": "Indicates the status of an individual Digital Payment Application (DPA) item in a batch.",
+          "enum": [
+            "SUCCESSFUL",
+            "FAILED"
+          ]
+        },
+        "error": {
+          "$ref": "#/$defs/Error"
+        },
+        "dpaResults": {
+          "items": {
+            "$ref": "#/$defs/DpaResults"
+          },
+          "type": "array"
+        }
+      }
+    },
+    "DpaResults": {
+      "type": "object",
+      "description": "Object for individual Digital Payment Application (DPA) item status data.",
+      "properties": {
+        "srcDpaId": {
+          "type": "string",
+          "description": "The registered identifier for the Digital Payment Application (DPA) accessing the service.\n\nConditional: Required if you are a Merchant directly integrating with Mastercard Checkout Solutions (MCS) APIs, a Payment Service Provider (PSP) integrating On-Behalf-Of (OBO) a Merchant, a Payment Facilitator, or if you are enrolling in the Secure Card on File (SCOF) QR program.\n"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the individual Digital Payment Application (DPA) item. Potential statuses include:\n\n* SUCCESSFUL - The DPA is eligible to process transactions.\n\n* FAILED - The DPA is NOT eligible to process transactions. Please see the error object for more details.\"\n",
+          "enum": [
+            "SUCCESSFUL",
+            "FAILED"
+          ]
+        },
+        "dpaName": {
+          "type": "string",
+          "description": "Legal name of Merchant (which may differ from dpaPresentationName)."
+        },
+        "error": {
+          "$ref": "#/$defs/Error"
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "description": "An error object is associated with individual DPA failures in a given batch (assuming a COMPLETED_WITH_ERRORS response).\n\nPlease note: In the event of a SUCCESSFUL response, this error object may be sent as NULL.\n",
+      "required": [
+        "status",
+        "reason",
+        "message"
+      ],
+      "properties": {
+        "status": {
+          "format": "int32",
+          "description": "HTTP status code associated with the Digital Payment Application (DPA) item error.",
+          "type": "integer"
+        },
+        "reason": {
+          "description": "Reason for receiving an error for the Digital Payment Application (DPA) item.",
+          "type": "string",
+          "enum": [
+            "INVALID_ARGUMENT",
+            "INVALID_VALUE",
+            "NOT_FOUND",
+            "DECLINED",
+            "INVALID_STATE",
+            "AUTHENTICATION_FAILED",
+            "INTERNAL_SERVER_ERROR"
+          ]
+        },
+        "message": {
+          "description": "Additional details on the Digital Payment Application (DPA) item error.",
+          "type": "string"
+        },
+        "errordetail": {
+          "description": "List of errors associated with a failed Digital Payment Application (DPA) item action.",
+          "items": {
+            "$ref": "#/$defs/ErrorDetail"
+          },
+          "type": "array"
+        }
+      }
+    },
+    "ErrorDetail": {
+      "type": "object",
+      "description": "Error associated with a failed Digital Payment Application (DPA) item action.",
+      "required": [
+        "reason"
+      ],
+      "properties": {
+        "reason": {
+          "description": "Reason for receiving an error for the Digital Payment Application (DPA) item.",
+          "type": "string",
+          "enum": [
+            "INVALID_ARGUMENT",
+            "INVALID_VALUE",
+            "NOT_FOUND",
+            "DECLINED",
+            "INVALID_STATE",
+            "AUTHENTICATION_FAILED",
+            "INTERNAL_SERVER_ERROR"
+          ]
+        },
+        "sourceType": {
+          "description": "Indicates the source type of the Digital Payment Application (DPA) item error.",
+          "type": "string"
+        },
+        "message": {
+          "description": "Additional details on the Digital Payment Application (DPA) item error.",
+          "type": "string"
+        },
+        "source": {
+          "description": "Indicates the field name for the cause of the Digital Payment Application (DPA) item error.",
+          "type": "string"
+        }
+      }
+    }
+  }
+}
